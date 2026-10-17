@@ -853,11 +853,19 @@ hintBtn.addEventListener('click', useHint);
 document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('button'); if (b) b.blur(); });
 
 // ── ورودی: کشیدن روی نقشه = حرکت پلیر | پینچ و چرخ ماوس = زوم ───────
+const stageEl = $('stage');
 const ptrs = new Map();
 let pinchDist = 0;
 
 // فاصلهٔ لازم برای یک گام (متناسب با اندازهٔ خانه روی صفحه)
 const swipeStep = () => clamp(base * cam.z * 0.8, 14, 34);
+
+// جلوگیری کامل از اسکرول/زوم/کشیدن خودِ صفحه با لمس روی نقشه و پد
+for (const el of [stageEl, ]) {
+    for (const ev of ['touchstart', 'touchmove']) {
+        el.addEventListener(ev, (e) => { e.preventDefault(); }, { passive: false });
+    }
+}
 
 mazeCanvas.addEventListener('pointerdown', (e) => {
     mazeCanvas.setPointerCapture(e.pointerId);
