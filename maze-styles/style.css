@@ -111,8 +111,8 @@ p {
     display: block;
     background-color: transparent;
     margin: 0 auto;
-    touch-action: none;          /* لمس/ماوس فقط برای دوربین بازی؛ صفحه اسکرول نمی‌شود */
-    cursor: grab;
+    touch-action: none;          /* لمس/ماوس فقط برای حرکت پلیر؛ صفحه اسکرول نمی‌شود */
+    cursor: default;
     user-select: none;
     -webkit-user-select: none;
 }
@@ -142,6 +142,7 @@ p {
     border-radius: 16px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(6px);
+    z-index: 10;
 }
 
 .win-card.show {
@@ -288,12 +289,51 @@ p {
     cursor: default;
 }
 
-/* جوی‌استیک دایره‌ای دوربین */
+/* ── پد شناور روی نقشه ───────────────────────────── */
+.pad-wrap {
+    position: absolute;
+    left: 0; top: 0;                 /* جای واقعی را JS تعیین می‌کند */
+    width: 78px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.pad-wrap.active {
+    opacity: 1;
+}
+
+.pad-grip {
+    width: 40px;
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #94a3b8;
+    cursor: move;
+    touch-action: none;
+}
+
+.pad-grip::after {                   /* خط‌های دستگیره */
+    content: '';
+    display: block;
+    margin: 4px auto 0;
+    width: 18px;
+    height: 2px;
+    background: #94a3b8;
+    box-shadow: 0 -3px 0 #94a3b8;
+}
+
 .pad {
     position: relative;
-    width: 104px;
-    height: 104px;
-    margin: 6px auto 0;
+    width: 78px;
+    height: 78px;
     border-radius: 50%;
     background:
         linear-gradient(#cbd5e1, #cbd5e1) center / 1px 70% no-repeat,
@@ -303,16 +343,13 @@ p {
     box-shadow: inset 0 2px 7px rgba(15, 23, 42, 0.14);
     touch-action: none;
     cursor: pointer;
-    user-select: none;
 }
 
 .knob {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 42px;
-    height: 42px;
-    margin: -21px 0 0 -21px;
+    left: 50%; top: 50%;
+    width: 32px; height: 32px;
+    margin: -16px 0 0 -16px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #4ade80, green 70%);
     box-shadow: 0 3px 9px rgba(0, 0, 0, 0.35), inset 0 -2px 4px rgba(0, 0, 0, 0.18);
