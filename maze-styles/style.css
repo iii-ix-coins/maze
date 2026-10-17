@@ -18,32 +18,22 @@
     --vgreen: #00ff00ff;
     --jup: #14bad6ff;
     --juphover: #14b9d680;
-
     --ui-bg: #05080d;
     --ui-surface: #0a111a;
     --ui-surface-2: #0d1621;
-
     --ui-text: #eaf2ff;
     --ui-muted: #718096;
-
     --ui-primary: #00e8b6;
     --ui-danger: #ff4d67;
-
     --ui-border: rgba(255, 255, 255, 0.08);
     --ui-border-strong: rgba(255, 255, 255, 0.14);
-
     --ui-radius-sm: 10px;
     --ui-radius-md: 14px;
     --ui-radius-lg: 18px;
-
-    --ui-shadow:
-        0 0 18px rgba(0, 232, 182, 0.035);
-
-    /* قاب دور تخته (رنگ خودِ تخته BOARD_COLOR در maze.js است) */
+    --ui-shadow: 0 0 18px rgba(0, 232, 182, 0.035);
     --board-surround: #004d00;
     --panel-w: 176px;
 }
-
 @font-face {
     font-family: 'Poppins';
     src: url('font/poppins-regular-webfont.woff2') format('woff2'),
@@ -51,7 +41,6 @@
     font-weight: normal;
     font-style: normal;
 }
-
 body {
     background-color: #0a0a0c;
     color: #f1f1f1;
@@ -62,8 +51,8 @@ body {
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden;
+    overscroll-behavior-y: none;
 }
-
 .game-container {
     text-align: center;
     background: var(--text-main);
@@ -74,20 +63,16 @@ body {
     max-width: 100%;
     box-sizing: border-box;
 }
-
 h1 {
     margin: 0 0 14px;
     font-size: 1.5rem;
     color: #0f172a;
 }
-
 p {
     color: #8a8a9e;
     font-size: 0.9rem;
     margin-bottom: 20px;
 }
-
-/* ── چیدمان: نمای بازی + پنل کنترل ───────────────────────────── */
 .game-layout {
     display: flex;
     direction: ltr;
@@ -95,7 +80,6 @@ p {
     align-items: flex-start;
     justify-content: center;
 }
-
 .maze-wrapper {
     position: relative;
     background-color: var(--board-surround);
@@ -107,24 +91,20 @@ p {
     touch-action: none;
     box-shadow: 0 6px 22px rgba(15, 23, 42, 0.28);
 }
-
 .maze {
     display: block;
     background-color: transparent;
     margin: 0 auto;
-    touch-action: none;          /* لمس/ماوس فقط برای حرکت پلیر؛ صفحه اسکرول نمی‌شود */
+    touch-action: none;
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
 }
-
 .maze.grabbing {
     cursor: grabbing;
 }
-
-/* ── کارت پیروزی ───────────────────────────────────────────── */
 .win-card {
     display: none;
     position: absolute;
@@ -139,7 +119,7 @@ p {
     max-width: 86%;
     box-sizing: border-box;
     line-height: 1.5;
-    direction: rtl;              /* متن فارسی؛ چون .game-layout برای چیدمان ltr است */
+    direction: ltr;
     background: rgba(10, 14, 20, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 16px;
@@ -147,49 +127,46 @@ p {
     backdrop-filter: blur(6px);
     z-index: 10;
 }
-
 .win-card.show {
     display: flex;
     animation: pop 0.55s 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
 }
-
 @keyframes pop {
-    from { opacity: 0; transform: translate(-50%, -42%) scale(0.85); }
-    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    from {
+        opacity: 0;
+        transform: translate(-50%, -42%) scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
-
 .message {
     font-size: 1.1rem;
     font-weight: bold;
     margin: 0;
     color: #ffb703;
 }
-
 .win-stats {
     display: flex;
     gap: 18px;
     direction: rtl;
     color: #e5ebf5;
 }
-
 .win-stats div {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
 }
-
 .win-stats b {
     font-size: 1.25rem;
     color: #fff;
 }
-
 .win-stats span {
     font-size: 0.72rem;
     color: #9aa8bf;
 }
-
-/* ── پنل کنترل ─────────────────────────────────────────────── */
 .panel {
     width: var(--panel-w);
     flex: none;
@@ -198,7 +175,6 @@ p {
     gap: 10px;
     box-sizing: border-box;
 }
-
 .tile {
     background: #fff;
     border: 1px solid #d6deea;
@@ -207,7 +183,6 @@ p {
     color: #0f172a;
     box-sizing: border-box;
 }
-
 .lbl {
     display: block;
     font-size: 0.68rem;
@@ -215,26 +190,22 @@ p {
     text-transform: uppercase;
     color: #64748b;
 }
-
 .cap {
     font-size: 0.62rem;
     color: #94a3b8;
     margin-top: 2px;
 }
-
 .hud {
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
-
 .hud b {
     display: block;
     font-size: 1.2rem;
     line-height: 1.3;
     font-variant-numeric: tabular-nums;
 }
-
 .row {
     display: flex;
     gap: 6px;
@@ -242,17 +213,14 @@ p {
     justify-content: center;
     margin-top: 6px;
 }
-
-.row > .btn {
+.row>.btn {
     flex: 1;
 }
-
 .zoom-label {
     min-width: 52px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
-
 .btn {
     background-color: #e2e8f0;
     color: #0f172a;
@@ -263,7 +231,6 @@ p {
     box-shadow: none;
     white-space: nowrap;
 }
-
 .btn.sm {
     flex: none;
     width: 38px;
@@ -271,31 +238,26 @@ p {
     font-size: 1.15rem;
     line-height: 1;
 }
-
 .btn:hover {
     background-color: #cbd5e1;
     transform: none;
     box-shadow: none;
 }
-
 .btn:active {
     transform: scale(0.96);
 }
-
 .btn[aria-pressed="true"] {
     background-color: green;
     color: #fff;
 }
-
 .btn:disabled {
     opacity: 0.45;
     cursor: default;
 }
-
-/* ── پد شناور روی نقشه ───────────────────────────── */
 .pad-wrap {
     position: absolute;
-    left: 0; top: 0;                 /* جای واقعی را JS تعیین می‌کند */
+    left: 0;
+    top: 0;
     width: 78px;
     z-index: 5;
     display: flex;
@@ -308,11 +270,9 @@ p {
     user-select: none;
     -webkit-user-select: none;
 }
-
 .pad-wrap.active {
     opacity: 1;
 }
-
 .pad-grip {
     width: 40px;
     height: 12px;
@@ -322,8 +282,7 @@ p {
     cursor: move;
     touch-action: none;
 }
-
-.pad-grip::after {                   /* خط‌های دستگیره */
+.pad-grip::after {
     content: '';
     display: block;
     margin: 4px auto 0;
@@ -332,7 +291,6 @@ p {
     background: #94a3b8;
     box-shadow: 0 -3px 0 #94a3b8;
 }
-
 .pad {
     position: relative;
     width: 78px;
@@ -347,11 +305,12 @@ p {
     touch-action: none;
     cursor: pointer;
 }
-
 .knob {
     position: absolute;
-    left: 50%; top: 50%;
-    width: 32px; height: 32px;
+    left: 50%;
+    top: 50%;
+    width: 32px;
+    height: 32px;
     margin: -16px 0 0 -16px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #4ade80, green 70%);
@@ -359,16 +318,13 @@ p {
     transition: transform 0.18s ease-out;
     pointer-events: none;
 }
-
 .pad.dragging .knob {
     transition: none;
 }
-
 .mini-tile {
     padding: 5px;
     line-height: 0;
 }
-
 #mini {
     display: block;
     margin: 0 auto;
@@ -377,7 +333,6 @@ p {
     touch-action: none;
     cursor: crosshair;
 }
-
 button {
     background-color: #e63946;
     border: none;
@@ -391,24 +346,96 @@ button {
     box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
     font-family: inherit;
 }
-
 button:hover {
     background-color: #cb2d3a;
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
 }
-
-/* ── صفحه‌های باریک: پنل زیر ماز می‌آید ─────────────────────── */
+.banner {
+    display: none;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 90%;
+    padding: 6px 12px;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #fff;
+    background: rgba(10, 14, 20, 0.85);
+    border-radius: 10px;
+    z-index: 6;
+    pointer-events: none;
+}
+.banner.show {
+    display: block;
+}
+.overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    line-height: 1.5;
+    direction: ltr;
+    background: rgba(5, 12, 5, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 20;
+}
+.overlay.show {
+    display: flex;
+}
+.overlay h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #fff;
+}
+.overlay p {
+    margin: 0 0 6px;
+    max-width: 320px;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+.overlay .btns {
+    display: flex;
+    gap: 10px;
+}
+.opt {
+    width: 180px;
+    background-color: green;
+    box-shadow: 0 4px 12px rgba(0, 128, 0, 0.35);
+}
+.opt:hover {
+    background-color: #0a7a0a;
+    box-shadow: 0 6px 18px rgba(0, 128, 0, 0.45);
+}
+.ghost {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    box-shadow: none;
+}
+.ghost:hover {
+    background-color: #cbd5e1;
+    box-shadow: none;
+}
 @media (max-width: 900px) {
     .game-container {
         padding: 14px;
     }
-
     .game-layout {
         flex-direction: column;
         align-items: center;
     }
-
     .panel {
         width: 100%;
         flex-direction: row;
@@ -416,26 +443,39 @@ button:hover {
         justify-content: center;
         align-items: stretch;
     }
-
-    .panel > .tile {
+    .panel>.tile {
         flex: 1 1 140px;
         max-width: 200px;
     }
-
-    .panel > .row {
+    .panel>.row {
         flex: 1 1 100%;
     }
-
-    .panel > button {
+    .panel>button {
         flex: 1 1 100%;
     }
 }
-
-/* ── موبایل: پد کوچک‌تر، روی نقشه ─────────────────────────────── */
 @media (max-width: 900px), (pointer: coarse) {
-    .pad-wrap { width: 54px; gap: 3px; }
-    .pad-grip { width: 30px; height: 10px; border-radius: 5px; }
-    .pad-grip::after { margin: 3px auto 0; width: 14px; box-shadow: 0 -2px 0 #94a3b8; }
-    .pad { width: 54px; height: 54px; }
-    .knob { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
+    .pad-wrap {
+        width: 54px;
+        gap: 3px;
+    }
+    .pad-grip {
+        width: 30px;
+        height: 10px;
+        border-radius: 5px;
+    }
+    .pad-grip::after {
+        margin: 3px auto 0;
+        width: 14px;
+        box-shadow: 0 -2px 0 #94a3b8;
+    }
+    .pad {
+        width: 54px;
+        height: 54px;
+    }
+    .knob {
+        width: 24px;
+        height: 24px;
+        margin: -12px 0 0 -12px;
+    }
 }
