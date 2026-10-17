@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maze</title>
     <link rel="stylesheet" href="maze-styles/style.css">
 </head>
+
 <body>
     <div class="game-container">
         <h1>Maze For Maze</h1>
-
         <div class="game-layout">
             <div class="maze-wrapper" id="stage">
                 <canvas id="maze" class="maze" aria-label="Maze"></canvas>
+
+                <!-- پد شناور دوربین -->
+                <div class="pad-wrap" id="padWrap">
+                    <div class="pad-grip" id="padGrip" title="Drag to reposition"></div>
+                    <div class="pad" id="pad" title="Drag to move the camera">
+                        <div class="knob" id="knob"></div>
+                    </div>
+                </div>
+
                 <div id="winCard" class="win-card">
                     <div id="message" class="message"></div>
                     <div id="winStats" class="win-stats"></div>
@@ -24,7 +34,6 @@
                     <div><span class="lbl">Steps</span><b id="hudSteps">0</b></div>
                     <div><span class="lbl">Time</span><b id="hudTime">0:00</b></div>
                 </div>
-
                 <div class="tile">
                     <div class="lbl">Zoom</div>
                     <div class="row">
@@ -34,28 +43,21 @@
                     </div>
                     <div class="row">
                         <button class="btn" id="zoomReset" title="Reset view  ( 0 )">Reset</button>
-                        <button class="btn" id="followBtn" aria-pressed="true" title="Camera follows the player">Follow</button>
+                        <button class="btn" id="followBtn" aria-pressed="true"
+                            title="Camera follows the player">Follow</button>
                     </div>
                 </div>
-
-                <div class="tile">
-                    <div class="pad" id="pad" title="Drag to move the camera">
-                        <div class="knob" id="knob"></div>
-                    </div>
-                </div>
-
-                <div class="tile mini-tile"><canvas id="mini" title="Mini map – Click or drag to move the camera"></canvas></div>
-
+                <div class="tile mini-tile"><canvas id="mini"
+                        title="Mini map – Click or drag to move the camera"></canvas></div>
                 <div class="row">
                     <button class="btn" id="fogBtn" aria-pressed="false" title="Torch">🔦 Torch</button>
                     <button class="btn" id="hintBtn" title="Hint">💡 Hint <span id="hintCount">3</span></button>
                 </div>
-
                 <button onclick="initGame()">New Maze</button>
             </aside>
         </div>
     </div>
-
     <script src="maze-game/maze.js"></script>
 </body>
+
 </html>
