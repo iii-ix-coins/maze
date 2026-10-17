@@ -1,0 +1,392 @@
+:root {
+    --bg-dark: #000000;
+    --text-main: #f1f5f9;
+    --text-muted: #727272;
+    --text-dark: #141b2dff;
+    --border-color: #242f42;
+    --border-color-trans: hsla(218, 29%, 20%, 0.18);
+    --border-color-2: #3e5274;
+    --gold-dark: #d4af37;
+    --gold-light: #f7e7ce;
+    --dark-shadow: hsl(217, 27%, 18%);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --sol: #00e8b6;
+    --pump: #5fcb88;
+    --solhover: #00e8b580;
+    --pumphover: #5fcb887f;
+    --lred: #ff0000ff;
+    --vgreen: #00ff00ff;
+    --jup: #14bad6ff;
+    --juphover: #14b9d680;
+
+    --ui-bg: #05080d;
+    --ui-surface: #0a111a;
+    --ui-surface-2: #0d1621;
+
+    --ui-text: #eaf2ff;
+    --ui-muted: #718096;
+
+    --ui-primary: #00e8b6;
+    --ui-danger: #ff4d67;
+
+    --ui-border: rgba(255, 255, 255, 0.08);
+    --ui-border-strong: rgba(255, 255, 255, 0.14);
+
+    --ui-radius-sm: 10px;
+    --ui-radius-md: 14px;
+    --ui-radius-lg: 18px;
+
+    --ui-shadow:
+        0 0 18px rgba(0, 232, 182, 0.035);
+
+    /* قاب دور تخته (رنگ خودِ تخته BOARD_COLOR در maze.js است) */
+    --board-surround: #004d00;
+    --panel-w: 176px;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('font/poppins-regular-webfont.woff2') format('woff2'),
+        url('font/poppins-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: #0a0a0c;
+    color: #f1f1f1;
+    font-family: 'Poppins', Tahoma, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.game-container {
+    text-align: center;
+    background: var(--text-main);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    border: 1px solid #222230;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin: 0 0 14px;
+    font-size: 1.5rem;
+    color: #0f172a;
+}
+
+p {
+    color: #8a8a9e;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+/* ── چیدمان: نمای بازی + پنل کنترل ───────────────────────────── */
+.game-layout {
+    display: flex;
+    direction: ltr;
+    gap: 18px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.maze-wrapper {
+    position: relative;
+    background-color: var(--board-surround);
+    display: inline-block;
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 0;
+    flex: none;
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.28);
+}
+
+.maze {
+    display: block;
+    background-color: transparent;
+    margin: 0 auto;
+    touch-action: none;          /* لمس/ماوس فقط برای دوربین بازی؛ صفحه اسکرول نمی‌شود */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.maze.grabbing {
+    cursor: grabbing;
+}
+
+/* ── کارت پیروزی ───────────────────────────────────────────── */
+.win-card {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 26px 22px;
+    min-width: 280px;
+    max-width: 86%;
+    box-sizing: border-box;
+    line-height: 1.5;
+    direction: rtl;              /* متن فارسی؛ چون .game-layout برای چیدمان ltr است */
+    background: rgba(10, 14, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+}
+
+.win-card.show {
+    display: flex;
+    animation: pop 0.55s 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+@keyframes pop {
+    from { opacity: 0; transform: translate(-50%, -42%) scale(0.85); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.message {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+    color: #ffb703;
+}
+
+.win-stats {
+    display: flex;
+    gap: 18px;
+    direction: rtl;
+    color: #e5ebf5;
+}
+
+.win-stats div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.win-stats b {
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+.win-stats span {
+    font-size: 0.72rem;
+    color: #9aa8bf;
+}
+
+/* ── پنل کنترل ─────────────────────────────────────────────── */
+.panel {
+    width: var(--panel-w);
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.tile {
+    background: #fff;
+    border: 1px solid #d6deea;
+    border-radius: 12px;
+    padding: 8px 10px;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.lbl {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.cap {
+    font-size: 0.62rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.hud {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.hud b {
+    display: block;
+    font-size: 1.2rem;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+.row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.row > .btn {
+    flex: 1;
+}
+
+.zoom-label {
+    min-width: 52px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.btn {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    padding: 8px 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 9px;
+    box-shadow: none;
+    white-space: nowrap;
+}
+
+.btn.sm {
+    flex: none;
+    width: 38px;
+    padding: 6px 0;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.btn:hover {
+    background-color: #cbd5e1;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn[aria-pressed="true"] {
+    background-color: green;
+    color: #fff;
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* جوی‌استیک دایره‌ای دوربین */
+.pad {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    margin: 6px auto 0;
+    border-radius: 50%;
+    background:
+        linear-gradient(#cbd5e1, #cbd5e1) center / 1px 70% no-repeat,
+        linear-gradient(#cbd5e1, #cbd5e1) center / 70% 1px no-repeat,
+        radial-gradient(circle at 50% 38%, #ffffff, #dbe3ef);
+    border: 1px solid #c5d0e0;
+    box-shadow: inset 0 2px 7px rgba(15, 23, 42, 0.14);
+    touch-action: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 42px;
+    height: 42px;
+    margin: -21px 0 0 -21px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #4ade80, green 70%);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.35), inset 0 -2px 4px rgba(0, 0, 0, 0.18);
+    transition: transform 0.18s ease-out;
+    pointer-events: none;
+}
+
+.pad.dragging .knob {
+    transition: none;
+}
+
+.mini-tile {
+    padding: 5px;
+    line-height: 0;
+}
+
+#mini {
+    display: block;
+    margin: 0 auto;
+    background: var(--board-surround);
+    border-radius: 8px;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+button {
+    background-color: #e63946;
+    border: none;
+    color: white;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+    font-family: inherit;
+}
+
+button:hover {
+    background-color: #cb2d3a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
+}
+
+/* ── صفحه‌های باریک: پنل زیر ماز می‌آید ─────────────────────── */
+@media (max-width: 900px) {
+    .game-container {
+        padding: 14px;
+    }
+
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .panel > .tile {
+        flex: 1 1 140px;
+        max-width: 200px;
+    }
+
+    .panel > .row {
+        flex: 1 1 100%;
+    }
+
+    .panel > button {
+        flex: 1 1 100%;
+    }
+}
