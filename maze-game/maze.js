@@ -347,6 +347,7 @@ function fitLayout() {
     mazeCanvas.width = mazeCanvas.height = Math.round(V * dpr);
     miniM = wide ? clamp(V - 430, 96, PANEL_W - 22) : 132;
     if (wallPath) buildMini();
+    placePad();
 }
 
 // ── ساخت مسیر دیوارها (مختصات دنیا) ─────────────────────────────────
@@ -851,28 +852,43 @@ hintBtn.addEventListener('click', useHint);
 // بعد از کلیک روی دکمه‌ها فوکوس برداشته می‌شود تا Space/Enter ناخواسته دوباره آن‌ها را نزند
 document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('button'); if (b) b.blur(); });
 
-// ── ورودی: کشیدن ماز با ماوس/لمس (پن) و پینچ ─────────────────────────
+// ── ورودی: کشیدن روی نقشه = حرکت پلیر | پینچ و چرخ ماوس = زوم ───────
 const ptrs = new Map();
 let pinchDist = 0;
-const PAN_THRESHOLD = 4;                                  // پیکسل؛ کلیک ساده دوربین را آزاد نمی‌کند
+
+// فاصلهٔ لازم برای یک گام (متناسب با اندازهٔ خانه روی صفحه)
+const swipeStep = () => clamp(base * cam.z * 0.8, 14, 34);
 
 mazeCanvas.addEventListener('pointerdown', (e) => {
     mazeCanvas.setPointerCapture(e.pointerId);
-    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, dragging: false });
-    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinchDist = Math.hypot(a.x - b.x, a.y - b.y); }
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, ax: e.clientX, ay: e.clientY });
+    if (ptrs.size === 2) {
+        const [a, b] = [...ptrs.values()];
+        pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+    }
 });
+
 mazeCanvas.addEventListener('pointermove', (e) => {
     const p = ptrs.get(e.pointerId);
     if (!p) return;
-    const dx = e.clientX - p.x, dy = e.clientY - p.y;
     p.x = e.clientX; p.y = e.clientY;
+
     if (ptrs.size === 1) {
-        if (!p.dragging && Math.hypot(p.x - p.sx, p.y - p.sy) > PAN_THRESHOLD) {
-            p.dragging = true;
-            mazeCanvas.classList.add('grabbing');
-            panByPixels(p.x - p.sx, p.y - p.sy);          // جبران حرکتِ قبل از عبور از آستانه
-        } else if (p.dragging) panByPixels(dx, dy);
-    } else if (ptrs.size === 2) {                          // پینچ: زوم حول نقطهٔ میانی (+ پن اگر دوربین آزاد است)
+        const step = swipeStep();
+        for (let guard = 0; guard < 6; guard++) {          // کشیدن سریع = چند گام
+            const dx = p.x - p.ax, dy = p.y - p.ay;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) < step) break;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                movePlayer(dx > 0 ? 1 : 3);
+                p.ax += dx > 0 ? step : -step;
+                p.ay = p.y;                                // جلوگیری از انحراف مورب
+            } else {
+                movePlayer(dy > 0 ? 2 : 0);
+                p.ay += dy > 0 ? step : -step;
+                p.ax = p.x;
+            }
+        }
+    } else if (ptrs.size === 2) {                          // پینچ: فقط زوم
         const [a, b] = [...ptrs.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
         const r = mazeCanvas.getBoundingClientRect();
@@ -882,27 +898,31 @@ mazeCanvas.addEventListener('pointermove', (e) => {
             if (cam.anchor) { cam.anchor = null; cam.cx = cam.tcx; cam.cy = cam.tcy; }
         }
         pinchDist = d;
-        if (!cam.follow) panByPixels(dx / 2, dy / 2);
     }
 });
+
 for (const ev of ['pointerup', 'pointercancel']) {
     mazeCanvas.addEventListener(ev, (e) => {
         ptrs.delete(e.pointerId);
         if (ptrs.size < 2) pinchDist = 0;
-        if (ptrs.size === 0) mazeCanvas.classList.remove('grabbing');
+        // اگر یکی از دو انگشت برداشته شد، انگشت باقی‌مانده از نقطهٔ فعلی دوباره شروع کند
+        for (const q of ptrs.values()) { q.ax = q.x; q.ay = q.y; }
     });
 }
+
 mazeCanvas.addEventListener('wheel', (e) => {             // چرخ ماوس / پینچ تاچ‌پد = زوم
     e.preventDefault();
     const r = mazeCanvas.getBoundingClientRect();
     zoomAt(cam.tz * Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
 }, { passive: false });
 
-// ── ورودی: جوی‌استیک دایره‌ای دوربین ──────────────────────────────────
-const padEl = $('pad'), knobEl = $('knob');
+// ── ورودی: پد شناور دوربین ────────────────────────────────────────────
+const padEl = $('pad'), knobEl = $('knob'), padWrap = $('padWrap'), padGrip = $('padGrip');
+const stage = $('stage');
 let padId = null;
+
 function padPoint(e) {
-    const r = padEl.getBoundingClientRect(), max = r.width / 2 - 21;
+    const r = padEl.getBoundingClientRect(), max = r.width / 2 - knobEl.offsetWidth / 2;
     let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
     const len = Math.hypot(dx, dy);
     if (len > max) { dx *= max / len; dy *= max / len; }
@@ -913,17 +933,71 @@ function padReset() {
     padVec.x = padVec.y = 0;
     knobEl.style.transform = '';
     padEl.classList.remove('dragging');
+    padWrap.classList.remove('active');
     padId = null;
 }
 padEl.addEventListener('pointerdown', (e) => {
     padId = e.pointerId;
     padEl.setPointerCapture(e.pointerId);
     padEl.classList.add('dragging');
+    padWrap.classList.add('active');                       // شفافیت ۱۰۰٪ هنگام استفاده
     padPoint(e);
 });
 padEl.addEventListener('pointermove', (e) => { if (e.pointerId === padId) padPoint(e); });
 for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     padEl.addEventListener(ev, (e) => { if (e.pointerId === padId) padReset(); });
+}
+
+// ── جابه‌جایی پد روی قاب بازی (با دستگیره) + چسبیدن به کناره‌ها ─────────
+const PAD_M = 6;                                           // فاصله از لبه (px)
+let padPos = { x: 1, y: 1 };                               // کسری از فضای آزاد؛ پیش‌فرض: پایین-راست
+try {
+    const s = JSON.parse(localStorage.getItem('mazePadPos'));
+    if (s && isFinite(s.x) && isFinite(s.y)) padPos = { x: clamp(s.x, 0, 1), y: clamp(s.y, 0, 1) };
+} catch (_) {}
+
+function padFree() {
+    return {
+        w: Math.max(1, stage.clientWidth  - padWrap.offsetWidth  - 2 * PAD_M),
+        h: Math.max(1, stage.clientHeight - padWrap.offsetHeight - 2 * PAD_M)
+    };
+}
+function placePad() {
+    const f = padFree();
+    padWrap.style.left = PAD_M + padPos.x * f.w + 'px';
+    padWrap.style.top  = PAD_M + padPos.y * f.h + 'px';
+}
+
+let gripId = null, gripOffX = 0, gripOffY = 0;
+padGrip.addEventListener('pointerdown', (e) => {
+    gripId = e.pointerId;
+    padGrip.setPointerCapture(e.pointerId);
+    const r = padWrap.getBoundingClientRect();
+    gripOffX = e.clientX - r.left; gripOffY = e.clientY - r.top;
+    padWrap.classList.add('active');
+    e.preventDefault();
+});
+padGrip.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== gripId) return;
+    const s = stage.getBoundingClientRect(), f = padFree();
+    padPos.x = clamp((e.clientX - s.left - gripOffX - PAD_M) / f.w, 0, 1);
+    padPos.y = clamp((e.clientY - s.top  - gripOffY - PAD_M) / f.h, 0, 1);
+    placePad();
+});
+for (const ev of ['pointerup', 'pointercancel']) {
+    padGrip.addEventListener(ev, (e) => {
+        if (e.pointerId !== gripId) return;
+        gripId = null;
+        padWrap.classList.remove('active');
+        // چسبیدن به نزدیک‌ترین کناره
+        const f = padFree();
+        const d = [padPos.x * f.w, (1 - padPos.x) * f.w, padPos.y * f.h, (1 - padPos.y) * f.h];
+        const m = d.indexOf(Math.min(...d));
+        if (m === 0) padPos.x = 0; else if (m === 1) padPos.x = 1;
+        else if (m === 2) padPos.y = 0; else padPos.y = 1;
+        placePad();
+        try { localStorage.setItem('mazePadPos', JSON.stringify(padPos)); } catch (_) {}
+    });
 }
 
 // ── ورودی: مینی‌مپ ───────────────────────────────────────────────────
