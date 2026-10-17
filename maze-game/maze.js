@@ -12,25 +12,25 @@
 const SIZE = 42;                 // ماز SIZE × SIZE خانه
 
 // ── تنظیمات مولد ────────────────────────────────────────────────────
-const CANDIDATES    = 36;        // هر بار این‌قدر ماز ساخته و بهترینش انتخاب می‌شود
-const BRANCH_MIN    = 5;         // شاخهٔ انحرافیِ «معتبر» حداقل این‌قدر عمق دارد
-const DEPTH_CAP     = 70;        // سقف سهم هر شاخه در امتیاز (تا یک شاخهٔ غول‌پیکر امتیاز را قبضه نکند)
+const CANDIDATES = 36;        // هر بار این‌قدر ماز ساخته و بهترینش انتخاب می‌شود
+const BRANCH_MIN = 5;         // شاخهٔ انحرافیِ «معتبر» حداقل این‌قدر عمق دارد
+const DEPTH_CAP = 70;        // سقف سهم هر شاخه در امتیاز (تا یک شاخهٔ غول‌پیکر امتیاز را قبضه نکند)
 const MIN_SEPARATION = SIZE;     // حداقل فاصلهٔ منهتنی شروع تا هدف (تا واقعاً دو سرِ نقشه باشند)
-const LOOP_COUNT    = 20;        // حداکثر تعداد حلقه‌های انحرافی (در عمل حدود ۱۴ تا ساخته می‌شود)
+const LOOP_COUNT = 20;        // حداکثر تعداد حلقه‌های انحرافی (در عمل حدود ۱۴ تا ساخته می‌شود)
 const LOOP_MIN_CYCLE = 30;       // کوتاه‌ترین طول مجاز برای یک حلقه (حلقهٔ کوچک = اتاقک زشت)
 
 // ── ظاهر ────────────────────────────────────────────────────────────
 const WALL_PX = 2.5;             // ضخامت دیوار در زوم ۱۰۰٪ (پیکسل)
 const WALL_COLOR = 'rgb(0, 0, 0)';
 const PLAYER_COLOR = '#ff0000';
-const EXIT_COLOR   = '#0400ff';
-const BOARD_COLOR  = 'green';    // رنگ تخته (قاب دور آن در CSS: --board-surround)
+const EXIT_COLOR = '#0400ff';
+const BOARD_COLOR = 'green';    // رنگ تخته (قاب دور آن در CSS: --board-surround)
 const PLAYER_R = 0.32;           // شعاع پلیر (بر حسب خانه)
-const EXIT_R   = 0.40;           // نیم‌قطر لوزی هدف (بر حسب خانه)
+const EXIT_R = 0.40;           // نیم‌قطر لوزی هدف (بر حسب خانه)
 
 // ── دوربین و رابط ───────────────────────────────────────────────────
-const ZOOM_MIN = 0.5, ZOOM_MAX = 5, ZOOM_STEP = 1.25;
-const VIEW_MARGIN = 8;           // حاشیهٔ تخته تا لبهٔ نما در زوم ۱۰۰٪ (px)
+const ZOOM_MIN = 1, ZOOM_MAX = 5, ZOOM_STEP = 1.25;
+const VIEW_MARGIN = 4;           // حاشیهٔ تخته تا لبهٔ نما در زوم ۱۰۰٪ (px)
 const PANEL_W = 176;             // باید با --panel-w در CSS یکی باشد
 const PAD_SPEED = 620;           // سرعت دوربین با جوی‌استیک (px بر ثانیه، در انحراف کامل)
 const HINTS_PER_MAZE = 3, HINT_LEN = 14, HINT_MS = 3500;
@@ -397,17 +397,11 @@ function buildMini() {
 // tight=false : حالت آزاد — می‌شود تخته را تا حدی کنار کشید (در هر زومی) ولی هرگز گم نمی‌شود
 function clampCam(tight, target) {
     const z = target ? cam.tz : cam.z;
-    const vw = V / (base * z);                           // عرض دیدِ دنیا بر حسب خانه
+    const vw = V / (base * z);
     let cx = target ? cam.tcx : cam.cx, cy = target ? cam.tcy : cam.cy;
-    if (tight) {
-        const pad = 0.8, lo = vw / 2 - pad, hi = SIZE - vw / 2 + pad;
-        cx = lo > hi ? SIZE / 2 : clamp(cx, lo, hi);
-        cy = lo > hi ? SIZE / 2 : clamp(cy, lo, hi);
-    } else {
-        const e = 0.3 * vw;
-        cx = clamp(cx, -e, SIZE + e);
-        cy = clamp(cy, -e, SIZE + e);
-    }
+    const pad = 0.8, lo = vw / 2 - pad, hi = SIZE - vw / 2 + pad;   // در هر دو حالت یکسان
+    cx = lo > hi ? SIZE / 2 : clamp(cx, lo, hi);
+    cy = lo > hi ? SIZE / 2 : clamp(cy, lo, hi);
     if (target) { cam.tcx = cx; cam.tcy = cy; } else { cam.cx = cx; cam.cy = cy; }
 }
 
@@ -833,9 +827,9 @@ document.addEventListener('keydown', (e) => {
     }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     switch (e.code) {                                     // e.code: مستقل از زبان کیبورد
-        case 'Equal': case 'NumpadAdd':      zoomBy(ZOOM_STEP); break;
+        case 'Equal': case 'NumpadAdd': zoomBy(ZOOM_STEP); break;
         case 'Minus': case 'NumpadSubtract': zoomBy(1 / ZOOM_STEP); break;
-        case 'Digit0': case 'Numpad0':       resetView(); break;
+        case 'Digit0': case 'Numpad0': resetView(); break;
         case 'KeyC': cam.follow = !cam.follow; if (cam.follow) cam.anchor = null; break;
         case 'KeyF': toggleFog(); break;
         case 'KeyH': useHint(); break;
@@ -861,7 +855,7 @@ let pinchDist = 0;
 const swipeStep = () => clamp(base * cam.z * 0.8, 14, 34);
 
 // جلوگیری کامل از اسکرول/زوم/کشیدن خودِ صفحه با لمس روی نقشه و پد
-for (const el of [stageEl, ]) {
+for (const el of [stageEl,]) {
     for (const ev of ['touchstart', 'touchmove']) {
         el.addEventListener(ev, (e) => { e.preventDefault(); }, { passive: false });
     }
@@ -962,18 +956,18 @@ let padPos = { x: 1, y: 1 };                               // کسری از فض
 try {
     const s = JSON.parse(localStorage.getItem('mazePadPos'));
     if (s && isFinite(s.x) && isFinite(s.y)) padPos = { x: clamp(s.x, 0, 1), y: clamp(s.y, 0, 1) };
-} catch (_) {}
+} catch (_) { }
 
 function padFree() {
     return {
-        w: Math.max(1, stage.clientWidth  - padWrap.offsetWidth  - 2 * PAD_M),
+        w: Math.max(1, stage.clientWidth - padWrap.offsetWidth - 2 * PAD_M),
         h: Math.max(1, stage.clientHeight - padWrap.offsetHeight - 2 * PAD_M)
     };
 }
 function placePad() {
     const f = padFree();
     padWrap.style.left = PAD_M + padPos.x * f.w + 'px';
-    padWrap.style.top  = PAD_M + padPos.y * f.h + 'px';
+    padWrap.style.top = PAD_M + padPos.y * f.h + 'px';
 }
 
 let gripId = null, gripOffX = 0, gripOffY = 0;
@@ -989,7 +983,7 @@ padGrip.addEventListener('pointermove', (e) => {
     if (e.pointerId !== gripId) return;
     const s = stage.getBoundingClientRect(), f = padFree();
     padPos.x = clamp((e.clientX - s.left - gripOffX - PAD_M) / f.w, 0, 1);
-    padPos.y = clamp((e.clientY - s.top  - gripOffY - PAD_M) / f.h, 0, 1);
+    padPos.y = clamp((e.clientY - s.top - gripOffY - PAD_M) / f.h, 0, 1);
     placePad();
 });
 for (const ev of ['pointerup', 'pointercancel']) {
@@ -1004,7 +998,7 @@ for (const ev of ['pointerup', 'pointercancel']) {
         if (m === 0) padPos.x = 0; else if (m === 1) padPos.x = 1;
         else if (m === 2) padPos.y = 0; else padPos.y = 1;
         placePad();
-        try { localStorage.setItem('mazePadPos', JSON.stringify(padPos)); } catch (_) {}
+        try { localStorage.setItem('mazePadPos', JSON.stringify(padPos)); } catch (_) { }
     });
 }
 
