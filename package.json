@@ -4,6 +4,10 @@
   "type": "module",
   "description": "Static web client for Maze for Maze Pro",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
   }
 }
