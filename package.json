@@ -1,0 +1,9 @@
+{
+  "name": "maze-for-maze-pro",
+  "private": true,
+  "type": "module",
+  "description": "Static web client for Maze for Maze Pro",
+  "scripts": {
+    "test": "node --test"
+  }
+}

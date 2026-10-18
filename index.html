@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#071008">
+    <meta name="description" content="Maze for Maze — a neon maze game with ordered targets and online races.">
+    <meta name="maze-multiplayer-url" content="">
+    <title>Maze for Maze · Pro</title>
+    <link rel="stylesheet" href="maze-styles/style.css">
+</head>
+<body class="in-menu">
+    <div class="game-container">
+        <h1>MAZE FOR MAZE <span class="title-dot" aria-hidden="true"></span></h1>
+        <div class="game-layout">
+            <div class="maze-wrapper" id="stage">
+                <canvas id="maze" class="maze" aria-label="Maze game board"></canvas>
+                <div class="mini-tile" id="miniTile"><canvas id="mini" title="Mini map – Click or drag to move the camera"></canvas></div>
+
+                <div class="pad-wrap" id="padWrap" aria-label="Movement joystick">
+                    <div class="pad-grip" id="padGrip" title="Drag to reposition"></div>
+                    <div class="pad" id="pad" title="Move the player">
+                        <div class="knob" id="knob"></div>
+                    </div>
+                </div>
+
+                <div id="banner" class="banner" role="status"></div>
+                <section id="raceBoard" class="race-board" aria-label="Race standings">
+                    <div class="race-board-heading"><span>LIVE RACE</span><small id="raceRoomCode"></small></div>
+                    <ol id="raceList"></ol>
+                </section>
+
+                <div id="winCard" class="win-card" role="dialog" aria-modal="true" aria-labelledby="message">
+                    <div id="message" class="message"></div>
+                    <div id="winStats" class="win-stats"></div>
+                    <button id="newMazeWin" type="button">New Maze</button>
+                </div>
+
+                <section id="menu" class="overlay goal-menu" role="dialog" aria-modal="true" aria-labelledby="goalHeading">
+                    <div class="menu-mark"><span class="mark-icon">◇</span><span>MISSION SETUP</span></div>
+                    <h2 id="goalHeading">Choose Targets</h2>
+                    <p id="menuSubtitle">Collect every point in numbered order</p>
+                    <div class="goal-options">
+                        <button class="opt" data-n="3" type="button">
+                            <span class="opt-main"><b>03</b><span>3 Points</span></span>
+                            <small class="waiting-count" data-waiting-goals="3" hidden>Waiting players <b>0</b></small>
+                        </button>
+                        <button class="opt" data-n="6" type="button">
+                            <span class="opt-main"><b>06</b><span>6 Points</span></span>
+                            <small class="waiting-count" data-waiting-goals="6" hidden>Waiting players <b>0</b></small>
+                        </button>
+                        <button class="opt" data-n="9" type="button">
+                            <span class="opt-main"><b>09</b><span>9 Points</span></span>
+                            <small class="waiting-count" data-waiting-goals="9" hidden>Waiting players <b>0</b></small>
+                        </button>
+                    </div>
+                    <div class="goal-rule"><span class="rule-lock">⌑</span> Targets unlock in order · 01 → 02 → 03</div>
+                    <button class="text-button" id="backToPlayers" type="button">← Change race mode</button>
+                </section>
+
+                <section id="waitingMenu" class="overlay waiting-menu" role="dialog" aria-modal="true" aria-labelledby="waitingTitle">
+                    <div class="waiting-orbit" aria-hidden="true"><span></span><i></i></div>
+                    <div class="menu-mark"><span>ONLINE MATCHMAKING</span></div>
+                    <h2 id="waitingTitle">Finding your race</h2>
+                    <p id="waitingText">Searching for players in the same mode.</p>
+                    <div class="waiting-count-large" id="waitingCount">Waiting players: 0 / 2</div>
+                    <div class="progress-track"><span id="waitingProgress"></span></div>
+                    <div class="waiting-actions">
+                        <button class="opt" id="cancelQueue" type="button">Cancel search</button>
+                        <button class="ghost" id="waitingOpenSettings" type="button" hidden>Configure server</button>
+                    </div>
+                </section>
+
+                <section id="confirm" class="overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+                    <h2 id="confirmTitle">End current game?</h2>
+                    <p id="confirmText">The game will stop and the shortest paths from the start to every point will be shown.</p>
+                    <div class="btns">
+                        <button id="endYes" type="button">End Game</button>
+                        <button id="endNo" class="ghost" type="button">Continue</button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="panel" id="panel">
+                <div class="tile hud">
+                    <div><span class="lbl">Steps</span><b id="hudSteps">0</b></div>
+                    <div><span class="lbl">Time</span><b id="hudTime">0:00</b></div>
+                    <div><span class="lbl">Goals</span><b id="hudGoals">0/3</b></div>
+                </div>
+                <div class="tools">
+                    <div class="grp">
+                        <button class="btn sm" id="zoomOut" title="Zoom out (−)" aria-label="Zoom out" type="button">−</button>
+                        <span class="zoom-label" id="zoomLabel">100%</span>
+                        <button class="btn sm" id="zoomIn" title="Zoom in (+)" aria-label="Zoom in" type="button">+</button>
+                    </div>
+                    <div class="grp">
+                        <button class="btn" id="zoomReset" title="Reset view (0)" type="button">Reset</button>
+                        <button class="btn" id="followBtn" aria-pressed="true" title="Camera follows the player" type="button">Follow</button>
+                    </div>
+                    <div class="grp">
+                        <button class="btn" id="fogBtn" aria-pressed="false" title="Torch" type="button">🔦 Torch</button>
+                        <button class="btn" id="hintBtn" title="Hint" type="button">💡 Hint <span id="hintCount">3</span></button>
+                    </div>
+                    <div id="padDock" class="pad-dock" aria-label="Desktop movement controls"></div>
+                    <button class="newbtn" id="newMazePanel" type="button">New Maze</button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <section id="playerModeMenu" class="overlay player-mode-screen show" role="dialog" aria-modal="true" aria-labelledby="modeHeading">
+        <div class="menu-shell">
+            <div class="menu-topline">
+                <div class="menu-brand"><span class="brand-symbol">✳</span><span>MAZE <i>/</i> RACE LOBBY</span></div>
+                <div id="networkStatus" class="network-status" data-state="offline">Server URL needed</div>
+            </div>
+            <div class="hero-copy">
+                <span class="hero-kicker">ONE MAZE. ONE RACE. YOUR ROUTE.</span>
+                <h2 id="modeHeading">Choose Your Race</h2>
+                <p>Race through the same maze. Targets unlock one by one — route planning matters.</p>
+            </div>
+
+            <label class="player-name-field" for="playerName">
+                <span>RACER NAME</span>
+                <input id="playerName" type="text" maxlength="24" placeholder="Player" autocomplete="nickname">
+            </label>
+
+            <div class="mode-grid" id="playerModeGrid">
+                <button class="mode-choice solo-choice" data-players="1" type="button">
+                    <span class="mode-number">01</span>
+                    <span class="mode-copy"><b>Free Play</b><small>Single player · No waiting</small></span>
+                    <span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="2" type="button">
+                    <span class="mode-number">02</span><span class="mode-copy"><b>2-Player</b><small>Head-to-head race</small><small class="mode-waiting" data-waiting-players="2">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="3" type="button">
+                    <span class="mode-number">03</span><span class="mode-copy"><b>3-Player</b><small>3 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="3">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="4" type="button">
+                    <span class="mode-number">04</span><span class="mode-copy"><b>4-Player</b><small>4 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="4">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="5" type="button">
+                    <span class="mode-number">05</span><span class="mode-copy"><b>5-Player</b><small>5 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="5">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="6" type="button">
+                    <span class="mode-number">06</span><span class="mode-copy"><b>6-Player</b><small>6 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="6">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="7" type="button">
+                    <span class="mode-number">07</span><span class="mode-copy"><b>7-Player</b><small>7 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="7">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="8" type="button">
+                    <span class="mode-number">08</span><span class="mode-copy"><b>8-Player</b><small>8 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="8">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="9" type="button">
+                    <span class="mode-number">09</span><span class="mode-copy"><b>9-Player</b><small>9 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="9">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+                <button class="mode-choice" data-players="10" type="button">
+                    <span class="mode-number">10</span><span class="mode-copy"><b>10-Player</b><small>10 racers · Shared maze</small><small class="mode-waiting" data-waiting-players="10">Waiting players <b>0</b></small></span><span class="mode-arrow">↗</span>
+                </button>
+            </div>
+
+            <details class="server-config" id="serverConfig">
+                <summary>Multiplayer server settings</summary>
+                <p>For online races, enter the WebSocket URL of your deployed Maze server (WSS on HTTPS sites).</p>
+                <div class="server-config-row">
+                    <input id="serverUrlInput" type="url" placeholder="wss://your-maze-server.example.com" spellcheck="false" autocomplete="url">
+                    <button id="saveServerUrl" type="button">Connect</button>
+                </div>
+                <small id="serverConfigHint">The single-player mode works without a server.</small>
+            </details>
+
+            <div class="menu-footer">
+                <span><i class="footer-pulse"></i> SEQUENTIAL TARGETS</span>
+                <span>SHARED MAZE · LIVE RACE</span>
+                <span>2–10 RACERS</span>
+            </div>
+        </div>
+    </section>
+
+    <script type="module" src="maze-game/maze.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "maze-multiplayer-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket matchmaking and race-state server for Maze",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
