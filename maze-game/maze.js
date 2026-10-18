@@ -285,17 +285,23 @@ let goals = 0, goalTotal = 3, pausedAt = null, revealed = false;
 const reveal = [];
 const dStart = new Int32Array(N), prevStart = new Int32Array(N);
 const hudGoals = $('hudGoals'), menuEl = $('menu'), confirmEl = $('confirm'), banner = $('banner');
+const miniTile = $('miniTile'), confirmTitle = $('confirmTitle'), confirmText = $('confirmText');
+const SAVE_KEY = 'mazeSave';
+let moves = '', mazeCode = '';
 function fitLayout() {
     dpr = window.devicePixelRatio || 1;
-    const wide = window.innerWidth > 900;
+    const w = window.innerWidth, h = window.innerHeight;
+    const wide = w >= 640 && w / h > 1.1;
     const side = wide
-        ? Math.min(window.innerWidth - PANEL_W - 18 - 110, window.innerHeight - 116)
-        : Math.min(window.innerWidth - 56, window.innerHeight - 100);
-    V = clamp(Math.floor(side / 2) * 2, 300, 920);
+        ? Math.min(w - PANEL_W - 14 - 28, h - 84)
+        : Math.min(w - 20, h - 232);
+    V = clamp(Math.floor(side / 2) * 2, 240, 960);
+    document.body.classList.toggle('wide', wide);
+    document.documentElement.style.setProperty('--v', V + 'px');
     base = Math.max(6, Math.floor((V - 2 * VIEW_MARGIN) / SIZE));
     mazeCanvas.style.width = mazeCanvas.style.height = V + 'px';
     mazeCanvas.width = mazeCanvas.height = Math.round(V * dpr);
-    miniM = wide ? clamp(V - 430, 96, PANEL_W - 22) : 132;
+    miniM = clamp(Math.round(V * 0.26), 76, 140);
     if (wallPath) buildMini();
     placePad();
 }
@@ -538,18 +544,41 @@ function draw(t) {
         ctx.stroke();
         ctx.restore();
     }
-    if (!revealed) {
+    if (!revealed && !fogOn) {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.font = `700 ${clamp(s * 0.6, 11, 20)}px Poppins, Tahoma, sans-serif`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        const fs = clamp(s * 0.6, 11, 18);
+        ctx.font = `700 ${fs}px Poppins, Tahoma, sans-serif`;
+        ctx.textAlign = 'center';
         ctx.lineJoin = 'round'; ctx.lineWidth = 3;
         ctx.globalAlpha = ease;
         for (let i = 0; i < exits.length; i++) {
             const left = exitDists[i][player];
             if (collected[i] || left <= 0) continue;
-            const lx = tx + ((exits[i] % SIZE) + 0.5) * s, ly = ty + (((exits[i] / SIZE) | 0) + 0.5) * s - EXIT_R * s - 8;
-            ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(String(left), lx, ly);
-            ctx.fillStyle = left <= 10 ? '#ffd24a' : '#fff'; ctx.fillText(String(left), lx, ly);
+            const sx = tx + ((exits[i] % SIZE) + 0.5) * s, sy = ty + (((exits[i] / SIZE) | 0) + 0.5) * s;
+            const txt = String(left), col = left <= 10 ? '#ffd24a' : '#fff';
+            let lx, ly;
+            if (sx >= 0 && sx <= V && sy >= 0 && sy <= V) {
+                const r = EXIT_R * s + 6;
+                lx = clamp(sx, 14, V - 14);
+                if (sy < V / 2) { ctx.textBaseline = 'top'; ly = clamp(sy + r, 2, V - fs - 4); }
+                else { ctx.textBaseline = 'bottom'; ly = clamp(sy - r, fs + 4, V - 2); }
+            } else {
+                const dx = sx - V / 2, dy = sy - V / 2;
+                const k = (V / 2 - 24) / Math.max(Math.abs(dx), Math.abs(dy));
+                lx = V / 2 + dx * k; ly = V / 2 + dy * k;
+                ctx.textBaseline = 'middle';
+                ctx.save();
+                ctx.translate(lx, ly);
+                ctx.rotate(Math.atan2(dy, dx));
+                ctx.beginPath();
+                ctx.moveTo(21, 0); ctx.lineTo(14, -5); ctx.lineTo(14, 5);
+                ctx.closePath();
+                ctx.fillStyle = col;
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(txt, lx, ly);
+            ctx.fillStyle = col; ctx.fillText(txt, lx, ly);
         }
         ctx.globalAlpha = 1;
         world();
@@ -631,6 +660,8 @@ function updateHud() {
     setHud(hudSteps, 's', steps);
     setHud(hudTime, 't', fmtTime(startTime === null ? 0 : (endTime !== null ? endTime : (pausedAt !== null ? pausedAt : performance.now())) - startTime));
     setHud(hudGoals, 'g', goals + '/' + goalTotal);
+    const mt = cam.tz > 1.02;
+    if (hudCache.m !== mt) { hudCache.m = mt; miniTile.classList.toggle('show', mt); }
     setHud(zoomLabel, 'z', Math.round(cam.tz * 100) + '%');
     setHud(hintCount, 'h', hintsLeft);
     if (hudCache.f !== cam.follow) { hudCache.f = cam.follow; followBtn.setAttribute('aria-pressed', String(cam.follow)); }
@@ -641,11 +672,13 @@ function movePlayer(d) {
     if (open[player] & (1 << d)) {
         player = NB[player * 4 + d];
         steps++;
+        moves += d;
         if (startTime === null) startTime = performance.now();
         trailPath.lineTo((player % SIZE) + 0.5, ((player / SIZE) | 0) + 0.5);
         pop = 1;
         ensurePlayerVisible();
         checkGoal();
+        saveGame();
     } else {
         kickX = DC[d] * 0.14;
         kickY = DR[d] * 0.14;
@@ -661,6 +694,7 @@ function checkGoal() {
         return;
     }
     isGameOver = true;
+    clearSave();
     endTime = performance.now();
     messageElement.textContent = "🏆 You Win";
     const eff = Math.min(100, Math.round(100 * solutionLen / Math.max(1, steps)));
@@ -716,6 +750,7 @@ function useHint() {
     hintsLeft--;
     hintsUsed++;
     updateHud();
+    saveGame();
 }
 function toggleFog() {
     fogOn = !fogOn;
@@ -754,14 +789,42 @@ function buildReveal() {
         reveal.push({ path, color: `hsl(${Math.round(i * 360 / exits.length)}, 90%, 62%)` });
     });
 }
+function saveGame() {
+    if (isGameOver) return;
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            maze: mazeCode, start: startCell, exits, moves, hintsLeft, hintsUsed,
+            elapsed: startTime === null ? null : (pausedAt !== null ? pausedAt : performance.now()) - startTime
+        }));
+    } catch (_) { }
+}
+function clearSave() {
+    try { localStorage.removeItem(SAVE_KEY); } catch (_) { }
+}
+function loadSave() {
+    try {
+        const v = JSON.parse(localStorage.getItem(SAVE_KEY));
+        if (v && typeof v.maze === 'string' && v.maze.length === N && Array.isArray(v.exits) && v.exits.length >= 1
+            && v.exits.length <= MAX_GOALS && typeof v.moves === 'string') return v;
+    } catch (_) { }
+    return null;
+}
+function setConfirm(resume) {
+    confirmTitle.textContent = resume ? 'Unfinished game found' : 'End current game?';
+    confirmText.textContent = resume
+        ? 'You left a game in progress. Continue it, or end it and see the shortest paths?'
+        : 'The game will stop and the shortest paths from the start to every point will be shown.';
+}
 function showMenu() {
     winCard.classList.remove('show');
     banner.classList.remove('show');
     confirmEl.classList.remove('show');
     menuEl.classList.add('show');
+    document.body.classList.add('in-menu');
 }
 function askEnd() {
     if (isGameOver) return;
+    setConfirm(false);
     if (pausedAt === null) pausedAt = performance.now();
     confirmEl.classList.add('show');
 }
@@ -769,10 +832,12 @@ function cancelEnd() {
     if (pausedAt !== null && startTime !== null) startTime += performance.now() - pausedAt;
     pausedAt = null;
     confirmEl.classList.remove('show');
+    saveGame();
 }
 function confirmEnd() {
     confirmEl.classList.remove('show');
     isGameOver = true;
+    clearSave();
     endTime = pausedAt !== null ? pausedAt : performance.now();
     pausedAt = null;
     buildReveal();
@@ -787,8 +852,7 @@ function confirmEnd() {
 function newMaze() {
     if (isGameOver) showMenu(); else askEnd();
 }
-function initGame(count) {
-    goalTotal = count || goalTotal;
+function resetUi() {
     isGameOver = false;
     pausedAt = null;
     revealed = false;
@@ -798,14 +862,18 @@ function initGame(count) {
     menuEl.classList.remove('show');
     confirmEl.classList.remove('show');
     banner.classList.remove('show');
+    document.body.classList.remove('in-menu');
     fitLayout();
-    const m = generateMazeData(goalTotal);
+}
+function beginScene() {
+    mazeCode = Array.from(open, v => v.toString(16)).join('');
     for (let i = 0; i < exits.length; i++) bfs(open, exits[i], exitDists[i], null);
     solutionLen = optimalTour();
     collected.fill(0);
     goals = 0;
     player = startCell;
-    steps = 0; startTime = endTime = null;
+    steps = 0; moves = '';
+    startTime = endTime = null;
     hintsLeft = HINTS_PER_MAZE; hintsUsed = 0; hint = null;
     confetti.length = 0;
     drawR = (player / SIZE) | 0; drawC = player % SIZE;
@@ -820,6 +888,40 @@ function initGame(count) {
     else { introT = 0; cam.z = 2.6; cam.cx = drawC + 0.5; cam.cy = drawR + 0.5; }
     clampCam(true, false);
     padReset();
+    updateHud();
+}
+function initGame(count) {
+    goalTotal = count || goalTotal;
+    resetUi();
+    generateMazeData(goalTotal);
+    beginScene();
+    saveGame();
+}
+function restoreGame(v) {
+    resetUi();
+    open = Uint8Array.from(v.maze, c => parseInt(c, 16));
+    startCell = v.start;
+    exits = v.exits.slice();
+    goalTotal = exits.length;
+    beginScene();
+    for (const ch of v.moves) {
+        const d = +ch;
+        if (!(d >= 0 && d < 4) || !(open[player] & (1 << d))) break;
+        player = NB[player * 4 + d];
+        steps++;
+        moves += ch;
+        trailPath.lineTo((player % SIZE) + 0.5, ((player / SIZE) | 0) + 0.5);
+        const i = exits.indexOf(player);
+        if (i >= 0 && !collected[i]) { collected[i] = 1; goals++; }
+    }
+    drawR = (player / SIZE) | 0; drawC = player % SIZE;
+    introT = 1; cam.z = 1; cam.cx = cam.cy = SIZE / 2;
+    hintsLeft = typeof v.hintsLeft === 'number' ? v.hintsLeft : HINTS_PER_MAZE;
+    hintsUsed = typeof v.hintsUsed === 'number' ? v.hintsUsed : 0;
+    if (typeof v.elapsed === 'number') startTime = performance.now() - v.elapsed;
+    pausedAt = performance.now();
+    setConfirm(true);
+    confirmEl.classList.add('show');
     updateHud();
 }
 const ARROWS = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, ArrowLeft: 3 };
@@ -1015,8 +1117,11 @@ function frame(t) {
     drawMini();
     requestAnimationFrame(frame);
 }
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+window.addEventListener('pagehide', saveGame);
 window.onload = () => {
     fitLayout();
-    showMenu();
+    const saved = loadSave();
+    if (saved) restoreGame(saved); else showMenu();
     requestAnimationFrame(frame);
 };
