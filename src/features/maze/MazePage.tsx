@@ -17,13 +17,6 @@ export function MazePage() {
     let disposed = false;
     let viewTimer: number | undefined;
     let bodyObserver: MutationObserver | undefined;
-    headerResizeObserver?.disconnect();
-
-    window.removeEventListener('resize', syncHeaderOffset);
-    window.removeEventListener('scroll', syncHeaderOffset);
-
-    app?.style.removeProperty('--maze-header-bottom');
-
     document.body.classList.add('page-loading', 'in-menu');
 
     const app = document.getElementById('mazeApp');
@@ -118,12 +111,33 @@ window.addEventListener('scroll', syncHeaderOffset, { passive: true });
       }
     })();
 
-    return () => {
-      disposed = true;
-      if (viewTimer !== undefined) window.clearInterval(viewTimer);
-      bodyObserver?.disconnect();
-      window.removeEventListener('site:themechange', onThemeChange);
-    };
+return () => {
+  disposed = true;
+
+  if (viewTimer !== undefined) {
+    window.clearInterval(viewTimer);
+  }
+
+  bodyObserver?.disconnect();
+  headerResizeObserver?.disconnect();
+
+  window.removeEventListener(
+    'site:themechange',
+    onThemeChange
+  );
+
+  window.removeEventListener(
+    'resize',
+    syncHeaderOffset
+  );
+
+  window.removeEventListener(
+    'scroll',
+    syncHeaderOffset
+  );
+
+  app?.style.removeProperty('--maze-header-bottom');
+};
   }, []);
 
   return (
