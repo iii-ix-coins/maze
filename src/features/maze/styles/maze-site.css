@@ -4369,3 +4369,26 @@
 }
 
 }
+/* =========================================
+   HEADER-AWARE MAZE LAYOUT
+   ========================================= */
+
+/* Remove the empty Brand Header host on Maze pages. */
+body.in-menu > #root > #site-brand-header:empty {
+    display: none !important;
+}
+
+/* Use the measured site-header bottom. */
+.maze-app .cg {
+    --cg-top-pad: var(--maze-header-bottom, 0px);
+    --cg-tabs-h: 0px;
+}
+
+/* Remove unwanted vertical centering and old manual offset. */
+@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
+    .maze-app .cg-layout {
+        margin-block: 0 !important;
+        transform: none !important;
+    }
+}
+
