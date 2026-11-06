@@ -17,10 +17,44 @@ export function MazePage() {
     let disposed = false;
     let viewTimer: number | undefined;
     let bodyObserver: MutationObserver | undefined;
+    headerResizeObserver?.disconnect();
+
+    window.removeEventListener('resize', syncHeaderOffset);
+    window.removeEventListener('scroll', syncHeaderOffset);
+
+    app?.style.removeProperty('--maze-header-bottom');
 
     document.body.classList.add('page-loading', 'in-menu');
 
     const app = document.getElementById('mazeApp');
+
+    const headerHost = document.getElementById('site-header');
+
+// Measure the actual responsive header height.
+const syncHeaderOffset = () => {
+  if (!app) return;
+
+  const headerBottom =
+    headerHost?.getBoundingClientRect().bottom ?? 0;
+
+  app.style.setProperty(
+    '--maze-header-bottom',
+    `${Math.max(0, Math.ceil(headerBottom))}px`
+  );
+};
+
+const headerResizeObserver =
+  headerHost && typeof ResizeObserver !== 'undefined'
+    ? new ResizeObserver(syncHeaderOffset)
+    : undefined;
+
+if (headerHost) {
+  headerResizeObserver?.observe(headerHost);
+}
+
+window.addEventListener('resize', syncHeaderOffset);
+window.addEventListener('scroll', syncHeaderOffset, { passive: true });
+    
     const applyTheme = (theme: string | undefined) => {
       if (!app) return;
       app.dataset.theme = ['grass', 'dark', 'light'].includes(theme ?? '') ? theme : 'grass';
@@ -53,6 +87,9 @@ export function MazePage() {
         // Reuse the exact existing site chrome boot order before initializing Maze.
         await bootLegacyHomeScripts();
         if (disposed) return;
+
+        syncHeaderOffset();
+        window.requestAnimationFrame(syncHeaderOffset);
 
         // The Maze source is now compiled by the repository-root Vite build.
         // Importing after React commits the DOM preserves the engine's existing
