@@ -55,7 +55,13 @@ function loadClassicScript({ src }: ClassicScript): Promise<void> {
 
 /** Load the previous script set sequentially, preserving its execution order. */
 export function bootLegacyHomeScripts(): Promise<void> {
-  if (window.__hollldLegacyHomeBoot) return window.__hollldLegacyHomeBoot;
+  if (window.__hollldLegacyHomeBoot) {
+    return window.__hollldLegacyHomeBoot;
+  }
+
+  // Detect Maze page independently from query parameters.
+  const isMazePage =
+    window.location.pathname.replace(/\/+$/, '') === '/maze.html';
 
   const boot = (async () => {
     // Original <script type="module"> entries, now inside the Vite graph.
