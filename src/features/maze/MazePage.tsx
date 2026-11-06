@@ -28,12 +28,18 @@ const syncHeaderOffset = () => {
   if (!app) return;
 
   const headerBottom =
-    headerHost?.getBoundingClientRect().bottom ?? 0;
+  headerHost?.getBoundingClientRect().bottom ?? 0;
 
-  app.style.setProperty(
-    '--maze-header-bottom',
-    `${Math.max(0, Math.ceil(headerBottom))}px`
-  );
+const contentTop = Math.max(
+  0,
+  Math.ceil(headerBottom - 12)
+);
+
+app.style.setProperty(
+  '--maze-header-bottom',
+  `${contentTop}px`
+);
+
 };
 
 const headerResizeObserver =
