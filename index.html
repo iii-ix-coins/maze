@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fa" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#08130f" />
+    <meta name="description" content="Hollld — Maze mining, token information and online maze races." />
+    <meta name="maze-multiplayer-url" content="" />
+    <title>Hollld.fun</title>
+    <link rel="icon" type="image/x-icon" href="/css/images/maze-logo.svg" />
+    <!-- Keep the original theme bootstrap before styles and React to avoid a theme flash. -->
+    <script src="/js/theme-init.js"></script>
+    <!-- Preserve the original stylesheet order and file contents. -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/rainbow-border.css" />
+    <link rel="stylesheet" href="/css/header-scroll-scrim.css" />
+    <link rel="stylesheet" href="/css/maze-camera.css" />
+    <!-- Match the two Maze-only inline rules from the previous /maze.html document. -->
+    <style>
+      body.in-menu .maze-app { min-height: 40vh; }
+      body.in-menu #site-header { z-index: 1000; }
+    </style>
+  </head>
+  <body class="page-loading">
+    <script>
+      if (window.location.pathname === '/maze.html') {
+        document.body.classList.add('in-menu');
+        document.title = 'Play Maze · Hollld';
+      }
+    </script>
+    <!-- Both hosts stay direct body children; this preserves the legacy CSS selectors. -->
+    <div id="root" style="display: contents"></div>
+    <!-- React portal target: keeps the original body-level Maze placement without a second React root. -->
+    <div id="maze-root" style="display: contents"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

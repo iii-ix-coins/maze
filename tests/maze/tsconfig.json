@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "baseUrl": "../..",
+    "paths": { "@maze/shared": ["shared/maze/src/index.ts"] }
+  },
+  "include": ["**/*.ts", "../../src/features/maze/**/*.ts", "../../engines/maze-server/src/**/*.ts"]
+}

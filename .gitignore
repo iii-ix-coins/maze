@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Tooling / logs
+.vite/
+coverage/
+playwright-report/
+test-results/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

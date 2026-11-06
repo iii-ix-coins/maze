@@ -1,0 +1,227 @@
+/* ==========================================================================
+   RAINBOW  ·  کادر و متن چندرنگ، آهسته و یکتا برای هر المنت
+   --------------------------------------------------------------------------
+   • هر المنتی که js/rainbow-border.js آن را علامت بزند (data-rb) حلقه می‌گیرد.
+   • JS برای هر المنت این متغیرها را تصادفی ولی یکتا می‌سازد:
+        --rb-h       رنگ پایه (hue)     --rb-span   فاصله‌ی رنگ‌ها
+        --rb-offset  زاویه‌ی شروع       --rb-speed  مدت یک دور
+        --rb-dir     جهت چرخش
+   • تم‌ها فقط روشنایی و شدت رنگ (L / C در OKLCH) را تعیین می‌کنند؛
+     یعنی همان hue در dark نئونی، در light عمیق و در grass پاستلی می‌شود.
+   ========================================================================== */
+
+/* —— 1 · TOKENS ——————————————————————————————————————————————————————— */
+
+@property --rb-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+:root {
+    --rb-l: 0.84;
+    /* روشنایی رنگ‌ها */
+    --rb-c: 0.47;
+    /* اشباع رنگ‌ها   */
+    --rb-width: 2px;
+    /* ضخامت حلقه (داخل کادر) */
+    --rb-opacity: 1;
+    --rb-opacity-hover: 1;
+}
+
+html[data-theme="light"] {
+    --rb-l: 0.60;
+}
+
+html[data-theme="grass"] {
+    --rb-l: 0.65;
+}
+
+
+/* —— 1b · TEXT TOKENS ——————————————————————————————————————————————————
+   همان مفهوم توکن‌های کادر، اما جدا؛ چون متن باید روی زمینه خوانا بماند.
+   اگر می‌خواهید متن هم دقیقاً مثل کادر در هر سه تم یکسان باشد، دو بلوک
+   light و grass پایین را پاک کنید.                                      */
+
+:root {
+    --rbt-l: 0.86;
+    /* روشنایی متن */
+    --rbt-c: 0.16;
+    /* اشباع متن   */
+    --rbt-l-ink-light: 0.90;
+    /* متنِ روشن روی زمینه‌ی تیره‌ی خودِ المنت (chip، کارت) */
+    --rbt-l-ink-dark: 0.38;
+    /* متنِ تیره روی زمینه‌ی روشنِ خودِ المنت (دکمه‌ی Play) */
+}
+
+html[data-theme="light"] {
+    --rbt-l: 0.71;
+    --rbt-c: 0.21;
+}
+
+html[data-theme="grass"] {
+    --rbt-l: 0.72;
+    --rbt-c: 0.21;
+}
+
+/* —— 2 · RECIPE ———————————————————————————————————————————————————————— */
+
+[data-rb] {
+    position: relative;
+    isolation: isolate;
+    border-color: transparent;
+    /* حلقه جای border را می‌گیرد */
+}
+
+/* نوارهایی که border واقعی دارند: حلقه از لبه‌ی بیرونی border شروع شود */
+.nav-wallet-button[data-rb],
+.theme-toggle[data-rb],
+.game-view-toggle[data-rb] {
+    --rb-inset: -1px;
+}
+
+:root [data-rb]::before {
+    content: "";
+    position: absolute;
+    inset: var(--rb-inset, 0px);
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    corner-shape: inherit;
+    padding: var(--rb-width);
+    display: block;
+    /* بر display:none ی .nav-link-primary و موبایل غلبه می‌کند */
+    height: auto;
+    /* بر height: 2px ی underline غلبه می‌کند */
+    transform: none;
+    /* بر scaleX(0) ی underline غلبه می‌کند */
+
+    /* پالت: چهار رنگ در یک بازه‌ی hue، رفت‌وبرگشتی تا چرخش بی‌درز باشد */
+    background: conic-gradient(from calc(var(--rb-angle) + var(--rb-offset, 0deg)),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 3 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
+            oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))));
+
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+
+    opacity: var(--rb-opacity);
+    transition: opacity var(--t-base, 280ms);
+
+    animation: rb-spin var(--rb-speed, 20s) linear infinite var(--rb-dir, normal);
+}
+
+:root [data-rb]:hover::before {
+    opacity: var(--rb-opacity-hover);
+}
+
+@keyframes rb-spin {
+    to {
+        --rb-angle: 360deg;
+    }
+}
+
+/* اسپات‌لایت نشانگر روی کادر قیمت/تغییرات: لایه‌ی بالای همان حلقه */
+@media (hover: hover) {
+    :root .header :is(.bar-box, .change-box)[data-rb]:hover::before {
+        background:
+            radial-gradient(260px circle at var(--mx) var(--my),
+                var(--hdr-spot-ring), var(--hdr-spot-ring-2) 38%, transparent 68%),
+            conic-gradient(from calc(var(--rb-angle) + var(--rb-offset, 0deg)),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 3 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
+                oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))));
+    }
+}
+
+/* —— 2b · TEXT RECIPE ————————————————————————————————————————————————
+   • js/rainbow-border.js به هر المنتِ دارای متن data-rbt می‌دهد و (در صورت نیاز)
+     متن را در <span> می‌پیچد؛ اینجا فقط ظاهر تعریف می‌شود.
+   • رنگ متن با -webkit-text-fill-color شفاف می‌شود (نه color) تا هیچ قانون
+     قدیمی‌ای با specificity بالاتر آن را برنگرداند و currentColor سالم بماند.
+   • گرادیان روی لایه‌ی اول و بک‌گراند اصلیِ المنت روی لایه‌ی دوم می‌ماند
+     (background-clip: text, border-box)، پس دکمه‌ها و chipها رنگ زمینه‌شان را نگه می‌دارند.
+   • چرخش زاویه با Web Animations API انجام می‌شود (نه property animation در CSS)
+     تا با انیمیشن‌های موجود (flash قیمت، pop-in، shimmer) تداخل نکند. */
+
+@property --rbt-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+[data-rbt][data-rbt-ink="light"] {
+    --rbt-l: var(--rbt-l-ink-light);
+}
+
+[data-rbt][data-rbt-ink="dark"] {
+    --rbt-l: var(--rbt-l-ink-dark);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+
+    /* [data-empty] یعنی skeleton؛ استایل خودش را دارد (style.css بخش 6.2) */
+    :root [data-rbt]:not([data-empty="true"]) {
+        -webkit-text-fill-color: transparent;
+        text-shadow: none !important;
+
+        background-image:
+            conic-gradient(from calc(var(--rbt-angle) + var(--rbt-offset, 0deg)),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 0 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 1 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 2 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 3 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 2 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 1 * var(--rbt-span, 50))),
+                oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 0 * var(--rbt-span, 50)))),
+            linear-gradient(transparent, transparent) !important;
+        -webkit-background-clip: text, border-box !important;
+        background-clip: text, border-box !important;
+    }
+
+    /* pseudo-elementهایی که متن و پس‌زمینه‌ی خودشان را دارند (chipهای soon / new،
+       فلش ▲ ▼) رنگ خودشان را نگه می‌دارند و از والد «شفاف» ارث نمی‌برند */
+    :root [data-rbt]::before,
+    :root [data-rbt]::after {
+        -webkit-text-fill-color: currentcolor;
+    }
+
+    /* چیزهایی که نباید از والدِ رنگین‌کمانی «شفاف» ارث ببرند */
+    :root :is(input, textarea, select, option, svg, svg *, [data-rbt-skip], [data-rbt-skip] *) {
+        -webkit-text-fill-color: currentcolor;
+    }
+}
+
+/* —— 3 · MOTION & ACCESSIBILITY ———————————————————————————————————————— */
+
+/* style.css یک قانون سراسری دارد که با prefers-reduced-motion همه‌ی انیمیشن‌ها را با
+   !important می‌کُشد (در ویندوز: Settings ▸ Accessibility ▸ "Animation effects" خاموش).
+   این حلقه‌ی تزئینی و بسیار آهسته است؛ پس در آن حالت فقط ۲٫۵ برابر کندتر می‌چرخد.
+   برای خاموش‌کردن کامل:  <html data-rb-motion="off">  */
+@media (prefers-reduced-motion: reduce) {
+    :root [data-rb]::before {
+        animation-duration: calc(var(--rb-speed, 20s) * 2.5) !important;
+        animation-iteration-count: infinite !important;
+        animation-delay: 0s !important;
+    }
+}
+
+html[data-rb-motion="off"] [data-rb]::before {
+    animation: none !important;
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --rb-opacity: 1;
+    }
+}

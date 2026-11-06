@@ -1,0 +1,1 @@
+export { MazePage } from '../MazePage';

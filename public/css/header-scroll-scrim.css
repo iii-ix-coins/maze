@@ -1,0 +1,34 @@
+/* OPTIONAL — paste AFTER header-theme.css. Not included in style.css.
+   Puts a blurred, theme-coloured band behind the sticky header only while the
+   page is scrolled (pure CSS scroll-driven animation; ignored by older browsers). */
+
+/* —— OPTIONAL · SCROLL SCRIM ———————————————————————————————————————————— */
+html[data-theme="dark"]  #site-header { --hdr-scrim: rgba(0, 0, 0, 0.62); }
+html[data-theme="light"] #site-header { --hdr-scrim: rgba(255, 255, 255, 0.74); }
+html[data-theme="grass"] #site-header { --hdr-scrim: rgba(0, 70, 20, 0.5); }
+
+@supports (animation-timeline: scroll()) {
+    @media (min-width: 721px) {
+        #site-header::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            inset-block: -10px -6px;
+            left: 50%;
+            width: 100vw;
+            translate: -50% 0;
+            pointer-events: none;
+            background: var(--hdr-scrim, rgba(0, 0, 0, 0.6));
+            -webkit-backdrop-filter: blur(14px) saturate(1.3);
+            backdrop-filter: blur(14px) saturate(1.3);
+            opacity: 0;
+            animation: hdr-scrim linear both;
+            animation-timeline: scroll(root);
+            animation-range: 0 90px;
+        }
+
+        @keyframes hdr-scrim {
+            to { opacity: 1; }
+        }
+    }
+}

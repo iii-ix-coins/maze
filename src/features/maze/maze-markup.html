@@ -1,0 +1,241 @@
+<div class="game-container">
+        <div class="game-layout">
+            <div class="maze-wrapper" id="stage">
+                <canvas id="maze" class="maze" aria-label="Maze game board"></canvas>
+                <div class="mini-tile" id="miniTile"><canvas id="mini"
+                        title="Mini map – Click or drag to move the camera"></canvas></div>
+
+                <div class="pad-wrap" id="padWrap" aria-label="Movement joystick">
+                    <div class="pad-grip" id="padGrip" title="Drag to reposition"></div>
+                    <div class="pad" id="pad" title="Move the player">
+                        <div class="knob" id="knob"></div>
+                    </div>
+                </div>
+
+                <div id="banner" class="banner" role="status"></div>
+                <section id="raceBoard" class="race-board" aria-label="Race standings">
+                    <div class="race-board-heading"><span>LIVE RACE</span><small id="raceRoomCode"></small></div>
+                    <ol id="raceList"></ol>
+                </section>
+
+                <div id="winCard" class="win-card" role="dialog" aria-modal="true" aria-labelledby="message">
+                    <div id="message" class="message"></div>
+                    <div id="winStats" class="win-stats"></div>
+                    <button id="newMazeWin" type="button">New Maze</button>
+                </div>
+
+                <section id="confirm" class="overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+                    <h2 id="confirmTitle">End current game?</h2>
+                    <p id="confirmText">The game will stop and the shortest paths from the start to every point will be
+                        shown.</p>
+                    <div class="btns">
+                        <button id="endYes" type="button">End Game</button>
+                        <button id="endNo" class="ghost" type="button">Continue</button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="panel" id="panel">
+                <div class="tile hud">
+                    <div><span class="lbl">Steps</span><b id="hudSteps">0</b></div>
+                    <div><span class="lbl">Time</span><b id="hudTime">0:00</b></div>
+                    <div><span class="lbl">Goals</span><b id="hudGoals">0/3</b></div>
+                </div>
+                <div class="tools">
+                    <div class="theme-switcher" role="group" aria-label="Maze color theme" title="Choose maze colors">
+                        <button class="theme-option" type="button" data-theme="grass" aria-label="Grass theme"
+                            aria-pressed="true"><span class="theme-swatch swatch-grass"
+                                aria-hidden="true"></span><span>Classic</span></button>
+                        <button class="theme-option" type="button" data-theme="light"
+                            aria-label="White floor and black walls" aria-pressed="false"><span
+                                class="theme-swatch swatch-light" aria-hidden="true"></span><span>Light</span></button>
+                        <button class="theme-option" type="button" data-theme="dark"
+                            aria-label="Black floor and white walls" aria-pressed="false"><span
+                                class="theme-swatch swatch-dark" aria-hidden="true"></span><span>Dark</span></button>
+                    </div>
+                    <div class="grp">
+                        <button class="btn sm" id="zoomOut" title="Zoom out (−)" aria-label="Zoom out"
+                            type="button">−</button>
+                        <span class="zoom-label" id="zoomLabel">100%</span>
+                        <button class="btn sm" id="zoomIn" title="Zoom in (+)" aria-label="Zoom in"
+                            type="button">+</button>
+                    </div>
+                    <div class="grp">
+                        <button class="btn" id="zoomReset" title="Reset view (0)" type="button">Reset</button>
+                        <button class="btn" id="followBtn" aria-pressed="true" title="Camera follows the player"
+                            type="button">Follow</button>
+                    </div>
+                    <div class="grp">
+                        <button class="btn" id="fogBtn" aria-pressed="false" title="Torch" type="button">🔦
+                            Torch</button>
+                        <button class="btn" id="hintBtn" title="Hint" type="button">💡 Hint <span
+                                id="hintCount">3</span></button>
+                    </div>
+                    <div id="padDock" class="pad-dock" aria-label="Desktop movement controls"></div>
+                    <button class="newbtn" id="newMazePanel" type="button">New Maze</button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Create Your Game: four steps — maze size, racers, targets, launch. No typed numbers anywhere. -->
+    <section id="createGame" class="cg show" role="dialog" aria-modal="true" aria-labelledby="cgTitle">
+        <header class="cg-top">
+            <nav class="cg-tabs" id="cgTabs" role="tablist" aria-label="Menu sections">
+                <span class="cg-tabs-glider" aria-hidden="true"></span>
+                <button type="button" class="cg-tab is-active" role="tab" id="tabCreate" data-view="create"
+                    aria-selected="true" aria-controls="cgViewCreate"><span>Create</span></button>
+                <button type="button" class="cg-tab" role="tab" id="tabRooms" data-view="rooms" aria-selected="false"
+                    aria-controls="lbRooms" tabindex="-1"><span>Rooms</span><b class="cg-tab-count" data-count="rooms"
+                        hidden>0</b></button>
+                <button type="button" class="cg-tab" role="tab" id="tabLive" data-view="live" aria-selected="false"
+                    aria-controls="lbLive" tabindex="-1"><span>Live</span><b class="cg-tab-count" data-count="live"
+                        hidden>0</b></button>
+            </nav>
+        </header>
+
+        <div class="cg-views" id="cgViews">
+            <div class="cg-layout cg-view" id="cgViewCreate" role="tabpanel" aria-labelledby="tabCreate">
+                <figure class="cg-stage">
+                    <canvas id="cgStage" aria-hidden="true"></canvas>
+                    <figcaption>A preview. Your real maze is generated when the game starts.</figcaption>
+                </figure>
+
+                <div class="cg-panel">
+                    <h1 class="cg-title" id="cgTitle">Create your game</h1>
+
+                    <ol class="cg-rail" id="cgRail" aria-label="Setup steps">
+                        <!-- The tiles are filled in by step-rail.js; icon files are declared in create-game/icons.js. -->
+                        <li><button type="button" class="cg-rail-btn" data-step="0" data-icon="size"><span class="cg-node"
+                                    aria-hidden="true"></span><span class="cg-rail-text"><b>Maze size</b><small
+                                        data-rail-value="0">Medium</small></span></button></li>
+                        <li><button type="button" class="cg-rail-btn" data-step="1" data-icon="racers"><span
+                                    class="cg-node" aria-hidden="true"></span><span class="cg-rail-text"><b>Racers</b><small
+                                        data-rail-value="1">Solo</small></span></button></li>
+                        <li><button type="button" class="cg-rail-btn" data-step="2" data-icon="targets"><span
+                                    class="cg-node" aria-hidden="true"></span><span class="cg-rail-text"><b>Targets</b><small
+                                        data-rail-value="2">3</small></span></button></li>
+                        <li><button type="button" class="cg-rail-btn" data-step="3" data-icon="launch"><span
+                                    class="cg-node" aria-hidden="true"></span><span class="cg-rail-text"><b>Launch</b><small
+                                        data-rail-value="3"></small></span></button></li>
+                    </ol>
+
+                    <div class="cg-steps" id="cgSteps">
+                        <section class="cg-step" data-step="0" aria-labelledby="cgH0">
+                            <h2 class="cg-step-title" id="cgH0">How big should the maze be?</h2>
+                            <p class="cg-step-help">Drag the lens along the track. A bigger maze means longer routes.
+                            </p>
+                            <div class="cg-readout">
+                                <span class="cg-readout-main" id="cgSizeName">Medium</span>
+                                <span class="cg-readout-sub" id="cgSizeDetail">33 × 33 · 1,089 cells</span>
+                            </div>
+                            <div class="cg-lens" id="cgLens" role="slider" tabindex="0" aria-label="Maze size"
+                                aria-valuemin="0" aria-valuemax="2" aria-valuenow="1" aria-valuetext="Medium, 33 by 33">
+                                <div class="cg-lens-track">
+                                    <i class="cg-lens-rail"></i>
+                                    <i class="cg-lens-fill"></i>
+                                    <i class="cg-lens-dot" style="--k:0"></i>
+                                    <i class="cg-lens-dot" style="--k:1"></i>
+                                    <i class="cg-lens-dot" style="--k:2"></i>
+                                    <span class="cg-lens-thumb"><i class="cg-lens-core"></i></span>
+                                </div>
+                                <div class="cg-lens-labels" aria-hidden="true">
+                                    <span style="--k:0"><b>Easy</b><small>21 × 21</small></span>
+                                    <span style="--k:1"><b>Medium</b><small>33 × 33</small></span>
+                                    <span style="--k:2"><b>Hard</b><small>45 × 45</small></span>
+                                </div>
+                            </div>
+                            <p class="cg-note" id="cgSizeNote">A balanced twist of paths.</p>
+                        </section>
+
+                        <section class="cg-step" data-step="1" aria-labelledby="cgH1">
+                            <h2 class="cg-step-title" id="cgH1">Who is racing?</h2>
+                            <p class="cg-step-help">Turn the dial, or give it a flick. One racer is a solo run; online
+                                races take up to 99.</p>
+                            <div class="cg-dial-wrap">
+                                <div class="cg-dial" id="cgDial" role="slider" tabindex="0"
+                                    aria-label="Number of racers" aria-valuemin="1" aria-valuemax="99" aria-valuenow="1"
+                                    aria-valuetext="1 racer, solo">
+                                    <svg class="cg-dial-svg" viewBox="-130 -130 260 260" aria-hidden="true">
+                                        <g class="cg-dial-ticks"></g>
+                                    </svg>
+                                    <div class="cg-dial-knob"><i class="cg-dial-notch"></i></div>
+                                    <div class="cg-dial-center" aria-hidden="true">
+                                        <span id="cgPlayersOdo"></span>
+                                        <small id="cgPlayersUnit">racer</small>
+                                    </div>
+                                </div>
+                                <button type="button" class="cg-nudge cg-nudge-minus" id="cgPlayersMinus"
+                                    aria-label="One fewer racer">−</button>
+                                <button type="button" class="cg-nudge cg-nudge-plus" id="cgPlayersPlus"
+                                    aria-label="One more racer">+</button>
+                            </div>
+                            <p class="cg-note" id="cgPlayersNote">Just you. Starts right away.</p>
+                            <p class="cg-note cg-lobby" id="cgPlayersLobby"></p>
+                        </section>
+
+                        <section class="cg-step" data-step="2" aria-labelledby="cgH2">
+                            <h2 class="cg-step-title" id="cgH2">How many targets?</h2>
+                            <p class="cg-step-help">Slide the ruler under the needle. Targets unlock in order, starting
+                                with number 1.</p>
+                            <div class="cg-readout cg-readout-inline">
+                                <span id="cgGoalsOdo"></span>
+                                <span class="cg-readout-sub" id="cgGoalsUnit">targets</span>
+                            </div>
+                            <div class="cg-ruler" id="cgRuler" role="slider" tabindex="0" aria-label="Number of targets"
+                                aria-valuemin="1" aria-valuemax="99" aria-valuenow="3" aria-valuetext="3 targets">
+                                <div class="cg-ruler-strip"></div>
+                                <div class="cg-ruler-needle" aria-hidden="true"><i></i></div>
+                            </div>
+                            <p class="cg-note" id="cgGoalsNote">Targets spread across the maze.</p>
+                            <p class="cg-note cg-lobby" id="cgGoalsLobby"></p>
+                        </section>
+
+                        <section class="cg-step" data-step="3" aria-labelledby="cgH3">
+                            <h2 class="cg-step-title" id="cgH3">Ready when you are</h2>
+                            <ul class="cg-summary" id="cgSummary">
+                                <li><span>Maze</span><b id="cgSumSize">Medium, 33 × 33</b><button type="button"
+                                        data-step="0">Change</button></li>
+                                <li><span>Racers</span><b id="cgSumPlayers">Solo</b><button type="button"
+                                        data-step="1">Change</button></li>
+                                <li><span>Targets</span><b id="cgSumGoals">3</b><button type="button"
+                                        data-step="2">Change</button></li>
+                            </ul>
+
+                            <label class="cg-name" id="cgNameField" for="playerName" hidden>
+                                <span>Your name</span>
+                                <input id="playerName" type="text" maxlength="24" placeholder="Player"
+                                    autocomplete="nickname">
+                            </label>
+
+                            <label class="cg-toggle" id="cgSeparateField" for="cgSeparate" hidden>
+                                <input id="cgSeparate" type="checkbox">
+                                <span class="cg-toggle-track" aria-hidden="true"><i></i></span>
+                                <span class="cg-toggle-text"><b>Open a new room</b><small>Skip rooms that are already
+                                        waiting</small></span>
+                            </label>
+
+                            <button type="button" class="cg-launch" id="cgLaunch" aria-describedby="cgLaunchNote">
+                                <span class="cg-launch-fill" aria-hidden="true"></span>
+                                <span class="cg-launch-label" id="cgLaunchLabel">Hold to start</span>
+                            </button>
+                            <p class="cg-note" id="cgLaunchNote">Solo run. Starts right away.</p>
+                        </section>
+                    </div>
+
+                    <nav class="cg-nav" aria-label="Step navigation">
+                        <button type="button" class="cg-back" id="cgBack">Back</button>
+                        <button type="button" class="cg-next" id="cgNext">Continue</button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Lobby: rooms that are waiting, races that are running, and the room you are sitting in. -->
+            <section class="lb cg-view" id="lbRooms" data-view="rooms" role="tabpanel" aria-labelledby="tabRooms"
+                hidden></section>
+            <section class="lb cg-view" id="lbLive" data-view="live" role="tabpanel" aria-labelledby="tabLive" hidden>
+            </section>
+            <section class="lb cg-view" id="lbRoom" data-view="room" aria-label="Your room" hidden></section>
+        </div>
+        <div class="lb-toast" id="lbToast" role="status" aria-live="polite"></div>
+    </section>

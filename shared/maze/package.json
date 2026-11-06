@@ -1,0 +1,9 @@
+{
+  "name": "@maze/shared",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Maze generation rules and the unchanged multiplayer protocol shared by the browser and server",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@maze/server",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Maze multiplayer WebSocket server",
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}
