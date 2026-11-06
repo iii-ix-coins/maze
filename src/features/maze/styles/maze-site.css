@@ -4334,4 +4334,38 @@
     background: rgba(22,122,85,.08);
     border-color: rgba(22,122,85,.38);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MAZE MENU LAYOUT REFINEMENT
+   - Use the full viewport width for Create / Rooms / Waiting Room.
+   - Keep consistent safe gutters instead of the previous 1180px cap.
+   - Lift the desktop Create Game work area without changing game logic.
+   ────────────────────────────────────────────────────────────────────────── */
+.maze-app .cg {
+    --cg-max: 100vw;
+    --cg-gutter: clamp(14px, 2.2vw, 30px);
+    --cg-gap: clamp(18px, 2.6vw, 40px);
+    --cg-aside: clamp(340px, 34vw, 480px);
+}
+
+.maze-app .cg-top,
+.maze-app .cg-layout {
+    width: 100%;
+    max-width: none;
+}
+
+.maze-app .lb {
+    width: 100%;
+    max-width: none;
+    padding-left: var(--cg-gutter);
+    padding-right: var(--cg-gutter);
+    padding-top: 10px;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+    .maze-app .cg-layout {
+        transform: translateY(-38px);
+    }
+}
+
 }
