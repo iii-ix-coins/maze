@@ -66,7 +66,9 @@ export function bootLegacyHomeScripts(): Promise<void> {
     await loadClassicScript({ src: rainbowBorderUrl });
     await loadClassicScript({ src: numberFormatterUrl });
     await loadClassicScript({ src: numberTickerUrl });
-    await loadClassicScript({ src: brandHeaderUrl });
+    if (!isMazePage) {
+        await loadClassicScript({ src: brandHeaderUrl });
+    }
     await loadClassicScript({ src: shareModalUrl });
 
     // Original <script type="module"> entry for the interaction bar.
