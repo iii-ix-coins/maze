@@ -21,39 +21,6 @@ export function MazePage() {
 
     const app = document.getElementById('mazeApp');
 
-    const headerHost = document.getElementById('site-header');
-
-// Measure the actual responsive header height.
-const syncHeaderOffset = () => {
-  if (!app) return;
-
-  const headerBottom =
-  headerHost?.getBoundingClientRect().bottom ?? 0;
-
-const contentTop = Math.max(
-  0,
-  Math.ceil(headerBottom - 12)
-);
-
-app.style.setProperty(
-  '--maze-header-bottom',
-  `${contentTop}px`
-);
-
-};
-
-const headerResizeObserver =
-  headerHost && typeof ResizeObserver !== 'undefined'
-    ? new ResizeObserver(syncHeaderOffset)
-    : undefined;
-
-if (headerHost) {
-  headerResizeObserver?.observe(headerHost);
-}
-
-window.addEventListener('resize', syncHeaderOffset);
-window.addEventListener('scroll', syncHeaderOffset, { passive: true });
-    
     const applyTheme = (theme: string | undefined) => {
       if (!app) return;
       app.dataset.theme = ['grass', 'dark', 'light'].includes(theme ?? '') ? theme : 'grass';
@@ -87,9 +54,6 @@ window.addEventListener('scroll', syncHeaderOffset, { passive: true });
         await bootLegacyHomeScripts();
         if (disposed) return;
 
-        syncHeaderOffset();
-        window.requestAnimationFrame(syncHeaderOffset);
-
         // The Maze source is now compiled by the repository-root Vite build.
         // Importing after React commits the DOM preserves the engine's existing
         // document.getElementById bindings and avoids a second frontend document.
@@ -117,33 +81,16 @@ window.addEventListener('scroll', syncHeaderOffset, { passive: true });
       }
     })();
 
-return () => {
-  disposed = true;
+      return () => {
+        disposed = true;
 
-  if (viewTimer !== undefined) {
-    window.clearInterval(viewTimer);
-  }
+        if (viewTimer !== undefined) {
+          window.clearInterval(viewTimer);
+        }
 
-  bodyObserver?.disconnect();
-  headerResizeObserver?.disconnect();
-
-  window.removeEventListener(
-    'site:themechange',
-    onThemeChange
-  );
-
-  window.removeEventListener(
-    'resize',
-    syncHeaderOffset
-  );
-
-  window.removeEventListener(
-    'scroll',
-    syncHeaderOffset
-  );
-
-  app?.style.removeProperty('--maze-header-bottom');
-};
+        bodyObserver?.disconnect();
+        window.removeEventListener('site:themechange', onThemeChange);
+      };
   }, []);
 
   return (
