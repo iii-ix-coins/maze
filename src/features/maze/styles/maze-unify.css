@@ -16,7 +16,7 @@
 
 /* ۱. ظرف صفحه */
 #mazeApp.in-menu {
-    --maze-gap: clamp(18px, 3vw, 36px);
+    --maze-gap: clamp(12px, 3vw, 20px);
     --maze-bleed: 12px;
     width: min(100% - 2 * var(--gutter, 24px) + 2 * var(--maze-bleed), var(--page-max, 1240px) + 2 * var(--maze-bleed));
     padding: var(--maze-gap) var(--maze-bleed);
