@@ -1,0 +1,85 @@
+#mazeApp.in-menu {
+    --maze-gap: clamp(18px, 3vw, 36px);
+    --maze-bleed: 12px; /* #mazeApp خودش overflow را می‌برد؛ جا برای glow و سایه */
+    width: min(100% - 2 * var(--gutter, 24px) + 2 * var(--maze-bleed), var(--page-max, 1240px) + 2 * var(--maze-bleed));
+    padding: var(--maze-gap) var(--maze-bleed);
+}
+#mazeApp.in-menu .cg {
+    --cg-max: min(100vw - 2 * var(--gutter, 24px), var(--page-max, 1240px));
+    --cg-gutter: 0px;
+}
+#mazeApp.in-menu .cg-top,
+#mazeApp.in-menu .cg-layout { width: 100%; max-width: none; }
+#mazeApp.in-menu .lb { max-width: none; padding-inline: 0; }
+#mazeApp.in-menu .cg-stage canvas { max-width: none; } /* باگ ریست سایت */
+
+@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
+    #mazeApp.in-menu .cg {
+        --cg-pad: clamp(16px, 1.8vw, 24px);
+        --cg-pad-t: var(--cg-pad);
+        --cg-pad-b: var(--cg-pad);
+        --cg-gutter: var(--cg-pad);
+        --cg-gap: calc(var(--cg-pad) * 2 + 14px);
+        --cg-aside: clamp(340px, 34vw, 440px);
+    }
+    #mazeApp.in-menu .cg-layout {
+        position: relative; isolation: isolate;
+        grid-template-columns: minmax(0, 1fr) minmax(0, var(--cg-aside));
+        justify-content: stretch;
+    }
+    #mazeApp.in-menu .cg-layout::before,
+    #mazeApp.in-menu .cg-layout::after {
+        content: ""; z-index: -1; grid-row: 1 / -1;
+        margin: calc(var(--cg-pad) * -1);
+        box-sizing: border-box; pointer-events: none;
+        border: 1px solid var(--stroke, var(--line));
+        border-radius: var(--r-lg, 24px);
+        background: var(--tile-bg, var(--glass));
+        box-shadow: var(--shadow-1, none);
+    }
+    #mazeApp.in-menu .cg-layout::before { grid-column: 1; }
+    #mazeApp.in-menu .cg-layout::after  { grid-column: 2; }
+    #mazeApp.in-menu .cg-stage canvas {
+        --m: min(var(--maze-side), 100%);
+        justify-self: center;
+        width: calc(var(--m) / .9);
+        margin: calc(var(--m) / .9 * -.05);
+        margin-top: calc(var(--m) / .9 * -.05 + var(--cg-row));
+    }
+}
+
+/* اتاق انتظار: یک سطح، گل | جزئیات */
+@media (min-width: 880px) {
+    #mazeApp.in-menu .lb-room-screen {
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        gap: clamp(24px, 4vw, 56px);
+        padding: clamp(20px, 3vw, 36px);
+        box-sizing: border-box;
+        border: 1px solid var(--stroke, var(--line));
+        border-radius: var(--r-lg, 24px);
+        background: var(--tile-bg, var(--glass));
+        box-shadow: var(--shadow-1, none);
+    }
+    #mazeApp.in-menu .lb-room-stage { width: min(100%, 360px); }
+    #mazeApp.in-menu .lb-room-panel { max-width: none; }
+}
+@media (min-width: 880px) and (min-height: 541px) {
+    #mazeApp.in-menu .lb-room-screen { align-items: center; }
+}
+
+/* حالت‌های خالی هم سطح دارند */
+#mazeApp.in-menu .lb-empty {
+    box-sizing: border-box;
+    padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px);
+    border: 1px dashed var(--stroke-hi, var(--line));
+    border-radius: var(--r-lg, 24px);
+    background: var(--veil, var(--glass));
+}
+
+#mazeApp.in-menu[data-theme="light"] .cg-layout::before,
+#mazeApp.in-menu[data-theme="light"] .cg-layout::after,
+#mazeApp.in-menu[data-theme="light"] .lb-room-screen {
+    background: rgba(255,255,255,.82);
+    border-color: rgba(26,62,43,.18);
+    box-shadow: 0 12px 32px rgba(30,60,44,.09);
+}
