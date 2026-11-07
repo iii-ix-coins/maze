@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import mazeMarkup from './maze-markup.html?raw';
 import { bootLegacyHomeScripts } from '../home/legacy-home-runtime';
 import './styles/maze-site.css';
+import './styles/maze-unify.css';
 
 /**
  * React-owned Maze page surface.
