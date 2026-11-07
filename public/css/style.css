@@ -1998,6 +1998,9 @@
 
 /* —— 1 · TOKENS ———————————————————————————————————————————————————————— */
 .nav {
+    /* Shared vertical rhythm for links, wallet action and the 3-way view/theme controls. */
+    --nav-control-height: 34px;
+
     /* type scale: 12.5px at 821px → 15px from 1050px up (always fits the bar) */
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
 
@@ -2164,8 +2167,9 @@ html[data-theme="light"] .nav-brand-logo--black {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 0;
-    height: var(--tt-size);
+    min-height: var(--nav-control-height);
+    height: var(--nav-control-height);
+    padding-inline: 12px;
     background: var(--page-max);
     box-shadow: var(--shadow-3);
     border-radius: var(--r-sm);
@@ -2276,8 +2280,9 @@ html[data-theme="light"] .nav-brand-logo--black {
     justify-content: center;
     gap: 3px;
 
-    min-height: 0;
-    padding: 6px 9px;
+    min-height: var(--nav-control-height);
+    height: var(--nav-control-height);
+    padding: 0 12px;
 
     /* 1px spacer; the edge is the rainbow ring */
     border-radius: var(--r-sm);
@@ -2376,6 +2381,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
+    height: var(--nav-control-height);
     padding: var(--tt-pad);
     /* 1px spacer; the edge is the rainbow ring */
     border-radius: 999px;
