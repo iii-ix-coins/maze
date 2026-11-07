@@ -2394,7 +2394,7 @@
 
 /* Stacked, short screens: a smaller maze and dial so the step is reachable without much scrolling. */
 @media (max-height: 700px) and (max-aspect-ratio: 5/4),
-       (max-height: 700px) and (max-width: 559px) {
+       (max-height: 700px) and (max-width: 419px) {
     .maze-app .cg{
         --maze-m: clamp(96px, 20dvh, 200px);
         --dial: clamp(120px, 20dvh, 170px);
@@ -2403,7 +2403,7 @@
 
 /* …and there the +/- buttons would cover the knob, so they stand beside the dial instead of under it. */
 @media (max-height: 700px) and (max-aspect-ratio: 5/4),
-       (max-height: 700px) and (max-width: 559px) {
+       (max-height: 700px) and (max-width: 419px) {
     .maze-app .cg-nudge{
         top: 50%;
         bottom: auto;
@@ -4337,10 +4337,10 @@
    - Keep consistent safe gutters instead of the previous 1180px cap.
    ────────────────────────────────────────────────────────────────────────── */
 .maze-app .cg {
-    --cg-max: 100vw;
-    --cg-gutter: clamp(14px, 2.2vw, 30px);
-    --cg-gap: clamp(18px, 2.6vw, 40px);
-    --cg-aside: clamp(340px, 34vw, 480px);
+    --cg-max: min(100vw, 1440px);
+    --cg-gutter: clamp(16px, 2.5vw, 34px);
+    --cg-gap: clamp(20px, 2.8vw, 40px);
+    --cg-aside: clamp(330px, 32vw, 440px);
 }
 
 .maze-app .cg-top,
@@ -4388,6 +4388,107 @@ body.in-menu {
     .maze-app .cg-layout {
         margin-block: 0 !important;
         transform: none !important;
+    }
+}
+
+/* Compact landscape: keep the maze and its controls side by side.
+   This avoids shrinking the preview to a tiny centered tile on 420–559px screens. */
+@media (min-width: 420px) and (max-width: 559px) and (orientation: landscape) {
+    .maze-app .cg {
+        --cg-gutter: 12px;
+        --cg-pad-t: 8px;
+        --cg-pad-b: 8px;
+        --cg-row: 8px;
+        --cg-gap: 12px;
+        --maze-m: clamp(156px, 40vw, 218px);
+        --node: clamp(30px, 7vw, 38px);
+        --rail-below: 34px;
+        --dial: clamp(104px, 29dvh, 142px);
+    }
+
+    .maze-app .cg-layout {
+        display: grid;
+        flex: 1 1 auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        margin: 0;
+        padding: var(--cg-pad-t) var(--cg-gutter) var(--cg-pad-b);
+        grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "title rail"
+            "stage steps"
+            "stage nav";
+        column-gap: var(--cg-gap);
+        row-gap: 0;
+        align-content: stretch;
+        justify-content: stretch;
+        overflow: clip;
+    }
+
+    .maze-app .cg-title {
+        align-self: end;
+        font-size: clamp(1.2rem, 4vw, 1.55rem);
+        line-height: 1.05;
+    }
+
+    .maze-app .cg-stage figcaption {
+        display: none;
+    }
+
+    .maze-app .cg-stage canvas {
+        grid-row: 2 / 4;
+        justify-self: center;
+        align-self: center;
+        width: calc(min(var(--maze-m), 100%) / .9);
+        margin: -5.5556%;
+    }
+
+    .maze-app .cg-rail {
+        align-self: start;
+        height: var(--node);
+    }
+
+    .maze-app .cg-rail-text b {
+        font-size: .62rem;
+    }
+
+    .maze-app .cg-rail-text small {
+        font-size: .58rem;
+        padding-inline: 5px;
+    }
+
+    .maze-app .cg-steps {
+        align-self: stretch;
+        min-height: 0;
+        margin: calc(var(--rail-below) + 6px) -5px 0;
+        padding: 4px 5px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+    }
+
+    .maze-app .cg-step {
+        gap: 7px;
+    }
+
+    .maze-app .cg-step-title {
+        font-size: .98rem;
+    }
+
+    .maze-app .cg-step-help,
+    .maze-app .cg-note {
+        font-size: .7rem;
+        line-height: 1.35;
+    }
+
+    .maze-app .cg-nav {
+        align-self: end;
+        padding: 7px 0 0;
+        border-top: 1px solid var(--line);
+        background: none;
     }
 }
 
