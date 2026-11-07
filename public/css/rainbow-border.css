@@ -97,7 +97,7 @@ html[data-theme="grass"] {
     /* بر scaleX(0) ی underline غلبه می‌کند */
 
     /* پالت: چهار رنگ در یک بازه‌ی hue، رفت‌وبرگشتی تا چرخش بی‌درز باشد */
-    background: conic-gradient(from calc(var(--rb-angle) + var(--rb-offset, 0deg)),
+    background: conic-gradient(from calc(var(--rb-angle, 0deg)  + var(--rb-offset, 0deg)),
             oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))),
             oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
             oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
@@ -133,7 +133,7 @@ html[data-theme="grass"] {
         background:
             radial-gradient(260px circle at var(--mx) var(--my),
                 var(--hdr-spot-ring), var(--hdr-spot-ring-2) 38%, transparent 68%),
-            conic-gradient(from calc(var(--rb-angle) + var(--rb-offset, 0deg)),
+            conic-gradient(from calc(var(--rbt-angle, 0deg) + var(--rbt-offset, 0deg)),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
@@ -168,7 +168,11 @@ html[data-theme="grass"] {
     --rbt-l: var(--rbt-l-ink-dark);
 }
 
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+@supports not (color: oklch(0.5 0.1 100)) {
+   [data-rb] { border-color: currentcolor; }
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) and (color: oklch(0.5 0.1 100))) {
 
     /* [data-empty] یعنی skeleton؛ استایل خودش را دارد (style.css بخش 6.2) */
     :root [data-rbt]:not([data-empty="true"]) {
