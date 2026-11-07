@@ -1235,11 +1235,10 @@
     grid-area: title;
     min-width: 0;
     margin: 0;
-    color: var(--haze);
-    font-size: clamp(1.4rem, 5.6vw, 1.9rem);
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
     font-weight: 700;
     letter-spacing: -.03em;
-    line-height: 1.08;
+    line-height: 1.1;
     text-shadow: none;
     overflow-wrap: anywhere;
 }
@@ -1350,8 +1349,6 @@
 
     .maze-app .cg-title{
         align-self: end;
-        font-size: clamp(1.45rem, 2.7vw, 2rem);
-        line-height: 1.05;
     }
 
     .maze-app .cg-stage figcaption{
@@ -2470,7 +2467,6 @@
 
     .maze-app .cg-title{
         align-self: center;
-        font-size: 1.2rem;
     }
 
     .maze-app .cg-rail-text small{
