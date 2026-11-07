@@ -6,7 +6,6 @@
  * preserving the old globals and boot sequence without keeping /public/js as
  * the active frontend source.
  */
-import rainbowBorderUrl from './legacy-scripts/rainbow-border.js?url';
 import numberFormatterUrl from './legacy-scripts/utils/numberFormatter.js?url';
 import numberTickerUrl from './legacy-scripts/numberTicker.js?url';
 import brandHeaderUrl from './legacy-scripts/components/BrandHeader.js?url';
@@ -69,7 +68,6 @@ export function bootLegacyHomeScripts(): Promise<void> {
     await import('./legacy-scripts/components/header-init.js');
 
     // Original classic scripts must keep classic scope (window globals).
-    await loadClassicScript({ src: rainbowBorderUrl });
     await loadClassicScript({ src: numberFormatterUrl });
     await loadClassicScript({ src: numberTickerUrl });
     if (!isMazePage) {
