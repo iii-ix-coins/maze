@@ -133,7 +133,7 @@ html[data-theme="grass"] {
         background:
             radial-gradient(260px circle at var(--mx) var(--my),
                 var(--hdr-spot-ring), var(--hdr-spot-ring-2) 38%, transparent 68%),
-            conic-gradient(from calc(var(--rbt-angle, 0deg) + var(--rbt-offset, 0deg)),
+            conic-gradient(from calc(var(--rb-angle, 0deg) + var(--rbt-offset, 0deg)),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 0 * var(--rb-span, 60))),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 1 * var(--rb-span, 60))),
                 oklch(var(--rb-l) var(--rb-c) calc(var(--rb-h, 200) + 2 * var(--rb-span, 60))),
@@ -172,7 +172,7 @@ html[data-theme="grass"] {
    [data-rb] { border-color: currentcolor; }
 }
 
-@supports ((-webkit-background-clip: text) or (background-clip: text)) and (color: oklch(0.5 0.1 100))) {
+@supports ((-webkit-background-clip: text) or (background-clip: text)) and (color: oklch(0.5 0.1 100)) {
 
     /* [data-empty] یعنی skeleton؛ استایل خودش را دارد (style.css بخش 6.2) */
     :root [data-rbt]:not([data-empty="true"]) {
@@ -180,7 +180,7 @@ html[data-theme="grass"] {
         text-shadow: none !important;
 
         background-image:
-            conic-gradient(from calc(var(--rbt-angle) + var(--rbt-offset, 0deg)),
+            conic-gradient(from calc(var(--rbt-angle, 0deg) + var(--rbt-offset, 0deg)),
                 oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 0 * var(--rbt-span, 50))),
                 oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 1 * var(--rbt-span, 50))),
                 oklch(var(--rbt-l) var(--rbt-c) calc(var(--rbt-h, 200) + 2 * var(--rbt-span, 50))),
