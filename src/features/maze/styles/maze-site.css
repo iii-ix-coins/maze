@@ -4339,7 +4339,6 @@
    MAZE MENU LAYOUT REFINEMENT
    - Use the full viewport width for Create / Rooms / Waiting Room.
    - Keep consistent safe gutters instead of the previous 1180px cap.
-   - Lift the desktop Create Game work area without changing game logic.
    ────────────────────────────────────────────────────────────────────────── */
 .maze-app .cg {
     --cg-max: 100vw;
@@ -4362,15 +4361,9 @@
     padding-top: 10px;
 }
 
-@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
-    .maze-app .cg-layout {
-        transform: translateY(-38px);
-    }
-}
-
 }
 /* =========================================
-   HEADER-AWARE MAZE LAYOUT
+   MAZE / SITE HEADER FLOW INTEGRATION
    ========================================= */
 
 /* Remove the empty Brand Header host on Maze pages. */
@@ -4378,13 +4371,23 @@ body.in-menu > #root > #site-brand-header:empty {
     display: none !important;
 }
 
-/* Use the measured site-header bottom. */
+/* The shared home-page section rhythm must not insert a gap before the Maze UI. */
+body.in-menu {
+    --section-gap: 0px;
+}
+
+/*
+ * #site-header is a normal-flow sibling of #mazeApp on /maze.html. Its height
+ * is already accounted for by the document layout, so copying its measured
+ * bottom into .cg-top padding would count the header twice and create a blank
+ * band above the wizard. Keep the hidden tabs and top inset at zero.
+ */
 .maze-app .cg {
-    --cg-top-pad: var(--maze-header-bottom, 0px);
+    --cg-top-pad: 0px;
     --cg-tabs-h: 0px;
 }
 
-/* Remove unwanted vertical centering and old manual offset. */
+/* Keep the wizard in normal flow instead of applying legacy vertical offsets. */
 @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
     .maze-app .cg-layout {
         margin-block: 0 !important;
