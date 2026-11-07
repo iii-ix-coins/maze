@@ -1,0 +1,1550 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   CREATE YOUR GAME
+   A dusk-lit garden: the maze preview is the hero, the controls are small glass instruments.
+   Palette: ground #08130f · moss #8be0a4 (actions) · lantern #ffd79a (current value) ·
+            sky #8fb0ff (targets) · coral #ff9b8a (you) · haze #e4f6ea (text)
+
+   LAYOUT MAP (desktop / landscape)  — one container, four hard edges
+   ┌────────────────────────── .cg-top ── tab bar ───────────────────────────┐
+   │ title  ┐                                           ┌ ① ─ ② ─ ③ ─ ④      │   ← title block and
+   │ caption┘ (together exactly one tile tall)          └ rail (tiles)        │     tile row share one band
+   │ ┌──────────────┐                                    labels / chosen values│
+   │ │              │                                    ───────────────────   │
+   │ │  maze        │      (free space)                  step controls         │
+   │ │              │                                    ───────────────────   │
+   │ └──────────────┘                                    Back        Continue  │
+   └─────────────────────────────────────────────────────────────────────────┘
+   Left edge  = tab bar = title = maze (the maze's visible wall, not its canvas padding)
+   Right edge = tab bar = tiles = controls = Continue
+   Everything is sized from the tokens below, so nothing is placed by eye.
+   ────────────────────────────────────────────────────────────────────────── */
+.cg {
+    /* colours */
+    --ground: #08130f;
+    --ground-2: #0f2119;
+    --moss: #8be0a4;
+    --lantern: #ffd79a;
+    --sky: #8fb0ff;
+    --coral: #ff9b8a;
+    --haze: #e4f6ea;
+    --fog: rgba(228, 246, 234, .64);
+    --line: rgba(228, 246, 234, .15);
+    --glass: rgba(228, 246, 234, .055);
+    --ease: cubic-bezier(.2, .8, .2, 1);
+
+    /* the shared container: tab bar, title, maze, controls (and the lobby's .lb) all use it */
+    --cg-max: 1180px;
+    --cg-gutter: clamp(16px, 4vw, 44px);
+    --cg-top-pad: max(8px, env(safe-area-inset-top));
+    --cg-pad-t: 12px;
+    --cg-pad-b: max(12px, env(safe-area-inset-bottom));
+    --cg-tabs-h: 42px;                           /* the tab bar's height (lobby.css: 40px) plus a little slack */
+
+    /* rhythm */
+    --cg-row: clamp(10px, 1.8dvh, 16px);        /* vertical space between blocks */
+    --cg-gap: clamp(20px, 3.4vw, 48px);         /* minimum space between maze and controls */
+    --cg-aside: clamp(340px, 36vw, 480px);      /* width of the controls column (landscape) */
+
+    /* progress tiles */
+    --node: clamp(34px, 9.5vw, 50px);
+    --rail-below: 42px;                          /* room the labels + chosen-value chips take under a tile */
+    --sub-h: 1.3rem;                             /* the caption line under the title (landscape) */
+
+    /* what the preview and the dial are allowed to take */
+    --maze-m: clamp(140px, 30dvh, 440px);       /* stacked layout: side of the visible maze */
+    --dial: clamp(130px, 22dvh, 240px);
+    --glow-x: 50%;
+    --glow-y: 36%;
+    --charge: 0;
+
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    color: var(--haze);
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    background:
+        radial-gradient(60% 70% at var(--glow-x) var(--glow-y), rgba(255, 215, 154, .10), transparent 70%),
+        radial-gradient(50% 60% at 92% 4%, rgba(139, 224, 164, .10), transparent 65%),
+        linear-gradient(180deg, #0a1612 0%, #07110d 100%);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cg.show {
+    display: flex;
+    animation: cgFade .5s ease both;
+}
+
+.cg [hidden] {
+    display: none !important;
+}
+
+/* The page-wide button style is for the game HUD; start from a clean slate inside this flow. */
+:where(.cg) button {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cg button:focus-visible,
+.cg [role="slider"]:focus-visible,
+.cg summary:focus-visible {
+    outline: 2px solid var(--lantern);
+    outline-offset: 3px;
+}
+
+.cg button:focus-visible,
+.cg summary:focus-visible {
+    border-radius: 12px;
+}
+
+.cg .cg-dial:focus-visible {
+    outline-offset: 5px;
+}
+
+.cg .cg-lens:focus-visible {
+    border-radius: 28px;
+}
+
+/* The ruler is masked at its edges, so its ring sits inside. */
+.cg .cg-ruler:focus-visible {
+    outline-offset: -3px;
+    border-radius: 16px;
+}
+
+/* A warm glow that swells while the launch button is held (it is centred on the maze). */
+.cg::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(48% 52% at var(--glow-x) var(--glow-y), rgba(255, 215, 154, .34), transparent 72%);
+    opacity: calc(var(--charge) * .85);
+}
+
+/* ── Top bar ──
+   Same container as the layout below, so the tab bar's edges are the page's edges. */
+.cg-top {
+    flex: none;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--cg-max);
+    margin-inline: auto;
+    padding: var(--cg-top-pad) var(--cg-gutter) 0;
+}
+
+/* ── Layout, stacked (phones, portrait tablets) ─────────────────────────────
+   title → maze → progress tiles → current step → Back / Continue, all on one left edge.
+   The panel and the figure are transparent boxes: their children (title, rail, steps, nav,
+   canvas, caption) are the grid items, so the HTML and the step logic stay as they are. */
+.cg-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--cg-max);
+    margin-inline: auto;
+    padding: var(--cg-pad-t) var(--cg-gutter) var(--cg-pad-b);
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+        "title"
+        "stage"
+        "rail"
+        "steps"
+        "nav";
+    align-content: start;
+    row-gap: var(--cg-row);
+}
+
+.cg-panel,
+.cg-stage {
+    display: contents;
+}
+
+.cg-title {
+    grid-area: title;
+    min-width: 0;
+    margin: 0;
+    color: var(--haze);
+    font-size: clamp(1.4rem, 5.6vw, 1.9rem);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.08;
+    text-shadow: none;
+    overflow-wrap: anywhere;
+}
+
+/* The canvas carries 5% of empty margin on every side (the maze is drawn at 90% of it, and the
+   glow fades out into that margin). The negative margin removes it from the layout, so the
+   maze's visible wall is what sits on the grid line, not an invisible box around it.
+   --m is the visible side; % resolve against the grid area, so it can never be wider than the column. */
+.cg-stage canvas {
+    --m: min(var(--maze-m), 100%);
+    grid-area: stage;
+    justify-self: center;
+    align-self: start;
+    display: block;
+    box-sizing: border-box;
+    width: calc(var(--m) / .9);
+    height: auto;
+    aspect-ratio: 1;
+    margin: calc(var(--m) / .9 * -.05);
+    -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 50%, #000 72%, rgba(0, 0, 0, .55) 88%, transparent 100%);
+    mask-image: radial-gradient(circle farthest-corner at 50% 50%, #000 72%, rgba(0, 0, 0, .55) 88%, transparent 100%);
+}
+
+/* There is no room for the caption in the stacked layout. */
+.cg-stage figcaption {
+    display: none;
+    grid-area: sub;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--fog);
+    font-size: .72rem;
+    line-height: 1.3;
+    opacity: .68;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cg-rail {
+    grid-area: rail;
+    min-width: 0;
+}
+
+.cg-steps {
+    grid-area: steps;
+    min-width: 0;
+    min-height: 0;
+}
+
+.cg-nav {
+    grid-area: nav;
+    min-width: 0;
+}
+
+/* Back / Continue stay reachable while the page scrolls. */
+.cg-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    padding: 10px 0 max(2px, env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent, #07110d 38%);
+}
+
+/* ── Layout, landscape (desktop, laptop, wide tablet) ──────────────────────
+   Two columns with a hard left and a hard right edge:
+     left   title + caption, then the maze, as large as the window's height allows
+     right  progress tiles, the current step, Back / Continue
+   The first two rows together are exactly one tile tall, so the title block and the tile
+   row share one band; the labels and chosen-value chips hang below the tiles and the step
+   starts under them. */
+@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
+    .cg {
+        --node: clamp(44px, 7.6dvh, 54px);
+        --dial: clamp(130px, 27dvh, 240px);
+        /* everything above and below the maze: tab bar, padding, tile band, gaps */
+        --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
+        --maze-cap: 760px;
+        --cg-need: 540px;                            /* the least height the controls column needs to show its tallest step */
+        /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
+        --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
+        --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
+        --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
+        --glow-y: 56%;
+    }
+
+    .cg-layout {
+        /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
+           The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
+        overflow: clip;
+        /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
+           that is too tall scrolls inside its own box instead of pushing the whole page down. */
+        flex: none;
+        /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
+           below the tab bar; on a short one it takes all of it. */
+        height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
+        margin-block: auto;
+        grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
+        grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(0, 1fr) auto;
+        grid-template-areas:
+            "title rail"
+            "sub   rail"
+            "stage steps"
+            "stage nav";
+        justify-content: space-between;
+        align-content: stretch;
+        column-gap: var(--cg-gap);
+        row-gap: 0;
+    }
+
+    .cg-title {
+        align-self: end;
+        font-size: clamp(1.45rem, 2.7vw, 2rem);
+        line-height: 1.05;
+    }
+
+    .cg-stage figcaption {
+        display: block;
+        align-self: start;
+        padding-top: 2px;
+    }
+
+    .cg-stage canvas {
+        grid-row: 3 / 5;
+        justify-self: start;
+        width: calc(100% / .9);
+        margin: -5.5556%;
+        margin-top: calc(-5.5556% + var(--cg-row));
+    }
+
+    .cg-rail {
+        align-self: start;
+        height: var(--node);
+    }
+
+    .cg-steps {
+        align-self: stretch;
+        margin: calc(var(--rail-below) + var(--cg-row)) -8px 0;
+        padding: 6px 8px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+    }
+
+    .cg-nav {
+        align-self: end;
+        padding: 14px 0 0;
+        border-top: 1px solid var(--line);
+        background: none;
+    }
+}
+
+/* ── Progress rail: a level map ────────────────────────────────────────────
+   Four rounded-square tiles on a track. Each tile has its own colour, matching what it
+   changes in the preview: moss = the maze, coral = racers, sky = targets, lantern = launch.
+   Tiles are tactile: a thick lower lip makes them read as keys you can press. */
+.cg-rail {
+    --radius: calc(var(--node) * .3);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;      /* first tile on the left edge, last on the right edge, equal gaps */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cg-rail > li {
+    flex: none;
+    width: var(--node);                  /* a tile is the column; its label overflows, centred, underneath */
+}
+
+/* The track: a dashed path that fills with colour as you advance, led by a glowing head. */
+.cg-rail::before,
+.cg-rail::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--node) / 2);         /* the track runs from the first tile's centre to the last one's */
+    right: calc(var(--node) / 2);
+    pointer-events: none;
+}
+
+.cg-rail::before {
+    top: calc(var(--node) / 2 - 1.5px);
+    height: 3px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(90deg, rgba(228, 246, 234, .2) 0 6px, transparent 6px 13px);
+}
+
+.cg-rail::after {
+    top: calc(var(--node) / 2 - 8px);
+    height: 16px;
+    background:
+        radial-gradient(circle, #fff 0 2.5px, var(--lantern) 3.5px 5px, rgba(255, 215, 154, .35) 7px, transparent 8px) calc(var(--cg-progress, 0) * 100%) 50% / 16px 16px no-repeat,
+        linear-gradient(90deg, var(--moss), var(--coral) 36%, var(--sky) 68%, var(--lantern)) 0 50% / 100% 4px no-repeat;
+    clip-path: inset(0 max(0px, calc((1 - var(--cg-progress, 0)) * 100% - 8px)) 0 0 round 2px);
+    transition: clip-path .65s var(--ease), background-position .65s var(--ease);
+}
+
+.cg-rail-btn {
+    --accent: var(--moss);
+    --lip: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0 0 2px;
+    color: var(--fog);
+}
+
+/* The outer labels line up with the outer edges instead of poking past them. */
+.cg-rail > li:first-child .cg-rail-btn { align-items: flex-start; }
+.cg-rail > li:last-child .cg-rail-btn { align-items: flex-end; }
+.cg-rail > li:first-child .cg-rail-text { align-items: flex-start; text-align: left; }
+.cg-rail > li:last-child .cg-rail-text { align-items: flex-end; text-align: right; }
+
+.cg-rail-btn[data-icon="size"] { --accent: var(--moss); }
+.cg-rail-btn[data-icon="racers"] { --accent: var(--coral); }
+.cg-rail-btn[data-icon="targets"] { --accent: var(--sky); }
+.cg-rail-btn[data-icon="launch"] { --accent: var(--lantern); }
+
+.cg-rail-btn:disabled {
+    cursor: default;
+}
+
+.cg .cg-rail-btn:focus-visible {
+    outline: none;
+}
+
+.cg .cg-rail-btn:focus-visible .cg-node {
+    outline: 2px solid var(--haze);
+    outline-offset: 4px;
+}
+
+/* The tile. Locked by default: dashed, dim, flat. */
+.cg-node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--node);
+    height: var(--node);
+    box-sizing: border-box;
+    border: 2px dashed rgba(228, 246, 234, .22);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, 0) 60%), #0a1611;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    color: rgba(228, 246, 234, .3);
+    transition: transform .4s var(--ease), background-color .35s ease, border-color .35s ease, color .35s ease, box-shadow .4s var(--ease);
+}
+
+/* Reached before, but you are elsewhere: solid, in its own colour. */
+.cg-rail-btn.is-visited .cg-node {
+    border: 2px solid color-mix(in srgb, var(--accent) 38%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent) 5%, transparent)), #0b1813;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 var(--lip) 0 rgba(0, 0, 0, .4);
+    color: var(--accent);
+}
+
+/* A step you have finished. The badge below is stamped on. */
+.cg-rail-btn.is-done .cg-node {
+    border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 28%, transparent), color-mix(in srgb, var(--accent) 12%, transparent)), #0b1813;
+}
+
+/* Where you are: lit, lifted, breathing. */
+.cg-rail-btn.is-active .cg-node {
+    --lip: 6px;
+    border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 52%), var(--accent);
+    box-shadow:
+        inset 0 -3px 0 rgba(0, 0, 0, .12),
+        0 var(--lip) 0 color-mix(in srgb, var(--accent) 52%, #000),
+        0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent),
+        0 12px 32px color-mix(in srgb, var(--accent) 38%, transparent);
+    color: #0d1a12;
+    transform: translateY(-4px);
+}
+
+/* A ring that keeps expanding from the active tile, the classic "this is next" beacon. */
+.cg-rail-btn.is-active .cg-node::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--accent);
+    border-radius: inherit;
+    pointer-events: none;
+    animation: cgRing 2.2s ease-out infinite;
+}
+
+/* One glossy sweep when a tile unlocks. */
+.cg-node::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .7) 50%, transparent 62%) -140% 0 / 250% 100% no-repeat;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cg-node.is-shining::before {
+    animation: cgShine .8s .08s ease-out both;
+}
+
+/* Icons: the .svg files from maze-styles/images, wired up in icons.js.
+   Tinted icons are stencils that take the tile's text colour; the others keep their own colours. */
+.cg-ico {
+    display: block;
+    width: 54%;
+    height: 54%;
+    background: var(--icon) center / contain no-repeat;
+    scale: var(--ico-scale, 1);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .25s ease, transform .4s var(--ease);
+}
+
+.cg-ico.is-tinted {
+    background: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+}
+
+.cg-rail.is-ready .cg-ico:not(.cg-badge) {
+    opacity: 1;
+}
+
+.cg-rail-btn.is-active .cg-node > .cg-ico:not(.cg-badge) {
+    animation: cgBob 2.4s ease-in-out infinite;
+}
+
+/* The check badge sits on the tile's corner and pops in with an overshoot. */
+.cg-ico.cg-badge {
+    position: absolute;
+    right: calc(var(--node) * -.13);
+    bottom: calc(var(--node) * -.13);
+    width: max(16px, calc(var(--node) * .42));
+    height: max(16px, calc(var(--node) * .42));
+    box-sizing: border-box;
+    border-radius: calc(var(--node) * .14);
+    background: var(--haze) var(--icon) center / 64% no-repeat;
+    box-shadow: 0 0 0 3px #08130f, 0 3px 10px rgba(0, 0, 0, .45);
+    scale: 1;
+    opacity: 0;
+    transform: scale(0) rotate(-40deg);
+    transition: transform .55s cubic-bezier(.34, 1.8, .5, 1), opacity .2s ease;
+}
+
+.cg-rail.is-ready .cg-rail-btn.is-done .cg-ico.cg-badge {
+    opacity: 1;
+    transform: none;
+}
+
+.cg-spark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    border-radius: 2.5px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    pointer-events: none;
+}
+
+/* Hover lifts a tile, pressing sinks it into its lip. */
+@media (hover: hover) {
+    .cg-rail-btn:not(:disabled):not(.is-active):hover .cg-node {
+        --lip: 5px;
+        transform: translateY(-3px);
+        border-color: var(--accent);
+    }
+
+    .cg-rail-btn:not(:disabled):hover .cg-node > .cg-ico:not(.cg-badge) {
+        transform: rotate(-6deg) scale(1.08);
+    }
+}
+
+.cg-rail-btn:not(:disabled):active .cg-node {
+    --lip: 1px;
+    transform: translateY(2px);
+}
+
+.cg-rail-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: max-content;
+    text-align: center;
+}
+
+.cg-rail-text b {
+    font-size: .72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: rgba(228, 246, 234, .5);
+    transition: color .3s ease;
+}
+
+.cg-rail-btn.is-visited .cg-rail-text b {
+    color: var(--fog);
+}
+
+.cg-rail-btn.is-active .cg-rail-text b {
+    color: var(--haze);
+    font-weight: 700;
+}
+
+/* What you picked, like an item equipped into a slot. */
+.cg-rail-text small {
+    min-width: 2.2em;
+    min-height: 1.45em;
+    box-sizing: border-box;
+    padding: 1px 8px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent);
+    font-size: .68rem;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-5px) scale(.88);
+    transition: opacity .3s ease, transform .45s var(--ease);
+}
+
+.cg-rail-text small:empty {
+    background: none;
+}
+
+.cg-rail-btn.is-visited .cg-rail-text small {
+    opacity: 1;
+    transform: none;
+}
+
+.cg-rail-text small.is-bump {
+    animation: cgChip .42s var(--ease);
+}
+
+/* Launch tile: it rumbles and glows while the button is held, and the rocket leaves when the game starts. */
+.cg-rail-btn.is-charging .cg-node {
+    transition: transform .4s var(--ease), background-color .35s ease, border-color .35s ease, color .35s ease;
+    box-shadow:
+        inset 0 -3px 0 rgba(0, 0, 0, .12),
+        0 6px 0 color-mix(in srgb, var(--accent) 52%, #000),
+        0 calc(6px + var(--charge) * 8px) calc(20px + var(--charge) * 34px) calc(var(--charge) * 5px) rgba(255, 150, 60, calc(.3 + var(--charge) * .6));
+}
+
+.cg-rail-btn.is-charging .cg-node > .cg-ico:not(.cg-badge) {
+    animation: cgRumble .09s linear infinite;
+}
+
+.cg.is-launching .cg-rail-btn[data-icon="launch"] .cg-node > .cg-ico:not(.cg-badge) {
+    animation: cgLiftoff .55s cubic-bezier(.4, 0, .9, .5) both;
+}
+
+.cg.is-instant .cg-rail::after,
+.cg.is-instant .cg-node,
+.cg.is-instant .cg-ico,
+.cg.is-instant .cg-rail-text small {
+    transition: none;
+}
+
+/* ── Steps ── */
+.cg-steps {
+    display: grid;
+    position: relative;
+}
+
+.cg-step {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(22px);
+    transition: opacity .3s ease, transform .42s var(--ease), visibility 0s .3s;
+}
+
+.cg-step.is-before {
+    transform: translateX(-22px);
+}
+
+.cg-step.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity .4s .08s ease, transform .55s .08s var(--ease), visibility 0s 0s;
+}
+
+.cg.is-instant .cg-step {
+    transition: none;
+}
+
+.cg-step-title {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.cg-step-help {
+    margin: 0;
+    max-width: 40ch;
+    color: var(--fog);
+    font-size: .84rem;
+    line-height: 1.55;
+}
+
+.cg-note {
+    margin: 0;
+    max-width: 42ch;
+    min-height: 2.9em;
+    color: var(--fog);
+    font-size: .82rem;
+    line-height: 1.5;
+}
+
+.cg-lobby {
+    min-height: 1.5em;
+    margin-top: -6px;
+    color: var(--moss);
+    font-size: .78rem;
+}
+
+.cg-readout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+}
+
+.cg-readout-main {
+    color: rgb(var(--tint, 255 215 154));
+    font-size: clamp(2.1rem, 7vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -.04em;
+    line-height: 1.05;
+}
+
+.cg-readout-sub {
+    color: var(--fog);
+    font-size: .84rem;
+}
+
+.cg-readout-inline {
+    align-items: baseline;
+    gap: 12px;
+}
+
+.cg-readout-inline .cg-odo {
+    color: var(--lantern);
+    font-size: clamp(2.6rem, 8vw, 3.8rem);
+}
+
+/* ── Odometer: rolling digits ── */
+.cg-odo {
+    display: inline-flex;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.04em;
+}
+
+.cg-odo-col {
+    position: relative;
+    display: inline-block;
+    width: .66em;
+    height: 1.02em;
+    overflow: hidden;
+    transition: width .35s var(--ease);
+}
+
+.cg-odo-col.is-blank {
+    width: 0;
+}
+
+.cg-odo-strip {
+    display: flex;
+    flex-direction: column;
+    transition: transform .55s cubic-bezier(.2, .9, .25, 1);
+    will-change: transform;
+}
+
+.cg-odo-strip > span {
+    display: block;
+    height: 1.02em;
+    line-height: 1.02em;
+    text-align: center;
+}
+
+/* ── Step 1: the lens ── */
+.cg-lens {
+    --thumb: 46px;
+    position: relative;
+    width: 100%;
+    margin-top: 4px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+
+.cg-lens.is-dragging {
+    cursor: grabbing;
+}
+
+.cg-lens-track {
+    position: relative;
+    height: 56px;
+}
+
+.cg-lens-rail,
+.cg-lens-fill {
+    position: absolute;
+    left: calc(var(--thumb) / 2);
+    right: calc(var(--thumb) / 2);
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 4px;
+}
+
+.cg-lens-rail {
+    background: var(--line);
+}
+
+.cg-lens-fill {
+    background: linear-gradient(90deg, rgba(139, 224, 164, .9), rgb(var(--tint, 255 215 154)));
+    transform-origin: left center;
+    transform: scaleX(.5);
+}
+
+.cg-lens-dot {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--k) / 2);
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    box-sizing: border-box;
+    border: 2px solid rgba(228, 246, 234, .3);
+    border-radius: 50%;
+    background: #0a1611;
+}
+
+.cg-lens-thumb {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: var(--thumb);
+    height: var(--thumb);
+    will-change: transform;
+}
+
+.cg-lens-core {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid rgba(255, 255, 255, .55);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .95) 0 6%, rgba(255, 255, 255, .26) 20%, transparent 44%),
+        radial-gradient(circle at 50% 55%, rgb(var(--tint, 255 215 154) / .62), rgb(var(--tint, 255 215 154) / .24) 62%, rgb(var(--tint, 255 215 154) / .08));
+    box-shadow:
+        0 0 0 6px rgb(var(--tint, 255 215 154) / .10),
+        0 8px 28px rgb(var(--tint, 255 215 154) / .38),
+        inset 0 -7px 12px rgba(0, 0, 0, .18);
+    transition: transform .3s var(--ease), box-shadow .3s ease;
+}
+
+.cg-lens.is-dragging .cg-lens-core {
+    transform: scale(1.14);
+    box-shadow:
+        0 0 0 9px rgb(var(--tint, 255 215 154) / .12),
+        0 12px 36px rgb(var(--tint, 255 215 154) / .5),
+        inset 0 -7px 12px rgba(0, 0, 0, .18);
+}
+
+.cg-lens-labels {
+    position: relative;
+    height: 40px;
+    margin-top: 2px;
+}
+
+.cg-lens-labels span {
+    position: absolute;
+    top: 0;
+    left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--k) / 2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    transform: translateX(-50%);
+    color: var(--fog);
+    text-align: center;
+    transition: color .3s ease;
+}
+
+.cg-lens-labels b {
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.cg-lens-labels small {
+    font-size: .7rem;
+    white-space: nowrap;
+    opacity: .8;
+}
+
+.cg[data-level="0"] .cg-lens-labels span:nth-child(1),
+.cg[data-level="1"] .cg-lens-labels span:nth-child(2),
+.cg[data-level="2"] .cg-lens-labels span:nth-child(3) {
+    color: var(--haze);
+}
+
+/* ── Step 2: the dial ── */
+.cg-dial-wrap {
+    position: relative;
+    align-self: center;
+    width: var(--dial);
+    height: var(--dial);
+    margin-top: 2px;
+}
+
+.cg-dial {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+
+.cg-dial.is-dragging {
+    cursor: grabbing;
+}
+
+.cg-dial-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.cg-dial-svg .tick {
+    stroke: rgba(228, 246, 234, .2);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    transition: stroke .25s ease;
+}
+
+.cg-dial-svg .tick.major {
+    stroke: rgba(228, 246, 234, .38);
+    stroke-width: 2.3;
+}
+
+.cg-dial-svg .tick.lit {
+    stroke: var(--moss);
+}
+
+.cg-dial-svg .tick.now {
+    stroke: var(--lantern);
+    stroke-width: 3.2;
+    filter: drop-shadow(0 0 5px rgba(255, 215, 154, .8));
+}
+
+.cg-dial-knob {
+    position: absolute;
+    inset: 15%;
+    border: 1px solid rgba(228, 246, 234, .24);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .05), rgba(0, 0, 0, .22) 100%),
+        var(--ground-2);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .12),
+        inset 0 -12px 26px rgba(0, 0, 0, .38),
+        0 16px 36px rgba(0, 0, 0, .5);
+    will-change: transform;
+}
+
+/* Grip ridges around the rim make the rotation visible. */
+.cg-dial-knob::before {
+    content: "";
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(rgba(228, 246, 234, .13) 0 1.6deg, transparent 1.6deg 10deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 74%, #000 75%, #000 96%, transparent 97%);
+    mask-image: radial-gradient(circle, transparent 74%, #000 75%, #000 96%, transparent 97%);
+}
+
+.cg-dial-notch {
+    position: absolute;
+    top: 7%;
+    left: 50%;
+    width: 4px;
+    height: 13%;
+    margin-left: -2px;
+    border-radius: 3px;
+    background: var(--lantern);
+    box-shadow: 0 0 14px rgba(255, 215, 154, .75);
+}
+
+/* A fixed highlight, so the light does not spin with the knob. */
+.cg-dial::after {
+    content: "";
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, .13), transparent 44%);
+    pointer-events: none;
+}
+
+.cg-dial-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cg-dial-center .cg-odo {
+    font-size: calc(var(--dial) * .3);
+    color: var(--haze);
+}
+
+.cg-dial-center small {
+    margin-top: 2px;
+    color: var(--fog);
+    font-size: .76rem;
+}
+
+.cg-nudge {
+    position: absolute;
+    bottom: calc(var(--dial) * .02);
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--glass);
+    color: var(--haze);
+    font-size: 1.25rem;
+    line-height: 1;
+    touch-action: manipulation;
+    user-select: none;
+    transition: background .2s ease, transform .2s var(--ease), border-color .2s ease;
+}
+
+.cg-nudge-minus {
+    left: calc(var(--dial) * .14);
+}
+
+.cg-nudge-plus {
+    right: calc(var(--dial) * .14);
+}
+
+.cg-nudge:active {
+    transform: scale(.9);
+    background: rgba(139, 224, 164, .18);
+}
+
+@media (hover: hover) {
+    .cg-nudge:hover {
+        border-color: var(--moss);
+    }
+}
+
+/* ── Step 3: the ruler ── */
+.cg-ruler {
+    position: relative;
+    width: 100%;
+    height: 92px;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+}
+
+.cg-ruler.is-dragging {
+    cursor: grabbing;
+}
+
+.cg-ruler-strip {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    height: 100%;
+    will-change: transform;
+}
+
+.cg-ruler .tick {
+    position: absolute;
+    bottom: 32px;
+    width: 2px;
+    height: calc(12px + 14px * var(--swell, 0));
+    margin-left: -1px;
+    border-radius: 2px;
+    background: rgba(228, 246, 234, calc(.26 + .5 * var(--swell, 0)));
+}
+
+.cg-ruler .tick.mid {
+    height: calc(19px + 12px * var(--swell, 0));
+}
+
+.cg-ruler .tick.major {
+    height: calc(28px + 10px * var(--swell, 0));
+    background: rgba(228, 246, 234, calc(.5 + .4 * var(--swell, 0)));
+}
+
+.cg-ruler .tick b {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-top: 8px;
+    transform: translateX(-50%);
+    color: var(--fog);
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.cg-ruler-needle {
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    bottom: 26px;
+    width: 2px;
+    margin-left: -1px;
+    border-radius: 2px;
+    background: var(--lantern);
+    box-shadow: 0 0 14px rgba(255, 215, 154, .65);
+    pointer-events: none;
+}
+
+.cg-ruler-needle i {
+    position: absolute;
+    top: -6px;
+    left: -4px;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    background: var(--lantern);
+    box-shadow: 0 0 12px rgba(255, 215, 154, .7);
+}
+
+/* ── Step 4: summary and launch ── */
+.cg-summary {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+}
+
+.cg-summary li {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: .88rem;
+}
+
+.cg-summary li span {
+    color: var(--fog);
+}
+
+.cg-summary li b {
+    font-weight: 600;
+}
+
+.cg-summary li button {
+    padding: 4px 2px;
+    color: var(--moss);
+    font-size: .78rem;
+}
+
+.cg-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--glass);
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.cg-name:focus-within {
+    border-color: var(--moss);
+    box-shadow: 0 0 0 3px rgba(139, 224, 164, .14);
+}
+
+.cg-name span {
+    flex: none;
+    color: var(--fog);
+    font-size: .78rem;
+}
+
+.cg-name input {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--haze);
+    font: inherit;
+    font-size: .9rem;
+}
+
+.cg-name input::placeholder {
+    color: rgba(228, 246, 234, .35);
+}
+
+.cg-launch {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 58px;
+    overflow: hidden;
+    border: 1px solid rgba(139, 224, 164, .42);
+    border-radius: 18px;
+    background: rgba(139, 224, 164, .07);
+    color: var(--haze);
+    font-size: .98rem;
+    font-weight: 600;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: border-color .3s ease, box-shadow .4s ease, transform .3s var(--ease);
+}
+
+.cg-launch-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(90deg, rgba(139, 224, 164, .12), rgba(139, 224, 164, .38));
+}
+
+.cg-launch-fill::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--lantern);
+    box-shadow: 0 0 16px 2px rgba(255, 215, 154, .7);
+}
+
+.cg-launch-label {
+    position: relative;
+    z-index: 1;
+}
+
+.cg-launch.is-holding {
+    transform: scale(.985);
+    border-color: var(--lantern);
+    box-shadow: 0 0 40px rgba(255, 215, 154, .22);
+}
+
+.cg-launch.is-shaking {
+    animation: cgShake .38s ease;
+}
+
+@media (hover: hover) {
+    .cg-launch:hover {
+        border-color: var(--moss);
+    }
+}
+
+.cg-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 46px;
+    margin-top: 0;
+}
+
+.cg-back {
+    padding: 11px 14px;
+    margin-inline-start: -14px;          /* the label, not the touch area, sits on the column's edge */
+    border-radius: 12px;
+    color: var(--fog);
+    font-size: .88rem;
+}
+
+.cg-back:disabled {
+    visibility: hidden;
+}
+
+.cg-next {
+    padding: 13px 28px;
+    border-radius: 14px;
+    background: var(--haze);
+    color: #0a1a12;
+    font-size: .92rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(139, 224, 164, .16);
+    transition: transform .25s var(--ease), box-shadow .3s ease;
+}
+
+.cg-next:active {
+    transform: scale(.96);
+}
+
+@media (hover: hover) {
+    .cg-next:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 34px rgba(139, 224, 164, .28);
+    }
+
+    .cg-back:hover {
+        color: var(--haze);
+    }
+}
+
+/* ── Launch hand-off ── */
+.cg.is-launching .cg-title,
+.cg.is-launching .cg-rail,
+.cg.is-launching .cg-steps,
+.cg.is-launching .cg-nav {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity .35s ease, transform .45s var(--ease);
+}
+
+.cg.is-launching .cg-top {
+    opacity: 0;
+    transition: opacity .3s ease;
+}
+
+/* ── Responsive refinements ────────────────────────────────────────────────
+   The two layouts above do the heavy lifting; these only trim sizes where height or width runs out.
+   "Stacked" = the single-column layout: narrower than 560px, or taller than 4:5. */
+
+/* Stacked, short screens: a smaller maze and dial so the step is reachable without much scrolling. */
+@media (max-height: 700px) and (max-aspect-ratio: 5/4),
+       (max-height: 700px) and (max-width: 559px) {
+    .cg {
+        --maze-m: clamp(96px, 20dvh, 200px);
+        --dial: clamp(120px, 20dvh, 170px);
+    }
+}
+
+/* …and there the +/- buttons would cover the knob, so they stand beside the dial instead of under it. */
+@media (max-height: 700px) and (max-aspect-ratio: 5/4),
+       (max-height: 700px) and (max-width: 559px) {
+    .cg-nudge {
+        top: 50%;
+        bottom: auto;
+        width: 34px;
+        height: 34px;
+        margin-top: -17px;
+    }
+
+    .cg-nudge-minus {
+        left: calc(var(--dial) * -.3);
+    }
+
+    .cg-nudge-plus {
+        right: calc(var(--dial) * -.3);
+    }
+}
+
+@media (max-width: 420px) {
+    .cg-rail-text b {
+        font-size: .66rem;
+    }
+
+    .cg-step-help {
+        font-size: .8rem;
+    }
+}
+
+@media (max-height: 700px) {
+    /* The progress tiles already echo every choice, so the recap list is redundant here. */
+    .cg-summary {
+        display: none;
+    }
+
+    .cg-step-help {
+        font-size: .78rem;
+        line-height: 1.45;
+    }
+
+    .cg-note {
+        min-height: 2.6em;
+    }
+}
+
+/* ── Landscape phones and very short windows: everything shrinks one notch, nothing scrolls ── */
+@media (max-height: 540px) and (min-width: 560px) and (min-aspect-ratio: 5/4) {
+    .cg {
+        --node: 38px;
+        --rail-below: 36px;
+        --sub-h: 0px;
+        --cg-need: 0px;
+        --cg-row: 8px;
+        --cg-top-pad: max(6px, env(safe-area-inset-top));
+        --cg-pad-t: 8px;
+        --cg-pad-b: max(8px, env(safe-area-inset-bottom));
+        --dial: clamp(96px, 28dvh, 140px);
+    }
+
+    .cg-stage figcaption,
+    .cg-step-help,
+    .cg-summary {
+        display: none;
+    }
+
+    .cg-title {
+        align-self: center;
+        font-size: 1.2rem;
+    }
+
+    .cg-rail-text small {
+        min-height: 1.3em;
+        padding: 0 6px;
+        font-size: .62rem;
+    }
+
+    .cg-ruler {
+        height: 70px;
+    }
+
+    .cg-step-title {
+        font-size: 1rem;
+    }
+
+    .cg-lens-labels {
+        height: 34px;
+    }
+
+    .cg-step {
+        gap: 6px;
+    }
+
+    .cg-note {
+        min-height: 0;
+        font-size: .76rem;
+        line-height: 1.35;
+    }
+
+    .cg-readout-main {
+        font-size: 1.9rem;
+    }
+
+    .cg-readout-inline .cg-odo {
+        font-size: 2.2rem;
+    }
+
+    .cg-name {
+        padding-block: 2px;
+    }
+
+    /* Beside the dial instead of under it, so they never cover the ring. */
+    .cg-nudge {
+        top: 50%;
+        bottom: auto;
+        width: 34px;
+        height: 34px;
+        margin-top: -17px;
+    }
+
+    .cg-nudge-minus {
+        left: calc(var(--dial) * -.3);
+    }
+
+    .cg-nudge-plus {
+        right: calc(var(--dial) * -.3);
+    }
+
+    .cg-nav {
+        min-height: 34px;
+        padding-top: 8px;
+    }
+}
+
+/* ── Keyframes ── */
+@keyframes cgFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes cgPulse {
+    0%, 100% { opacity: .6; transform: scale(.9); }
+    50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes cgRing {
+    0% { transform: scale(1); opacity: .75; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes cgBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2.5px); }
+}
+
+@keyframes cgShine {
+    0% { background-position: -140% 0; opacity: 1; }
+    100% { background-position: 140% 0; opacity: 1; }
+}
+
+@keyframes cgChip {
+    0% { transform: scale(.8); }
+    55% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+}
+
+@keyframes cgRumble {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(calc(var(--charge) * -1.8px), calc(var(--charge) * .9px)) rotate(calc(var(--charge) * -5deg)); }
+    75% { transform: translate(calc(var(--charge) * 1.8px), calc(var(--charge) * -.9px)) rotate(calc(var(--charge) * 5deg)); }
+}
+
+@keyframes cgLiftoff {
+    0% { transform: translateY(0); opacity: 1; }
+    20% { transform: translateY(4px) scaleY(.9); opacity: 1; }
+    100% { transform: translateY(-220%) scaleY(1.25); opacity: 0; }
+}
+
+@keyframes cgShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cg *,
+    .cg *::before,
+    .cg *::after,
+    .cg.show {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+

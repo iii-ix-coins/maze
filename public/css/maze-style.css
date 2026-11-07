@@ -1,0 +1,451 @@
+/* ==========================================================================
+   maze-style.css  —  Maze hub (maze.html) + skin for the maze-pro game DOM
+   --------------------------------------------------------------------------
+   PART A  ·  .maze-hero / .maze-features        (new hollld-side blocks)
+   PART B  ·  .maze-app  — re-skin of the *unchanged* maze-pro markup
+               (every selector is scoped, so maze-pro's generic `button`,
+               `.banner`, `.panel`, `.tile`, `.overlay`, `h1` … can no longer
+               collide with the hollld shell).
+   Requires style.css (tokens, layers, tile/panel recipes, .btn).
+
+   CANVAS THEME TOKENS  (read these from maze.js with getComputedStyle so the
+   canvas matches the UI):   --maze-wall  --maze-floor  --maze-trail
+                             --maze-goal  --maze-player --maze-hint  --maze-fog
+   ========================================================================== */
+
+@layer pages {
+
+    /* ======================================================================
+       PART A — HUB
+       ====================================================================== */
+    .maze-hero {
+        position: relative; isolation: isolate; overflow: hidden;
+        display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center;
+        gap: clamp(20px, 4vw, 64px); padding: clamp(28px, 5.4vw, 76px);
+        border-radius: var(--r-xl); corner-shape: var(--corner, round);
+        background:
+            radial-gradient(80% 110% at 100% 0%, oklch(0.40 0.12 170 / 0.45), transparent 62%),
+            radial-gradient(70% 90% at 0% 100%, oklch(0.36 0.14 290 / 0.38), transparent 62%),
+            linear-gradient(160deg, oklch(0.24 0.045 260 / 0.82), oklch(0.13 0.027 262 / 0.9));
+        border: 1px solid var(--stroke-hi); box-shadow: var(--shadow-2);
+    }
+    .maze-hero::before {
+        content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+        background:
+            linear-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px) 0 0 / 48px 48px,
+            linear-gradient(90deg, oklch(1 0 0 / 0.035) 1px, transparent 1px) 0 0 / 48px 48px;
+        -webkit-mask-image: radial-gradient(90% 100% at 70% 40%, #000, transparent);
+                mask-image: radial-gradient(90% 100% at 70% 40%, #000, transparent);
+    }
+    .maze-hero-copy { display: grid; justify-items: start; gap: clamp(16px, 2vw, 26px); }
+    .maze-hero-title {
+        font-size: clamp(2.8rem, 0.6rem + 6.2vw, 6.4rem); font-stretch: 78%; font-weight: 800; letter-spacing: -0.035em; line-height: 0.9; text-transform: uppercase;
+    }
+    .maze-hero-title span { display: block; }
+    .maze-hero-title span:first-child { color: transparent; -webkit-text-stroke: 1.5px oklch(1 0 0 / 0.85); letter-spacing: 0.01em; }
+    .maze-hero-title span:last-child {
+        background: linear-gradient(95deg, var(--mint), var(--azure) 55%, var(--violet)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 40px oklch(0.87 0.17 170 / 0.35));
+    }
+    .maze-hero-copy p { max-width: 46ch; font-size: var(--fs-md); color: var(--text-soft); }
+    .maze-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+    .maze-hero-art { position: relative; justify-self: center; width: min(100%, 520px); aspect-ratio: 10 / 7; }
+    .maze-hero-art svg { width: 100%; height: 100%; overflow: visible; }
+    .maze-hero-art::before {
+        content: ""; position: absolute; inset: -12%; z-index: -1; border-radius: 50%;
+        background: radial-gradient(closest-side, oklch(0.87 0.17 170 / 0.22), transparent);
+    }
+    .maze-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* features bento */
+    .maze-features { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 16px); }
+    .maze-tile {
+        position: relative; isolation: isolate; display: grid; align-content: start; gap: 10px; overflow: hidden;
+        padding: clamp(18px, 2.2vw, 28px); border-radius: var(--r-lg); corner-shape: var(--corner, round);
+        background: var(--tile-bg); border: 1px solid var(--stroke); box-shadow: var(--shadow-1); --accent: var(--mint);
+        transition: transform var(--t-slow) var(--ease-out), border-color var(--t-base);
+    }
+    .maze-tile::before {
+        content: ""; position: absolute; inset: -1px; z-index: -1; pointer-events: none; border-radius: inherit; corner-shape: inherit; padding: 1px;
+        background: radial-gradient(260px circle at var(--mx) var(--my), color-mix(in oklab, var(--accent) 95%, transparent), transparent 66%);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+        opacity: 0; transition: opacity var(--t-base);
+    }
+    .maze-tile:hover { transform: translateY(-3px); }
+    .maze-tile:hover::before { opacity: 1; }
+    .maze-tile:nth-child(1) { grid-column: span 3; --accent: var(--mint); }
+    .maze-tile:nth-child(2) { grid-column: span 3; --accent: var(--azure); }
+    .maze-tile:nth-child(3), .maze-tile:nth-child(4), .maze-tile:nth-child(5) { grid-column: span 2; }
+    .maze-tile:nth-child(3) { --accent: var(--gold); }
+    .maze-tile:nth-child(4) { --accent: var(--violet); }
+    .maze-tile:nth-child(5) { --accent: var(--coral); }
+    .maze-tile-icon {
+        display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; corner-shape: var(--corner, round);
+        color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 38%, transparent);
+        box-shadow: 0 12px 32px -12px var(--accent);
+    }
+    .maze-tile-icon svg { width: 24px; height: 24px; }
+    .maze-tile h3 { font-size: var(--fs-lg); }
+    .maze-tile p { color: var(--text-mute); max-width: 40ch; }
+    .maze-tile-num { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+
+    /* ======================================================================
+       PART B — .maze-app  (maze-pro DOM, unchanged markup)
+       ====================================================================== */
+    .maze-app {
+        /* canvas theme tokens (documented in the file header) */
+        --maze-floor: oklch(0.125 0.028 262);
+        --maze-wall: oklch(0.80 0.09 235);
+        --maze-trail: var(--mint);
+        --maze-goal: var(--gold);
+        --maze-player: #ffffff;
+        --maze-hint: var(--azure);
+        --maze-fog: oklch(0.08 0.02 262);
+
+        /* maze.js hard-codes its canvas palette (BOARD_COLOR 'green', black walls). Until the merge makes it read
+           --maze-floor / --maze-wall, this filter pulls the engine's green into the site's jade. Set to `none` afterwards. */
+        --maze-canvas-filter: hue-rotate(46deg) saturate(0.85) brightness(0.92);
+
+        --board-surround: oklch(0.12 0.03 262);
+        --panel-w: 176px;
+
+        position: relative; color: var(--text); font-family: var(--font-body);
+
+        & .game-container { width: 100%; max-width: 100%; display: grid; justify-items: center; gap: 14px; text-align: center; }
+
+        & h1 {
+            display: inline-flex; align-items: center; gap: 12px;
+            font-family: var(--font-mono); font-weight: 700; font-size: var(--fs-xs); letter-spacing: 0.32em; text-transform: uppercase; color: var(--mint);
+        }
+        & .title-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); animation: maze-signal 1.8s ease-in-out infinite; }
+
+        & .game-layout { display: flex; direction: ltr; gap: 16px; align-items: center; justify-content: center; width: 100%; scroll-margin-top: 92px; }
+
+        /* hide the board behind the lobby, exactly like the original full-screen overlay did */
+        &:has(.player-mode-screen.show) .game-container > h1,
+        &:has(.player-mode-screen.show) .game-layout { display: none; }
+
+        /* ———— generic controls (replaces maze-pro's global red <button>) ———— */
+        & button {
+            padding: 0.72rem 1.4rem; border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 650; color: var(--text);
+            background: var(--veil); border: 1px solid var(--stroke-hi);
+            transition: transform var(--t-base) var(--ease-spring), background var(--t-base), border-color var(--t-base), box-shadow var(--t-base), color var(--t-base);
+        }
+        & button:hover { background: oklch(1 0 0 / 0.11); transform: translateY(-1px); }
+        & button:active { scale: 0.96; }
+        & button:disabled { opacity: 0.45; pointer-events: none; }
+        & .ghost { color: var(--text-soft); background: transparent; }
+
+        /* ———— board ———— */
+        & .maze-wrapper {
+            position: relative; flex: none; display: inline-block; overflow: hidden; line-height: 0; touch-action: none;
+            border-radius: var(--r-lg); corner-shape: var(--corner, round); background: var(--board-surround);
+            border: 1px solid var(--stroke-hi);
+            box-shadow: 0 40px 100px -30px oklch(0 0 0 / 0.9), 0 0 0 1px oklch(0 0 0 / 0.5), 0 0 80px -20px oklch(0.87 0.17 170 / 0.3), inset 0 0 60px oklch(0.87 0.17 170 / 0.05);
+        }
+        & .maze-wrapper::after {                                   /* animated rim light */
+            content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; border-radius: inherit; corner-shape: inherit; padding: 1.5px;
+            background: conic-gradient(from var(--angle), transparent 0 55%, oklch(0.87 0.17 170 / 0.9) 72%, oklch(0.79 0.12 225 / 0.7) 82%, transparent 92%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            animation: spin-angle 9s linear infinite;
+        }
+        & .maze { display: block; margin: 0 auto; background: transparent; filter: var(--maze-canvas-filter, none); touch-action: none; cursor: default; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+        & .maze.grabbing { cursor: grabbing; }
+
+        & .mini-tile {
+            position: absolute; top: 10px; left: 10px; z-index: 6; padding: 5px; line-height: 0; border-radius: 14px;
+            background: oklch(0.10 0.025 262 / 0.7); border: 1px solid var(--stroke-hi);
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        & .mini-tile.show { opacity: 1; pointer-events: auto; }
+        & #mini { display: block; border-radius: 9px; background: var(--board-surround); filter: var(--maze-canvas-filter, none); touch-action: none; cursor: crosshair; }
+
+        /* ———— HUD panel ———— */
+        & .panel { flex: none; width: var(--panel-w); display: flex; flex-direction: column; gap: 10px; align-self: center; }
+        :is(body.in-menu) & .panel { display: none !important; }
+        & .tile {
+            padding: 10px 12px; border-radius: var(--r-md); corner-shape: var(--corner, round);
+            background: var(--tile-bg); border: 1px solid var(--stroke); box-shadow: var(--shadow-1);
+        }
+        & .lbl { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-mute); }
+        & .hud { display: flex; justify-content: space-around; align-items: center; gap: 6px; }
+        & .hud b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1.18rem; line-height: 1.3; font-variant-numeric: tabular-nums; }
+        & .tools { display: flex; flex-direction: column; gap: 9px; }
+        & .grp { display: flex; gap: 6px; align-items: center; justify-content: center; }
+        & .grp > .btn { flex: 1; }
+        & .zoom-label { min-width: 48px; font-family: var(--font-mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--text-soft); }
+        & .btn { padding: 8px 8px; font-size: 0.76rem; border-radius: 11px; white-space: nowrap; }
+        & .btn.sm { flex: none; width: 38px; padding: 6px 0; font-size: 1.1rem; line-height: 1; }
+        & .btn[aria-pressed="true"] { color: var(--ink-1000); background: linear-gradient(135deg, var(--mint), oklch(0.80 0.14 200)); border-color: transparent; box-shadow: 0 8px 24px -8px oklch(0.87 0.17 170 / 0.8); }
+        & .newbtn {
+            padding: 11px 14px; font-size: 0.8rem; border-radius: 12px; color: var(--ink-1000); border-color: transparent;
+            background: linear-gradient(135deg, var(--gold), oklch(0.86 0.12 100)); box-shadow: 0 12px 30px -10px oklch(0.84 0.13 88 / 0.8);
+        }
+        & .newbtn:hover { background: linear-gradient(135deg, oklch(0.88 0.13 90), oklch(0.90 0.11 100)); }
+
+        /* ———— narrow layout: HUD above, tools below ———— */
+        :is(body:not(.wide)) & .game-layout { flex-direction: column; align-items: center; gap: 10px; }
+        :is(body:not(.wide)) & .panel { display: contents; }
+        :is(body:not(.wide)) & .hud { order: -1; width: var(--v); }
+        :is(body:not(.wide)) & .tools { order: 1; width: var(--v); max-width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px; }
+
+        /* ———— joystick ———— */
+        & .pad-dock { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 96px; border-radius: 16px; background: var(--field-bg); border: 1px solid var(--stroke); }
+        & .pad-dock:empty { display: none; }
+        :is(body:not(.wide)) & #padDock { display: none; }
+        & .pad-wrap { position: absolute; left: 0; top: 0; z-index: 5; width: 78px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.32; transition: opacity 0.2s ease; touch-action: none; user-select: none; -webkit-user-select: none; }
+        & .pad-wrap.active { opacity: 1; }
+        & .pad-wrap.docked { position: relative; left: auto !important; top: auto !important; flex: none; opacity: 0.9; }
+        & .pad-wrap.docked .pad-grip { display: none; }
+        :is(body:not(.wide)) & .pad-wrap { width: 56px; }
+        :is(body:not(.wide)) & .pad-wrap.docked { position: absolute; }
+        & .pad-grip { width: 42px; height: 12px; border-radius: 6px; cursor: move; touch-action: none; background: oklch(1 0 0 / 0.18); border: 1px solid var(--stroke-hi); }
+        & .pad-grip::after { content: ""; display: block; margin: 4px auto 0; width: 18px; height: 2px; background: oklch(1 0 0 / 0.4); box-shadow: 0 -3px 0 oklch(1 0 0 / 0.4); }
+        & .pad {
+            position: relative; width: 78px; height: 78px; border-radius: 50%; touch-action: none; cursor: pointer;
+            background:
+                linear-gradient(oklch(1 0 0 / 0.14), oklch(1 0 0 / 0.14)) center / 1px 66% no-repeat,
+                linear-gradient(oklch(1 0 0 / 0.14), oklch(1 0 0 / 0.14)) center / 66% 1px no-repeat,
+                radial-gradient(circle at 50% 35%, oklch(0.30 0.045 260), oklch(0.16 0.03 262));
+            border: 1px solid var(--stroke-hi); box-shadow: inset 0 3px 10px oklch(0 0 0 / 0.6), 0 8px 24px -8px oklch(0 0 0 / 0.8);
+        }
+        :is(body.wide) & .pad-wrap.docked .pad { width: 72px; height: 72px; }
+        & .knob {
+            position: absolute; left: 50%; top: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; pointer-events: none;
+            background: radial-gradient(circle at 35% 30%, oklch(0.95 0.12 170), var(--mint-deep) 72%);
+            box-shadow: 0 0 22px oklch(0.87 0.17 170 / 0.7), inset 0 -3px 5px oklch(0 0 0 / 0.25); transition: transform 0.18s ease-out;
+        }
+        :is(body.wide) & .pad-wrap.docked .knob { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+        & .pad.dragging .knob { transition: none; }
+
+        /* ———— toast banner (maze-pro `.banner`, now harmless to the home hero) ———— */
+        & .banner {
+            display: none; position: absolute; top: 12px; left: 50%; z-index: 6; width: max-content; max-width: 90%; padding: 8px 16px;
+            transform: translateX(-50%); text-align: center; font-size: 0.8rem; line-height: 1.4; color: var(--text); pointer-events: none;
+            border-radius: var(--r-pill); background: oklch(0.12 0.028 262 / 0.82); border: 1px solid var(--stroke-hi);
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        }
+        & .banner.show { display: block; animation: maze-toast 0.4s var(--ease-out); }
+
+        /* ———— win card ———— */
+        & .win-card {
+            display: none; position: absolute; left: 50%; top: 50%; z-index: 40; flex-direction: column; align-items: center; gap: 14px;
+            min-width: 270px; max-width: 90%; padding: 26px 30px 26px; transform: translate(-50%, -50%); line-height: 1.5; direction: ltr;
+            border-radius: var(--r-lg); corner-shape: var(--corner, round);
+            background: linear-gradient(160deg, oklch(0.27 0.05 262 / 0.95), oklch(0.14 0.028 262 / 0.97)); border: 1px solid var(--stroke-hi);
+            box-shadow: 0 30px 90px -20px oklch(0 0 0 / 0.9), 0 0 70px -20px oklch(0.84 0.13 88 / 0.5);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+        }
+        & .win-card.show { display: flex; animation: maze-pop 0.7s 0.4s var(--ease-spring) both; }
+        & .message { margin: 0; font-family: var(--font-display); font-weight: 750; font-size: 1.45rem; letter-spacing: -0.03em; background: linear-gradient(95deg, var(--gold), oklch(0.93 0.07 95)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        & .win-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; direction: ltr; }
+        & .win-stats div { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; padding: 10px 14px; border-radius: 14px; background: var(--veil); border: 1px solid var(--stroke); }
+        & .win-stats b { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+        & .win-stats span { font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mute); }
+
+        /* ———— in-board overlays: goal picker · matchmaking · confirm ———— */
+        & .overlay {
+            display: none; position: absolute; inset: 0; z-index: 20; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+            padding: 16px; line-height: 1.5; direction: ltr; text-align: center;
+            background: radial-gradient(70% 60% at 50% 0%, oklch(0.30 0.09 175 / 0.4), transparent 70%), oklch(0.08 0.022 262 / 0.84);
+            -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+        }
+        & .overlay.show { display: flex; animation: maze-lobby-in 0.4s var(--ease-out) both; }
+        & .overlay h2 { font-size: clamp(1.3rem, 3.6vw, 1.8rem); letter-spacing: -0.04em; color: var(--text); }
+        & .overlay p { max-width: 340px; font-size: 0.85rem; color: var(--text-soft); margin: 0 0 4px; }
+        & .overlay .btns { display: flex; gap: 10px; }
+        & .overlay .btns button:first-child { color: var(--ink-1000); border-color: transparent; background: linear-gradient(135deg, var(--coral), oklch(0.66 0.2 12)); box-shadow: 0 10px 28px -10px var(--coral); }
+
+        & .menu-mark { display: flex; align-items: center; gap: 8px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; color: var(--mint); }
+        & .mark-icon { font-size: 1.05rem; }
+        & .goal-options { width: min(100%, 320px); display: flex; flex-direction: column; gap: 9px; margin: 4px 0; }
+        & .opt { text-align: left; }
+        & .goal-options .opt {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 52px; padding: 9px 14px; border-radius: 14px;
+            font-size: 0.9rem; font-weight: 700; background: linear-gradient(110deg, oklch(0.40 0.09 172 / 0.55), oklch(0.20 0.04 255 / 0.7)); border-color: oklch(0.87 0.17 170 / 0.28);
+        }
+        & .goal-options .opt:hover { border-color: oklch(0.87 0.17 170 / 0.7); box-shadow: 0 14px 34px -14px oklch(0.87 0.17 170 / 0.8); transform: translateY(-2px); }
+        & .opt-main { display: flex; align-items: center; gap: 12px; }
+        & .opt-main > b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.04em; color: var(--mint); background: oklch(0 0 0 / 0.3); }
+        & .opt-main > span { white-space: nowrap; }
+        & .waiting-count { font-size: 0.6rem; font-weight: 500; text-align: right; white-space: nowrap; color: var(--text-soft); }
+        & .waiting-count b { font-variant-numeric: tabular-nums; color: var(--text); }
+        & .goal-rule { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: var(--text-mute); }
+        & .rule-lock { color: var(--gold); font-size: 1rem; }
+        & .text-button { padding: 6px 10px; font-size: 0.72rem; color: var(--text-mute); background: transparent; border-color: transparent; }
+        & .text-button:hover { color: var(--text); background: var(--veil); transform: none; }
+
+        & .waiting-orbit { position: relative; width: 78px; height: 78px; display: grid; place-items: center; margin-bottom: 4px; border: 1px solid oklch(0.87 0.17 170 / 0.18); border-radius: 50%; }
+        & .waiting-orbit::before, & .waiting-orbit::after { content: ""; position: absolute; inset: 8px; border: 1px solid oklch(0.87 0.17 170 / 0.24); border-radius: 50%; }
+        & .waiting-orbit::after { inset: 18px; border-color: oklch(0.87 0.17 170 / 0.34); }
+        & .waiting-orbit span { position: relative; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 24px var(--mint); animation: maze-signal 1.5s ease-in-out infinite; }
+        & .waiting-orbit i { position: absolute; inset: -5px; border: 1px solid var(--mint); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; animation: maze-orbit 3.2s linear infinite; }
+        & .waiting-count-large { font-family: var(--font-mono); font-weight: 650; font-size: 0.82rem; font-variant-numeric: tabular-nums; color: var(--text); }
+        & .progress-track { width: min(100%, 320px); height: 6px; overflow: hidden; border-radius: 99px; background: oklch(1 0 0 / 0.08); }
+        & .progress-track > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint-deep), var(--mint)); box-shadow: 0 0 14px var(--mint); transition: width 0.3s ease; }
+        & .waiting-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+        & .waiting-actions button { min-width: 140px; }
+
+        /* ———— live race board ———— */
+        & .race-board {
+            display: none; position: absolute; top: 10px; right: 10px; z-index: 7; width: min(224px, 44%); max-height: min(44%, 290px); overflow: auto; padding: 10px;
+            text-align: left; line-height: 1.2; pointer-events: none; border-radius: 16px; corner-shape: var(--corner, round);
+            background: oklch(0.10 0.025 262 / 0.78); border: 1px solid oklch(0.87 0.17 170 / 0.3);
+            box-shadow: 0 14px 40px -14px oklch(0 0 0 / 0.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        }
+        & .race-board.show { display: block; animation: maze-toast 0.4s var(--ease-out); }
+        & .race-board-heading { display: flex; justify-content: space-between; gap: 6px; margin: 0 0 8px; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.18em; color: var(--mint); }
+        & .race-board-heading small { font-size: 0.52rem; font-weight: 600; letter-spacing: 0; color: var(--text-dim); }
+        & .race-board ol { display: flex; flex-direction: column; gap: 3px; }
+        & .race-row { display: grid; grid-template-columns: 20px 7px minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 5px 5px; border-radius: 8px; background: oklch(1 0 0 / 0.035); }
+        & .race-row.is-you { background: oklch(0.87 0.17 170 / 0.16); box-shadow: inset 0 0 0 1px oklch(0.87 0.17 170 / 0.3); }
+        & .race-row.is-finished { opacity: 0.92; }
+        & .race-place { font-family: var(--font-mono); font-size: 0.58rem; font-variant-numeric: tabular-nums; color: var(--text-dim); }
+        & .race-dot { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+        & .race-identity { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+        & .race-identity b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.66rem; font-weight: 700; }
+        & .race-identity small { font-size: 0.52rem; color: var(--text-mute); }
+        & .race-row > strong { font-family: var(--font-mono); font-size: 0.68rem; font-variant-numeric: tabular-nums; color: var(--text-soft); }
+        :is(body:not(.wide)) & .race-board { width: min(180px, 48%); max-height: 36%; }
+
+        /* ======================================================================
+           LOBBY  (#playerModeMenu.player-mode-screen) — an inline hero card now,
+           instead of a viewport-covering overlay, so the site nav stays usable.
+           ====================================================================== */
+        & .player-mode-screen {
+            position: relative; inset: auto; z-index: auto; width: 100%; height: auto; max-width: none; max-height: none; overflow: visible;
+            display: none; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: left;
+        }
+        & .player-mode-screen.show { display: block; animation: maze-lobby-in 0.5s var(--ease-out) both; }
+        & .menu-shell {
+            position: relative; isolation: isolate; overflow: hidden; width: 100%; margin: 0 auto;
+            padding: clamp(20px, 3.8vw, 52px); border-radius: var(--r-xl); corner-shape: var(--corner, round);
+            background: linear-gradient(155deg, oklch(0.25 0.045 260 / 0.78), oklch(0.14 0.028 262 / 0.86));
+            border: 1px solid var(--stroke-hi); box-shadow: var(--shadow-2);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+        }
+        & .menu-shell::before {
+            content: ""; position: absolute; inset: 0 8% auto; height: 1px; pointer-events: none;
+            background: linear-gradient(90deg, transparent, oklch(0.87 0.17 170 / 0.9), transparent);
+        }
+        & .menu-shell::after {
+            content: ""; position: absolute; inset: auto -10% -45% auto; z-index: -1; width: 60%; aspect-ratio: 1; pointer-events: none;
+            background: radial-gradient(closest-side, oklch(0.55 0.18 288 / 0.28), transparent);
+        }
+        & .menu-topline, & .menu-brand, & .menu-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        & .menu-brand { justify-content: flex-start; gap: 12px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.2em; color: var(--text-soft); }
+        & .menu-brand i { padding: 0 3px; font-style: normal; color: var(--text-dim); }
+        & .brand-symbol {
+            display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 11px; corner-shape: var(--corner, round);
+            font-size: 1.1rem; color: var(--mint); background: oklch(0.87 0.17 170 / 0.12); border: 1px solid oklch(0.87 0.17 170 / 0.34); box-shadow: 0 0 26px -6px var(--mint);
+        }
+        & .network-status {
+            flex: none; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 7px 13px; border-radius: var(--r-pill);
+            font-size: 0.68rem; font-weight: 600; color: var(--text-mute); background: var(--field-bg); border: 1px solid var(--stroke);
+        }
+        & .network-status::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--text-dim); }
+        & .network-status[data-state="online"] { color: var(--mint); border-color: oklch(0.87 0.17 170 / 0.3); }
+        & .network-status[data-state="online"]::before { background: var(--mint); box-shadow: 0 0 10px var(--mint); }
+        & .network-status[data-state="connecting"] { color: var(--gold); }
+        & .network-status[data-state="connecting"]::before { background: var(--gold); animation: maze-signal 1s ease infinite; }
+
+        & .hero-copy { padding: clamp(26px, 4vw, 48px) 0 clamp(18px, 2.4vw, 28px); display: grid; justify-items: start; gap: 12px; }
+        & .hero-kicker { display: inline-flex; align-items: center; gap: 12px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.24em; color: var(--mint); }
+        & .hero-kicker::before { content: ""; width: 26px; height: 1px; background: currentColor; box-shadow: 0 0 10px currentColor; }
+        & .hero-copy h2 {
+            font-size: var(--fs-2xl); font-stretch: 88%; letter-spacing: -0.05em; line-height: 0.98;
+            background: linear-gradient(180deg, #fff 25%, oklch(0.80 0.09 210)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        & .hero-copy p { max-width: 52ch; font-size: var(--fs-md); color: var(--text-soft); }
+
+        & .player-name-field {
+            display: flex; align-items: center; gap: 16px; width: 100%; margin-bottom: 14px; padding: 0 18px; border-radius: var(--r-md);
+            background: var(--field-bg); border: 1px solid var(--stroke); transition: border-color var(--t-base), box-shadow var(--t-base);
+        }
+        & .player-name-field:focus-within { border-color: oklch(0.87 0.17 170 / 0.6); box-shadow: 0 0 0 4px oklch(0.87 0.17 170 / 0.12); }
+        & .player-name-field span { flex: none; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.16em; color: var(--text-mute); }
+        & .player-name-field input { min-width: 0; width: 100%; padding: 15px 0; border: 0; outline: 0; background: transparent; font-size: var(--fs-base); color: var(--text); }
+        & .player-name-field input::placeholder { color: var(--text-dim); }
+
+        & .mode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 10px; }
+        & .mode-choice {
+            --mx: -600px; --my: -600px;
+            position: relative; isolation: isolate; min-width: 0; display: grid; grid-template-columns: 52px minmax(0, 1fr) 18px; align-items: center; gap: 14px;
+            padding: 14px 16px 14px 14px; border-radius: var(--r-md); corner-shape: var(--corner, round); text-align: left; white-space: normal;
+            background: var(--tile-bg); border: 1px solid var(--stroke); box-shadow: var(--shadow-1); color: var(--text);
+        }
+        & .mode-choice::before {
+            content: ""; position: absolute; inset: -1px; z-index: -1; pointer-events: none; border-radius: inherit; corner-shape: inherit; padding: 1px;
+            background: radial-gradient(240px circle at var(--mx) var(--my), oklch(0.87 0.17 170 / 0.95), transparent 66%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            opacity: 0; transition: opacity var(--t-base);
+        }
+        & .mode-choice:hover, & .mode-choice:focus-visible { transform: translateY(-3px); background: linear-gradient(155deg, oklch(0.34 0.07 200 / 0.7), oklch(0.20 0.035 262 / 0.7)); outline: none; }
+        & .mode-choice:hover::before, & .mode-choice:focus-visible::before { opacity: 1; }
+        & .mode-choice:active { scale: 0.98; }
+        & .mode-choice.solo-choice {
+            grid-column: 1 / -1; padding: 18px 20px 18px 16px; grid-template-columns: 64px minmax(0, 1fr) 22px;
+            background: linear-gradient(120deg, oklch(0.46 0.12 172 / 0.65), oklch(0.20 0.045 258 / 0.8) 70%); border-color: oklch(0.87 0.17 170 / 0.38);
+        }
+        & .mode-number {
+            display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; corner-shape: var(--corner, round);
+            font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+            color: var(--text-soft); background: oklch(0 0 0 / 0.28); border: 1px solid var(--stroke-hi);
+        }
+        & .solo-choice .mode-number { width: 64px; height: 64px; font-size: 1.5rem; color: var(--ink-1000); background: linear-gradient(135deg, var(--mint), oklch(0.80 0.14 200)); border-color: transparent; box-shadow: 0 12px 34px -10px oklch(0.87 0.17 170 / 0.85); }
+        & .mode-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+        & .mode-copy > b { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; letter-spacing: -0.02em; }
+        & .solo-choice .mode-copy > b { font-size: 1.3rem; }
+        & .mode-copy > small { font-size: 0.74rem; line-height: 1.35; color: var(--text-mute); }
+        & .mode-copy > .mode-waiting { display: inline-flex; align-items: center; gap: 7px; margin-top: 4px; font-size: 0.68rem; color: var(--text-soft); }
+        & .mode-waiting::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); animation: maze-signal 2s ease-in-out infinite; }
+        & .mode-waiting b { font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--mint); }
+        & .mode-arrow { justify-self: end; font-size: 1.1rem; color: var(--text-dim); transition: transform var(--t-base) var(--ease-spring), color var(--t-base); }
+        & .mode-choice:hover .mode-arrow { color: var(--mint); transform: translate(3px, -3px); }
+
+        & .server-config { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--stroke); font-size: 0.78rem; color: var(--text-mute); }
+        & .server-config summary { width: fit-content; cursor: pointer; font-weight: 650; color: var(--text-soft); list-style: none; }
+        & .server-config summary::before { content: "＋"; margin-right: 8px; color: var(--mint); }
+        & .server-config[open] summary::before { content: "−"; }
+        & .server-config summary::-webkit-details-marker { display: none; }
+        & .server-config p { margin: 10px 0; line-height: 1.55; }
+        & .server-config-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        & .server-config-row input { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; outline: none; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text); background: var(--field-bg); border: 1px solid var(--stroke); }
+        & .server-config-row input:focus { border-color: oklch(0.87 0.17 170 / 0.6); }
+        & .server-config-row button { color: var(--ink-1000); border-color: transparent; background: linear-gradient(135deg, var(--mint), oklch(0.80 0.14 200)); }
+        & #serverConfigHint { display: block; margin-top: 8px; color: var(--text-dim); line-height: 1.45; }
+        & .menu-footer { flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--stroke); font-size: 0.6rem; font-weight: 800; letter-spacing: 0.16em; color: var(--text-dim); }
+        & .menu-footer > span:first-child { display: flex; align-items: center; gap: 8px; }
+        & .footer-pulse { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); animation: maze-signal 2s ease-in-out infinite; }
+    }
+
+    /* while a game is on, the like/share dock sits in its normal slot instead of floating over the board */
+    body:not(.in-menu):has(#site-maze-app) .site-interaction-bar-host { position: static; }
+
+    /* ——— keyframes (maze-prefixed so merged code can't clash) ——— */
+    @keyframes maze-signal { 0%, 100% { opacity: 0.65; transform: scale(0.88); } 50% { opacity: 1; transform: scale(1.14); } }
+    @keyframes maze-orbit { to { transform: rotate(360deg); } }
+    @keyframes maze-lobby-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+    @keyframes maze-toast { from { opacity: 0; translate: 0 -8px; } }
+    @keyframes maze-pop { from { opacity: 0; transform: translate(-50%, -42%) scale(0.86); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+    /* ——— responsive ——— */
+    @media (max-width: 980px) {
+        .maze-hero { grid-template-columns: 1fr; }
+        .maze-hero-art { order: -1; width: min(100%, 400px); }
+        .maze-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .maze-tile:nth-child(n) { grid-column: span 1; }
+        .maze-tile:nth-child(1) { grid-column: 1 / -1; }
+    }
+    @media (max-width: 560px) {
+        .maze-features { grid-template-columns: 1fr; }
+        .maze-app .menu-topline { flex-wrap: wrap; }
+        .maze-app .network-status { max-width: 100%; }
+        .maze-app .player-name-field { flex-direction: column; align-items: stretch; gap: 0; padding: 10px 16px 4px; }
+        .maze-app .player-name-field input { padding: 10px 0 12px; }
+    }
+}

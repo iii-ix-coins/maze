@@ -1,0 +1,72 @@
+/*
+ * Add this stylesheet after style.css, or copy this block into style.css.
+ * It replaces the old .maze-background-layer / html::before background system.
+ */
+
+html {
+    background-color: var(--maze-canvas, #00a800);
+    transition: background-color 850ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Disable the old crop background if that rule still exists in the project. */
+html::before {
+    content: none !important;
+    display: none !important;
+}
+
+.maze-background-layer {
+    display: none !important;
+}
+
+.maze-viewport {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.maze-canvas {
+    transition: fill 850ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.maze-image {
+    opacity: 0;
+    transition: opacity 850ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    pointer-events: none;
+}
+
+.maze-image.is-active {
+    opacity: 1;
+}
+
+/* The camera transform is updated per animation frame; do not transition transform. */
+#maze-world {
+    transform-box: view-box;
+    will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    html,
+    .maze-canvas {
+        transition-duration: 200ms;
+    }
+
+    .maze-image {
+        transition-duration: 200ms;
+    }
+}
+
+/* Nav actions (theme toggle styles live in style.css: "Theme toggle") */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
