@@ -1,44 +1,73 @@
+/* ۰. FRAME TOKENS */
+#mazeApp.in-menu {
+    --frame-pad: clamp(16px, 1.8vw, 24px);      /* فاصله‌ی داخلی قاب */
+    --frame-gap: 14px;                          /* فاصله‌ی دو قاب مجاور */
+    --frame-r: var(--r-lg, 24px);
+    --frame-stroke: var(--stroke, var(--line));
+    --frame-bg: var(--tile-bg, var(--glass));
+    --frame-shadow: var(--shadow-1, none);
+    --frame-split: 0px;                         /* فقط تک‌ستون مقدار می‌گیرد */
+}
+#mazeApp.in-menu[data-theme="light"] {
+    --frame-stroke: rgba(26,62,43,.18);
+    --frame-bg: rgba(255,255,255,.82);
+    --frame-shadow: 0 12px 32px rgba(30,60,44,.09);
+}
+
+/* ۱. ظرف صفحه */
 #mazeApp.in-menu {
     --maze-gap: clamp(18px, 3vw, 36px);
-    --maze-bleed: 12px; /* #mazeApp خودش overflow را می‌برد؛ جا برای glow و سایه */
+    --maze-bleed: 12px;
     width: min(100% - 2 * var(--gutter, 24px) + 2 * var(--maze-bleed), var(--page-max, 1240px) + 2 * var(--maze-bleed));
     padding: var(--maze-gap) var(--maze-bleed);
 }
 #mazeApp.in-menu .cg {
     --cg-max: min(100vw - 2 * var(--gutter, 24px), var(--page-max, 1240px));
-    --cg-gutter: 0px;
+    --cg-gutter: var(--frame-pad);
+    --cg-pad-t: var(--frame-pad);
+    --cg-pad-b: var(--frame-pad);
+    --cg-gap: calc(var(--frame-pad) * 2 + var(--frame-gap));
 }
 #mazeApp.in-menu .cg-top,
 #mazeApp.in-menu .cg-layout { width: 100%; max-width: none; }
 #mazeApp.in-menu .lb { max-width: none; padding-inline: 0; }
-#mazeApp.in-menu .cg-stage canvas { max-width: none; } /* باگ ریست سایت */
+#mazeApp.in-menu .cg-stage canvas { max-width: none; }
+
+/* ۲. CREATE: دو قاب در همه‌ی اندازه‌ها */
+#mazeApp.in-menu .cg-layout { position: relative; isolation: isolate; }
+#mazeApp.in-menu .cg-layout::before,
+#mazeApp.in-menu .cg-layout::after {
+    content: "";
+    z-index: -1;
+    margin: calc(var(--frame-pad) * -1);
+    box-sizing: border-box;
+    pointer-events: none;
+    border: 1px solid var(--frame-stroke);
+    border-radius: var(--frame-r);
+    background: var(--frame-bg);
+    box-shadow: var(--frame-shadow);
+}
+/* grid-area: row-start / col-start / row-end / col-end */
+#mazeApp.in-menu .cg-layout::before { grid-area: title-start / title-start / stage-end / stage-end; }
+#mazeApp.in-menu .cg-layout::after {
+    grid-area: rail-start / rail-start / nav-end / nav-end;
+    margin-top: calc(var(--frame-pad) * -1 + var(--frame-split));
+}
+
+/* تک‌ستون (نه عریض، نه landscape فشرده) */
+@media not (((min-width: 560px) and (min-aspect-ratio: 5/4)) or ((min-width: 420px) and (max-width: 559px) and (orientation: landscape))) {
+    #mazeApp.in-menu .cg { --frame-split: calc(var(--frame-pad) * 2 + var(--frame-gap) - var(--cg-row)); }
+    #mazeApp.in-menu .cg-rail { margin-top: var(--frame-split); }
+    #mazeApp.in-menu .cg-nav { background: linear-gradient(180deg, transparent, var(--frame-nav-fade, rgba(10,17,28,.92)) 38%); }
+    #mazeApp.in-menu[data-theme="light"] .cg-nav { --frame-nav-fade: rgba(255,255,255,.92); }
+}
 
 @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
-    #mazeApp.in-menu .cg {
-        --cg-pad: clamp(16px, 1.8vw, 24px);
-        --cg-pad-t: var(--cg-pad);
-        --cg-pad-b: var(--cg-pad);
-        --cg-gutter: var(--cg-pad);
-        --cg-gap: calc(var(--cg-pad) * 2 + 14px);
-        --cg-aside: clamp(340px, 34vw, 440px);
-    }
+    #mazeApp.in-menu .cg { --cg-aside: clamp(340px, 34vw, 440px); }
     #mazeApp.in-menu .cg-layout {
-        position: relative; isolation: isolate;
         grid-template-columns: minmax(0, 1fr) minmax(0, var(--cg-aside));
         justify-content: stretch;
     }
-    #mazeApp.in-menu .cg-layout::before,
-    #mazeApp.in-menu .cg-layout::after {
-        content: ""; z-index: -1; grid-row: 1 / -1;
-        margin: calc(var(--cg-pad) * -1);
-        box-sizing: border-box; pointer-events: none;
-        border: 1px solid var(--stroke, var(--line));
-        border-radius: var(--r-lg, 24px);
-        background: var(--tile-bg, var(--glass));
-        box-shadow: var(--shadow-1, none);
-    }
-    #mazeApp.in-menu .cg-layout::before { grid-column: 1; }
-    #mazeApp.in-menu .cg-layout::after  { grid-column: 2; }
     #mazeApp.in-menu .cg-stage canvas {
         --m: min(var(--maze-side), 100%);
         justify-self: center;
@@ -48,17 +77,34 @@
     }
 }
 
-/* اتاق انتظار: یک سطح، گل | جزئیات */
+@media (min-width: 420px) and (max-width: 559px) and (orientation: landscape) {
+    #mazeApp.in-menu { --frame-pad: 12px; }
+}
+
+/* ۳. OPEN ROOMS و LIVE RACES */
+#mazeApp.in-menu .lb[data-view="rooms"],
+#mazeApp.in-menu .lb[data-view="live"] {
+    box-sizing: border-box;
+    padding: var(--frame-pad);
+    border: 1px solid var(--frame-stroke);
+    border-radius: var(--frame-r);
+    background: var(--frame-bg);
+    box-shadow: var(--frame-shadow);
+}
+/* قاب حدود ۵۰px از عرض مفید کم می‌کند؛ بدون این، Live در حداکثر عرض از ۳ به ۲ ستون می‌رفت */
+#mazeApp.in-menu .lb-grid-live { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+
+/* ۴. اتاق انتظار: رفتار قبلی، فقط از توکن‌ها می‌خواند */
 @media (min-width: 880px) {
     #mazeApp.in-menu .lb-room-screen {
         grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
         gap: clamp(24px, 4vw, 56px);
         padding: clamp(20px, 3vw, 36px);
         box-sizing: border-box;
-        border: 1px solid var(--stroke, var(--line));
-        border-radius: var(--r-lg, 24px);
-        background: var(--tile-bg, var(--glass));
-        box-shadow: var(--shadow-1, none);
+        border: 1px solid var(--frame-stroke);
+        border-radius: var(--frame-r);
+        background: var(--frame-bg);
+        box-shadow: var(--frame-shadow);
     }
     #mazeApp.in-menu .lb-room-stage { width: min(100%, 360px); }
     #mazeApp.in-menu .lb-room-panel { max-width: none; }
@@ -67,19 +113,11 @@
     #mazeApp.in-menu .lb-room-screen { align-items: center; }
 }
 
-/* حالت‌های خالی هم سطح دارند */
+/* ۵. حالت‌های خالی */
 #mazeApp.in-menu .lb-empty {
     box-sizing: border-box;
     padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px);
     border: 1px dashed var(--stroke-hi, var(--line));
-    border-radius: var(--r-lg, 24px);
+    border-radius: var(--frame-r);
     background: var(--veil, var(--glass));
-}
-
-#mazeApp.in-menu[data-theme="light"] .cg-layout::before,
-#mazeApp.in-menu[data-theme="light"] .cg-layout::after,
-#mazeApp.in-menu[data-theme="light"] .lb-room-screen {
-    background: rgba(255,255,255,.82);
-    border-color: rgba(26,62,43,.18);
-    box-shadow: 0 12px 32px rgba(30,60,44,.09);
 }
