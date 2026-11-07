@@ -167,6 +167,14 @@ export class MazeStage {
     setActive(on) {
         this.active = on;
         if (on) { this.resize(); this.requestDraw(); }
+        else if (this.stopLoop) { this.stopLoop(); this.stopLoop = null; }
+    }
+
+    /** Releases the canvas observer and animation loop when React unmounts the preview. */
+    destroy() {
+        this.active = false;
+        this.observer?.disconnect();
+        if (this.stopLoop) { this.stopLoop(); this.stopLoop = null; }
     }
 
     resize() {

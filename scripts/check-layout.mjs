@@ -51,15 +51,42 @@ for (const file of activeFrontend) {
 
 const mazeBaseline = fs.readFileSync(path.join(root, 'src/features/maze/maze-markup.html'), 'utf8');
 const mazeReact = fs.readFileSync(path.join(root, 'src/features/maze/MazeMarkup.tsx'), 'utf8');
+const mazeMenu = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
 const baselineIds = [...mazeBaseline.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
-const missingMazeIds = baselineIds.filter(id => !mazeReact.includes(`id={"${id}"}`));
+// IDs now live across the static React game tree and the React-owned dynamic menu.
+// Dynamic tab IDs use a conditional expression, so check their quoted literals too.
+const reactMazeSources = `${mazeReact}\n${mazeMenu}`;
+const missingMazeIds = baselineIds.filter(id => {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const explicitId = new RegExp(`\\bid\\s*=\\s*(?:\\{\\s*[\"']${escaped}[\"']\\s*\\}|[\"']${escaped}[\"'])`);
+  return !explicitId.test(reactMazeSources) && !reactMazeSources.includes(`'${id}'`);
+});
 if (missingMazeIds.length) {
-  console.error('[layout] Maze React markup is missing legacy DOM IDs:', missingMazeIds.join(', '));
+  console.error('[layout] Maze React tree is missing legacy DOM IDs:', missingMazeIds.join(', '));
   process.exit(1);
 }
 if (/dangerouslySetInnerHTML/.test(mazeReact)) {
   console.error('[layout] Maze React markup must not inject the original HTML string.');
   process.exit(1);
+}
+const createController = fs.readFileSync(path.join(root, 'src/features/maze/ui/create-game/create-game.ts'), 'utf8');
+const lobbyCoordinator = fs.readFileSync(path.join(root, 'src/features/maze/ui/lobby/lobby-hub.ts'), 'utf8');
+const domUiApi = /\b(?:document\.|querySelector(?:All)?\(|createElement\(|replaceChildren\(|innerHTML|classList\.)/;
+if (domUiApi.test(createController) || domUiApi.test(lobbyCoordinator)) {
+  console.error('[layout] CreateGameComponent and LobbyHub must remain DOM-free state/protocol adapters.');
+  process.exit(1);
+}
+for (const component of ['function CreateWizard', 'export function RoomsPanel', 'export function LivePanel', 'export function RoomPanel']) {
+  if (!mazeMenu.includes(component)) {
+    console.error(`[layout] React Maze menu is missing ${component}.`);
+    process.exit(1);
+  }
+}
+for (const obsolete of ['rooms-view.ts', 'room-view.ts', 'live-view.ts', 'card-list.ts', 'lobby-toolbar.ts', 'seat-bloom.ts', 'create-game/controls.ts', 'create-game/step-rail.ts']) {
+  if (fs.existsSync(path.join(root, 'src/features/maze/ui', obsolete))) {
+    console.error(`[layout] obsolete imperative Maze UI controller remains: ${obsolete}`);
+    process.exit(1);
+  }
 }
 const activeSources = [
   'src/app/App.tsx',

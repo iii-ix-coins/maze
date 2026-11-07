@@ -1,17 +1,9 @@
 # Maze frontend feature
 
-React owns the Maze page shell and its complete static interface tree in
-`MazePage.tsx` / `MazeMarkup.tsx`. The original DOM IDs, classes, canvas nodes,
-control nodes and stylesheet hooks are retained so the established game
-runtime can attach without a contract change.
+React owns the Maze page, the Create Game Wizard, Rooms browser, Room Details / Waiting Room and Live Races. `MazeMenu.tsx` is the React-owned presentation layer and subscribes to the immutable UI snapshot in `maze-ui-store.ts`.
 
-The simulation remains an independent TypeScript engine: Canvas rendering,
-maze generation, frame loop, keyboard/pointer/joystick input, save format and
-multiplayer message protocol are intentionally not React state. React must not
-re-render the high-frequency simulation surface.
+`CreateGameComponent` is a DOM-free state adapter retained for the existing engine API. `LobbyHub` is a protocol/data coordinator only: it coordinates the existing WebSocket client and `LobbyStore`, then publishes snapshots and user actions to React. The lobby data store, sorting/filtering algorithms, room protocol and persisted preference keys remain independent of the view components.
 
-Migration work still required inside the UI layer: the Create wizard and the
-Rooms / Live / Room views are currently populated and coordinated by the
-imperative modules under `ui/`, `lobby/`, `rooms/`, `create-game/`, `live/` and
-`race/`. These are the next React conversion targets. Their DOM contracts and
-network adapters must be migrated one feature at a time with parity tests.
+The simulation remains an independent TypeScript engine. Maze generation, game state, Canvas rendering, frame loop, keyboard/pointer/joystick input, save format and multiplayer message protocol are not moved into React state. `MazeStage` and `LiveThumb` are canvas preview renderers with explicit React mount/unmount cleanup.
+
+Remaining UI migration work includes the in-race HUD and Race Board, plus any other legacy presentation/bootstrap surface outside the four migrated menu views. The original static game DOM IDs are preserved as a compatibility boundary until those engine-facing surfaces are converted. Do not move high-frequency game-loop updates into React state.

@@ -1,2 +1,1 @@
-export { LiveView } from '../ui/lobby/live-view';
-export { LiveThumb } from '../ui/lobby/live-thumb';
+export { LivePanel } from '../ui/react/MazeMenu';

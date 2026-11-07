@@ -1,396 +1,503 @@
 /**
- * The lobby: ties the server connection, the lobby mirror (`LobbyStore`), the three views (Rooms, Live and the
- * room you are sitting in) and the menu shell together. The game engine only talks to this class through a handful
- * of calls (`quickMatch`, `handleMessage`, `gameStarted`, …); everything about rooms stays in here.
+ * Data/protocol coordinator for multiplayer lobby flows.
+ * No view classes, DOM writes, or element references live here. React owns all
+ * Rooms, Room Details and Live Races markup; this class only coordinates the
+ * multiplayer client and publishes immutable UI snapshots.
  */
 import { LobbyStore } from './lobby-store';
-import { RoomsView } from './rooms-view';
-import { LiveView } from './live-view';
-import { RoomView } from './room-view';
-import { Toast } from './toast';
 import { ICONS } from './icons';
-import { frameThrottle } from './dom';
 import { getPlayerName } from './player-name';
+import { mazeUiStore } from '../react/maze-ui-store';
 
 const LOBBY_VIEWS = new Set(['create', 'rooms', 'live']);
+const MAX_PEEK_CACHE = 24;
+
+function frameThrottle<T extends (...args: any[]) => void>(fn: T): T {
+  let queued = false;
+  return ((...args: any[]) => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; fn(...args); });
+  }) as T;
+}
 
 export class LobbyHub {
-    declare client: any;
-    declare retryConnection: any; // NOTE: never assigned in the legacy code either (see docs/FINDINGS.md)
-    declare shell: any;
-    declare getServerUrl: () => string;
-    declare openServerSettings: (...args: any[]) => any;
-    declare store: any;
-    declare toast: Toast;
-    declare network: string;
-    declare phase: string;
-    declare pending: string;
-    declare returnView: string;
-    declare lastSetup: any;
-    declare watching: boolean;
-    declare pendingCode: string;
-    declare tickTimer: number;
-    declare roomsView: RoomsView;
-    declare liveView: LiveView;
-    declare roomView: RoomView;
+  client: any;
+  shell: any;
+  getServerUrl: () => string;
+  retryConnection: () => void;
+  store: LobbyStore;
+  network = 'offline';
+  phase: 'idle' | 'joining' | 'inRoom' = 'idle';
+  pending = '';
+  returnView: 'create' | 'rooms' | 'live' | 'room' = 'create';
+  lastSetup: any = null;
+  watching = false;
+  pendingCode = '';
+  tickTimer: ReturnType<typeof setInterval> | 0 = 0;
+  peekedIds: string[] = [];
+  mazeCache = new Map<string, any>();
+  frameCache = new Map<string, any>();
+  busyTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  noticeTimer: ReturnType<typeof setTimeout> | 0 = 0;
 
-    /**
-     * @param {{client:import('../../net/multiplayer-client').MazeMultiplayerClient,
-     *          shell:import('../create-game/create-game').CreateGameComponent,
-     *          getServerUrl:()=>string, retryConnection:()=>void}} options
-     */
-    constructor({ client, shell, getServerUrl, retryConnection }) {
-        this.client = client;
-        this.shell = shell;
-        this.getServerUrl = getServerUrl;
-        this.openServerSettings = retryConnection;
-        this.store = new LobbyStore();
-        this.toast = new Toast(document.getElementById('lbToast'));
-        this.network = 'offline';
-        this.phase = 'idle';        // idle | joining | inRoom
-        this.pending = '';          // quick | join | spectate | ''
-        this.returnView = 'create';
-        this.lastSetup = null;
-        this.watching = false;
-        this.pendingCode = '';
-        this.tickTimer = 0;
+  constructor({ client, shell, getServerUrl, retryConnection }: any) {
+    this.client = client;
+    this.shell = shell;
+    this.getServerUrl = getServerUrl;
+    this.retryConnection = retryConnection;
+    this.store = new LobbyStore();
 
-        this.roomsView = new RoomsView(document.getElementById('lbRooms'), {
-            store: this.store,
-            onJoin: room => this.joinRoom(room),
-            onJoinCode: code => this.joinCode(code),
-            onCreate: () => this.shell.setView('create'),
-            onRetry: () => this.retryConnection(),
-            onNotice: message => this.toast.show(message, { tone: 'warn' })
-        });
-        this.liveView = new LiveView(document.getElementById('lbLive'), {
-            store: this.store,
-            onWatch: room => this.watchRoom(room),
-            onPeek: ids => this.client.peek(ids),
-            onBrowseRooms: () => this.shell.setView('rooms'),
-            onRetry: () => this.retryConnection()
-        });
-        this.roomView = new RoomView(document.getElementById('lbRoom'), {
-            onLeave: () => this.leaveRoom(),
-            onStart: () => this.client.startRoom(),
-            onCopy: code => this.copyInvite(code)
-        });
+    const publish = frameThrottle(() => this.refreshAll());
+    this.store.subscribe(() => publish());
+    shell.onViewChange = (view: string, previous: string) => this.viewChanged(view, previous);
+    shell.onVisibility = (visible: boolean) => this.visibilityChanged(visible);
 
-        const refreshAll = frameThrottle(() => this.refreshAll());
-        this.store.subscribe(() => refreshAll());
-        shell.onViewChange = (view, previous) => this.viewChanged(view, previous);
-        shell.onVisibility = visible => this.visibilityChanged(visible);
+    mazeUiStore.registerActions({
+      joinRoom: (room: any) => this.joinRoom(room),
+      joinCode: (code: string) => this.joinCode(code),
+      watchRoom: (room: any) => this.watchRoom(room),
+      leaveRoom: () => this.leaveRoom(),
+      startRoom: () => this.client.startRoom(),
+      retryConnection: () => this.retryConnection(),
+      browseRooms: () => this.shell.setView('rooms'),
+      backToLobby: () => this.backToLobby(),
+      copyInvite: (code: string) => this.copyInvite(code),
+      requestPeeks: (ids: string[]) => this.requestPeeks(ids),
+      roomNoticeAction: (key: string) => this.roomNoticeAction(key),
+      toastAction: (key: string) => this.toastAction(key),
+    });
+  }
+
+  get online() { return this.network === 'online'; }
+  get status() {
+    if (this.network === 'online' && this.client.protocol && this.client.protocol < 2) return 'old';
+    return this.network;
+  }
+  get supportsRooms() { return this.client.supportsRooms(); }
+  get youId() { return this.client.selfId; }
+
+  onNetwork(state: string) {
+    const was = this.network;
+    this.network = state;
+    this.shell.setNetworkStatus(state);
+    if (state !== 'online') {
+      this.watching = false;
+      this.store.reset();
+      this.forgetPeeks();
+      if (was === 'online' || was === 'connecting') this.connectionLost(state);
     }
+    this.pushStatus();
+    this.refreshAll();
+  }
 
-    /* ── Connection state ── */
-    get online() { return this.network === 'online'; }
-    /** What the lists should show: offline, connecting, online, or old (a server without rooms). */
-    get status() {
-        if (this.network === 'online' && this.client.protocol && this.client.protocol < 2) return 'old';
-        return this.network;
+  pushStatus() {
+    mazeUiStore.patch({ network: this.status });
+    this.syncWatch();
+  }
+
+  connectionLost(state: string) {
+    if (state === 'connecting') return;
+    if (this.phase === 'joining' || this.phase === 'inRoom') {
+      const joining = this.phase === 'joining';
+      this.phase = 'idle';
+      if (this.shell.view === 'room' && this.shell.visible) {
+        this.showRoomNotice({
+          title: joining ? 'Server unavailable' : 'Connection lost',
+          text: joining
+            ? 'Could not reach the game. Check your connection and try again.'
+            : 'The connection dropped, so you were removed from the room. Reconnecting happens automatically.',
+          actions: [
+            { label: 'Back to lobby', primary: true, key: 'back', icon: ICONS.back },
+            { label: 'Reconnect', key: 'retry', icon: ICONS.server },
+          ],
+        });
+      }
     }
-    get supportsRooms() { return this.client.supportsRooms(); }
+    this.clearBusy();
+  }
 
-    onNetwork(state) {
-        const was = this.network;
-        this.network = state;
-        if (state !== 'online') {
-            this.watching = false;
-            this.store.reset();
-            this.liveView.forgetPeeks();
-            if (was === 'online' || was === 'connecting') this.connectionLost(state);
-        }
+  handleMessage(message: any) {
+    switch (message.type) {
+      case 'connected':
         this.pushStatus();
-    }
-    pushStatus() {
-        const options = { hasUrl: Boolean(this.getServerUrl()) };
-        this.roomsView.setStatus(this.status, options);
-        this.liveView.setStatus(this.status, options);
-        this.syncWatch();
-    }
-    connectionLost(state) {
-        if (state === 'connecting') return;
+        this.consumePendingCode();
+        return false;
+      case 'lobby:state':
+        this.store.applyState(message);
+        return true;
+      case 'lobby:patch':
+        this.store.applyPatch(message);
+        return true;
+      case 'peek:maze':
+      case 'peek:frame':
+      case 'peek:end':
+        this.onPeekMessage(message);
+        return true;
+      case 'room:joined':
+        this.onJoined(message);
+        return true;
+      case 'room:state':
+        if (this.phase === 'inRoom' || this.phase === 'joining') this.onJoined({ room: message.room, you: this.youId });
+        return true;
+      case 'room:notice':
+        this.notice(message.message || 'The room changed.');
+        return true;
+      case 'room:error':
+        return this.onRoomError(message);
+      case 'room:closed':
+        if (!this.shell.visible) return false;
+        if (this.phase !== 'idle') this.closedWhileWaiting(message);
+        return true;
+      case 'queue:waiting':
+        if (this.supportsRooms || !this.shell.visible) return this.supportsRooms;
         if (this.phase === 'joining' || this.phase === 'inRoom') {
-            const joining = this.phase === 'joining';
-            this.phase = 'idle';
-            if (this.shell.view === 'room' && this.shell.visible) {
-                this.roomView.showNotice({
-                    title: joining ? 'Server unavailable' : 'Connection lost',
-                    text: joining
-                        ? 'Could not reach the game. Check your connection and try again.'
-                        : 'The connection dropped, so you were removed from the room. Reconnecting happens automatically.',
-                    actions: [
-                        { label: 'Back to lobby', primary: true, icon: ICONS.back, onClick: () => this.backToLobby() },
-                        { label: 'Reconnect', icon: ICONS.server, onClick: () => this.retryConnection() }
-                    ]
-                });
-            }
+          this.phase = 'inRoom';
+          mazeUiStore.patch({
+            roomMode: 'room',
+            room: null,
+            roomJoining: null,
+            roomNotice: null,
+            legacyRoom: {
+              waiting: Math.max(0, Number(message.waitingPlayers) || 0),
+              required: Math.max(1, Number(message.requiredPlayers || message.players) || 1),
+            },
+          });
+          this.shell.setView('room');
         }
-        this.roomsView.clearBusy();
-        this.liveView.clearBusy();
-    }
-
-    /* ── Messages ── */
-    /** Returns true when the message belonged to the lobby and needs no further handling. */
-    handleMessage(message) {
-        switch (message.type) {
-            case 'connected':
-                this.pushStatus(); // the protocol version is known now
-
-                this.consumePendingCode();
-                return false; // the engine also wants to know
-            case 'lobby:state':
-                this.store.applyState(message);
-                return true;
-            case 'lobby:patch':
-                this.store.applyPatch(message);
-                return true;
-            case 'peek:maze':
-            case 'peek:frame':
-            case 'peek:end':
-                this.liveView.onPeekMessage(message);
-                return true;
-            case 'room:joined':
-                this.onJoined(message);
-                return true;
-            case 'room:state':
-                if (this.phase === 'inRoom' || this.phase === 'joining') this.onJoined({ room: message.room, you: this.youId });
-                return true;
-            case 'room:notice':
-                this.toast.show(message.message || 'The room changed.');
-                return true;
-            case 'room:error':
-                return this.onRoomError(message);
-            case 'room:closed':
-                if (!this.shell.visible) return false; // a running game handles its own room
-                if (this.phase !== 'idle') this.closedWhileWaiting(message);
-                return true;
-            case 'queue:waiting':
-                // Protocol v2 servers send this only for old clients.
-                if (this.supportsRooms || !this.shell.visible) return this.supportsRooms;
-                if (this.phase === 'joining' || this.phase === 'inRoom') {
-                    this.phase = 'inRoom';
-                    this.shell.setView('room');
-                    this.roomView.setLegacy(message.waitingPlayers, message.requiredPlayers || message.players);
-                }
-                return true;
-            case 'room:forming':
-                return this.supportsRooms;
-            case 'queue:left':
-                // v2 servers send this next to `room:left` for old clients; the engine must not treat it as "go to menu".
-                return this.supportsRooms;
-            case 'match:error':
-            case 'protocol:error':
-                // Rate limits and malformed requests end a pending join like any other refusal.
-                return this.shell.visible ? this.onRoomError({ ...message, code: message.code || 'invalid' }) : false;
-            default:
-                return false;
-        }
-    }
-
-    get youId() { return this.client.selfId; }
-
-    onJoined(message) {
-        this.phase = 'inRoom';
-        this.pending = '';
-        this.roomsView.clearBusy();
-        this.roomView.setRoom(message.room, message.you || this.youId);
-        if (this.shell.visible && this.shell.view !== 'room') this.shell.setView('room');
-        this.roomView.setActive(this.shell.view === 'room');
-    }
-
-    onRoomError(message) {
-        const code = message.code;
-        if (code === 'stale') return true;
-        const wasPending = this.pending;
-        this.roomsView.clearBusy();
-        this.liveView.clearBusy();
-        if (this.phase === 'joining') {
-            this.phase = 'idle';
-            this.pending = '';
-            this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
-        }
-        if ((code === 'started' || code === 'full') && message.roomId && wasPending !== 'quick') {
-            const room = this.store.get(message.roomId);
-            if (room && room.phase === 'playing') {
-                this.toast.show('That race has already started.', {
-                    action: { label: 'Watch it', onClick: () => this.watchRoom(room) }, tone: 'warn', ms: 7000
-                });
-                return true;
-            }
-        }
-        this.toast.show(message.message || 'That did not work.', { tone: 'warn' });
         return true;
+      case 'room:forming':
+        return this.supportsRooms;
+      case 'queue:left':
+        return this.supportsRooms;
+      case 'match:error':
+      case 'protocol:error':
+        return this.shell.visible ? this.onRoomError({ ...message, code: message.code || 'invalid' }) : false;
+      default:
+        return false;
     }
+  }
 
-    closedWhileWaiting(message) {
-        const was = this.phase;
-        this.phase = 'idle';
-        this.pending = '';
-        this.toast.show(message.message || 'The room closed.', { tone: 'warn', ms: 6500 });
-        if (this.shell.view === 'room') this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
-        return was;
+  onJoined(message: any) {
+    this.phase = 'inRoom';
+    this.pending = '';
+    this.clearBusy();
+    mazeUiStore.patch({
+      roomMode: 'room',
+      roomJoining: null,
+      room: message.room || null,
+      roomYouId: message.you || this.youId,
+      roomNotice: null,
+      legacyRoom: null,
+    });
+    if (this.shell.visible && this.shell.view !== 'room') this.shell.setView('room');
+  }
+
+  onRoomError(message: any) {
+    const code = message.code;
+    if (code === 'stale') return true;
+    const wasPending = this.pending;
+    this.clearBusy();
+    if (this.phase === 'joining') {
+      this.phase = 'idle';
+      this.pending = '';
+      this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
     }
-
-    /* ── Flows the player starts ── */
-    /** The wizard's launch button: join a room with this exact set-up, or open one. */
-    quickMatch(config) {
-        const url = this.getServerUrl();
-        this.rememberReturn();
-        this.lastSetup = config;
-        this.roomView.showJoining({
-            size: config.size, players: config.players, goals: config.goals,
-            title: config.separate ? 'Opening your room…' : 'Finding you a seat…',
-            text: config.separate ? 'A new room with your setup, listed for everyone.' : 'Joining a room with this exact setup, or opening one.'
+    if ((code === 'started' || code === 'full') && message.roomId && wasPending !== 'quick') {
+      const room = this.store.get(message.roomId);
+      if (room && room.phase === 'playing') {
+        this.notice('That race has already started.', {
+          tone: 'warn',
+          action: { label: 'Watch it', onClick: () => this.watchRoom(room), key: `watch:${room.id}` },
         });
-        this.shell.setView('room');
-        if (!url) {
-            this.phase = 'idle';
-            this.roomView.showNotice({
-                actions: [
-                    { label: 'Back', icon: ICONS.back, onClick: () => this.backToLobby() }
-                ]
-            });
-            return;
-        }
-        this.phase = 'joining';
-        this.pending = 'quick';
-        this.client.connect(url);
-        this.client.quickMatch(config, { separate: !!config.separate });
-    }
-
-    joinRoom(room) {
-        if (!this.beginJoin(room, 'join')) return;
-        this.client.joinRoom({ roomId: room.id, name: getPlayerName() });
-    }
-    joinCode(code) {
-        if (this.phase !== 'idle') return;
-        const known = this.store.findByCode(code);
-        if (known && !this.beginJoin(known, 'join')) return;
-        if (!known) {
-            this.rememberReturn();
-            this.phase = 'joining';
-            this.pending = 'join';
-            this.roomView.showJoining({ size: 33, players: 2, goals: 3, title: `Opening room ${code}…`, text: 'Taking a seat.' });
-            this.shell.setView('room');
-        }
-        this.client.joinRoom({ code, name: getPlayerName() });
-    }
-    /** Shows the room we are about to sit in so the screen never flashes empty. */
-    beginJoin(room, kind) {
-        if (this.phase !== 'idle') return false;
-        this.rememberReturn();
-        this.phase = 'joining';
-        this.pending = kind;
-        // The bloom already shows the racers who are there, so the new seat opens among them.
-        this.roomView.showJoining({
-            size: room.size, players: room.capacity, goals: room.goals, seats: room.seats || [],
-            title: `Joining ${room.host}'s room…`, text: `Taking a seat in room ${room.code}.`
-        });
-        this.shell.setView('room');
         return true;
+      }
     }
-    watchRoom(room) {
-        this.pending = 'spectate';
-        this.client.spectate({ roomId: room.id });
-    }
-    leaveRoom() {
-        this.client.leaveRoom();
-        this.phase = 'idle';
-        this.pending = '';
-        this.backToLobby();
-    }
-    backToLobby() {
-        this.phase = 'idle';
-        this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
-    }
-    rememberReturn() {
-        if (this.shell.view !== 'room') this.returnView = this.shell.view;
-    }
-    copyInvite(code) {
-        const link = /^https?:$/.test(location.protocol)
-            ? `${location.origin}${location.pathname}?room=${encodeURIComponent(code)}`
-            : code;
-        const done = ok => this.roomView.flashCopied(ok);
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(() => done(true), () => done(false));
-        else done(false);
-    }
+    this.notice(message.message || 'That did not work.', { tone: 'warn' });
+    return true;
+  }
 
-    /** Called from the page address (?room=K7QF): join as soon as the server answers. */
-    joinWhenReady(code) {
-        this.pendingCode = code;
-        if (this.online && this.client.protocol) this.consumePendingCode();
-    }
-    consumePendingCode() {
-        if (!this.pendingCode || !this.client.supportsRooms() || !this.shell.visible) return;
-        const code = this.pendingCode;
-        this.pendingCode = '';
-        this.shell.setView('rooms');
-        this.roomsView.setCode(code);
-        this.joinCode(code);
-    }
+  closedWhileWaiting(message: any) {
+    const was = this.phase;
+    this.phase = 'idle';
+    this.pending = '';
+    this.notice(message.message || 'The room closed.', { tone: 'warn' });
+    if (this.shell.view === 'room') this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
+    return was;
+  }
 
-    /* ── Engine hooks ── */
-    /** A race (or a spectated race) takes over the screen. */
-    gameStarted() {
-        this.phase = 'idle';
-        this.pending = '';
-        this.roomsView.clearBusy();
-        this.liveView.clearBusy();
-        this.syncWatch();
-    }
-    /** The menu is visible again after a game. */
-    menuShown() {
-        this.phase = 'idle';
-        this.pending = '';
-        this.syncWatch();
-    }
-    notice(message, options?: any) { this.toast.show(message, options); }
+  showJoining(details: any) {
+    mazeUiStore.patch({
+      roomMode: 'joining',
+      room: null,
+      roomYouId: '',
+      roomNotice: null,
+      legacyRoom: null,
+      roomJoining: details,
+    });
+  }
 
-    /* ── View lifecycle ── */
-    viewChanged(view, _previous?: any) {
-        this.roomsView.setActive(view === 'rooms');
-        this.liveView.setActive(view === 'live');
-        this.roomView.setActive(view === 'room');
-        this.syncWatch();
-        this.syncTicker();
-        if (view === 'rooms' || view === 'live') this.refreshAll();
-    }
-    visibilityChanged(visible) {
-        if (!visible) {
-            this.roomsView.setActive(false);
-            this.liveView.setActive(false);
-            this.roomView.setActive(false);
-        } else {
-            this.viewChanged(this.shell.view);
-            this.consumePendingCode();
-        }
-        this.syncWatch();
-        this.syncTicker();
-    }
-    /** The lobby feed is only needed while a lobby page is on screen. */
-    syncWatch() {
-        const wanted = this.online && this.shell.visible && LOBBY_VIEWS.has(this.shell.view);
-        if (wanted && !this.watching) { this.client.watchLobby(); this.watching = true; }
-        else if (!wanted && this.watching) { this.client.unwatchLobby(); this.watching = false; this.liveView.forgetPeeks(); }
-        else if (!wanted) this.client.lobbyWanted = false;
-    }
-    syncTicker() {
-        const want = this.shell.visible && (this.shell.view === 'rooms' || this.shell.view === 'live');
-        if (want && !this.tickTimer) {
-            this.tickTimer = setInterval(() => { this.roomsView.tick(); this.liveView.tick(); }, 1000);
-        } else if (!want && this.tickTimer) {
-            clearInterval(this.tickTimer);
-            this.tickTimer = 0;
-        }
-    }
+  showRoomNotice({ title = 'Something went wrong', text = 'Please try again.', actions = [], eyebrow = 'Online race' }: any = {}) {
+    mazeUiStore.patch({
+      roomMode: 'notice',
+      room: null,
+      roomJoining: null,
+      legacyRoom: null,
+      roomNotice: { title, text, eyebrow, actions },
+    });
+  }
 
-    refreshAll() {
-        this.roomsView.refresh();
-        this.liveView.refresh();
-        const counts = this.store.counts;
-        this.shell.setTabCount('rooms', this.store.ready ? counts.waitingRooms : 0);
-        this.shell.setTabCount('live', this.store.ready ? counts.liveRooms : 0);
-        this.shell.setOpenRooms(this.store.ready && this.supportsRooms ? this.store.waiting() : null, counts);
+  quickMatch(config: any) {
+    const url = this.getServerUrl();
+    this.rememberReturn();
+    this.lastSetup = config;
+    this.showJoining({
+      size: config.size, players: config.players, goals: config.goals,
+      title: config.separate ? 'Opening your room…' : 'Finding you a seat…',
+      text: config.separate ? 'A new room with your setup, listed for everyone.' : 'Joining a room with this exact setup, or opening one.',
+      seats: [],
+    });
+    this.shell.setView('room');
+    if (!url) {
+      this.phase = 'idle';
+      this.showRoomNotice({ actions: [{ label: 'Back', key: 'back', icon: ICONS.back }] });
+      return;
     }
+    this.phase = 'joining';
+    this.pending = 'quick';
+    this.client.connect(url);
+    this.client.quickMatch(config, { separate: !!config.separate });
+  }
+
+  joinRoom(room: any) {
+    if (!this.beginJoin(room, 'join')) return;
+    this.client.joinRoom({ roomId: room.id, name: getPlayerName() });
+  }
+
+  joinCode(code: string) {
+    if (this.phase !== 'idle') return;
+    const known = this.store.findByCode(code);
+    if (known && !this.beginJoin(known, 'join')) return;
+    if (!known) {
+      this.rememberReturn();
+      this.phase = 'joining';
+      this.pending = 'join';
+      this.showJoining({ size: 33, players: 2, goals: 3, title: `Opening room ${code}…`, text: 'Taking a seat.', seats: [] });
+      this.shell.setView('room');
+    }
+    this.client.joinRoom({ code, name: getPlayerName() });
+  }
+
+  beginJoin(room: any, kind: string) {
+    if (this.phase !== 'idle') return false;
+    this.rememberReturn();
+    this.phase = 'joining';
+    this.pending = kind;
+    this.showJoining({
+      size: room.size, players: room.capacity, goals: room.goals, seats: room.seats || [],
+      title: `Joining ${room.host}'s room…`, text: `Taking a seat in room ${room.code}.`,
+    });
+    this.shell.setView('room');
+    return true;
+  }
+
+  watchRoom(room: any) {
+    if (!room) return;
+    this.setBusy(room.id, true);
+    this.pending = 'spectate';
+    this.client.spectate({ roomId: room.id });
+  }
+
+  leaveRoom() {
+    this.client.leaveRoom();
+    this.phase = 'idle';
+    this.pending = '';
+    this.backToLobby();
+  }
+
+  backToLobby() {
+    this.phase = 'idle';
+    this.pending = '';
+    this.shell.setView(this.returnView === 'room' ? 'create' : this.returnView);
+  }
+
+  rememberReturn() {
+    if (this.shell.view !== 'room') this.returnView = this.shell.view;
+  }
+
+  async copyInvite(code: string) {
+    const link = /^https?:$/.test(location.protocol)
+      ? `${location.origin}${location.pathname}?room=${encodeURIComponent(code)}`
+      : code;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+      await navigator.clipboard.writeText(link);
+      mazeUiStore.patch({ copied: true });
+      window.setTimeout(() => mazeUiStore.patch({ copied: false }), 1800);
+    } catch {
+      mazeUiStore.showToast('Copy is not available here. Select the room code to copy it.', { tone: 'warn' });
+    }
+  }
+
+  joinWhenReady(code: string) {
+    this.pendingCode = code;
+    if (this.online && this.client.protocol) this.consumePendingCode();
+  }
+
+  consumePendingCode() {
+    if (!this.pendingCode || !this.client.supportsRooms() || !this.shell.visible) return;
+    const code = this.pendingCode;
+    this.pendingCode = '';
+    this.shell.setView('rooms');
+    this.joinCode(code);
+  }
+
+  gameStarted() {
+    this.phase = 'idle';
+    this.pending = '';
+    this.clearBusy();
+    this.syncWatch();
+  }
+
+  menuShown() {
+    this.phase = 'idle';
+    this.pending = '';
+    this.syncWatch();
+  }
+
+  notice(message: string, options: any = {}) {
+    const action = options.action ? {
+      label: options.action.label,
+      key: options.action.key || '',
+      onClick: options.action.onClick,
+    } : undefined;
+    mazeUiStore.showToast(message, { tone: options.tone, action });
+  }
+
+  toastAction(key: string) {
+    if (key.startsWith('watch:')) {
+      const room = this.store.get(key.slice(6));
+      if (room) this.watchRoom(room);
+    }
+  }
+
+  roomNoticeAction(key: string) {
+    if (key === 'back') this.backToLobby();
+    else if (key === 'retry') this.retryConnection();
+  }
+
+  viewChanged(view: string, _previous?: string) {
+    this.syncWatch();
+    this.syncTicker();
+    if (view === 'rooms' || view === 'live') this.refreshAll();
+  }
+
+  visibilityChanged(visible: boolean) {
+    if (!visible) {
+      this.requestPeeks([]);
+    } else {
+      this.viewChanged(this.shell.view);
+      this.consumePendingCode();
+    }
+    this.syncWatch();
+    this.syncTicker();
+  }
+
+  syncWatch() {
+    const wanted = this.online && this.shell.visible && LOBBY_VIEWS.has(this.shell.view);
+    if (wanted && !this.watching) {
+      this.client.watchLobby();
+      this.watching = true;
+    } else if (!wanted && this.watching) {
+      this.client.unwatchLobby();
+      this.watching = false;
+      this.forgetPeeks();
+    } else if (!wanted) {
+      this.client.lobbyWanted = false;
+    }
+  }
+
+  syncTicker() {
+    const want = this.shell.visible && (this.shell.view === 'rooms' || this.shell.view === 'live');
+    if (want && !this.tickTimer) {
+      this.tickTimer = setInterval(() => mazeUiStore.patch({ now: this.store.now() }), 1000);
+    } else if (!want && this.tickTimer) {
+      clearInterval(this.tickTimer);
+      this.tickTimer = 0;
+    }
+  }
+
+  setBusy(roomId: string, on: boolean) {
+    clearTimeout(this.busyTimers.get(roomId));
+    this.busyTimers.delete(roomId);
+    mazeUiStore.patch(current => ({
+      busyRoomIds: on
+        ? [...new Set([...current.busyRoomIds, roomId])]
+        : current.busyRoomIds.filter(id => id !== roomId),
+    }));
+    if (on) this.busyTimers.set(roomId, setTimeout(() => this.setBusy(roomId, false), 9000));
+  }
+
+  clearBusy() {
+    for (const id of [...this.busyTimers.keys()]) this.setBusy(id, false);
+  }
+
+  requestPeeks(ids: string[]) {
+    const normalized = this.shell.visible && this.shell.view === 'live' ? ids.slice(0, 12) : [];
+    const key = normalized.join();
+    if (key === this.peekedIds.join()) return;
+    this.peekedIds = normalized;
+    this.client.peek(normalized);
+  }
+
+  forgetPeeks() {
+    this.peekedIds = [];
+    this.mazeCache.clear();
+    this.frameCache.clear();
+    mazeUiStore.patch({ peekMazes: {}, peekFrames: {} });
+    this.client.peek([]);
+  }
+
+  onPeekMessage(message: any) {
+    const id = String(message.roomId || '');
+    if (!id) return;
+    if (message.type === 'peek:maze') {
+      this.mazeCache.delete(id);
+      this.mazeCache.set(id, message);
+      while (this.mazeCache.size > MAX_PEEK_CACHE) this.mazeCache.delete(this.mazeCache.keys().next().value as string);
+      mazeUiStore.patch(current => ({ peekMazes: { ...current.peekMazes, [id]: message } }));
+    } else if (message.type === 'peek:frame') {
+      this.frameCache.delete(id);
+      this.frameCache.set(id, message);
+      while (this.frameCache.size > MAX_PEEK_CACHE) this.frameCache.delete(this.frameCache.keys().next().value as string);
+      mazeUiStore.patch(current => ({ peekFrames: { ...current.peekFrames, [id]: message } }));
+    } else if (message.type === 'peek:end') {
+      this.mazeCache.delete(id);
+      this.frameCache.delete(id);
+      mazeUiStore.patch(current => {
+        const peekMazes = { ...current.peekMazes };
+        const peekFrames = { ...current.peekFrames };
+        delete peekMazes[id];
+        delete peekFrames[id];
+        return { peekMazes, peekFrames };
+      });
+    }
+  }
+
+  refreshAll() {
+    const waiting = this.store.waiting();
+    const live = this.store.live();
+    const counts = this.store.counts;
+    mazeUiStore.patch({
+      rooms: waiting,
+      live,
+      recent: this.store.recentRaces(),
+      storeReady: this.store.ready,
+      network: this.status,
+      now: this.store.now(),
+    });
+    this.shell.setTabCount('rooms', this.store.ready ? counts.waitingRooms : 0);
+    this.shell.setTabCount('live', this.store.ready ? counts.liveRooms : 0);
+    this.shell.setOpenRooms(this.store.ready && this.supportsRooms ? waiting : null, counts);
+  }
 }

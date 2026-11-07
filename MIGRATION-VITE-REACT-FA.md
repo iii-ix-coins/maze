@@ -24,26 +24,31 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 8. اسکریپت‌های قدیمی Home دیگر از مسیر فعال Home یا Maze اجرا نمی‌شوند و فقط به‌عنوان baseline/rollback باقی مانده‌اند.
 9. فایل‌های Backend و قراردادهای API/WebSocket در این فاز تغییر داده نشده‌اند.
 
+### انجام‌شده در فاز دوم — رابط بازی React
+
+1. Create Game Wizard به React state و کامپوننت‌های کنترل‌شده منتقل شده است؛ نگه‌داشتن دکمهٔ Launch، تنظیمات بازی و ذخیره‌سازی قبلی حفظ شده‌اند.
+2. Rooms browser، فیلتر چندانتخابی اندازه، جست‌وجو، مرتب‌سازی ذخیره‌شده، اتصال با کد و کارت‌های اتاق به React منتقل شده‌اند.
+3. Room Details / Waiting Room، فهرست بازیکنان، وضعیت میزبان، کد دعوت، خروج و شروع اتاق به React منتقل شده‌اند.
+4. Live Races، فیلترها، مرتب‌سازی، recent races و درخواست thumbnailهای قابل مشاهده به React منتقل شده‌اند.
+5. `CreateGameComponent` به یک state adapter بدون DOM تبدیل شده است؛ `LobbyHub` فقط مسئول هماهنگی WebSocket، `LobbyStore` و انتشار snapshot است.
+6. کلاس‌های View قدیمی و ابزارهای DOM-only جایگزین‌شده (Rooms/Room/Live Views، CardList، Toolbar، SeatBloom، Toast و کنترلرهای Wizard) از مسیر فعال حذف شده‌اند.
+7. شناسه‌های DOM موردنیاز موتور حفظ شده‌اند؛ `MazeStage` و `LiveThumb` فقط Canvasهای پیش‌نمایش را رسم می‌کنند و به lifecycle کامپوننت‌های React متصل‌اند.
+
 ### باقی‌مانده برای رسیدن به ۱۰۰٪ React UI
 
-1. بازنویسی Create Game wizard، Slider/Dial/Ruler و Step Rail به React State و Components.
-2. بازنویسی Lobby، Rooms، Room Details، Live Races و Race UI به React.
-3. انتقال نمایش HUD، Toolbar، Theme controls داخل بازی، modalها و وضعیت‌های نمایشی به React؛ Canvas و ورودی‌های پیوسته همچنان سرویس‌های TypeScript مستقل بمانند.
-4. ساخت Routeهای واقعی و React Features برای Coin/Token، Holders، Market، Live Feed و سایر صفحات/بخش‌هایی که در این سورس وجود دارند یا توسط لینک‌های فعلی ارجاع می‌شوند.
-5. انتقال تمامی UIهای پویا از `document.createElement`, `innerHTML`, `replaceChildren` و دستکاری مستقیم classها به React. DOM imperatives فقط برای Canvas/renderer و bridgeهای فنی محدود مجازند.
-6. حذف `legacy-scripts` و کدهای UI قدیمی فقط پس از تکمیل parity و اطمینان از عدم وابستگی runtime.
+1. انتقال Race Board، HUD و وضعیت‌های قابل‌نمایش داخل مسابقه به React؛ loop، Canvas، ورودی‌های پیوسته و Simulation همچنان در موتور مستقل می‌مانند.
+2. ساخت Routeها و React Features کامل برای Coin/Token، Holders، Market، Live Feed و سایر بخش‌های سایت.
+3. انتقال هر UI پویا و bootstrap باقی‌مانده از اسکریپت‌های قدیمی؛ دستکاری DOM فقط برای Canvas/renderer و bridgeهای فنی مجاز باقی می‌ماند.
+4. حذف کامل `legacy-scripts` و duplicate sourceها پس از پایان parity و تست‌های مرورگر.
 
 ## نقشه راه پیشنهادی
 
-### فاز 2 — Game UI React
+### فاز 2 — Game UI React (بخش Lobby تکمیل شد)
 
-- Create Wizard و تنظیمات بازی
-- Rooms browser و Room Details
-- Live view و live cards
-- Lobby state و filters/sorting
-- Race Board و HUD
+- Create Wizard، Rooms browser، Room Details و Live Races منتقل شده‌اند.
+- Race Board و HUD داخل مسابقه هنوز در صف انتقال هستند.
 
-در این فاز Adapterهای موجود به‌عنوان مرز حفظ می‌شوند؛ قراردادهای شبکه، Room Store و موتور دست‌نخورده باقی می‌مانند. برای هر Feature باید ورودی/خروجی state و رویدادهای قبلی قبل از جایگزینی ثبت شوند.
+Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شبکه، Room Store و الگوریتم‌های موتور تغییر نکرده‌اند.
 
 ### فاز 3 — Site Features React
 
@@ -86,6 +91,6 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 
 ## آزمون‌های فعلی و محدودیت
 
-`npm run check:layout` بدون نصب وابستگی‌ها قابل اجراست و ساختار پایه را کنترل می‌کند. برای TypeScript، Build و تست‌های کامل باید ابتدا `npm install` موفق اجرا شود. در زمان آماده‌سازی این نسخه، نصب وابستگی‌ها در محیط اجرایی به timeout برخورد کرد؛ بنابراین `vite build`, `tsc` و تست مرورگر در این محیط تأیید نشده‌اند.
+`node scripts/check-layout.mjs` بدون نصب وابستگی‌ها اجرا شد و ساختار React، حفظ ۸۳ شناسهٔ DOM، وجود چهار نمای React و DOM-free بودن CreateGameComponent/LobbyHub را تأیید کرد. Syntax تعداد ۶۶ فایل TypeScript/TSX با transpiler سراسری TypeScript و Syntax فایل‌های JavaScript با `node --check` بدون خطا بررسی شد. ۸ تست واحد Room Store و رتبه‌بندی بازیکنان و فایل آزمون مدل Lobby نیز موفق بودند. برای Typecheck واقعی، Vite Production Build و تست‌های کامل باید وابستگی‌های محلی نصب شوند. نصب وابستگی‌ها در این محیط به timeout برخورد کرد؛ تلاش Typecheck نیز به‌دلیل نبود `@types/node` و `vite/client` متوقف شد؛ بنابراین `vite build` و تست بصری مرورگر در این محیط تأیید نشده‌اند.
 
 تست parity تاریخی Maze نیز به `legacy/mazeV3` نیاز دارد که در ZIP ورودی موجود نیست. نبود این baseline را نباید با ادعای parity کامل جایگزین کرد.
