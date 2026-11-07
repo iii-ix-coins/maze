@@ -257,7 +257,7 @@
         /* —— Layout —— */
         --page-max: 1240px;
         --gutter: clamp(14px, 3.4vw, 32px);
-        --section-gap: clamp(18px, 3vw, 36px);
+        --section-gap: clamp(10px, 3vw, 20px);
         --dock-h: 66px;
 
         /* —— Motion —— */
