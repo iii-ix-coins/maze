@@ -1761,8 +1761,6 @@
     @keyframes flash-green {
         from {
             color: var(--mint);
-            -webkit-text-fill-color: var(--mint);
-            /* rainbow ink is transparent-filled */
             text-shadow: 0 0 26px oklch(0.87 0.17 170 / 0.95);
         }
     }
@@ -1770,7 +1768,6 @@
     @keyframes flash-red {
         from {
             color: var(--coral);
-            -webkit-text-fill-color: var(--coral);
             text-shadow: 0 0 26px oklch(0.73 0.185 20 / 0.95);
         }
     }
@@ -2011,6 +2008,7 @@
     --nav-disabled: #68736b;
     --nav-panel: #111815;
     --nav-border: rgba(255, 255, 255, 0.08);
+    --nav-edge: rgba(184, 255, 92, 0.45);
     --nav-shadow: rgba(0, 0, 0, 0.32);
     --nav-hover-bg: rgba(255, 255, 255, 0.055);
     --nav-sub-bg: rgba(255, 255, 255, 0.035);
@@ -2031,6 +2029,7 @@ html[data-theme="light"] .nav {
     --nav-disabled: #7b8798;
     --nav-panel: #ffffff;
     --nav-border: rgba(26, 34, 48, 0.16);
+    --nav-edge: rgba(10, 107, 31, 0.55);
     --nav-shadow: rgba(26, 34, 48, 0.2);
     --nav-hover-bg: rgba(26, 34, 48, 0.07);
     --nav-sub-bg: rgba(26, 34, 48, 0.04);
@@ -2053,6 +2052,7 @@ html[data-theme="grass"] .nav {
     --nav-disabled: #b9d8b5;
     --nav-panel: #08230f;
     --nav-border: rgba(255, 255, 255, 0.22);
+    --nav-edge: rgba(255, 255, 255, 0.60);
     --nav-shadow: rgba(0, 25, 5, 0.45);
     --nav-hover-bg: rgba(255, 255, 255, 0.14);
     --nav-sub-bg: rgba(255, 255, 255, 0.07);
@@ -2284,7 +2284,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     height: var(--nav-control-height);
     padding: 0 12px;
 
-    /* 1px spacer; the edge is the rainbow ring */
+    border: 1px solid var(--nav-edge);
     border-radius: var(--r-sm);
     background: color-mix(in srgb, var(--nav-accent) 7.5%, transparent);
     color: var(--nav-accent);
@@ -2383,7 +2383,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     flex: 0 0 auto;
     height: var(--nav-control-height);
     padding: var(--tt-pad);
-    /* 1px spacer; the edge is the rainbow ring */
+    border: 1px solid var(--nav-edge);
     border-radius: 999px;
     background: var(--nav-chip-bg);
 }
@@ -2656,9 +2656,9 @@ html[data-theme="light"] .nav-brand-logo--black {
              "6.1 Tile recipe" and "6.3 HEADER" without !important.
    Rules : 1. backgrounds are invisible (transparent) — the page canvas shows
               through, exactly like the nav bar;
-           2. borders are gone — the edge AND all text colour now come from
-              css/rainbow-border.css + js/rainbow-border.js (per-element
-              multicolour ring / gradient ink); nothing here draws them;
+           2. every box has a themed 1px edge (--hdr-border, --hdr-border-hover);
+              the cursor-follow spotlight ring on the price / change boxes is
+              the "6.1 Tile recipe" ::before, coloured by --hdr-spot-ring(-2);
            3. ink is picked per canvas:
                 grass  #008000 / #005e27  →  light ink (+ soft dark halo)
                 light  #ffffff / #ededed  →  dark ink (dark blue/green/red)
@@ -2677,6 +2677,9 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     --hdr-lift: 0 10px 26px -12px rgba(0, 0, 0, 0.85);
     --hdr-focus: #b8ff5c;
+
+    --hdr-border: var(--stroke-hi);
+    --hdr-border-hover: oklch(0.87 0.17 170 / 0.6);
 
     --hdr-gain: oklch(0.87 0.17 170);
     --hdr-loss: oklch(0.73 0.185 20);
@@ -2711,6 +2714,9 @@ html[data-theme="light"] .header {
     --hdr-lift: 0 10px 24px -12px rgba(26, 34, 48, 0.4);
     --hdr-focus: #1d4ed8;
 
+    --hdr-border: rgba(26, 34, 48, 0.22);
+    --hdr-border-hover: rgba(29, 78, 216, 0.6);
+
     --hdr-gain: #0a6b1f;
     --hdr-loss: #b3261e;
 
@@ -2740,6 +2746,9 @@ html[data-theme="grass"] .header {
 
     --hdr-lift: 0 10px 24px -12px rgba(0, 30, 5, 0.6);
     --hdr-focus: #ffffff;
+
+    --hdr-border: rgba(255, 255, 255, 0.45);
+    --hdr-border-hover: rgba(255, 255, 255, 0.9);
 
     --hdr-gain: #dfff85;
     --hdr-loss: #ffe4df;
@@ -2811,11 +2820,14 @@ html[data-theme="grass"] .header {
     color: var(--hdr-text-soft);
 }
 
-/* —— 3 · SURFACES  (no background · no border) ————————————————————————
-   The 3px multicolour edge is drawn by css/rainbow-border.css ([data-rb]).   */
+/* —— 3 · SURFACES  (transparent fill · themed 1px edge) ————————————————— */
 .header :is(.bar-box, .change-box, .mint-box, .mint-copy-btn, .btn-link) {
     background: transparent;
-    border: 0;
+    border: 1px solid var(--hdr-border);
+}
+
+.header :is(.bar-box, .change-box, .mint-box, .mint-copy-btn, .btn-link):hover {
+    border-color: var(--hdr-border-hover);
 }
 
 /* beats the old translucent hover fill ("6.3") */
@@ -2823,8 +2835,17 @@ html[data-theme="grass"] .header {
     background: transparent;
 }
 
-/* cursor spotlight RING = a layer of the rainbow ring (rainbow-border.css,
-   uses --hdr-spot-ring / --hdr-spot-ring-2).  Only the soft glow lives here. */
+/* cursor spotlight RING = the 6.1 tile ::before, coloured per theme.
+   padding = ring thickness (its mask keeps only that band, over the edge). */
+.header :is(.bar-box, .change-box)::before {
+    padding: 1px;
+    background: radial-gradient(260px circle at var(--mx) var(--my),
+            var(--hdr-spot-ring),
+            var(--hdr-spot-ring-2) 38%,
+            transparent 68%);
+}
+
+/* soft glow behind the ring */
 .header :is(.bar-box, .change-box)::after {
     background: radial-gradient(360px circle at var(--mx) var(--my),
             var(--hdr-spot-glow),
@@ -2839,6 +2860,7 @@ html[data-theme="grass"] .header {
 /* "copied" is transient feedback, so it is the one state that is filled */
 .header .mint-copy-btn.is-copied {
     background: var(--hdr-copied-bg);
+    border-color: transparent;
     box-shadow: var(--hdr-copied-glow);
 }
 
@@ -2847,7 +2869,7 @@ html[data-theme="grass"] .header {
 }
 
 /* —— 5 · OUTBOUND LINKS (Solscan · Pump · Jupiter) ————————————————————— */
-/* the edge is the rainbow ring; what stays here is the hover lift + brand glow */
+/* the edge comes from section 3; what stays here is the hover lift + brand glow */
 .header .btn-link {
     --lift: 0 0 0 0 transparent;
     box-shadow: var(--lift);
