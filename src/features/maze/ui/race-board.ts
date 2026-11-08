@@ -1,10 +1,19 @@
 /**
- * Small, framework-free UI components. Each component owns only its own DOM rendering.
- * (The pre-game flow and the lobby live in ./create-game/ and ./lobby/.)
+ * Race standings model/controller. It deliberately contains no DOM operations:
+ * the React RaceBoardView subscribes to raceBoardStore and renders the rows.
  */
+export type RacePlayer = {
+    id: string;
+    name?: string;
+    color?: string;
+    connected?: boolean;
+    finished?: boolean;
+    goals?: number;
+    steps?: number;
+    position?: number;
+};
 
-/** Finished racers first, then the most targets, then the fewest steps. */
-export function rankPlayers(players = []) {
+export function rankPlayers(players: RacePlayer[] = []): RacePlayer[] {
     return [...players].sort((a, b) =>
         Number(b.finished) - Number(a.finished) ||
         (Number(b.goals) - Number(a.goals)) ||
@@ -12,85 +21,122 @@ export function rankPlayers(players = []) {
     );
 }
 
-export class RaceBoardComponent {
-    declare root: HTMLElement;
-    declare list: HTMLElement;
-    declare onPick: (id: string) => void;
-    declare picking: any;
+export type RaceBoardRow = {
+    id: string;
+    place: string;
+    name: string;
+    color: string;
+    status: string;
+    steps: number;
+    isYou: boolean;
+    isFocus: boolean;
+    isFinished: boolean;
+};
 
-    /** Rows drawn at once; with up to 99 racers the rest collapse into a "+N more" footer. */
+export type RaceBoardSnapshot = {
+    visible: boolean;
+    picking: boolean;
+    heading: string;
+    roomCode: string;
+    crowd: number;
+    rows: RaceBoardRow[];
+    hiddenCount: number;
+};
+
+const initialSnapshot: RaceBoardSnapshot = {
+    visible: false,
+    picking: false,
+    heading: 'LIVE RACE',
+    roomCode: '',
+    crowd: 0,
+    rows: [],
+    hiddenCount: 0,
+};
+
+let snapshot = initialSnapshot;
+let onPick: ((id: string) => void) | null = null;
+const listeners = new Set<() => void>();
+
+export const raceBoardStore = {
+    getSnapshot: () => snapshot,
+    subscribe: (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+    },
+    select: (id: string) => {
+        if (snapshot.picking && id) onPick?.(id);
+    },
+};
+
+function publish(next: RaceBoardSnapshot) {
+    const keys = Object.keys(next) as (keyof RaceBoardSnapshot)[];
+    if (keys.every(key => Object.is(snapshot[key], next[key]))) return;
+    snapshot = next;
+    listeners.forEach(listener => listener());
+}
+
+/** Stable API used by the legacy engine call sites, backed entirely by data. */
+export class RaceBoardComponent {
     static MAX_ROWS = 8;
-    /**
-     * @param {HTMLElement} root
-     * @param {HTMLElement} list
-     * @param {{onPick?:(id:string)=>void}} [options] when set, rows can be clicked (a spectator picks who to follow)
-     */
-    constructor(root, list, { onPick = null }: any = {}) {
-        this.root = root;
-        this.list = list;
-        this.onPick = onPick;
-        if (onPick) {
-            list.addEventListener('click', event => {
-                const row = event.target.closest && event.target.closest('.race-row[data-id]');
-                if (row && this.picking) onPick(row.dataset.id);
-            });
-        }
+
+    constructor({ onPick: pick = null }: { onPick?: ((id: string) => void) | null } = {}) {
+        onPick = pick;
     }
-    show() { this.root.classList.add('show'); }
-    hide() { this.root.classList.remove('show'); }
+
+    show() {
+        publish({ ...snapshot, visible: true });
+    }
+
+    hide() {
+        publish({ ...snapshot, visible: false, picking: false });
+    }
+
+    setHeading(heading: string) {
+        publish({ ...snapshot, heading });
+    }
+
+    setRoomCode(roomCode: string) {
+        publish({ ...snapshot, roomCode });
+    }
+
     /**
-     * @param {object[]} players
-     * @param {string} ownId  the local racer (empty for a spectator)
-     * @param {number} goalTotal
-     * @param {string} [focusId]  the racer a spectator follows
+     * Racers of interest (the local player or followed spectator target) remain
+     * visible even if their rank falls below the eight-row display cutoff.
      */
-    render(players = [], ownId = '', goalTotal = 3, focusId = '') {
+    render(players: RacePlayer[] = [], ownId = '', goalTotal = 3, focusId = '') {
         const ranked = rankPlayers(players);
         const max = RaceBoardComponent.MAX_ROWS;
-        // The racers you care about (yourself, the one you follow) stay visible even when ranked below the cut-off.
-        const pins = [ownId, focusId].filter((id, i, all) => id && all.indexOf(id) === i)
-            .map(id => ranked.findIndex(item => item.id === id)).filter(rank => rank >= max).sort((a, b) => a - b);
+        const pins = [ownId, focusId]
+            .filter((id, i, all) => id && all.indexOf(id) === i)
+            .map(id => ranked.findIndex(item => item.id === id))
+            .filter(rank => rank >= max)
+            .sort((a, b) => a - b);
         const visible = ranked.slice(0, max - pins.length);
         for (const rank of pins) visible.push(ranked[rank]);
-        this.picking = Boolean(this.onPick) && !ownId;
-        this.root.classList.toggle('is-pickable', this.picking);
-        const rows = visible.map(player => this.row(player, ranked.indexOf(player), ownId, goalTotal, focusId));
-        const hidden = ranked.length - visible.length;
-        if (hidden > 0) {
-            const more = document.createElement('li');
-            more.className = 'race-more';
-            more.textContent = `+${hidden} more racer${hidden === 1 ? '' : 's'}`;
-            rows.push(more);
-        }
-        this.list.replaceChildren(...rows);
-        this.root.dataset.crowd = String(ranked.length);
-        this.show();
-    }
-    row(player, index, ownId, goalTotal, focusId = '') {
-        const row = document.createElement('li');
-        row.className = 'race-row';
-        row.dataset.id = player.id;
-        if (player.id === ownId) row.classList.add('is-you');
-        if (focusId && player.id === focusId) row.classList.add('is-focus');
-        if (player.finished) row.classList.add('is-finished');
-        const place = document.createElement('span');
-        place.className = 'race-place';
-        place.textContent = String(index + 1).padStart(2, '0');
-        const dot = document.createElement('span');
-        dot.className = 'race-dot';
-        dot.style.backgroundColor = player.color || '#44d17c';
-        const identity = document.createElement('span');
-        identity.className = 'race-identity';
-        const name = document.createElement('b');
-        name.textContent = player.name || 'Player';
-        const status = document.createElement('small');
-        status.textContent = player.connected === false ? 'Disconnected' :
-            (player.finished ? 'Finished' : `${Number(player.goals) || 0}/${goalTotal} targets`);
-        identity.append(name, status);
-        const score = document.createElement('strong');
-        score.textContent = String(Number(player.steps) || 0);
-        score.title = 'Steps';
-        row.append(place, dot, identity, score);
-        return row;
+        const picking = Boolean(onPick) && !ownId;
+        const rows = visible.map(player => {
+            const rank = ranked.indexOf(player);
+            return {
+                id: String(player.id),
+                place: String(rank + 1).padStart(2, '0'),
+                name: player.name || 'Player',
+                color: player.color || '#44d17c',
+                status: player.connected === false
+                    ? 'Disconnected'
+                    : (player.finished ? 'Finished' : `${Number(player.goals) || 0}/${goalTotal} targets`),
+                steps: Number(player.steps) || 0,
+                isYou: player.id === ownId,
+                isFocus: Boolean(focusId && player.id === focusId),
+                isFinished: Boolean(player.finished),
+            };
+        });
+        publish({
+            ...snapshot,
+            visible: true,
+            picking,
+            crowd: ranked.length,
+            rows,
+            hiddenCount: Math.max(0, ranked.length - visible.length),
+        });
     }
 }

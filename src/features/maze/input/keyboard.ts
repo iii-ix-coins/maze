@@ -1,5 +1,5 @@
 // Moved verbatim from legacy/mazeV3/maze-game/maze.js (statements 134). Only imports/exports and `S.` state access were added.
-import { confirmEl } from '../engine/dom';
+import { mazeHudStore } from '../ui/maze-view-store';
 import { cancelEnd, askEnd } from '../engine/session';
 import { S, cam } from '../engine/state';
 import { ARROWS, ZOOM_STEP } from '../engine/constants';
@@ -8,7 +8,7 @@ import { zoomBy, resetView } from '../engine/camera';
 
 export function initKeyboard() {
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && confirmEl.classList.contains('show')) { cancelEnd(); return; }
+    if (e.key === 'Escape' && mazeHudStore.getSnapshot().confirmVisible) { cancelEnd(); return; }
     const t: any = e.target;
     if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"], [role="slider"], #createGame')) return;
     if (!S.isGameOver && (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.code === 'KeyR'))) { e.preventDefault(); askEnd(); return; }

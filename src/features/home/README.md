@@ -1,16 +1,5 @@
 # Home feature — native React route
 
-The active Home route no longer runs the previous Home DOM-construction scripts.
-`HomePage.tsx` owns the page lifecycle; `SiteChromeHosts` composes the site
-regions; `SiteNavigation` owns menu state; `ThemeSwitcher` and
-`GameViewSwitcher` are accessible React controls; and `InteractionBar` owns
-Views / Likes / Shares / Share Modal state.
+The active Home route is now composed from React-owned feature sections. `SiteChromeHosts` owns the common page lifecycle, navigation, brand header and interaction dock. `MarketSummary`, `LiveFeedPanel` and `HoldersPanel` own the market snapshot, buyer/holder rail and Top 100 table respectively.
 
-Existing CSS selectors, IDs, public asset URLs, theme storage keys, API
-endpoints, request methods and polling cadence are preserved. The old source
-under `legacy-scripts/` is retained only as a migration baseline/rollback
-reference and is not booted by the active Home or Maze routes.
-
-Remaining feature migration: the Coin page and dormant legacy feature panels
-must be moved into React when their routes are activated. The platform's
-Node.js services and API contracts are intentionally outside the React app.
+The route uses only existing API contracts and service responses. Legacy DOM scripts remain as non-executed comparison/rollback sources; they are not imported by the active frontend.

@@ -14,7 +14,9 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Competitions', href: './competitions.html', key: 'competitions', group: 'compete', disabled: true, title: 'Competitions are coming soon.' },
   { label: 'Leaderboard', href: './leaderboard.html', key: 'leaderboard', group: 'compete', disabled: true, title: 'Leaderboard is coming soon.' },
-  { label: 'Token', href: './coin.html', key: 'token' },
+  { label: 'Market', href: '/market.html', key: 'market' },
+  { label: 'Token', href: '/coin.html', key: 'token' },
+  { label: 'Holders', href: '/holders.html', key: 'holders' },
   { label: 'How to Play', href: './how-to-play.html', key: 'how-to-play', disabled: true, title: 'How to Play Maze' },
 ];
 
@@ -25,7 +27,9 @@ function getCurrentPageKey(): string | null {
     { suffixes: ['/maze.html', '/play'], key: 'maze' },
     { suffixes: ['/competitions.html', '/competitions'], key: 'competitions' },
     { suffixes: ['/leaderboard.html', '/leaderboard'], key: 'leaderboard' },
+    { suffixes: ['/market.html', '/market'], key: 'market' },
     { suffixes: ['/coin.html', '/token'], key: 'token' },
+    { suffixes: ['/holders.html', '/holders'], key: 'holders' },
     { suffixes: ['/how-to-play.html', '/how-to-play'], key: 'how-to-play' },
   ];
   return routes.find((route) => route.suffixes.some((suffix) => path.endsWith(suffix)))?.key ?? null;

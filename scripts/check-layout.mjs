@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
-  'index.html', 'vite.config.ts', 'package.json',
+  'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.ts', 'package.json',
   'src/app', 'src/components', 'src/features/home', 'src/features/market',
   'src/features/holders', 'src/features/live-feed', 'src/features/coin',
   'src/features/interaction', 'src/features/theme', 'src/features/maze/lobby',
@@ -40,6 +40,12 @@ const activeFrontend = [
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
   'src/features/interaction/InteractionBar.tsx',
+  'src/features/market/MarketSummary.tsx',
+  'src/features/market/MarketPage.tsx',
+  'src/features/coin/CoinPage.tsx',
+  'src/features/holders/HoldersPanel.tsx',
+  'src/features/holders/HoldersPage.tsx',
+  'src/features/live-feed/LiveFeedPanel.tsx',
 ];
 for (const file of activeFrontend) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
@@ -52,10 +58,12 @@ for (const file of activeFrontend) {
 const mazeBaseline = fs.readFileSync(path.join(root, 'src/features/maze/maze-markup.html'), 'utf8');
 const mazeReact = fs.readFileSync(path.join(root, 'src/features/maze/MazeMarkup.tsx'), 'utf8');
 const mazeMenu = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
+const mazeRuntimeUi = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeRuntimeUi.tsx'), 'utf8');
+const mazeThemeController = fs.readFileSync(path.join(root, 'src/features/maze/engine/theme.ts'), 'utf8');
 const baselineIds = [...mazeBaseline.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
 // IDs now live across the static React game tree and the React-owned dynamic menu.
 // Dynamic tab IDs use a conditional expression, so check their quoted literals too.
-const reactMazeSources = `${mazeReact}\n${mazeMenu}`;
+const reactMazeSources = `${mazeReact}\n${mazeMenu}\n${mazeRuntimeUi}`;
 const missingMazeIds = baselineIds.filter(id => {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const explicitId = new RegExp(`\\bid\\s*=\\s*(?:\\{\\s*[\"']${escaped}[\"']\\s*\\}|[\"']${escaped}[\"'])`);
@@ -76,9 +84,29 @@ if (domUiApi.test(createController) || domUiApi.test(lobbyCoordinator)) {
   console.error('[layout] CreateGameComponent and LobbyHub must remain DOM-free state/protocol adapters.');
   process.exit(1);
 }
+const raceBoardSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/race-board.ts'), 'utf8');
+const hudSource = fs.readFileSync(path.join(root, 'src/features/maze/engine/hud.ts'), 'utf8');
+if (domUiApi.test(raceBoardSource) || domUiApi.test(hudSource)) {
+  console.error('[layout] Race Board and HUD adapters must publish state without imperative DOM rendering.');
+  process.exit(1);
+}
+if (!/useSyncExternalStore/.test(mazeRuntimeUi) || !/raceBoardStore/.test(mazeRuntimeUi) || !/mazeHudStore/.test(mazeRuntimeUi)) {
+  console.error('[layout] in-race UI must be subscribed to the React external stores.');
+  process.exit(1);
+}
+if (/querySelectorAll|classList\.|setAttribute\(|textContent|innerHTML/.test(mazeThemeController)) {
+  console.error('[layout] Maze theme controller must publish state instead of mutating React-owned controls.');
+  process.exit(1);
+}
 for (const component of ['function CreateWizard', 'export function RoomsPanel', 'export function LivePanel', 'export function RoomPanel']) {
   if (!mazeMenu.includes(component)) {
     console.error(`[layout] React Maze menu is missing ${component}.`);
+    process.exit(1);
+  }
+}
+for (const component of ['export function MiniMapTile', 'export function RaceBoardView', 'export function WinCardView', 'export function HudStats', 'export function ThemeControls', 'export function ConfirmDialog', 'export function MazeBanner']) {
+  if (!mazeRuntimeUi.includes(component)) {
+    console.error(`[layout] React in-race UI is missing ${component}.`);
     process.exit(1);
   }
 }
@@ -98,6 +126,12 @@ const activeSources = [
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/components/navigation/GameViewSwitcher.tsx',
   'src/features/interaction/InteractionBar.tsx',
+  'src/features/market/MarketSummary.tsx',
+  'src/features/market/MarketPage.tsx',
+  'src/features/coin/CoinPage.tsx',
+  'src/features/holders/HoldersPanel.tsx',
+  'src/features/holders/HoldersPage.tsx',
+  'src/features/live-feed/LiveFeedPanel.tsx',
 ];
 for (const file of activeSources) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
@@ -107,4 +141,35 @@ for (const file of activeSources) {
   }
 }
 
-console.log('[layout] root Vite + React routes and migrated React chrome verified.');
+
+const siteFeatureSources = [
+  'src/features/market/MarketSummary.tsx',
+  'src/features/coin/CoinPage.tsx',
+  'src/features/holders/HoldersPanel.tsx',
+  'src/features/live-feed/LiveFeedPanel.tsx',
+  'src/features/market/useMarketData.ts',
+  'src/features/holders/useHolders.ts',
+];
+for (const file of siteFeatureSources) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  if (/from ['\"][^'\"]*legacy-scripts\//.test(source)) {
+    console.error(`[layout] active site feature imports a legacy controller: ${file}`);
+    process.exit(1);
+  }
+}
+const featureRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
+for (const route of ['/coin.html', '/holders.html', '/market.html']) {
+  if (!featureRouter.includes(route)) {
+    console.error(`[layout] React router is missing active site route: ${route}`);
+    process.exit(1);
+  }
+}
+const viteConfig = fs.readFileSync(path.join(root, 'vite.config.ts'), 'utf8');
+for (const page of ['coin.html', 'holders.html', 'market.html']) {
+  if (!viteConfig.includes(`'${page}'`)) {
+    console.error(`[layout] Vite production inputs are missing ${page}.`);
+    process.exit(1);
+  }
+}
+
+console.log('[layout] root Vite + React routes, site features and migrated Maze UI verified.');

@@ -1,18 +1,28 @@
-// Moved verbatim from legacy/mazeV3/maze-game/maze.js (statements 91, 93, 94). Only imports/exports and `S.` state access were added.
-import { hudCache, S, cam } from './state';
-import { hudSteps, hudTime, hudGoals, miniTile, zoomLabel, hintCount, followBtn, hintBtn } from './dom';
-export const fmtTime = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-export function setHud(el, key, val) {
-    if (hudCache[key] !== val) { hudCache[key] = val; el.textContent = val; }
-}
+// The engine publishes an immutable HUD snapshot at its existing updateHud()
+// call sites. React owns the visible DOM and subscribes to this store.
+import { S, cam } from './state';
+import { publishHud } from '../ui/maze-view-store';
+
+export const fmtTime = (ms: number) => {
+    const s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+};
+
 export function updateHud() {
-    setHud(hudSteps, 's', S.steps);
-    setHud(hudTime, 't', fmtTime(S.startTime === null ? 0 : (S.endTime !== null ? S.endTime : (S.pausedAt !== null ? S.pausedAt : performance.now())) - S.startTime));
-    setHud(hudGoals, 'g', S.goals + '/' + S.goalTotal);
-    const mt = cam.tz > 1.02;
-    if (hudCache.m !== mt) { hudCache.m = mt; miniTile.classList.toggle('show', mt); }
-    setHud(zoomLabel, 'z', Math.round(cam.tz * 100) + '%');
-    setHud(hintCount, 'h', S.hintsLeft);
-    if (hudCache.f !== cam.follow) { hudCache.f = cam.follow; followBtn.setAttribute('aria-pressed', String(cam.follow)); }
-    hintBtn.disabled = S.hintsLeft <= 0 || S.isGameOver;
+    const elapsedAt = S.endTime !== null
+        ? S.endTime
+        : (S.pausedAt !== null ? S.pausedAt : (S.startTime === null ? 0 : performance.now()));
+    const elapsed = S.startTime === null ? 0 : elapsedAt - S.startTime;
+
+    publishHud({
+        steps: Number(S.steps) || 0,
+        time: fmtTime(elapsed),
+        goals: `${S.goals}/${S.goalTotal}`,
+        miniMapVisible: cam.tz > 1.02,
+        zoom: `${Math.round(cam.tz * 100)}%`,
+        hintsLeft: Number(S.hintsLeft) || 0,
+        hintDisabled: S.hintsLeft <= 0 || S.isGameOver,
+        follow: Boolean(cam.follow),
+        fogOn: Boolean(S.fogOn),
+    });
 }

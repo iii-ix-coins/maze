@@ -51,5 +51,4 @@ export const collected = new Uint8Array(MAX_GOALS);
 export const reveal = [];
 export const racerPos = new Map();
 export const padVec = { x: 0, y: 0 };
-export const hudCache: Record<string, any> = {};
 export const ptrs = new Map();

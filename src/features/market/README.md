@@ -1,3 +1,5 @@
-# Market feature
+# Market feature — React
 
-Move presentation and UI state here incrementally. Keep API payloads, poll intervals, retry timing, caching and formatting semantics identical until baseline tests authorize a separate change.
+`MarketSummary` and `MarketPage` now own the market UI. The shared `useMarketData` hook preserves the existing `GET /api/jupiter-market` request, `cache: no-store`, `Accept: application/json` header, and 30-second refresh cadence. Payload unwrapping and number formatting mirror the legacy implementation.
+
+The feature does not call any new service and does not transform or persist backend state.

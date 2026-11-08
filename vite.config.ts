@@ -52,6 +52,14 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
     },
     build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(root, 'index.html'),
+          coin: path.resolve(root, 'coin.html'),
+          holders: path.resolve(root, 'holders.html'),
+          market: path.resolve(root, 'market.html'),
+        },
+      },
       outDir: path.resolve(root, 'dist/site'),
       emptyOutDir: true,
       manifest: true,

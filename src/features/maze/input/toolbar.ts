@@ -7,7 +7,10 @@ import { cam } from '../engine/state';
 import { toggleFog, useHint } from '../engine/solo';
 
 export function initToolbar() {
-document.querySelectorAll<HTMLElement>('.theme-option').forEach(button => button.addEventListener('click', () => applyMazeTheme(button.dataset.theme)));
+document.addEventListener('click', (event: any) => {
+    const button = event.target.closest && event.target.closest('.theme-option[data-theme]');
+    if (button) applyMazeTheme(button.dataset.theme);
+});
 try { applyMazeTheme(localStorage.getItem('maze-color-theme') || 'grass', false); } catch (_) { applyMazeTheme('grass', false); }
 $('zoomIn').addEventListener('click', () => zoomBy(ZOOM_STEP));
 $('zoomOut').addEventListener('click', () => zoomBy(1 / ZOOM_STEP));

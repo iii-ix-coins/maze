@@ -3,8 +3,9 @@ import { S, collected, cam, confetti, reveal, racerPos } from './state';
 import { multiplayerClient, createGame, raceBoard } from './services';
 import { ensurePlayerVisible, clampCam } from './camera';
 import { DC, DR, rnd, MAX_GOALS, generateMazeData } from '@maze/shared';
-import { reduceMotion, messageElement, winStats, winCard, fogBtn, confirmEl, banner } from './dom';
+import { reduceMotion } from './dom';
 import { fmtTime, updateHud } from './hud';
+import { showMazeResult, hideMazeResult, hideMazeBanner, hideMazeConfirm, showMazeConfirm } from '../ui/maze-view-store';
 import { EXIT_COLOR, HINT_LEN, SAVE_KEY, HINTS_PER_MAZE, PLAYER_COLOR } from './constants';
 import { bfs, fitLayout, applyMazeSize } from './layout';
 import { syncRoleUi, setConfirm } from './session';
@@ -46,12 +47,15 @@ export function checkGoal() {
     S.isGameOver = true;
     clearSave();
     S.endTime = performance.now();
-    messageElement.textContent = "🏆 You Win";
     const eff = Math.min(100, Math.round(100 * S.solutionLen / Math.max(1, S.steps)));
-    const item = (v, l) => `<div><b>${v}</b><span>${l}</span></div>`;
-    winStats.innerHTML = item(S.steps, 'گام') + item(S.solutionLen, 'The shortest way') + item(eff + '%', 'Efficiency')
-        + item(fmtTime(S.endTime - S.startTime), 'time') + (S.hintsUsed ? item(S.hintsUsed, 'Guide') : '');
-    winCard.classList.add('show');
+    const stats = [
+        { value: S.steps, label: 'گام' },
+        { value: S.solutionLen, label: 'The shortest way' },
+        { value: eff + '%', label: 'Efficiency' },
+        { value: fmtTime(S.endTime - S.startTime), label: 'time' },
+        ...(S.hintsUsed ? [{ value: S.hintsUsed, label: 'Guide' }] : []),
+    ];
+    showMazeResult('🏆 You Win', stats);
     if (!reduceMotion) {
         burst(S.player, 90);
         setTimeout(() => burst(S.player, 90), 320);
@@ -104,7 +108,7 @@ export function useHint() {
 }
 export function toggleFog() {
     S.fogOn = !S.fogOn;
-    fogBtn.setAttribute('aria-pressed', String(S.fogOn));
+    updateHud();
 }
 export function orderedRouteLength() {
     if (!S.exits.length) return 0;
@@ -154,11 +158,10 @@ export function resetUi() {
     S.pausedAt = null;
     S.revealed = false;
     reveal.length = 0;
-    messageElement.textContent = "";
-    winCard.classList.remove('show');
+    hideMazeResult();
     createGame.hide();
-    confirmEl.classList.remove('show');
-    banner.classList.remove('show');
+    hideMazeConfirm();
+    hideMazeBanner();
     document.body.classList.remove('in-menu');
     syncRoleUi();
     fitLayout();
@@ -229,6 +232,6 @@ export function restoreGame(v) {
     if (typeof v.elapsed === 'number') S.startTime = performance.now() - v.elapsed;
     S.pausedAt = performance.now();
     setConfirm(true);
-    confirmEl.classList.add('show');
+    showMazeConfirm();
     updateHud();
 }

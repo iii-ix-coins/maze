@@ -27,21 +27,22 @@ Production URLs: `http://localhost:5000/` and `http://localhost:5000/maze.html`.
 
 ## Current architecture
 
-- `index.html`, `vite.config.ts`, `package.json`: the only frontend document and Vite toolchain.
+- `index.html`, `coin.html`, `holders.html`, `market.html`, `vite.config.ts`, `package.json`: the Vite page inputs and frontend toolchain.
 - `src/main.tsx`, `src/app`: one React root, route dispatch, providers and error boundary.
-- `src/features/home/HomePage.tsx`: React-owned Home shell and page lifecycle.
+- `src/features/home/HomePage.tsx`: React-owned Home shell, Market Summary, Live Feed and Holders sections.
 - `src/components/navigation`: React Navigation, theme selector and Maze view selector.
 - `src/features/interaction/InteractionBar.tsx`: React Views / Likes / Shares / Share Modal UI; existing `/api/stats*` contracts are retained.
+- `src/features/market`, `src/features/coin`, `src/features/holders`, `src/features/live-feed`: React market snapshot, Token detail (`/coin.html`), Holders (`/holders.html`) and live activity views. Existing market, history and live-feed endpoints/polling semantics are retained.
 - `src/features/maze/MazePage.tsx` and `MazeMarkup.tsx`: React owns the Maze page structure and static DOM tree. The full set of original IDs, classes, canvases and control hooks is retained.
 - `src/features/maze/engine`, `canvas`, `input`, `net`, `shared/maze`: the independent TypeScript simulation, renderer, input system, and multiplayer client/protocol. These modules are Vite-managed but not React state, intentionally avoiding high-frequency game-loop renders.
 - `engines/*`, `shared/state`, `server.js`, `start.js`: existing Node.js backend, workers, state and SQLite integration. Their source and contracts are outside this frontend migration.
 - `legacy/` and `src/features/home/legacy-scripts/`: retained reference/baseline sources. They are not imported by the active Home or Maze routes.
 
-## Migration status — Phase 1
+## Migration status — Phase 4
 
-The active Home shell has been migrated from imperative DOM construction to React components: Navigation and its menus, Theme and Game view switchers, Brand header, interaction dock, share modal and their local state are now React-owned. The static Maze interface has also been converted from an HTML string injected with `dangerouslySetInnerHTML` into JSX rendered by React.
+The Home shell, market snapshot, live-feed rail, holders table and Token detail page are now React-owned. The Coin/Token, Market and Holders pages have dedicated Vite HTML inputs and share the same React application entry. The Maze lobby and in-race UI have also been migrated to React while the engine remains independent.
 
-This is a meaningful first migration slice, not a claim that the requested 100% React UI target is complete. The dynamic Maze UI is still driven by existing imperative TypeScript modules under `src/features/maze/ui/`, `lobby/`, `rooms/`, `create-game/`, `live/`, `race/` and `input/`. These are the next conversion targets. Coin/token, holders, market and live-feed feature controllers are also not yet active React routes in this build.
+The old browser scripts remain only as archived parity/rollback references. They are not imported by the active Home, Market, Token, Holders or Maze routes. A fully automated visual parity pass and production build still need to be run in an environment with project dependencies installed.
 
 ## No-regression constraints
 

@@ -1,13 +1,14 @@
 // Moved verbatim from legacy/mazeV3/maze-game/maze.js (statements 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132). Only imports/exports and `S.` state access were added.
 import { createGame, lobbyHub, multiplayerClient, raceBoard } from './services';
 import { S, racerPos, cam, collected } from './state';
-import { banner, $, reduceMotion, messageElement, winStats, winCard } from './dom';
+import { reduceMotion } from './dom';
 import { initGame, resetUi, beginScene, burst } from './solo';
 import { generateMazeData, DC, DR } from '@maze/shared';
 import { applyMazeSize } from './layout';
 import { showMenu } from './session';
 import { PLAYER_COLOR } from './constants';
 import { updateHud, fmtTime } from './hud';
+import { showMazeResult, showMazeBanner } from '../ui/maze-view-store';
 import { rankPlayers } from '../ui/race-board';
 import { ensurePlayerVisible } from './camera';
 export function getMultiplayerUrl() {
@@ -24,10 +25,9 @@ export function handleNetworkStatus(state, message) {
     if (state === 'offline' && S.multiplayerSession) {
         // The server forgets a racer whose connection closed, so a race cannot be resumed after reconnecting.
         S.isGameOver = true;
-        banner.textContent = S.spectating
+        showMazeBanner(S.spectating
             ? 'Connection lost — this race can no longer be watched. Go back to the lobby to pick another.'
-            : 'Connection lost — this race can no longer sync. Return to the lobby to start a new match.';
-        banner.classList.add('show');
+            : 'Connection lost — this race can no longer sync. Return to the lobby to start a new match.');
     }
 }
 /** Called by "Create Your Game" once the player has held the launch button. */
@@ -77,9 +77,7 @@ export function loadSharedMaze(map, sizeHint, goalCount) {
     return true;
 }
 export function roomLabel(watchers = 0) {
-    const label = $('raceRoomCode');
-    if (!label) return;
-    label.textContent = `ROOM ${S.roomCode}${watchers > 0 ? ` · ${watchers} watching` : ''}`;
+    raceBoard.setRoomCode(`ROOM ${S.roomCode}${watchers > 0 ? ` · ${watchers} watching` : ''}`);
 }
 export function startMultiplayerGame(message) {
     const map = message.maze;
@@ -225,11 +223,14 @@ export function finishMultiplayerGame(message) {
     S.isGameOver = true;
     S.endTime = performance.now();
     S.pausedAt = null;
-    messageElement.textContent = !S.spectating && S.multiplayerWinnerId === S.localPlayerId ? '🏆 You win!' : `🏁 ${S.multiplayerWinnerName} wins`;
-    const item = (value, label) => `<div><b>${value}</b><span>${label}</span></div>`;
-    winStats.innerHTML = item(S.steps, 'Steps') + item(`${S.goals}/${S.goalTotal}`, 'Targets') +
-        item(fmtTime(Math.max(0, S.endTime - (S.startTime || S.endTime))), 'Time');
-    winCard.classList.add('show');
+    const winMessage = !S.spectating && S.multiplayerWinnerId === S.localPlayerId
+        ? '🏆 You win!'
+        : `🏁 ${S.multiplayerWinnerName} wins`;
+    showMazeResult(winMessage, [
+        { value: S.steps, label: 'Steps' },
+        { value: `${S.goals}/${S.goalTotal}`, label: 'Targets' },
+        { value: fmtTime(Math.max(0, S.endTime - (S.startTime || S.endTime))), label: 'Time' },
+    ]);
     raceBoard.render(S.multiplayerPlayers, S.localPlayerId, S.goalTotal, S.spectating ? S.spectatorFocus : '');
     if (!reduceMotion) {
         const mine = !S.spectating && S.multiplayerWinnerId === S.localPlayerId;
@@ -276,8 +277,7 @@ export function handleMultiplayerMessage(message) {
             // The room vanished under a running race (everybody else left, or the host failed).
             if (S.multiplayerSession && !S.spectating && !S.multiplayerWinnerId && (!message.roomId || message.roomId === S.multiplayerRoomId)) {
                 S.isGameOver = true;
-                banner.textContent = String(message.message || 'This room closed.') + ' Go back to the lobby to start another.';
-                banner.classList.add('show');
+                showMazeBanner(String(message.message || 'This room closed.') + ' Go back to the lobby to start another.');
             }
             break;
         case 'spectate:ended':
@@ -297,7 +297,7 @@ export function handleMultiplayerMessage(message) {
         case 'protocol:error': {
             const text = String(message.message || 'Multiplayer error');
             if (createGame.visible) lobbyHub.notice(text, { tone: 'warn' });
-            else { banner.textContent = text; banner.classList.add('show'); }
+            else showMazeBanner(text);
             break;
         }
         default:

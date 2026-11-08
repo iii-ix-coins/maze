@@ -1,19 +1,21 @@
-import { useEffect } from 'react';
 import { SiteChromeHosts } from '../../components/layout/SiteChromeHosts';
+import { MarketSummary } from '../market/MarketSummary';
+import { LiveFeedPanel } from '../live-feed/LiveFeedPanel';
+import { HoldersPanel } from '../holders/HoldersPanel';
 
-/** Native React Home shell. The platform APIs and all public URLs remain unchanged. */
+/** React-owned home page. Existing API-backed sections are rendered by feature components. */
 export function HomePage() {
-  useEffect(() => {
-    const markPageLoaded = () => {
-      document.body.classList.remove('page-loading');
-      document.body.classList.add('page-loaded');
-    };
-
-    if (document.readyState === 'complete') markPageLoaded();
-    else window.addEventListener('load', markPageLoaded, { once: true });
-
-    return () => window.removeEventListener('load', markPageLoaded);
-  }, []);
-
-  return <SiteChromeHosts />;
+  const isMazeRoute = window.location.pathname === '/maze.html';
+  return (
+    <>
+      <SiteChromeHosts />
+      {!isMazeRoute ? (
+        <main className="site-home-content feature-page-shell">
+          <MarketSummary />
+          <LiveFeedPanel />
+          <HoldersPanel />
+        </main>
+      ) : null}
+    </>
+  );
 }
