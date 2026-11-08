@@ -1,3 +1,3 @@
 # Modal components
 
-Migrate one modal at a time. Preserve IDs, focus behaviour, keyboard dismissal, body scroll behaviour and all existing action semantics before removing its legacy script.
+React owns the active modals. Preserve IDs, focus behaviour, keyboard dismissal, body scroll behaviour and existing action semantics when changing a modal. Do not reintroduce imperative DOM builders or standalone modal bootstraps.

@@ -21,7 +21,7 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 5. مسیرهای فعلی API تعاملات (`/api/stats`, `/api/stats/view`, `/api/stats/like`, `/api/stats/share`) بدون تغییر نگه داشته شده‌اند.
 6. ساختار ثابت Maze از HTML string به JSX تبدیل شده است؛ ۸۳ شناسه اصلی در JSX حفظ شده‌اند تا موتور فعلی همان عناصر مورد انتظارش را پیدا کند.
 7. `MazePage` lifecycle و بارگذاری موتور را کنترل می‌کند؛ موتور TypeScript پس از Commit شدن رابط React اجرا می‌شود.
-8. اسکریپت‌های قدیمی Home دیگر از مسیر فعال Home یا Maze اجرا نمی‌شوند و فقط به‌عنوان baseline/rollback باقی مانده‌اند.
+8. اسکریپت‌های قدیمی Home از مسیر فعال حذف شده‌اند؛ صفحات فعال فقط ورودی مشترک React را بارگذاری می‌کنند.
 9. فایل‌های Backend و قراردادهای API/WebSocket در این فاز تغییر داده نشده‌اند.
 
 ### انجام‌شده در فاز دوم — رابط بازی React
@@ -52,13 +52,11 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 5. Holders همان `/api/live-feed/holders?limit=100` با cadence پنج‌ثانیه‌ای و منطق data-version را حفظ می‌کند. Live Feed همان buyers/holders endpointها با limit=100، request sequence، cancel و refresh پنج‌ثانیه‌ای پس از پایان درخواست را حفظ می‌کند.
 6. Vite اکنون `index.html`، `market.html`، `coin.html` و `holders.html` را به‌عنوان build input می‌شناسد. این کار از طریق Multi-page frontend build انجام شده و نیازی به تغییر `server.js` نداشته است.
 7. هیچ فایل `server.js`، `start.js`، `engines/`، `shared/` یا قرارداد API تغییر نکرده است؛ مسیرها، متدها، queryها و ساختار پاسخ سرویس‌ها دست‌نخورده‌اند.
-8. DOM-based legacy scripts در `legacy-scripts/` و `public/js/` صرفاً برای rollback/parity نگه داشته شده‌اند و در مسیرهای فعال React import یا اجرا نمی‌شوند.
+8. کنترلرهای DOM قدیمی و نسخه‌های تکراری آن‌ها از `src/features/home/legacy-scripts/` و `public/js/` حذف شده‌اند؛ bundle قدیمی JavaScript/CSS بازی نیز حذف شده است. دو فایل `legacy/` فقط fallback ایستا برای مسیرهای موجود در Express هستند و هیچ script یا controller بارگذاری نمی‌کنند.
 
 ### باقی‌مانده برای رسیدن به ۱۰۰٪ React UI
 
-1. انتقال سایر bootstrapها و بخش‌های قدیمی سایت که در archive فعلی صفحهٔ فعال ندارند، پس از شناسایی دقیق دامنهٔ موردنیاز.
-2. حذف `legacy-scripts` و duplicate sourceها فقط پس از تأیید parity و تکمیل تست‌های مرورگر؛ فعلاً نگهداری‌شان عمدی است.
-3. اجرای Typecheck کامل، Vite Production Build، تست API زنده و تست بصری Desktop/Tablet/Mobile در محیط دارای وابستگی‌ها.
+1. اجرای Typecheck کامل، Vite Production Build، تست API زنده و تست بصری Desktop/Tablet/Mobile در محیط دارای وابستگی‌ها.
 
 ## نقشه راه پیشنهادی
 
@@ -76,10 +74,12 @@ Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شب�
 
 ### فاز 4 — حذف Legacy UI
 
-- حذف کلاسیک‌های فعال جایگزین‌شده
-- حذف DOM bootstrapهای قدیمی
-- حذف duplicate sourceها
-- حذف compatibility adapters غیرضروری
+- کنترلرهای DOM قدیمی از `public/js/` حذف شدند.
+- نسخه‌های تکراری آن‌ها از `src/features/home/legacy-scripts/` حذف شدند.
+- `theme-init.js` خارجی حذف و منطق کوچک جلوگیری از theme flash به‌صورت inline در `<head>` صفحه‌های React قرار گرفت.
+- `initMazeBackground()` و ساخت SVG با `createElementNS` حذف شد؛ اکنون `MazeBackground.tsx` ساختار SVG را در React رندر می‌کند و فقط transform دوربین را در RAF به‌روزرسانی می‌کند.
+- bundle و source map قدیمی Maze حذف شد؛ SVGهای مورد استفادهٔ Wizard حفظ شدند.
+- صفحات fallback موردنیاز Express بدون تغییر Backend باقی ماندند، اما اکنون فقط پیام ثابت نمایش می‌دهند و هیچ JavaScript یا UI قدیمی را اجرا نمی‌کنند.
 
 ### فاز 5 — تست و انتشار
 
@@ -118,7 +118,39 @@ Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شب�
 ### بازبینی تحویل فاز چهارم
 
 - `node scripts/check-layout.mjs` موفق است و ورودی‌های چندصفحه‌ای Vite، routeهای React و عدم import مستقیم کنترلرهای legacy را بررسی می‌کند.
-- بررسی نحوی با TypeScript transpiler برای ۸۰ فایل TS/TSX زیر `src/` (به‌جز declaration files) بدون خطا انجام شد؛ `node --check` نیز برای ۷۴ فایل JavaScript در `public/js/` و `legacy-scripts/` موفق بود.
+- در اعتبارسنجی تاریخی فاز چهارم، ۸۰ فایل TS/TSX با transpiler بررسی شدند و ۷۴ فایل JavaScript قدیمی نیز با `node --check` بدون خطا بودند؛ آن فایل‌های قدیمی در مرحلهٔ پاک‌سازی نهایی حذف شده‌اند.
 - Typecheck هدفمند Featureهای جدید با React declaration shim موقت موفق شد. این نتیجه جایگزین Typecheck کامل با وابستگی‌های واقعی پروژه نیست.
 - `server.js`، `start.js`، `engines/`، `shared/` و `src/services/api/contracts.ts` با نسخهٔ ورودی مقایسه شدند و بدون تغییر هستند.
 - در محیط فعلی `node_modules` نصب نیست: Typecheck کامل به‌دلیل نبود `@types/node` و `vite/client` اجرا نشد؛ Vite Build و Vitest نیز به‌ترتیب به‌دلیل در دسترس نبودن `vite` و `vitest` اجرا نشدند. تست بصری مرورگر و تست زندهٔ API هم انجام نشده‌اند.
+
+
+## بازبینی نهایی — حذف کنترلرها و Bootstrapهای Legacy
+
+- `public/js/` (۳۷ فایل) و نسخهٔ تکراری `src/features/home/legacy-scripts/` (۳۷ فایل) حذف شدند.
+- bootstrap خارجی `theme-init.js` از هر چهار ورودی HTML حذف شد؛ خواندن کلید موجود `hollld-theme` با همان مقادیر مجاز، به اسکریپت inline پیش از CSS منتقل شد تا جلوگیری از FOUC حفظ شود.
+- `public/maze-assets/assets/app.js`، `app.css`، source mapها و فونت‌های hashed مربوط به خروجی قدیمی حذف شدند؛ پنج SVG که Create Wizard استفاده می‌کند حفظ شدند.
+- `legacy/home.html` و `legacy/maze.html` به صفحه‌های fallback ایستا و بدون script تبدیل شدند، چون `server.js` بدون تغییر همچنان این دو فایل را در مسیرهای fallback خود ارجاع می‌دهد. در نبود Build تولیدی، این صفحات اکنون پیام نیاز به Build نشان می‌دهند؛ رابط فعال React و مسیر بازی ساخته‌شده تغییر نمی‌کند.
+- `server.js`، `start.js`، `engines/`، `shared/`، API contracts، Maze engine، ورودی‌ها و WebSocket client دست‌نخورده باقی ماندند. `MazeBackground.tsx` نیز هیچ state یا React render در هر فریم تولید نمی‌کند.
+- بررسی layout اکنون به‌صورت صریح نبود پوشه‌های controller قدیمی، نبود bundle قدیمی و نبود script خارجی `/js/*.js` در صفحات React و fallbackها را کنترل می‌کند. `node scripts/check-layout.mjs` پس از پاک‌سازی موفق شد.
+- syntax اسکریپت‌های inline چهار صفحهٔ فعال و فایل‌های JS فعال باقی‌مانده با Node بررسی شد؛ این بررسی جایگزین Typecheck/Production Build یا Visual QA نیست.
+- SHA-256 تعداد ۱۴۸ فایل مربوط به Backend، API contracts، Simulation، ورودی‌ها و WebSocket با نسخهٔ قبل از پاک‌سازی تطبیق داده شد و هیچ اختلافی نداشت.
+
+
+### گزارش کنترل نهایی پس از حذف Legacy
+
+- `node scripts/check-layout.mjs` موفق است؛ checker علاوه بر مسیرهای حذف‌شده، اکنون هر فایل مستقل `.js`، `.mjs` یا `.cjs` در `src/` و `public/` را نیز رد می‌کند.
+- Transpile نحوی TypeScript برای ۸۱ فایل `.ts/.tsx` در `src/` بدون Diagnostic بود.
+- `node --check` برای ۱۰۴ فایل JavaScript/ESM/CJS در پروژه موفق بود؛ پنج اسکریپت inline چهار ورودی HTML نیز جداگانه با Node بررسی شدند.
+- هیچ فایل مستقل JavaScript در `src/` یا `public/` باقی نمانده است. تنها ورودی فعال مرورگر در این درخت `src/main.tsx` است.
+- ۱۴۸ فایل محافظت‌شده شامل `server.js`، `start.js`، `package.json`، پوشه‌های `engines/` و `shared/`، قرارداد API، Maze Simulation، renderer، input و WebSocket client با SHA-256 نسخهٔ قبل مقایسه شدند؛ هر ۱۴۸ فایل دقیقاً بدون تغییرند.
+- دو صفحهٔ `legacy/home.html` و `legacy/maze.html` حذف نشدند، زیرا سرور Express بدون تغییر به آن‌ها fallback می‌کند؛ محتوای آن‌ها اکنون فقط HTML/CSS ایستا و فاقد script است. این fallback تنها زمانی دیده می‌شود که Build تولیدی React موجود نباشد.
+- اسکریپت‌های کوچک inline قبل از Paint عمداً باقی مانده‌اند: خواندن `hollld-theme` برای جلوگیری از چشمک تم و افزودن `body.in-menu` روی `/maze.html` برای حفظ CSS اولیه. هیچ‌کدام کنترلر، سازندهٔ DOM یا bootstrap اجرای اپلیکیشن نیستند.
+- Typecheck کامل، Vite Production Build و تست بصری مرورگر در این مرحله اجرا نشدند؛ وابستگی‌های پروژه در این محیط نصب نیستند و دسترسی قبلی به npm registry نیز با خطای DNS/شبکه متوقف شده بود. نتایج Syntax و ساختار را نباید معادل این آزمون‌ها دانست.
+
+### اعداد نهایی کنترل نحوی پس از پاک‌سازی
+
+- ۸۱ فایل TypeScript/TSX در `src/` با TypeScript transpile شدند و هیچ Diagnostic نحوی نداشتند.
+- ۱۰۴ فایل `.js`/`.mjs`/`.cjs` در کل پروژه با `node --check` بررسی شدند.
+- پنج script inline موجود در چهار HTML ورودی جداگانه از نظر Syntax بررسی شدند.
+- هیچ فایل مستقل JavaScript با پسوندهای `.js`/`.mjs`/`.cjs` در `src/` یا `public/` باقی نمانده است.
+- جزئیات حذف، استثناهای inline pre-paint و نتایج هش در `LEGACY-CLEANUP-REPORT-FA.md` ثبت شده‌اند.

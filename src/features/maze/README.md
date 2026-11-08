@@ -6,4 +6,4 @@ React owns the Maze page, the Create Game Wizard, Rooms browser, Room Details / 
 
 The simulation remains an independent TypeScript engine. Maze generation, game state, Canvas rendering, frame loop, keyboard/pointer/joystick input, save format and multiplayer message protocol are not moved into React state. `MazeStage` and `LiveThumb` are canvas preview renderers with explicit React mount/unmount cleanup.
 
-Remaining UI migration work includes the in-race HUD and Race Board, plus any other legacy presentation/bootstrap surface outside the four migrated menu views. The original static game DOM IDs are preserved as a compatibility boundary until those engine-facing surfaces are converted. Do not move high-frequency game-loop updates into React state.
+The Create/Rooms/Live menu, in-race HUD, Race Board, result cards and site-facing Maze controls are React-owned. The original static game DOM IDs remain as the engine compatibility boundary. The remaining imperative modules are limited to the independent simulation/render/input lifecycle and canvas-based visual effects; they are not UI controllers. Do not move high-frequency game-loop updates into React state.

@@ -1,3 +1,3 @@
 # Interaction feature
 
-Preserve Views, Likes, Shares, copy semantics, optimistic effects and endpoint behaviour. Do not activate a React replacement while the legacy interaction script is still enabled.
+`InteractionBar.tsx` is the only active interaction UI. It preserves Views, Likes, Shares, copy semantics, optimistic effects and the existing `/api/stats*` endpoint behaviour. The former DOM controller and its bootstrap scripts have been removed.

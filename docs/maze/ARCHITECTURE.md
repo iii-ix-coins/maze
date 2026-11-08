@@ -8,17 +8,18 @@ maze-site/
 │  ├─ engine/                  منطق بازی، State، Camera، Renderer و Game Loop
 │  ├─ input/                   keyboard، pointer، joystick و minimap
 │  ├─ net/                     Multiplayer WebSocket client
-│  ├─ ui/                      کنترلرهای DOM فعلی برای Lobby، Rooms و Wizard
+│  ├─ ui/react/                کامپوننت‌های React برای Lobby، HUD و Race Board
+│  ├─ ui/                      store و adapterهای بدون DOM برای موتور
 │  └─ styles/                  CSS بازی و فونت‌ها
 ├─ shared/maze/src/            قواعد ساخت ماز و پروتکل مشترک
 ├─ engines/maze-server/src/    Multiplayer WebSocket server
 ├─ tests/maze/                 تست‌های واحد و تست سرور
-└─ legacy/                     HTML قدیمی برای مقایسه و بازگشت
+└─ legacy/                     فقط دو صفحهٔ fallback ایستا و بدون JavaScript برای Express
 ```
 
 ## مرز React و موتور بازی
 
-React/Vite یک Frontend واحد برای `/` و `/maze.html` فراهم می‌کند. صفحهٔ Maze و markup آن در React mount می‌شوند؛ پس از commit شدن DOM، موتور فعلی به همان IDها و کلاس‌ها متصل می‌شود. Canvas rendering، `requestAnimationFrame`، input handling، game state، الگوریتم generator و پیام‌های WebSocket به React منتقل یا بازنویسی نشده‌اند.
+React/Vite یک Frontend واحد برای `/` و `/maze.html` فراهم می‌کند. صفحهٔ Maze و markup آن در React mount می‌شوند؛ پس از commit شدن DOM، موتور فعلی به همان IDها و کلاس‌ها متصل می‌شود. Canvas rendering، `requestAnimationFrame`، input handling، game state، الگوریتم generator و پیام‌های WebSocket به React منتقل یا بازنویسی نشده‌اند. کنترلرهای DOM سایت، فایل‌های bootstrap قدیمی و bundle قدیمی Maze حذف شده‌اند؛ پس‌زمینهٔ SVG هم اکنون توسط React ساخته می‌شود. صفحات `legacy/` فقط پیام fallback ثابت دارند.
 
 این جداسازی آگاهانه است: React نباید در هر فریم Canvas را re-render کند و مهاجرت UI نباید state یا زمان‌بندی بازی را تغییر دهد.
 

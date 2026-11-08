@@ -101,7 +101,7 @@
     .dot.active {
         width: 46px;
         background: linear-gradient(90deg, var(--mint) var(--dot-p), oklch(1 0 0 / 0.16) var(--dot-p));
-        animation: dot-fill 7272ms linear forwards;                              /* = slideDuration in app.js */
+        animation: dot-fill 7272ms linear forwards;                              /* LiveFeedPanel rotation timing */
     }
     @keyframes dot-fill { to { --dot-p: 100%; } }
 

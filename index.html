@@ -9,7 +9,20 @@
     <title>Hollld.fun</title>
     <link rel="icon" type="image/x-icon" href="/css/images/maze-logo.svg" />
     <!-- Keep the original theme bootstrap before styles and React to avoid a theme flash. -->
-    <script src="/js/theme-init.js"></script>
+    <!-- Synchronous theme preference initialization prevents a first-paint theme flash. -->
+    <script>
+      (() => {
+        const allowedThemes = new Set(['grass', 'dark', 'light']);
+        let theme = 'grass';
+        try {
+          const savedTheme = window.localStorage.getItem('hollld-theme');
+          if (allowedThemes.has(savedTheme)) theme = savedTheme;
+        } catch (_) {
+          // Storage can be unavailable in privacy-restricted browser contexts.
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <!-- Preserve the original stylesheet order and file contents. -->
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/header-scroll-scrim.css" />

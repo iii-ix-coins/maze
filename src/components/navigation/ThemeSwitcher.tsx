@@ -1,7 +1,6 @@
-import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
 import { applySiteTheme, SITE_THEMES, type SiteTheme } from '../../features/theme/theme';
-import { initMazeBackground } from '../../features/theme/maze-background.js';
 
 const THEME_LABELS: Record<SiteTheme, string> = {
   grass: 'Grass',
@@ -18,10 +17,6 @@ const THEME_ICONS: Record<SiteTheme, string> = {
 export function ThemeSwitcher() {
   const theme = useSiteTheme();
   const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    initMazeBackground();
-  }, []);
 
   const selectTheme = (nextTheme: SiteTheme, focus = false) => {
     applySiteTheme(nextTheme);

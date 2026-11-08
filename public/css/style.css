@@ -2809,9 +2809,7 @@ html[data-theme="grass"] .header {
     color: var(--hdr-loss);
 }
 
-/* app.js paints "Coming soon" with an inline style="color: gray".
-   An author !important beats an inline normal declaration, so the theme can
-   still own that colour without editing the script. */
+/* Preserve the theme colour for disabled placeholder labels carrying a gray inline style. */
 .header .change-box>div[style*="gray"] {
     color: var(--hdr-dim) !important;
 }

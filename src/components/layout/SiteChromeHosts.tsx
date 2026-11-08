@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { InteractionBar } from '../../features/interaction/InteractionBar';
+import { MazeBackground } from '../../features/theme/MazeBackground';
 
 /**
  * React owns the original four body-level site regions. IDs, order and styling
@@ -19,6 +20,7 @@ export function SiteChromeHosts() {
 
   return (
     <>
+      <MazeBackground />
       <div id="site-header"><SiteNavigation /></div>
       <div id="site-brand-header" className="site-brand-header-host">
         <div id="hold-info" className="brand-header">
