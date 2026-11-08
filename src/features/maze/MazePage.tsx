@@ -42,12 +42,6 @@ export function MazePage() {
     bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('site:themechange', onThemeChange);
 
-    const multiplayerMeta = document.querySelector<HTMLMetaElement>('meta[name="maze-multiplayer-url"]');
-    if (multiplayerMeta && !multiplayerMeta.content.trim()) {
-      const scheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      multiplayerMeta.content = `${scheme}//${window.location.hostname}:8081`;
-    }
-
     void (async () => {
       try {
         // Site chrome and the complete static Maze UI tree are mounted by React.

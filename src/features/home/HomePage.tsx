@@ -8,7 +8,7 @@ export function HomePage() {
   const isMazeRoute = window.location.pathname === '/maze.html';
   return (
     <>
-      <SiteChromeHosts />
+      <SiteChromeHosts mazePage={isMazeRoute} />
       {!isMazeRoute ? (
         <main className="site-home-content feature-page-shell">
           <MarketSummary />

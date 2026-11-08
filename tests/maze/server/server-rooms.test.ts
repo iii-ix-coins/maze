@@ -20,7 +20,7 @@ function startServer(env = {}) {
         const child = spawn(process.execPath, [SERVER], {
             env: {
                 ...process.env,
-                PORT: '0',
+                MAZE_PORT: '0',
                 MAZE_PREPARE_TIMEOUT_MS: '700',
                 MAZE_LOBBY_FLUSH_MS: '40',
                 MAZE_HEARTBEAT_MS: '60000',

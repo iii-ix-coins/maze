@@ -260,7 +260,13 @@ export class LobbyHub {
     this.shell.setView('room');
     if (!url) {
       this.phase = 'idle';
-      this.showRoomNotice({ actions: [{ label: 'Back', key: 'back', icon: ICONS.back }] });
+      this.pending = '';
+      this.showRoomNotice({
+        eyebrow: 'Multiplayer unavailable',
+        title: 'Online play is not configured',
+        text: 'The game server address is missing for this site. Solo play is still available; ask the site administrator to finish the multiplayer server settings.',
+        actions: [{ label: 'Back to setup', primary: true, key: 'back', icon: ICONS.back }],
+      });
       return;
     }
     this.phase = 'joining';

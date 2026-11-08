@@ -121,3 +121,99 @@
     border-radius: var(--frame-r);
     background: var(--veil, var(--glass));
 }
+
+/* --------------------------------------------------------------------------
+   React Maze page flow. Keep these rules unlayered: create-game.css is also
+   unlayered, while the historical .maze-app overrides in maze-site.css live
+   inside @layer pages and therefore cannot beat its fixed-position .cg rule.
+   -------------------------------------------------------------------------- */
+body.in-menu {
+    --section-gap: 10px;
+    height: 100dvh;
+    min-height: 100dvh;
+    gap: 10px;
+    align-items: stretch;
+    overflow-y: hidden;
+    padding-block: 10px max(12px, env(safe-area-inset-bottom));
+}
+
+body.in-menu #site-header {
+    position: relative;
+    top: auto;
+    z-index: 1000;
+    flex: 0 0 auto;
+}
+
+body.in-menu #site-brand-header,
+body.in-menu #site-interaction-bar,
+body.in-menu #site-share-modal {
+    display: none !important;
+}
+
+#mazeApp.maze-app.in-menu {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: 0;
+    height: auto;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg {
+    position: relative;
+    inset: auto;
+    z-index: 1;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: transparent;
+    --cg-top-pad: 0px;
+    --cg-tabs-h: 0px;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg > .cg-top {
+    display: none !important;
+    min-height: 0;
+    padding: 0;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg > .cg-views {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate:not([hidden]) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+}
+
+@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
+    #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
+        height: 100%;
+        overflow: clip;
+    }
+
+    /* The shared site navigation now occupies its own row above the wizard.
+       Reserve that height when sizing the preview canvas so it cannot slide
+       underneath the header or get clipped at the bottom of short viewports. */
+    #mazeApp.maze-app.in-menu > #createGame.cg {
+        --maze-side: min(100dvh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
+    }
+}

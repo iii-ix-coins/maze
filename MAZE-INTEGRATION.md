@@ -14,7 +14,9 @@ npm start
 
 ## تنظیم WebSocket
 
-`MAZE_PUBLIC_URL` را در محیط Build می‌توان برای آدرس عمومی WebSocket تنظیم کرد. در حالت محلی، کلاینت در صورت خالی بودن مقدار، همان hostname را با پورت `8081` استفاده می‌کند. `MAZE_ALLOWED_ORIGINS` باید شامل Originهای دقیق سایت باشد؛ از `*` استفاده نکنید.
+`MAZE_PUBLIC_URL` باید در متغیرهای Build سرویس `site` روی آدرس عمومی WebSocket سرویس مستقل `maze-server` تنظیم شود؛ برای نمونه `wss://<maze-server-public-domain>`. کلاینت فقط در محیط محلی (`localhost` / `127.0.0.1`) در صورت خالی بودن این مقدار به پورت `8081` برمی‌گردد و در Production آدرس سرویس را حدس نمی‌زند.
+
+در متغیرهای Runtime سرویس `maze-server`، مقدار `MAZE_ALLOWED_ORIGINS` را روی Origin دقیق سایت قرار دهید؛ برای نمونه `https://maze-coin.up.railway.app` (بدون مسیر). اگر این مقدار خالی باشد، کنترل پیش‌فرض same-host برای دو سرویس مستقل Railway اتصال مرورگر را رد می‌کند. از `*` استفاده نکنید.
 
 ## حفظ سازگاری
 

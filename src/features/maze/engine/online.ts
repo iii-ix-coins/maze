@@ -14,10 +14,32 @@ import { ensurePlayerVisible } from './camera';
 export function getMultiplayerUrl() {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="maze-multiplayer-url"]');
     const configured = meta ? meta.content.trim() : '';
-    if (configured) return configured;
-    if (location.protocol !== 'http:' && location.protocol !== 'https:') return '';
-    const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${scheme}//${location.host}`;
+
+    if (configured) {
+        try {
+            const url = new URL(configured, window.location.href);
+            if (url.protocol === 'http:') url.protocol = 'ws:';
+            if (url.protocol === 'https:') url.protocol = 'wss:';
+            if ((url.protocol !== 'ws:' && url.protocol !== 'wss:') || !url.hostname) return '';
+            if (window.location.protocol === 'https:' && url.protocol !== 'wss:') {
+                console.error('[Maze] HTTPS pages require a secure WSS endpoint.');
+                return '';
+            }
+            return url.href;
+        } catch (error) {
+            console.error('[Maze] Invalid public multiplayer URL:', error);
+            return '';
+        }
+    }
+
+    // The local server defaults to port 8081. A production frontend and the
+    // Maze server are separate Railway services, so guessing the frontend
+    // host (or its port 8081) would silently target the wrong service.
+    const localHosts = new Set(['localhost', '127.0.0.1', '[::1]', '0.0.0.0']);
+    if (!localHosts.has(window.location.hostname.toLowerCase())) return '';
+    if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return '';
+    const scheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${scheme}//${window.location.hostname}:8081`;
 }
 export function handleNetworkStatus(state, message) {
     createGame.setNetworkStatus(state, message);

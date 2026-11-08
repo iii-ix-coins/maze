@@ -144,11 +144,19 @@ export class CreateGameComponent {
   async launch() {
     if (this.state.launching) return;
     mazeUiStore.patch({ launching: true, holdPhase: 'done', holdProgress: 1 });
-    const result = this.onLaunch(this.getConfig());
-    if (result === 'stay') {
+    try {
+      const result = await this.onLaunch(this.getConfig());
+      if (result === 'stay') {
+        mazeUiStore.patch({ launching: false, holdPhase: 'idle', holdProgress: 0 });
+      } else {
+        this.hide();
+      }
+      return result;
+    } catch (error) {
+      console.error('[Maze] Game launch failed:', error);
       mazeUiStore.patch({ launching: false, holdPhase: 'idle', holdProgress: 0 });
-    } else {
-      this.hide();
+      mazeUiStore.showToast('The game could not start. Please try again.', { tone: 'warn' });
+      return 'stay';
     }
   }
 }

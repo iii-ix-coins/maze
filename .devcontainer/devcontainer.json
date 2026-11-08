@@ -1,0 +1,27 @@
+{
+  "name": "Maze Cloud Development",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "22.23.4",
+      "npmVersion": "10.9.9",
+      "nodeGypDependencies": true
+    }
+  },
+  "postCreateCommand": "npm ci --include=dev --include=optional --no-audit --no-fund",
+  "forwardPorts": [5173, 5000, 8081],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Site",
+      "onAutoForward": "openBrowser"
+    },
+    "5000": {
+      "label": "API Server",
+      "onAutoForward": "notify"
+    },
+    "8081": {
+      "label": "Maze WebSocket Server",
+      "onAutoForward": "notify"
+    }
+  }
+}

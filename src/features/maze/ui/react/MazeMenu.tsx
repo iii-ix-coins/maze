@@ -10,6 +10,7 @@ import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent as ReactPoin
 import { DIFFICULTIES } from '@maze/shared';
 import { createGame } from '../create-game/create-game';
 import { MazeStage } from '../create-game/maze-stage';
+import { iconUrl, STEP_ICONS } from '../create-game/icons';
 import { LiveThumb } from '../lobby/live-thumb';
 import { ICONS } from '../lobby/icons';
 import {
@@ -42,6 +43,13 @@ function useMazeUi(): MazeUiState {
 function Icon({ name }: { name: keyof typeof ICONS }) {
   return <span className="lb-fact-ic" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ICONS[name] }} />;
 }
+
+const WIZARD_STEPS = [
+  { label: 'Maze size', icon: 'size' },
+  { label: 'Racers', icon: 'racers' },
+  { label: 'Targets', icon: 'targets' },
+  { label: 'Launch', icon: 'launch' },
+] as const;
 
 function Plural({ count, one, many }: { count: number; one: string; many: string }) {
   return <>{count === 1 ? one : many}</>;
@@ -132,7 +140,7 @@ export function MazeMenu() {
       data-view={state.view}
       data-step={state.step}
       data-level={state.levelIndex}
-      style={{ '--tab': activeIndex, '--charge': state.holdProgress } as CSSProperties}
+      style={{ '--tab': activeIndex, '--charge': state.holdProgress, '--cg-progress': state.step / 3 } as CSSProperties}
     >
       <header className="cg-top">
         <nav className="cg-tabs" id="cgTabs" role="tablist" aria-label="Menu sections">
@@ -187,6 +195,7 @@ function CreateWizard({ state }: { state: MazeUiState }) {
   const holdStart = useRef<number>(0);
   const holdRaf = useRef<number | null>(null);
   const pointerActive = useRef(false);
+  const launchPending = useRef(false);
   const lastShowVersion = useRef(0);
   const previousView = useRef(state.view);
   const level = DIFFICULTIES[state.levelIndex];
@@ -233,7 +242,42 @@ function CreateWizard({ state }: { state: MazeUiState }) {
     pointerActive.current = false;
     if (holdRaf.current !== null) window.cancelAnimationFrame(holdRaf.current);
     holdRaf.current = null;
-    if (!mazeUiStore.getSnapshot().launching) createGame.setHold(0, 'idle');
+    const current = mazeUiStore.getSnapshot();
+    // Once the hold is complete, keep its full state visible while the canvas
+    // plays the launch animation and hands control to the game engine.
+    if (!launchPending.current && !current.launching && current.holdPhase !== 'done') {
+      createGame.setHold(0, 'idle');
+    }
+  }, []);
+
+  const startLaunch = useCallback(() => {
+    const current = mazeUiStore.getSnapshot();
+    if (launchPending.current || current.launching) return;
+
+    launchPending.current = true;
+    pointerActive.current = false;
+    if (holdRaf.current !== null) window.cancelAnimationFrame(holdRaf.current);
+    holdRaf.current = null;
+    createGame.setHold(1, 'done');
+
+    const finishLaunch = async () => {
+      try {
+        await createGame.launch();
+      } finally {
+        launchPending.current = false;
+      }
+    };
+
+    const stage = stageRef.current;
+    try {
+      if (stage?.active) stage.playLaunch(() => { void finishLaunch(); });
+      else void finishLaunch();
+    } catch (error) {
+      launchPending.current = false;
+      createGame.setHold(0, 'idle');
+      console.error('[Maze] Launch animation failed:', error);
+      mazeUiStore.showToast('The game could not start. Please try again.', { tone: 'warn' });
+    }
   }, []);
 
   useEffect(() => {
@@ -263,7 +307,8 @@ function CreateWizard({ state }: { state: MazeUiState }) {
   const beginHold = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     event.preventDefault();
-    if (state.launching) return;
+    if (state.launching || launchPending.current) return;
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer capture is optional. */ }
     pointerActive.current = true;
     holdStart.current = performance.now();
     createGame.setHold(0, 'holding');
@@ -274,14 +319,16 @@ function CreateWizard({ state }: { state: MazeUiState }) {
       if (progress >= 1) {
         pointerActive.current = false;
         holdRaf.current = null;
-        createGame.setHold(1, 'done');
-        stageRef.current?.playLaunch(() => void createGame.launch());
+        startLaunch();
         return;
       }
       holdRaf.current = window.requestAnimationFrame(update);
     };
     holdRaf.current = window.requestAnimationFrame(update);
   };
+
+  const stepClass = (step: number) =>
+    `cg-step${state.step === step ? ' is-active' : state.step > step ? ' is-before' : ''}`;
 
   const waitingLine = (withGoals: boolean) => {
     if (solo || state.network !== 'online') return '';
@@ -315,20 +362,35 @@ function CreateWizard({ state }: { state: MazeUiState }) {
       </figure>
       <div className="cg-panel">
         <h1 className="cg-title" id="cgTitle">Create Your Game</h1>
-        <ol className="cg-rail" id="cgRail" aria-label="Setup steps">
-          {(['Maze size', 'Racers', 'Targets', 'Launch'] as const).map((label, index) => {
+        <ol className="cg-rail is-ready" id="cgRail" aria-label="Setup steps">
+          {WIZARD_STEPS.map(({ label, icon: iconName }, index) => {
             const value = index === 0 ? level.label : index === 1 ? (solo ? 'Solo' : String(state.players)) : index === 2 ? String(state.goals) : '';
+            const icon = STEP_ICONS[iconName];
+            const completed = index < state.step;
+            const visited = index <= state.maxStep;
             return (
-              <li key={label}>
+              <li key={iconName}>
                 <button
                   type="button"
-                  className={`cg-rail-btn ${state.step === index ? 'is-active' : ''} ${index < state.step ? 'is-before' : ''} ${index > state.maxStep ? 'is-locked' : ''}`}
+                  className={`cg-rail-btn ${state.step === index ? 'is-active' : ''} ${visited ? 'is-visited' : ''} ${completed ? 'is-done' : ''} ${!visited ? 'is-locked' : ''} ${index === 3 && state.holdPhase !== 'idle' ? 'is-charging' : ''}`}
                   data-step={index}
-                  data-icon={['size', 'racers', 'targets', 'launch'][index]}
-                  disabled={index > state.maxStep || state.launching}
+                  data-icon={iconName}
+                  aria-current={state.step === index ? 'step' : undefined}
+                  disabled={!visited || state.launching || state.holdPhase === 'holding' || state.holdPhase === 'done'}
                   onClick={() => createGame.goTo(index)}
                 >
-                  <span className="cg-node" aria-hidden="true" />
+                  <span className="cg-node" aria-hidden="true">
+                    <span
+                      className={`cg-ico${icon.tint ? ' is-tinted' : ''}`}
+                      style={{ '--icon': `url("${iconUrl(iconName)}")`, '--ico-scale': icon.fit } as CSSProperties}
+                    />
+                    {completed && (
+                      <span
+                        className="cg-ico cg-badge"
+                        style={{ '--icon': `url("${iconUrl('check')}")` } as CSSProperties}
+                      />
+                    )}
+                  </span>
                   <span className="cg-rail-text"><b>{label}</b><small>{value}</small></span>
                 </button>
               </li>
@@ -336,7 +398,7 @@ function CreateWizard({ state }: { state: MazeUiState }) {
           })}
         </ol>
         <div className="cg-steps" id="cgSteps">
-          <section className="cg-step is-active" data-step="0" aria-labelledby="cgH0" hidden={state.step !== 0} aria-hidden={state.step !== 0}>
+          <section className={stepClass(0)} data-step="0" aria-labelledby="cgH0" hidden={state.step !== 0} aria-hidden={state.step !== 0}>
             <h2 className="cg-step-title" id="cgH0">How big should the maze be?</h2>
             <p className="cg-step-help">Drag the lens along the track. A bigger maze means longer routes.</p>
             <div className="cg-readout">
@@ -360,7 +422,7 @@ function CreateWizard({ state }: { state: MazeUiState }) {
             <p className="cg-note" id="cgSizeNote">{sizeNotes[state.levelIndex]}</p>
           </section>
 
-          <section className="cg-step" data-step="1" aria-labelledby="cgH1" hidden={state.step !== 1} aria-hidden={state.step !== 1}>
+          <section className={stepClass(1)} data-step="1" aria-labelledby="cgH1" hidden={state.step !== 1} aria-hidden={state.step !== 1}>
             <h2 className="cg-step-title" id="cgH1">Who is racing?</h2>
             <p className="cg-step-help">Choose the number of racers. One racer is a solo run; online races take up to 99.</p>
             <div className="cg-dial-wrap cg-react-dial-wrap">
@@ -375,7 +437,7 @@ function CreateWizard({ state }: { state: MazeUiState }) {
             <p className="cg-note cg-lobby" id="cgPlayersLobby">{waitingLine(false)}</p>
           </section>
 
-          <section className="cg-step" data-step="2" aria-labelledby="cgH2" hidden={state.step !== 2} aria-hidden={state.step !== 2}>
+          <section className={stepClass(2)} data-step="2" aria-labelledby="cgH2" hidden={state.step !== 2} aria-hidden={state.step !== 2}>
             <h2 className="cg-step-title" id="cgH2">How many targets?</h2>
             <p className="cg-step-help">Choose how many targets to collect, in order from number 1.</p>
             <div className="cg-readout cg-readout-inline"><span id="cgGoalsOdo">{state.goals}</span><span className="cg-readout-sub" id="cgGoalsUnit">{state.goals === 1 ? 'target' : 'targets'}</span></div>
@@ -384,7 +446,7 @@ function CreateWizard({ state }: { state: MazeUiState }) {
             <p className="cg-note cg-lobby" id="cgGoalsLobby">{waitingLine(true)}</p>
           </section>
 
-          <section className="cg-step" data-step="3" aria-labelledby="cgH3" hidden={state.step !== 3} aria-hidden={state.step !== 3}>
+          <section className={stepClass(3)} data-step="3" aria-labelledby="cgH3" hidden={state.step !== 3} aria-hidden={state.step !== 3}>
             <h2 className="cg-step-title" id="cgH3">Ready when you are</h2>
             <ul className="cg-summary" id="cgSummary">
               <li><span>Maze</span><b id="cgSumSize">{level.label}, {level.size} × {level.size}</b><button type="button" data-step="0" onClick={() => createGame.goTo(0)}>Change</button></li>
@@ -402,17 +464,18 @@ function CreateWizard({ state }: { state: MazeUiState }) {
             </label>
             <button
               type="button"
-              className="cg-launch"
+              className={`cg-launch ${state.holdPhase === 'holding' ? 'is-holding' : ''}`}
               id="cgLaunch"
               aria-describedby="cgLaunchNote"
-              disabled={state.launching}
+              disabled={state.launching || state.holdPhase === 'done'}
               onPointerDown={beginHold}
               onPointerUp={cancelHold}
               onPointerCancel={cancelHold}
+              onLostPointerCapture={cancelHold}
               onPointerLeave={cancelHold}
               onContextMenu={event => event.preventDefault()}
               onBlur={cancelHold}
-              onClick={event => { if (event.detail === 0 && !state.launching) stageRef.current?.playLaunch(() => void createGame.launch()); }}
+              onClick={event => { if (event.detail === 0 && !state.launching) startLaunch(); }}
             >
               <span className="cg-launch-fill" aria-hidden="true" style={{ width: `${state.holdProgress * 100}%` }} />
               <span className="cg-launch-label" id="cgLaunchLabel">{state.holdPhase === 'holding' ? 'Keep holding' : solo ? 'Hold to start' : 'Hold to find a race'}</span>
