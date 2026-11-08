@@ -21,13 +21,12 @@
     "isolatedModules": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ],
       "@maze/shared": [
-        "shared/maze/src/index.ts"
+        "./shared/maze/src/index.ts"
       ]
     },
     "types": [
@@ -40,8 +39,8 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "vite.config.ts",
-    "vitest.config.ts",
+    "vite.config.mts",
+    "vitest.config.mts",
     "shared/maze/src/**/*.ts",
     "engines/maze-server/src/**/*.ts"
   ],

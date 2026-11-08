@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
-  'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.ts', 'package.json',
+  'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.mts', 'package.json',
   'src/app', 'src/components', 'src/features/home', 'src/features/market',
   'src/features/holders', 'src/features/live-feed', 'src/features/coin',
   'src/features/interaction', 'src/features/theme', 'src/features/maze/lobby',
@@ -190,7 +190,7 @@ for (const route of ['/coin.html', '/holders.html', '/market.html']) {
     process.exit(1);
   }
 }
-const viteConfig = fs.readFileSync(path.join(root, 'vite.config.ts'), 'utf8');
+const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
 for (const page of ['coin.html', 'holders.html', 'market.html']) {
   if (!viteConfig.includes(`'${page}'`)) {
     console.error(`[layout] Vite production inputs are missing ${page}.`);

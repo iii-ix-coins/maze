@@ -10,7 +10,12 @@ const imageRoot = new URL('public/maze-assets/assets/images/', root);
 test('every icon declared in icons.js points at a real SVG file', () => {
     for (const [name, icon] of Object.entries(STEP_ICONS)) {
         const file = fileURLToPath(new URL(icon.file, imageRoot));
-        assert.equal(new URL(iconUrl(name)).pathname, `/maze-assets/assets/images/${icon.file}`);
+
+        assert.equal(
+            new URL(iconUrl(name, 'https://example.test/')).pathname,
+            `/maze-assets/assets/images/${icon.file}`
+        );
+
         assert.ok(file.startsWith(fileURLToPath(root)), `${name} resolves inside the project`);
         assert.ok(fs.existsSync(file), `${name}: missing file ${icon.file}`);
         assert.match(fs.readFileSync(file, 'utf8'), /<svg[\s>]/, `${name}: ${icon.file} is not an SVG`);

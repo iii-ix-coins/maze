@@ -22,7 +22,7 @@ if (!files.length) {
 
 const result = spawnSync(
   process.execPath,
-  ['--import', 'tsx', '--test', ...files],
+  ['--import', 'tsx', '--test', '--test-concurrency=1', ...files],
   { cwd: root, stdio: 'inherit' },
 );
 process.exit(result.status ?? 1);

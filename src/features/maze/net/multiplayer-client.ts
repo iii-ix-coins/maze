@@ -22,7 +22,7 @@ export class MazeMultiplayerClient {
     declare reconnectTimer: number;
     declare attempts: number;
 
-    constructor({ onMessage = (..._args: any[]) => {}, onStatus = (..._args: any[]) => {} } = {}) {
+    constructor({ onMessage = (..._args: any[]) => { }, onStatus = (..._args: any[]) => { } } = {}) {
         this.onMessage = onMessage;
         this.onStatus = onStatus;
         this.url = '';
@@ -55,7 +55,7 @@ export class MazeMultiplayerClient {
         return this.open();
     }
     open() {
-        clearTimeout(this.reconnectTimer);
+        window.clearTimeout(this.reconnectTimer);
         this.reconnectTimer = 0;
         this.protocol = 0;
         this.onStatus('connecting', this.attempts ? 'Reconnecting…' : 'Connecting…');
@@ -107,7 +107,7 @@ export class MazeMultiplayerClient {
     scheduleReconnect() {
         if (!this.keepAlive || !this.url || this.reconnectTimer) return;
         const delay = Math.min(RECONNECT_MAX_MS, RECONNECT_MIN_MS * Math.pow(1.7, this.attempts++));
-        this.reconnectTimer = setTimeout(() => {
+        this.reconnectTimer = window.setTimeout(() => {
             this.reconnectTimer = 0;
             if (this.keepAlive && !this.socket) this.open();
         }, delay);
@@ -185,7 +185,7 @@ export class MazeMultiplayerClient {
 
     disconnect(notify = true) {
         this.keepAlive = false;
-        clearTimeout(this.reconnectTimer);
+        window.clearTimeout(this.reconnectTimer);
         this.reconnectTimer = 0;
         this.pendingAction = null;
         this.protocol = 0;
@@ -193,7 +193,7 @@ export class MazeMultiplayerClient {
         this.socket = null;
         if (current) {
             current.onclose = null;
-            try { current.close(); } catch (_) {}
+            try { current.close(); } catch (_) { }
         }
         if (notify) this.onStatus('offline', 'Offline');
     }

@@ -482,6 +482,7 @@ test('quick match prefers the fullest matching room', () => withServer(async srv
 
 /* ── Starting a race ───────────────────────────────────────────────────── */
 test('a full room prepares: room:host goes to the host only; publish starts everybody with distinct colours', () => withServer(async srv => {
+    const payload = makeMaze(2, 21);
     const [a, b, c] = [await srv.client(), await srv.client(), await srv.client()];
     const watcher = await srv.client();
     watcher.send({ type: 'lobby:watch' });
@@ -502,7 +503,6 @@ test('a full room prepares: room:host goes to the host only; publish starts ever
     const patch = await watcher.waitFor('lobby:patch', m => summaryOf(m, room.id) && summaryOf(m, room.id).phase === 'preparing');
     assert.equal(summaryOf(patch, room.id).count, 3);
 
-    const payload = makeMaze(2, 21);
     a.send({ type: 'maze:publish', maze: payload });
     const starts = await Promise.all([a, b, c].map(client => client.waitFor('game:start')));
     starts.forEach((start, i) => {

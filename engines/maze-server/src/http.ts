@@ -5,8 +5,7 @@ import { activeHttpResponses, S, clients, rooms, connectionsByIp } from './state
 import { currentCounts, listableRooms, roomSummary, recentList } from './registry';
 import path from 'node:path';
 import fs from 'node:fs';
-import WebSocket from 'ws';
-
+import { WebSocketServer } from 'ws';
 /* ── HTTP ──────────────────────────────────────────────────────────────── */
 export function applySecurityHeaders(headers = {}) {
     return {
@@ -120,7 +119,7 @@ export const httpServer = http.createServer((req, res) => {
     res.end('Not found');
 });
 
-export const wss = new WebSocket.Server({
+export const wss = new WebSocketServer({
     server: httpServer,
     maxPayload: 64 * 1024,
     perMessageDeflate: false,

@@ -10,22 +10,22 @@ import { multiplayerClient, lobbyHub } from './services';
 import { frame } from './frame';
 
 export function initButtons() {
-$('newMazeWin').addEventListener('click', newMaze);
-$('newMazePanel').addEventListener('click', newMaze);
-$('endYes').addEventListener('click', confirmEnd);
-$('endNo').addEventListener('click', cancelEnd);
+    $('newMazeWin').addEventListener('click', newMaze);
+    $('newMazePanel').addEventListener('click', newMaze);
+    $('endYes').addEventListener('click', confirmEnd);
+    $('endNo').addEventListener('click', cancelEnd);
 }
 
 export function initWindowEvents() {
-window.addEventListener('beforeunload', (e) => {
-    if (!S.isGameOver) { e.preventDefault(); e.returnValue = ''; }
-});
-window.addEventListener('resize', () => {
-    clearTimeout(S.resizeTimer);
-    S.resizeTimer = setTimeout(fitLayout, 100);
-});
-document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
-window.addEventListener('pagehide', saveGame);
+    window.addEventListener('beforeunload', (e) => {
+        if (!S.isGameOver) { e.preventDefault(); e.returnValue = ''; }
+    });
+    window.addEventListener('resize', () => {
+        window.clearTimeout(S.resizeTimer);
+        S.resizeTimer = window.setTimeout(fitLayout, 100);
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+    window.addEventListener('pagehide', saveGame);
 }
 
 let runtimeStarted = false;
