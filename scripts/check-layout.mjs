@@ -11,7 +11,7 @@ const required = [
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
   'src/services', 'src/hooks', 'src/types', 'src/styles',
-  'public/css', 'public/images', 'public/fonts', 'engines', 'shared', 'tests',
+  'public/css', 'public/css/images', 'public/css/font', 'engines', 'shared', 'tests',
   'src/main.tsx', 'src/app/App.tsx', 'src/features/home/HomePage.tsx',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
@@ -72,6 +72,10 @@ for (const page of activeHtmlPages) {
     console.error(`[layout] active page must mount the shared React entry: ${page}`);
     process.exit(1);
   }
+  if (html.split('<!-- @shared-styles -->').length !== 2) {
+    console.error(`[layout] active page must contain exactly one shared-styles marker: ${page}`);
+    process.exit(1);
+  }
   if (!html.includes("localStorage.getItem('hollld-theme')")) {
     console.error(`[layout] active page is missing pre-paint theme initialization: ${page}`);
     process.exit(1);
@@ -108,6 +112,14 @@ for (const file of activeFrontend) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
   if (/legacy-home-runtime|bootLegacyHomeScripts/.test(source)) {
     console.error(`[layout] active frontend still boots legacy Home scripts: ${file}`);
+    process.exit(1);
+  }
+}
+
+const sharedStylesConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
+for (const needle of ['SHARED_STYLES', '/css/style.css', '/css/header-scroll-scrim.css', '/css/maze-camera.css', 'sharedStylesPlugin()']) {
+  if (!sharedStylesConfig.includes(needle)) {
+    console.error(`[layout] vite.config.mts shared-styles injection is incomplete (missing ${needle}).`);
     process.exit(1);
   }
 }
