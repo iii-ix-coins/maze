@@ -27,7 +27,7 @@ Production URLs: `http://localhost:5000/` and `http://localhost:5000/maze.html`.
 
 ## Current architecture
 
-- `index.html`, `coin.html`, `holders.html`, `market.html`, `vite.config.ts`, `package.json`: the Vite page inputs and frontend toolchain.
+- `index.html`, `coin.html`, `holders.html`, `market.html`, `vite.config.mts`, `package.json`: the Vite page inputs and frontend toolchain.
 - `src/main.tsx`, `src/app`: one React root, route dispatch, providers and error boundary.
 - `src/features/home/HomePage.tsx`: React-owned Home shell, Market Summary, Live Feed and Holders sections.
 - `src/components/navigation`: React Navigation, theme selector and Maze view selector.
@@ -37,6 +37,7 @@ Production URLs: `http://localhost:5000/` and `http://localhost:5000/maze.html`.
 - `src/features/maze/engine`, `canvas`, `input`, `net`, `shared/maze`: the independent TypeScript simulation, renderer, input system, and multiplayer client/protocol. These modules are Vite-managed but not React state, intentionally avoiding high-frequency game-loop renders. The animated site background's SVG structure is React-owned by `src/features/theme/MazeBackground.tsx`; only its camera transform is updated imperatively per frame.
 - `engines/*`, `shared/state`, `server.js`, `start.js`: existing Node.js backend, workers, state and SQLite integration. Their source and contracts are outside this frontend migration.
 - `legacy/home.html` and `legacy/maze.html`: static, script-free fallback notices retained only because the unchanged Express server references them when no production React build exists. The duplicated DOM controllers, `public/js/`, archived Home scripts, and old compiled Maze UI bundle have been removed.
+- Public asset directories: `public/css/images` and `public/css/font` are the URLs actually used by the React code and `public/css/style.css`. `public/images` and `public/fonts` are byte-identical mirrors kept on purpose: `scripts/check-layout.mjs` requires them and they preserve the public `/images/*` and `/fonts/*` URLs. Remove them only after confirming nothing external links to those URLs, and update `check-layout.mjs` in the same change. The Create Wizard icons are served from `public/maze-assets/assets/images/` (the former unused copy under `src/features/maze/ui/create-game/images/` was removed).
 
 ## Migration status — Phase 4
 
