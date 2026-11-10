@@ -274,6 +274,33 @@
    THEME TEXT PALETTES
    ========================================= */
 
+    /* =========================================
+   THEME-AWARE BRAND HEADER SHADOWS
+   ========================================= */
+
+    /* DARK */
+    html[data-theme="dark"] {
+        --brand-header-shadow:
+            0 18px 38px rgba(0, 0, 0, .48),
+            0 0 22px rgba(0, 232, 181, .10),
+            inset 0 1px 0 rgba(255, 255, 255, .055);
+    }
+
+    /* LIGHT */
+    html[data-theme="light"] {
+        --brand-header-shadow:
+            0 18px 38px rgba(17, 24, 39, .19),
+            0 5px 14px rgba(17, 24, 39, .08);
+    }
+
+    /* GRASS */
+    html[data-theme="grass"] {
+        --brand-header-shadow:
+            0 18px 38px rgba(0, 20, 8, .48),
+            0 0 24px rgba(112, 224, 0, .13),
+            inset 0 1px 0 rgba(158, 240, 26, .08);
+    }
+
     /* LIGHT THEME */
     html[data-theme="light"] {
         color-scheme: light;
@@ -828,7 +855,7 @@
         position: relative;
         border-radius: var(--r-lg);
         background: var(--page-max);
-        box-shadow: var(--shadow-3);
+        box-shadow: var(--brand-header-shadow);
     }
 
     /* —— 6.2 Skeleton for "--" placeholders (fx.js sets data-empty) ———— */
@@ -2039,11 +2066,26 @@
     --nav-sub-bg: rgba(255, 255, 255, 0.035);
     --nav-active-bg: rgba(184, 255, 92, 0.075);
     --nav-active-text: #b8ff5c;
-    --nav-active-shadow: 0 8px 26px -8px oklch(0.87 0.17 170 / 0.85), inset 0 1px 0 oklch(1 0 0 / 0.45);
+    --nav-active-shadow: var(--nav-control-shadow-hover);
     --nav-chip-bg: rgba(255, 255, 255, 0.05);
     --nav-soon-text: var(--gold);
     --nav-soon-bg: oklch(0.84 0.13 88 / 0.14);
     --nav-soon-border: oklch(0.84 0.13 88 / 0.3);
+
+
+    /* Navigation elevation system */
+    --nav-control-shadow:
+        0 5px 14px rgba(0, 0, 0, .34),
+        0 0 10px rgba(0, 232, 181, .07);
+
+    --nav-control-shadow-hover:
+        0 8px 22px rgba(0, 0, 0, .40),
+        0 0 17px rgba(0, 232, 181, .15);
+
+    --nav-control-shadow-active:
+        0 3px 9px rgba(0, 0, 0, .30),
+        0 0 9px rgba(0, 232, 181, .10);
+
 }
 
 /* palette · LIGHT — dark ink on white; active page = inverse (dark) chip */
@@ -2064,13 +2106,22 @@ html[data-theme="light"] .nav {
 
     --nav-active-bg: rgba(17, 24, 39, .08);
     --nav-active-text: #111827;
-    --nav-active-shadow: 0 4px 14px rgba(17, 24, 39, .08);
+    --nav-active-shadow: var(--nav-control-shadow-hover);
 
     --nav-chip-bg: transparent;
 
     --nav-soon-text: #64748b;
     --nav-soon-bg: rgba(100, 116, 139, .10);
     --nav-soon-border: rgba(100, 116, 139, .2);
+
+    --nav-control-shadow:
+        0 5px 14px rgba(17, 24, 39, .12);
+
+    --nav-control-shadow-hover:
+        0 9px 22px rgba(17, 24, 39, .19);
+
+    --nav-control-shadow-active:
+        0 3px 9px rgba(17, 24, 39, .13);
 }
 
 
@@ -2093,13 +2144,25 @@ html[data-theme="grass"] .nav {
 
     --nav-active-bg: rgba(112, 224, 0, .13);
     --nav-active-text: #ccff33;
-    --nav-active-shadow: 0 4px 16px rgba(56, 176, 0, .16);
+    --nav-active-shadow: var(--nav-control-shadow-hover);
 
     --nav-chip-bg: transparent;
 
     --nav-soon-text: #9ef01a;
     --nav-soon-bg: rgba(112, 224, 0, .10);
     --nav-soon-border: rgba(112, 224, 0, .25);
+
+    --nav-control-shadow:
+        0 5px 14px rgba(0, 25, 5, .34),
+        0 0 10px rgba(112, 224, 0, .08);
+
+    --nav-control-shadow-hover:
+        0 9px 22px rgba(0, 25, 5, .40),
+        0 0 17px rgba(112, 224, 0, .19);
+
+    --nav-control-shadow-active:
+        0 3px 9px rgba(0, 25, 5, .30),
+        0 0 9px rgba(158, 240, 26, .13);
 }
 
 /* —— 2 · STRUCTURE ————————————————————————————————————————————————————— */
@@ -2212,7 +2275,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     height: var(--nav-control-height);
     padding-inline: 12px;
     background: var(--page-max);
-    box-shadow: var(--shadow-3);
+    box-shadow: var(--nav-control-shadow);
     border-radius: var(--r-sm);
     color: var(--nav-muted);
     font-size: 1.05rem;
@@ -2228,9 +2291,14 @@ html[data-theme="light"] .nav-brand-logo--black {
         border-color 180ms ease;
 }
 
+.nav-link:hover:not(.nav-link-disabled):not(:disabled) {
+    box-shadow: var(--nav-control-shadow-hover);
+    transform: translateY(-1px);
+}
 
 .nav-link:active {
-    transform: scale(0.95);
+    box-shadow: var(--nav-control-shadow-active);
+    transform: scale(.96);
 }
 
 .nav-link.active {
@@ -2327,6 +2395,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     border-radius: var(--r-sm);
     background: var(--page-max);
+    box-shadow: var(--nav-control-shadow);
     font-weight: 600;
     font-size: 1.05rem;
     white-space: nowrap;
@@ -2346,11 +2415,16 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .nav-wallet-button:hover {
     background: var(--nav-hover-bg);
+    box-shadow: var(--nav-control-shadow-hover);
+    transform: translateY(-1px);
 }
 
 .nav-wallet-button:active {
     background: var(--nav-active-bg);
+    box-shadow: var(--nav-control-shadow-active);
+    transform: scale(.97);
 }
+
 /* —— 6 · MOBILE MENU BUTTON ———————————————————————————————————————————— */
 .nav-mobile-toggle {
     display: none;
@@ -2433,6 +2507,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     width: var(--tt-size);
     height: var(--tt-size);
     border-radius: 50%;
+    box-shadow: var(--nav-control-shadow);
     pointer-events: none;
     transform: translateX(calc(var(--theme-index) * var(--tt-size)));
     transition:
@@ -2491,6 +2566,20 @@ html[data-theme="light"] .nav-brand-logo--black {
 /* Game section selector: intentionally reuses the ThemeSwitcher geometry. */
 .game-view-toggle .theme-toggle__thumb {
     background: transparent;
+}
+
+
+.game-view-toggle .theme-toggle__option {
+    border-radius: 50%;
+    transition:
+        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
+        box-shadow 250ms ease,
+        background-color 250ms ease;
+}
+
+.game-view-toggle .theme-toggle__option.is-active {
+    background: var(--nav-active-bg);
+    box-shadow: var(--nav-control-shadow);
 }
 
 .game-view-toggle .theme-toggle__icon {
