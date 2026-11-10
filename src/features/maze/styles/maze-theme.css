@@ -1,0 +1,92 @@
+
+/* ---------- GRASS ---------- */
+
+.maze-app[data-theme="grass"] .cg {
+    --maze-text-primary: #70e000;
+    --maze-text-secondary: #9ef01a;
+    --maze-text-muted: #ccff33;
+    --maze-accent: #38b000;
+
+    --haze: var(--maze-text-primary);
+    --fog: var(--maze-text-secondary);
+
+    --ground: rgba(5, 30, 22, .92);
+    --ground-2: rgba(10, 47, 34, .94);
+
+    --line: rgba(112, 224, 0, .20);
+    --glass: rgba(112, 224, 0, .055);
+}
+
+/* ---------- LIGHT ---------- */
+
+.maze-app[data-theme="light"] .cg {
+    --maze-text-primary: #111827;
+    --maze-text-secondary: #374151;
+    --maze-text-muted: #64748b;
+    --maze-accent: #166534;
+
+    --haze: var(--maze-text-primary);
+    --fog: var(--maze-text-secondary);
+
+    --ground: rgba(255, 255, 255, .96);
+    --ground-2: rgba(248, 250, 252, .98);
+
+    --line: rgba(17, 24, 39, .13);
+    --glass: rgba(255, 255, 255, .78);
+}
+
+/* ---------- LIGHT SURFACES ---------- */
+
+.maze-app[data-theme="light"] .cg .cg-panel,
+.maze-app[data-theme="light"] .cg .cg-card,
+.maze-app[data-theme="light"] .cg .cg-step,
+.maze-app[data-theme="light"] .lb .lb-card {
+    background: rgba(255, 255, 255, .94);
+    border-color: rgba(17, 24, 39, .12);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
+}
+
+/* ---------- TEXT COLORS: LIGHT ---------- */
+
+.maze-app[data-theme="light"] .cg-title,
+.maze-app[data-theme="light"] .cg-step-title,
+.maze-app[data-theme="light"] .cg-readout-main,
+.maze-app[data-theme="light"] .cg-readout-inline .cg-odo,
+.maze-app[data-theme="light"] .cg-lobby,
+.maze-app[data-theme="light"] .cg-summary li button,
+.maze-app[data-theme="light"] .lb-title,
+.maze-app[data-theme="light"] .lb-room-title,
+.maze-app[data-theme="light"] .lb-empty h3,
+.maze-app[data-theme="light"] .lb-code-big {
+    color: var(--maze-text-primary);
+}
+
+.maze-app[data-theme="light"] .cg-step-help,
+.maze-app[data-theme="light"] .cg-note,
+.maze-app[data-theme="light"] .cg-readout-sub,
+.maze-app[data-theme="light"] .cg-summary li span,
+.maze-app[data-theme="light"] .cg-name span,
+.maze-app[data-theme="light"] .lb-sub,
+.maze-app[data-theme="light"] .lb-room-text,
+.maze-app[data-theme="light"] .lb-room-note,
+.maze-app[data-theme="light"] .lb-code-box small,
+.maze-app[data-theme="light"] .lb-left,
+.maze-app[data-theme="light"] .lb-count-of,
+.maze-app[data-theme="light"] .lb-chips-static {
+    color: var(--maze-text-secondary);
+}
+
+/* ---------- INPUTS: LIGHT ---------- */
+
+.maze-app[data-theme="light"] .cg input,
+.maze-app[data-theme="light"] .lb input,
+.maze-app[data-theme="light"] .cg textarea,
+.maze-app[data-theme="light"] .lb textarea {
+    color: var(--maze-text-primary);
+}
+
+.maze-app[data-theme="light"] .cg input::placeholder,
+.maze-app[data-theme="light"] .lb input::placeholder,
+.maze-app[data-theme="light"] .cg textarea::placeholder {
+    color: var(--maze-text-muted);
+}
