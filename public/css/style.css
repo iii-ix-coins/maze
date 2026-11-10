@@ -280,25 +280,24 @@
 
     /* DARK */
     html[data-theme="dark"] {
-        --brand-header-shadow:
-            0 18px 38px rgba(0, 0, 0, .48),
-            0 0 22px rgba(0, 232, 181, .10),
-            inset 0 1px 0 rgba(255, 255, 255, .055);
+        --brand-header-shadow: 0 18px 38px rgba(0, 0, 0, .60),
+            0 0 22px rgba(0, 232, 181, .17),
+            inset 0 1px 0 rgba(255, 255, 255, .075);
     }
 
     /* LIGHT */
     html[data-theme="light"] {
         --brand-header-shadow:
-            0 18px 38px rgba(17, 24, 39, .19),
-            0 5px 14px rgba(17, 24, 39, .08);
+            0 18px 38px rgba(17, 24, 39, .25),
+            0 5px 14px rgba(17, 24, 39, .11);
     }
 
     /* GRASS */
     html[data-theme="grass"] {
         --brand-header-shadow:
-            0 18px 38px rgba(0, 20, 8, .48),
-            0 0 24px rgba(112, 224, 0, .13),
-            inset 0 1px 0 rgba(158, 240, 26, .08);
+            0 18px 38px rgba(0, 20, 8, .60),
+            0 0 24px rgba(112, 224, 0, .21),
+            inset 0 1px 0 rgba(158, 240, 26, .11);
     }
 
     /* LIGHT THEME */
@@ -2073,18 +2072,17 @@
     --nav-soon-border: oklch(0.84 0.13 88 / 0.3);
 
 
-    /* Navigation elevation system */
     --nav-control-shadow:
-        0 5px 14px rgba(0, 0, 0, .34),
-        0 0 10px rgba(0, 232, 181, .07);
+        0 5px 14px rgba(0, 0, 0, .46),
+        0 0 10px rgba(0, 232, 181, .12);
 
     --nav-control-shadow-hover:
-        0 8px 22px rgba(0, 0, 0, .40),
-        0 0 17px rgba(0, 232, 181, .15);
+        0 8px 22px rgba(0, 0, 0, .54),
+        0 0 17px rgba(0, 232, 181, .23);
 
     --nav-control-shadow-active:
-        0 3px 9px rgba(0, 0, 0, .30),
-        0 0 9px rgba(0, 232, 181, .10);
+        0 3px 9px rgba(0, 0, 0, .42),
+        0 0 9px rgba(0, 232, 181, .16);
 
 }
 
@@ -2115,13 +2113,13 @@ html[data-theme="light"] .nav {
     --nav-soon-border: rgba(100, 116, 139, .2);
 
     --nav-control-shadow:
-        0 5px 14px rgba(17, 24, 39, .12);
+        0 5px 14px rgba(17, 24, 39, .17);
 
     --nav-control-shadow-hover:
-        0 9px 22px rgba(17, 24, 39, .19);
+        0 9px 22px rgba(17, 24, 39, .26);
 
     --nav-control-shadow-active:
-        0 3px 9px rgba(17, 24, 39, .13);
+        0 3px 9px rgba(17, 24, 39, .19);
 }
 
 
@@ -2153,16 +2151,16 @@ html[data-theme="grass"] .nav {
     --nav-soon-border: rgba(112, 224, 0, .25);
 
     --nav-control-shadow:
-        0 5px 14px rgba(0, 25, 5, .34),
-        0 0 10px rgba(112, 224, 0, .08);
+        0 5px 14px rgba(0, 25, 5, .46),
+        0 0 10px rgba(112, 224, 0, .13);
 
     --nav-control-shadow-hover:
-        0 9px 22px rgba(0, 25, 5, .40),
-        0 0 17px rgba(112, 224, 0, .19);
+        0 9px 22px rgba(0, 25, 5, .55),
+        0 0 17px rgba(112, 224, 0, .26);
 
     --nav-control-shadow-active:
-        0 3px 9px rgba(0, 25, 5, .30),
-        0 0 9px rgba(158, 240, 26, .13);
+        0 3px 9px rgba(0, 25, 5, .42),
+        0 0 9px rgba(158, 240, 26, .19);
 }
 
 /* —— 2 · STRUCTURE ————————————————————————————————————————————————————— */
