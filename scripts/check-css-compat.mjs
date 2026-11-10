@@ -24,6 +24,24 @@ if (!files.length) {
   process.exit(1);
 }
 
+function isInsideColorMixSupports(node) {
+  let parent = node.parent;
+
+  while (parent) {
+    if (
+      parent.type === 'atrule' &&
+      parent.name === 'supports' &&
+      /color\s*:\s*color-mix\(/i.test(parent.params)
+    ) {
+      return true;
+    }
+
+    parent = parent.parent;
+  }
+
+  return false;
+}
+
 const errors = [];
 for (const file of files) {
   const css = fs.readFileSync(file, 'utf8');
@@ -39,14 +57,25 @@ for (const file of files) {
       errors.push(`${relative}: untransformed OKLCH/OKLab remains in ${decl.prop}`);
     }
 
-    if (/\bcolor-mix\(/i.test(decl.value)) {
+    if (
+      /\bcolor-mix\(/i.test(decl.value) &&
+      !isInsideColorMixSupports(decl)
+    ) {
       const siblings = decl.parent?.nodes ?? [];
       const index = siblings.indexOf(decl);
-      const hasFallback = siblings.slice(0, index).some((previous) =>
-        previous.type === 'decl' && previous.prop === decl.prop && !/\bcolor-mix\(/i.test(previous.value),
-      );
+
+      const hasFallback = siblings
+        .slice(0, index)
+        .some((previous) =>
+          previous.type === 'decl' &&
+          previous.prop === decl.prop &&
+          !/\bcolor-mix\(/i.test(previous.value)
+        );
+
       if (!hasFallback) {
-        errors.push(`${relative}: ${decl.prop} uses color-mix() without a preceding legacy fallback`);
+        errors.push(
+          `${relative}: ${decl.prop} uses color-mix() without a preceding legacy fallback`
+        );
       }
     }
 
