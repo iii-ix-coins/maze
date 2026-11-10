@@ -2047,47 +2047,59 @@
 }
 
 /* palette · LIGHT — dark ink on white; active page = inverse (dark) chip */
+
 html[data-theme="light"] .nav {
-    --nav-text: #1a2230;
-    --nav-muted: #465468;
-    --nav-accent: #0a6b1f;
-    --nav-disabled: #7b8798;
+    --nav-text: #111827;
+    --nav-muted: #374151;
+    --nav-accent: #111827;
+    --nav-disabled: #9ca3af;
+
     --nav-panel: #ffffff;
-    --nav-border: rgba(26, 34, 48, 0.16);
-    --nav-edge: rgba(10, 107, 31, 0.55);
-    --nav-shadow: rgba(26, 34, 48, 0.2);
-    --nav-hover-bg: rgba(26, 34, 48, 0.07);
-    --nav-sub-bg: rgba(26, 34, 48, 0.04);
-    --nav-active-bg: #111b14;
-    --nav-active-text: #b8ff5c;
-    --nav-active-shadow: 0 6px 18px -8px rgba(17, 27, 20, 0.55);
-    --nav-chip-bg: rgba(26, 34, 48, 0.05);
-    --nav-soon-text: #7a5a00;
-    --nav-soon-bg: rgba(180, 130, 0, 0.14);
-    --nav-soon-border: rgba(122, 90, 0, 0.4);
+    --nav-border: rgba(17, 24, 39, .13);
+    --nav-edge: rgba(17, 24, 39, .22);
+    --nav-shadow: rgba(17, 24, 39, .15);
+
+    --nav-hover-bg: rgba(17, 24, 39, .06);
+    --nav-sub-bg: rgba(17, 24, 39, .035);
+
+    --nav-active-bg: rgba(17, 24, 39, .08);
+    --nav-active-text: #111827;
+    --nav-active-shadow: 0 4px 14px rgba(17, 24, 39, .08);
+
+    --nav-chip-bg: transparent;
+
+    --nav-soon-text: #64748b;
+    --nav-soon-bg: rgba(100, 116, 139, .10);
+    --nav-soon-border: rgba(100, 116, 139, .2);
 }
+
 
 /* palette · GRASS — white ink on green; active page = inverse (white) chip.
    The panel is a deep green, so the same tokens read correctly on the bar
    AND inside the dropdown / mobile menu (no per-panel re-scoping needed). */
 html[data-theme="grass"] .nav {
-    --nav-text: #ffffff;
-    --nav-muted: #eaf8e6;
-    --nav-accent: #ffffff;
-    --nav-disabled: #b9d8b5;
+    --nav-text: #70e000;
+    --nav-muted: #9ef01a;
+    --nav-accent: #ccff33;
+    --nav-disabled: #38b000;
+
     --nav-panel: #08230f;
-    --nav-border: rgba(255, 255, 255, 0.22);
-    --nav-edge: rgba(255, 255, 255, 0.60);
-    --nav-shadow: rgba(0, 25, 5, 0.45);
-    --nav-hover-bg: rgba(255, 255, 255, 0.14);
-    --nav-sub-bg: rgba(255, 255, 255, 0.07);
-    --nav-active-bg: #ffffff;
-    --nav-active-text: #064e12;
-    --nav-active-shadow: 0 6px 18px -8px rgba(0, 30, 5, 0.55);
-    --nav-chip-bg: rgba(0, 40, 0, 0.28);
-    --nav-soon-text: #2e2000;
-    --nav-soon-bg: #f7d94c;
-    --nav-soon-border: rgba(46, 32, 0, 0.35);
+    --nav-border: rgba(112, 224, 0, .18);
+    --nav-edge: rgba(158, 240, 26, .45);
+    --nav-shadow: rgba(0, 25, 5, .45);
+
+    --nav-hover-bg: rgba(112, 224, 0, .10);
+    --nav-sub-bg: rgba(112, 224, 0, .07);
+
+    --nav-active-bg: rgba(112, 224, 0, .13);
+    --nav-active-text: #ccff33;
+    --nav-active-shadow: 0 4px 16px rgba(56, 176, 0, .16);
+
+    --nav-chip-bg: transparent;
+
+    --nav-soon-text: #9ef01a;
+    --nav-soon-bg: rgba(112, 224, 0, .10);
+    --nav-soon-border: rgba(112, 224, 0, .25);
 }
 
 /* —— 2 · STRUCTURE ————————————————————————————————————————————————————— */
@@ -2128,17 +2140,21 @@ html[data-theme="grass"] .nav {
 }
 
 /* Brand */
-.nav-brand {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
 .nav-brand-mark {
     display: flex;
     align-items: center;
-    height: calc(var(--nav-fs) * 2);
+    justify-content: center;
+    height: var(--nav-control-height);
 }
+
+.nav-brand-logo {
+    display: none;
+    height: 100%;
+    max-height: var(--nav-control-height);
+    width: auto;
+    object-fit: contain;
+}
+
 
 .nav-brand-logo {
     display: none;
@@ -2309,10 +2325,8 @@ html[data-theme="light"] .nav-brand-logo--black {
     height: var(--nav-control-height);
     padding: 0 12px;
 
-    border: 1px solid var(--nav-edge);
     border-radius: var(--r-sm);
-    background: color-mix(in srgb, var(--nav-accent) 7.5%, transparent);
-    color: var(--nav-accent);
+    background: var(--page-max);
     font-weight: 600;
     font-size: 1.05rem;
     white-space: nowrap;
@@ -2331,13 +2345,12 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 .nav-wallet-button:hover {
-    background: color-mix(in srgb, white 100%, transparent);
+    background: var(--nav-hover-bg);
 }
 
 .nav-wallet-button:active {
-    background: color-mix(in srgb, black 100%, transparent);
+    background: var(--nav-active-bg);
 }
-
 /* —— 6 · MOBILE MENU BUTTON ———————————————————————————————————————————— */
 .nav-mobile-toggle {
     display: none;
@@ -2408,9 +2421,9 @@ html[data-theme="light"] .nav-brand-logo--black {
     flex: 0 0 auto;
     height: var(--nav-control-height);
     padding: var(--tt-pad);
-    border: 1px solid var(--nav-edge);
+    border: 0;
     border-radius: 999px;
-    background: var(--nav-chip-bg);
+    background: var(--page-max);
 }
 
 .theme-toggle__thumb {
@@ -2543,7 +2556,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-brand-mark {
-        height: 26px;
+        height: var(--nav-control-height);
     }
 
     .nav .theme-toggle:not(.game-view-toggle) {
