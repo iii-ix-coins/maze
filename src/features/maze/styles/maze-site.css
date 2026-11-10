@@ -40,8 +40,8 @@
     /* Montserrat Regular */
     @font-face {
         font-family: "Montserrat";
-        src: url("./font/montserrat-regular-webfont.woff2") format("woff2"),
-            url("./font/montserrat-regular-webfont.woff") format("woff");
+        src: url("/css/font/montserrat-regular-webfont.woff2") format("woff2"),
+            url("/css/font/montserrat-regular-webfont.woff") format("woff");
         font-weight: 400;
         font-style: normal;
         font-display: swap;
@@ -50,8 +50,8 @@
     /* Montserrat SemiBold */
     @font-face {
         font-family: "Montserrat";
-        src: url("./font/montserrat-semibold-webfont.woff2") format("woff2"),
-            url("./font/montserrat-semibold-webfont.woff") format("woff");
+        src: url("/css/font/montserrat-semibold-webfont.woff2") format("woff2"),
+            url("/css/font/montserrat-semibold-webfont.woff") format("woff");
         font-weight: 600;
         font-style: normal;
         font-display: swap;
@@ -60,8 +60,8 @@
     /* Montserrat Bold */
     @font-face {
         font-family: "Montserrat";
-        src: url("./font/montserrat-bold-webfont.woff2") format("woff2"),
-            url("./font/montserrat-bold-webfont.woff") format("woff");
+        src: url("/css/font/montserrat-bold-webfont.woff2") format("woff2"),
+            url("/css/font/montserrat-bold-webfont.woff") format("woff");
         font-weight: 700;
         font-style: normal;
         font-display: swap;
@@ -1088,9 +1088,13 @@
         --ground: #08130f;
         --ground-2: #0f2119;
         --moss: #8be0a4;
+        --moss-rgb: 139, 224, 164;
         --lantern: #ffd79a;
+        --lantern-rgb: 255, 215, 154;
         --sky: #8fb0ff;
+        --sky-rgb: 143, 176, 255;
         --coral: #ff9b8a;
+        --coral-rgb: 255, 155, 138;
         --haze: #e4f6ea;
         --fog: rgba(228, 246, 234, .64);
         --line: rgba(228, 246, 234, .15);
@@ -1107,6 +1111,7 @@
         /* the tab bar's height (lobby.css: 40px) plus a little slack */
 
         /* rhythm */
+        --cg-row: clamp(10px, 1.8vh, 16px);
         --cg-row: clamp(10px, 1.8dvh, 16px);
         /* vertical space between blocks */
         --cg-gap: clamp(20px, 3.4vw, 48px);
@@ -1122,8 +1127,10 @@
         /* the caption line under the title (landscape) */
 
         /* what the preview and the dial are allowed to take */
+        --maze-m: clamp(140px, 30vh, 440px);
         --maze-m: clamp(140px, 30dvh, 440px);
         /* stacked layout: side of the visible maze */
+        --dial: clamp(130px, 22vh, 240px);
         --dial: clamp(130px, 22dvh, 240px);
         --glow-x: 50%;
         --glow-y: 36%;
@@ -1322,7 +1329,9 @@
    starts under them. */
     @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
         .maze-app .cg {
+            --node: clamp(44px, 7.6vh, 54px);
             --node: clamp(44px, 7.6dvh, 54px);
+            --dial: clamp(130px, 27vh, 240px);
             --dial: clamp(130px, 27dvh, 240px);
             /* everything above and below the maze: tab bar, padding, tile band, gaps */
             --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
@@ -1331,6 +1340,7 @@
             /* the least height the controls column needs to show its tallest step */
             /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
             --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
+            --maze-side: min(100vh - var(--v-chrome), var(--maze-cap), var(--maze-w));
             --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
             --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
             --glow-y: 56%;
@@ -1339,12 +1349,14 @@
         .maze-app .cg-layout {
             /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
            The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
+            overflow: hidden;
             overflow: clip;
             /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
            that is too tall scrolls inside its own box instead of pushing the whole page down. */
             flex: none;
             /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
            below the tab bar; on a short one it takes all of it. */
+            height: min(100vh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
             height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
             margin-block: auto;
             grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
@@ -1454,6 +1466,7 @@
 
     .maze-app .cg-rail-btn {
         --accent: var(--moss);
+        --accent-rgb: var(--moss-rgb);
         --lip: 3px;
         display: flex;
         flex-direction: column;
@@ -1485,18 +1498,22 @@
 
     .maze-app .cg-rail-btn[data-icon="size"] {
         --accent: var(--moss);
+        --accent-rgb: var(--moss-rgb);
     }
 
     .maze-app .cg-rail-btn[data-icon="racers"] {
         --accent: var(--coral);
+        --accent-rgb: var(--coral-rgb);
     }
 
     .maze-app .cg-rail-btn[data-icon="targets"] {
         --accent: var(--sky);
+        --accent-rgb: var(--sky-rgb);
     }
 
     .maze-app .cg-rail-btn[data-icon="launch"] {
         --accent: var(--lantern);
+        --accent-rgb: var(--lantern-rgb);
     }
 
     .maze-app .cg-rail-btn:disabled {
@@ -1531,7 +1548,9 @@
 
     /* Reached before, but you are elsewhere: solid, in its own colour. */
     .maze-app .cg-rail-btn.is-visited .cg-node {
+        border: 2px solid rgba(var(--accent-rgb), .38);
         border: 2px solid color-mix(in srgb, var(--accent) 38%, transparent);
+        background: linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .05)), #0b1813;
         background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent) 5%, transparent)), #0b1813;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 var(--lip) 0 rgba(0, 0, 0, .4);
         color: var(--accent);
@@ -1539,15 +1558,23 @@
 
     /* A step you have finished. The badge below is stamped on. */
     .maze-app .cg-rail-btn.is-done .cg-node {
+        border-color: rgba(var(--accent-rgb), .80);
         border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+        background: linear-gradient(180deg, rgba(var(--accent-rgb), .28), rgba(var(--accent-rgb), .12)), #0b1813;
         background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 28%, transparent), color-mix(in srgb, var(--accent) 12%, transparent)), #0b1813;
     }
 
     /* Where you are: lit, lifted, breathing. */
     .maze-app .cg-rail-btn.is-active .cg-node {
         --lip: 6px;
+        border: 2px solid var(--accent);
         border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
         background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 52%), var(--accent);
+        box-shadow:
+            inset 0 -3px 0 rgba(0, 0, 0, .12),
+            0 var(--lip) 0 rgba(0, 0, 0, .52),
+            0 0 0 6px rgba(var(--accent-rgb), .14),
+            0 12px 32px rgba(var(--accent-rgb), .38);
         box-shadow:
             inset 0 -3px 0 rgba(0, 0, 0, .12),
             0 var(--lip) 0 color-mix(in srgb, var(--accent) 52%, #000),
@@ -1694,6 +1721,7 @@
         box-sizing: border-box;
         padding: 1px 8px;
         border-radius: 8px;
+        background: rgba(var(--accent-rgb), .16);
         background: color-mix(in srgb, var(--accent) 16%, transparent);
         color: var(--accent);
         font-size: .68rem;
@@ -1721,6 +1749,10 @@
     /* Launch tile: it rumbles and glows while the button is held, and the rocket leaves when the game starts. */
     .maze-app .cg-rail-btn.is-charging .cg-node {
         transition: transform .4s var(--ease), background-color .35s ease, border-color .35s ease, color .35s ease;
+        box-shadow:
+            inset 0 -3px 0 rgba(0, 0, 0, .12),
+            0 6px 0 rgba(0, 0, 0, .52),
+            0 calc(6px + var(--charge) * 8px) calc(20px + var(--charge) * 34px) calc(var(--charge) * 5px) rgba(255, 150, 60, calc(.3 + var(--charge) * .6));
         box-shadow:
             inset 0 -3px 0 rgba(0, 0, 0, .12),
             0 6px 0 color-mix(in srgb, var(--accent) 52%, #000),
@@ -2447,7 +2479,9 @@
     @media (max-height: 700px) and (max-aspect-ratio: 5/4),
     (max-height: 700px) and (max-width: 419px) {
         .maze-app .cg {
+            --maze-m: clamp(96px, 20vh, 200px);
             --maze-m: clamp(96px, 20dvh, 200px);
+            --dial: clamp(120px, 20vh, 170px);
             --dial: clamp(120px, 20dvh, 170px);
         }
     }
@@ -2510,6 +2544,7 @@
             --cg-top-pad: max(6px, env(safe-area-inset-top));
             --cg-pad-t: 8px;
             --cg-pad-b: max(8px, env(safe-area-inset-bottom));
+            --dial: clamp(96px, 28vh, 140px);
             --dial: clamp(96px, 28dvh, 140px);
         }
 
@@ -3929,6 +3964,7 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        max-height: min(32vh, 280px);
         max-height: min(32dvh, 280px);
         margin: 0;
         padding: 0;
@@ -4060,6 +4096,7 @@
         }
 
         .maze-app .lb-room-stage {
+            width: min(100%, 62vh, 470px);
             width: min(100%, 62dvh, 470px);
             justify-self: center;
         }
@@ -4259,6 +4296,7 @@
         .maze-app .lb-room-stage {
             position: sticky;
             top: 8px;
+            width: min(100%, 64vh);
             width: min(100%, 64dvh);
         }
 
@@ -4268,6 +4306,7 @@
         }
 
         .maze-app .lb-members {
+            max-height: 26vh;
             max-height: 26dvh;
         }
     }
@@ -4351,6 +4390,7 @@
         min-height: 0;
         align-items: initial;
         justify-content: initial;
+        --ground: rgba(16, 24, 39, .90);
         --ground: color-mix(in srgb, var(--ink-950, #101827) 90%, transparent);
         --ground-2: var(--ink-900, #172235);
         --moss: var(--mint, #72e8c2);
@@ -4371,7 +4411,9 @@
         --haze: #70e000;
         --fog: #9ef01a;
         --moss: #38b000;
+        --moss-rgb: 56, 176, 0;
         --lantern: #ccff33;
+        --lantern-rgb: 204, 255, 51;
     }
 
     /* Light */
@@ -4379,14 +4421,18 @@
         --haze: #111827;
         --fog: #374151;
         --moss: #166534;
+        --moss-rgb: 22, 101, 52;
         --lantern: #956000;
+        --lantern-rgb: 149, 96, 0;
     }
 
     .maze-app[data-theme="grass"] .cg {
         --ground: rgba(5, 30, 22, .84);
         --ground-2: rgba(10, 47, 34, .9);
         --moss: #38b000;
+        --moss-rgb: 56, 176, 0;
         --lantern: #ccff33;
+        --lantern-rgb: 204, 255, 51;
         --haze: #70e000;
         --fog: #9ef01a;
         --line: var(--stroke, rgba(255, 255, 255, .14));
@@ -4397,7 +4443,9 @@
         --ground: rgba(8, 12, 22, .9);
         --ground-2: rgba(15, 22, 38, .94);
         --moss: var(--azure, #8fb0ff);
+        --moss-rgb: 143, 176, 255;
         --lantern: var(--gold, #f0cf76);
+        --lantern-rgb: 240, 207, 118;
         --haze: #edf2ff;
         --fog: #a3aec2;
         --line: rgba(190, 205, 235, .17);
@@ -4408,11 +4456,15 @@
         --ground: rgba(247, 250, 248, .92);
         --ground-2: rgba(255, 255, 255, .96);
         --sky: #315fba;
+        --sky-rgb: 49, 95, 186;
         --coral: #bd4b42;
+        --coral-rgb: 189, 75, 66;
         --haze: #111827;
         --fog: #374151;
         --moss: #166534;
+        --moss-rgb: 22, 101, 52;
         --lantern: #956000;
+        --lantern-rgb: 149, 96, 0;
         --line: rgba(26, 62, 43, .19);
         --glass: rgba(255, 255, 255, .66);
     }
@@ -4652,6 +4704,7 @@ body.in-menu {
         --maze-m: clamp(156px, 40vw, 218px);
         --node: clamp(30px, 7vw, 38px);
         --rail-below: 34px;
+        --dial: clamp(104px, 29vh, 142px);
         --dial: clamp(104px, 29dvh, 142px);
     }
 
@@ -4673,7 +4726,8 @@ body.in-menu {
         row-gap: 0;
         align-content: stretch;
         justify-content: stretch;
-        overflow: clip;
+        overflow: hidden;
+            overflow: clip;
     }
 
     .maze-app .cg-title {

@@ -1,8 +1,5 @@
 import { useEffect } from 'react';
 import { MazeMarkup } from './MazeMarkup';
-import './styles/maze-site.css';
-import './styles/maze-unify.css';
-import './styles/maze-theme.css';
 
 /**
  * React-owned Maze page surface.

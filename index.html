@@ -23,10 +23,9 @@
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <!-- Shared, order-sensitive stylesheets are injected by vite.config.mts (SHARED_STYLES). Page-specific stylesheets follow. -->
+    <!-- One complete, order-sensitive CSS graph is processed by Vite + PostCSS. -->
     <!-- @shared-styles -->
-    <link rel="stylesheet" href="/css/home-style.css" />
-    <link rel="stylesheet" href="/css/feature-pages.css" />
+    <link rel="stylesheet" href="/src/styles/site.css" />
     <!-- Keep the shared navigation above the Maze page surface. -->
     <style>
       body.in-menu #site-header { z-index: 1000; }

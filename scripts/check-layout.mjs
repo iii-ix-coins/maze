@@ -22,7 +22,7 @@ const required = [
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
   'src/features/maze/engine/frame.ts', 'src/features/maze/canvas/index.ts',
   'shared/maze/src/index.ts', 'engines/maze-server/src/server.ts',
-  'server.js', 'start.js', 'public/css/style.css', 'public/maze-assets/assets/images/check.svg'
+  'server.js', 'start.js', 'src/styles/site.css', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
 ];
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -59,6 +59,13 @@ const remainingClientScripts = [
 if (remainingClientScripts.length) {
   console.error('[layout] standalone JavaScript files remain in the React-owned client tree:', remainingClientScripts.join(', '));
   process.exit(1);
+}
+
+for (const retiredCss of ['style.css', 'header-scroll-scrim.css', 'maze-camera.css', 'home-style.css', 'feature-pages.css']) {
+  if (fs.existsSync(path.join(root, 'public', 'css', retiredCss))) {
+    console.error(`[layout] active stylesheet must be sourced from src/styles, not public/css: ${retiredCss}`);
+    process.exit(1);
+  }
 }
 
 const activeHtmlPages = ['index.html', 'coin.html', 'holders.html', 'market.html'];
@@ -116,10 +123,15 @@ for (const file of activeFrontend) {
   }
 }
 
-const sharedStylesConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
-for (const needle of ['SHARED_STYLES', '/css/style.css', '/css/header-scroll-scrim.css', '/css/maze-camera.css', 'sharedStylesPlugin()']) {
-  if (!sharedStylesConfig.includes(needle)) {
-    console.error(`[layout] vite.config.mts shared-styles injection is incomplete (missing ${needle}).`);
+const activeHtmlPagesForCss = ['index.html', 'coin.html', 'holders.html', 'market.html'];
+for (const page of activeHtmlPagesForCss) {
+  const html = fs.readFileSync(path.join(root, page), 'utf8');
+  if (!html.includes('href="/src/styles/site.css"')) {
+    console.error(`[layout] ${page} must load the single centralized CSS entry /src/styles/site.css.`);
+    process.exit(1);
+  }
+  if (/href=["'][^"']*\/css\/(?:style|home-style|feature-pages|header-scroll-scrim|maze-camera)\.css/i.test(html)) {
+    console.error(`[layout] ${page} still loads an unprocessed public CSS file.`);
     process.exit(1);
   }
 }

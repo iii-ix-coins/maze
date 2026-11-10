@@ -129,7 +129,9 @@
    -------------------------------------------------------------------------- */
 body.in-menu {
     --section-gap: 10px;
+    height: 100vh;
     height: 100dvh;
+    min-height: 100vh;
     min-height: 100dvh;
     gap: 10px;
     align-items: stretch;
@@ -207,13 +209,15 @@ body.in-menu #site-share-modal {
 @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
     #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
         height: 100%;
-        overflow: clip;
+        overflow: hidden;
+            overflow: clip;
     }
 
     /* The shared site navigation now occupies its own row above the wizard.
        Reserve that height when sizing the preview canvas so it cannot slide
        underneath the header or get clipped at the bottom of short viewports. */
     #mazeApp.maze-app.in-menu > #createGame.cg {
+        --maze-side: min(100vh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
         --maze-side: min(100dvh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
     }
 }

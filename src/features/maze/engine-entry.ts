@@ -2,7 +2,6 @@
  * Maze web client entry. Boot order is exactly the order of the legacy single-file script (maze-game/maze.js):
  * services are constructed when ./engine/services loads, then the former top-level statements run in the same sequence.
  */
-import './styles/maze-site.css';
 import './engine/services';
 import { initLegacyUrlCleanup } from './engine/online';
 import { initKeyboard } from './input/keyboard';

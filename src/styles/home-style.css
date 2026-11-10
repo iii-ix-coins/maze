@@ -271,23 +271,29 @@
     .how-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 16px); counter-reset: step; }
     .how-step {
         --accent: var(--mint);
+        --accent-rgb: 0, 232, 181;
         position: relative; display: grid; align-content: start; gap: 10px; overflow: hidden;
         padding: clamp(20px, 2.4vw, 30px) clamp(20px, 2.4vw, 30px) clamp(24px, 2.8vw, 34px);
         border-radius: var(--r-lg); min-height: 230px;
     }
-    .how-step:nth-child(2) { --accent: var(--azure); }
-    .how-step:nth-child(3) { --accent: var(--gold); }
+    .how-step:nth-child(2) { --accent: var(--azure); --accent-rgb: 83, 166, 255; }
+    .how-step:nth-child(3) { --accent: var(--gold); --accent-rgb: 255, 198, 74; }
     .how-step-no {
         position: absolute; right: 14px; top: -6px; z-index: 0; pointer-events: none; user-select: none;
         font-family: var(--font-display); font-weight: 800; font-size: clamp(6rem, 11vw, 9rem); line-height: 1; letter-spacing: -0.06em;
-        color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--accent) 45%, transparent);
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(var(--accent-rgb), .45);
+        -webkit-text-stroke: 1px color-mix(in oklab, var(--accent) 45%, transparent);
         opacity: 0.55; transition: opacity var(--t-slow), transform var(--t-slow) var(--ease-out);
     }
     .how-step:hover .how-step-no { opacity: 1; transform: translateY(6px); }
     .how-step-glyph {
         position: relative; z-index: 1; display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 14px;
         border-radius: 18px; corner-shape: var(--corner, round);
-        color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent);
+        color: var(--accent);
+        background: rgba(var(--accent-rgb), .14);
+        background: color-mix(in oklab, var(--accent) 14%, transparent);
+        border: 1px solid rgba(var(--accent-rgb), .40);
         border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
         box-shadow: 0 12px 34px -12px var(--accent);
     }

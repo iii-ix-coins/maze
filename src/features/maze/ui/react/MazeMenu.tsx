@@ -32,9 +32,6 @@ import {
 } from '../lobby/lobby-model';
 import { loadLobbyPreferences, saveLobbyPreferences } from '../lobby/lobby-preferences';
 import { mazeUiStore, type MazeMenuView, type MazeUiState } from './maze-ui-store';
-import '../../styles/create-game.css';
-import '../../styles/lobby.css';
-import './maze-menu.css';
 
 function useMazeUi(): MazeUiState {
   return useSyncExternalStore(mazeUiStore.subscribe, mazeUiStore.getSnapshot, mazeUiStore.getSnapshot);

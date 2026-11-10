@@ -35,9 +35,9 @@
    ========================================================================== */
 @font-face {
     font-family: "Montserrat";
-    src: url("font/montserrat-regular-webfont.woff2") format("woff2"),
-        url("font/montserrat-regular-webfont.woff") format("woff"),
-        url("font/montserrat-regular-webfont.ttf") format("truetype");
+    src: url("/css/font/montserrat-regular-webfont.woff2") format("woff2"),
+        url("/css/font/montserrat-regular-webfont.woff") format("woff"),
+        url("/css/font/montserrat-regular-webfont.ttf") format("truetype");
     font-weight: 100 500;
     font-style: normal;
     font-display: swap;
@@ -45,9 +45,9 @@
 
 @font-face {
     font-family: "Montserrat";
-    src: url("font/montserrat-semibold-webfont.woff2") format("woff2"),
-        url("font/montserrat-semibold-webfont.woff") format("woff"),
-        url("font/montserrat-semibold-webfont.ttf") format("truetype");
+    src: url("/css/font/montserrat-semibold-webfont.woff2") format("woff2"),
+        url("/css/font/montserrat-semibold-webfont.woff") format("woff"),
+        url("/css/font/montserrat-semibold-webfont.ttf") format("truetype");
     font-weight: 501 650;
     font-style: normal;
     font-display: swap;
@@ -55,9 +55,9 @@
 
 @font-face {
     font-family: "Montserrat";
-    src: url("font/montserrat-bold-webfont.woff2") format("woff2"),
-        url("font/montserrat-bold-webfont.woff") format("woff"),
-        url("font/montserrat-bold-webfont.ttf") format("truetype");
+    src: url("/css/font/montserrat-bold-webfont.woff2") format("woff2"),
+        url("/css/font/montserrat-bold-webfont.woff") format("woff"),
+        url("/css/font/montserrat-bold-webfont.ttf") format("truetype");
     font-weight: 651 900;
     font-style: normal;
     font-display: swap;
@@ -263,6 +263,7 @@
         /* —— Motion —— */
         --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
         --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+        --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
         --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
         --t-fast: 160ms;
         --t-base: 280ms;
@@ -344,6 +345,7 @@
     }
 
     body {
+        min-height: 100vh;
         min-height: 100dvh;
         font-family: var(--font-body);
         font-size: var(--fs-base);
@@ -2064,6 +2066,7 @@
     --nav-border: rgba(255, 255, 255, 0.08);
     --nav-edge: rgba(184, 255, 92, 0.45);
     --nav-shadow: rgba(0, 0, 0, 0.32);
+    --nav-shadow-soft: rgba(0, 0, 0, .16);
     --nav-hover-bg: rgba(255, 255, 255, 0.055);
     --nav-sub-bg: rgba(255, 255, 255, 0.035);
     --nav-active-bg: rgba(184, 255, 92, 0.075);
@@ -2103,6 +2106,7 @@ html[data-theme="light"] .nav {
     --nav-border: rgba(17, 24, 39, .13);
     --nav-edge: rgba(17, 24, 39, .22);
     --nav-shadow: rgba(17, 24, 39, .15);
+    --nav-shadow-soft: rgba(17, 24, 39, .075);
 
     --nav-hover-bg: rgba(17, 24, 39, .06);
     --nav-sub-bg: rgba(17, 24, 39, .035);
@@ -2147,6 +2151,7 @@ html[data-theme="grass"] .nav {
     --nav-border: rgba(112, 224, 0, .18);
     --nav-edge: rgba(158, 240, 26, .45);
     --nav-shadow: rgba(0, 25, 5, .45);
+    --nav-shadow-soft: rgba(0, 25, 5, .225);
 
     --nav-hover-bg: rgba(112, 224, 0, .10);
     --nav-sub-bg: rgba(112, 224, 0, .07);
@@ -2683,6 +2688,7 @@ html[data-theme="light"] .nav-brand-logo--black {
         padding: 9px 9px;
 
         background: var(--nav-panel);
+        box-shadow: 0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
         box-shadow: 0 18px 35px color-mix(in srgb, var(--nav-shadow), transparent);
     }
 

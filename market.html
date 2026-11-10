@@ -21,10 +21,9 @@
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <!-- Shared, order-sensitive stylesheets are injected by vite.config.mts (SHARED_STYLES). Page-specific stylesheets follow. -->
+    <!-- One complete, order-sensitive CSS graph is processed by Vite + PostCSS. -->
     <!-- @shared-styles -->
-    <link rel="stylesheet" href="/css/home-style.css" />
-    <link rel="stylesheet" href="/css/feature-pages.css" />
+    <link rel="stylesheet" href="/src/styles/site.css" />
   </head>
   <body class="page-loading">
     <div id="root" style="display: contents"></div>

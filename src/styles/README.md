@@ -1,3 +1,5 @@
 # Styles
 
-The current design remains in the root `public/css` directory. This app-level folder is reserved for small React-specific compatibility styles. Do not duplicate or reorder the existing stylesheets here.
+All active site styles are authored in this folder and `src/features/maze/styles`. Every active HTML page loads the single Vite entry `site.css`.
+
+Keep the `@import` order in `site.css` deliberate. Vite inlines the complete graph before PostCSS runs, allowing the cascade-layer converter to process the entire site stylesheet once.

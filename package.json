@@ -9,11 +9,11 @@
     "start": "node start.js",
     "dev": "nodemon start.js",
     "dev:site": "vite --config vite.config.mts --host 0.0.0.0",
-    "build:site": "vite build --config vite.config.mts",
+    "build:site": "vite build --config vite.config.mts && node scripts/check-css-compat.mjs",
     "preview:site": "vite preview --config vite.config.mts --host 0.0.0.0",
     "build:maze-server": "node scripts/build-maze-server.mjs",
     "start:maze-server": "node --env-file-if-exists=.env dist/maze-server/server.cjs",
-    "build:all": "node scripts/build-maze-server.mjs && vite build --config vite.config.mts",
+    "build:all": "node scripts/build-maze-server.mjs && vite build --config vite.config.mts && node scripts/check-css-compat.mjs",
     "typecheck": "tsc --project tsconfig.json",
     "test": "vitest run --config vitest.config.mts --pool=threads",
     "test:maze": "npm run build:maze-server && node scripts/run-maze-tests.mjs",
@@ -45,7 +45,10 @@
     "tsx": "^4.23.12",
     "typescript": "7.0.2",
     "vite": "8.3.6",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "@csstools/postcss-cascade-layers": "^6.0.2",
+    "postcss-preset-env": "^11.6.1",
+    "postcss": "^8.5.32"
   },
   "engines": {
     "node": "22.23.4"
