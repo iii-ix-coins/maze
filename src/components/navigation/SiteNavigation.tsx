@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { GameViewSwitcher } from './GameViewSwitcher';
+import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { usePathname } from '../../app/navigation';
 
@@ -132,9 +133,7 @@ export function SiteNavigation() {
               ))}
             </div>
             <div className="nav-actions">
-              <button type="button" className="nav-wallet-button" data-nav-action="connect-wallet" aria-label="Connect wallet">
-                <span>Connect Wallet</span>
-              </button>
+              <WalletConnectButton />
             </div>
           </div>
 

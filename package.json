@@ -31,7 +31,9 @@
     "express": "^4.21.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "ws": "^8.22.0"
+    "ws": "^8.22.0",
+    "@reown/appkit": "^1.8.24",
+    "@reown/appkit-adapter-solana": "^1.8.24"
   },
   "devDependencies": {
     "@csstools/postcss-cascade-layers": "^6.0.2",

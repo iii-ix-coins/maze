@@ -2352,6 +2352,31 @@ html[data-theme="light"] .nav-brand-logo--black {
     transform: scale(.97);
 }
 
+.nav-wallet-button.is-connected {
+    border: 1px solid color-mix(in oklch, var(--mint) 38%, var(--nav-border));
+}
+
+.nav-wallet-button .nav-wallet-indicator {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mint) 18%, transparent);
+}
+
+.nav-wallet-button .nav-wallet-address {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    letter-spacing: -0.02em;
+}
+
+.nav-wallet-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+    transform: none;
+}
+
 /* —— 6 · MOBILE MENU BUTTON ———————————————————————————————————————————— */
 .nav-mobile-toggle {
     display: none;
