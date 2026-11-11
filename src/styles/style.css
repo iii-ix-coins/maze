@@ -546,39 +546,10 @@
         opacity: 0;
     }
 
-    body::after {
-        /* MAZE brand logo loader */
-        content: "";
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        z-index: 9999;
-
-        width: 88px;
-        height: 70px;
-        margin: -35px 0 0 -44px;
-
-        background-image: url("/css/images/maze-logo.svg");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-
-        filter: drop-shadow(0 0 14px rgba(112, 224, 0, 0.35));
-
-        pointer-events: none;
-        visibility: hidden;
-        opacity: 0;
-    }
-
     body.page-loading::before {
         visibility: visible;
         opacity: 1;
         animation: curtain-failsafe 0.6s 3.4s forwards;
-    }
-
-    body.page-loading::after {
-        visibility: visible;
-        animation: glyph-in 0.4s 0.22s both, glyph-spin 2.2s var(--ease-in-out) 0.22s infinite, glyph-failsafe 0.4s 3.4s forwards;
     }
 
     body.page-loaded::before {
@@ -598,35 +569,6 @@
     }
 
     @keyframes curtain-failsafe {
-        to {
-            opacity: 0;
-            visibility: hidden;
-        }
-    }
-
-    @keyframes glyph-in {
-        from {
-            opacity: 0;
-            scale: 0.6;
-        }
-
-        to {
-            opacity: 1;
-            scale: 1;
-        }
-    }
-
-    @keyframes glyph-spin {
-        from {
-            rotate: 0deg;
-        }
-
-        to {
-            rotate: 360deg;
-        }
-    }
-
-    @keyframes glyph-failsafe {
         to {
             opacity: 0;
             visibility: hidden;

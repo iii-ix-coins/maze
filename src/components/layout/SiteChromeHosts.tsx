@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { InteractionBar } from '../../features/interaction/InteractionBar';
 import { MazeBackground } from '../../features/theme/MazeBackground';
@@ -8,16 +7,6 @@ import { MazeBackground } from '../../features/theme/MazeBackground';
  * hooks are retained so the existing CSS and Maze page continue to line up.
  */
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
-  useEffect(() => {
-    const markPageLoaded = () => {
-      document.body.classList.remove('page-loading');
-      document.body.classList.add('page-loaded');
-    };
-    if (document.readyState === 'complete') markPageLoaded();
-    else window.addEventListener('load', markPageLoaded, { once: true });
-    return () => window.removeEventListener('load', markPageLoaded);
-  }, []);
-
   return (
     <>
       <MazeBackground />

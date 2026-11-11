@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { usePageLoading } from '../../components/layout/PageLoadingProvider';
 import { MazeMarkup } from './MazeMarkup';
 
 /**
@@ -11,11 +12,11 @@ import { MazeMarkup } from './MazeMarkup';
  * rewritten as part of a frontend bundler/framework migration.
  */
 export function MazePage() {
+  const finishPageLoading = usePageLoading();
   useEffect(() => {
     let disposed = false;
     let viewTimer: number | undefined;
     let bodyObserver: MutationObserver | undefined;
-    document.body.classList.add('page-loading', 'in-menu');
 
     const app = document.getElementById('mazeApp');
 
@@ -47,8 +48,7 @@ export function MazePage() {
         await import('./engine-entry');
         if (disposed) return;
 
-        document.body.classList.remove('page-loading');
-        document.body.classList.add('page-loaded');
+        finishPageLoading();
 
         const view = new URLSearchParams(window.location.search).get('view');
         if (view && ['create', 'rooms', 'live'].includes(view)) {
@@ -68,20 +68,21 @@ export function MazePage() {
       } catch (error) {
         console.error('[Maze] React/Vite bootstrap failed:', error);
         document.body.dataset.mazeBootstrapError = 'true';
+        finishPageLoading();
       }
     })();
 
-      return () => {
-        disposed = true;
+    return () => {
+      disposed = true;
 
-        if (viewTimer !== undefined) {
-          window.clearInterval(viewTimer);
-        }
+      if (viewTimer !== undefined) {
+        window.clearInterval(viewTimer);
+      }
 
-        bodyObserver?.disconnect();
-        window.removeEventListener('site:themechange', onThemeChange);
-      };
-  }, []);
+      bodyObserver?.disconnect();
+      window.removeEventListener('site:themechange', onThemeChange);
+    };
+  }, [finishPageLoading]);
 
   return (
     <main className="maze-app in-menu" id="mazeApp">
