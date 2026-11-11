@@ -10,3 +10,4 @@
 @import "../features/maze/styles/lobby.css";
 @import "../features/maze/ui/react/maze-menu.css";
 @import "./page-loader.css";
+@import "./page-transition.css";

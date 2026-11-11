@@ -1,6 +1,5 @@
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { InteractionBar } from '../../features/interaction/InteractionBar';
-import { MazeBackground } from '../../features/theme/MazeBackground';
 
 /**
  * React owns the original four body-level site regions. IDs, order and styling
@@ -9,7 +8,6 @@ import { MazeBackground } from '../../features/theme/MazeBackground';
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
   return (
     <>
-      <MazeBackground />
       <div id="site-header"><SiteNavigation /></div>
       {!mazePage && (
         <>

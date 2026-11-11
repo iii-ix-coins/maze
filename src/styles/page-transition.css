@@ -1,0 +1,4 @@
+body.page-loading #root > main > *,
+html[data-page-swap] #root > main > * {
+    opacity: 0;
+}

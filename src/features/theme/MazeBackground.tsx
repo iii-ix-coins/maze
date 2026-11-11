@@ -3,6 +3,26 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
 import type { SiteTheme } from './theme';
 
+
+const CAMERA_STORAGE_KEY = 'hollld-bg-camera';
+
+function readSavedCamera(): { route: number; camera: number } | null {
+  try {
+    const raw = window.sessionStorage.getItem(CAMERA_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { route?: unknown; camera?: unknown };
+    if (
+      typeof parsed.route === 'number' && Number.isFinite(parsed.route) &&
+      typeof parsed.camera === 'number' && Number.isFinite(parsed.camera)
+    ) {
+      return { route: parsed.route, camera: parsed.camera };
+    }
+  } catch {
+    // Storage can be unavailable; the camera simply starts from zero.
+  }
+  return null;
+}
+
 /**
  * React owns the decorative SVG tree. The independent camera animation updates
  * only the SVG transform at frame rate; it never feeds animation state back
@@ -18,12 +38,6 @@ const SCROLL_IDLE_DELAY_MS = 150;
 const MAX_FRAME_DELTA_MS = 100;
 const CAMERA_SMOOTHING_MS = 150;
 const ZOOM_MULTIPLIER = 1.6;
-
-const THEME_ASSETS: Record<SiteTheme, { image: string; color?: string }> = {
-  grass: { image: '/css/images/3D-bg-grass.svg' },
-  dark: { image: '/css/images/3D-bg-dark.svg' },
-  light: { image: '/css/images/3D-bg-light.svg' },
-};
 
 const CAMERA_ROUTE = [
   { u: 0.5, v: 0.5, zoom: 2.56, rotation: 0 },
@@ -115,20 +129,6 @@ export function MazeBackground() {
   const segmentPathRefs = useRef<Array<SVGPathElement | null>>([]);
   themeRef.current = theme;
 
-  const activateTheme = (nextTheme: SiteTheme) => {
-    setActiveTheme(nextTheme);
-    const color = THEME_ASSETS[nextTheme].color;
-    if (color) document.documentElement.style.backgroundColor = color;
-  };
-
-  useLayoutEffect(() => {
-    const asset = THEME_ASSETS[theme];
-    if (loadedThemes.has(theme)) {
-      activateTheme(theme);
-    } else if (asset.color && canvasRef.current) {
-      canvasRef.current.style.fill = asset.color;
-    }
-  }, [theme, loadedThemes]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -139,8 +139,9 @@ export function MazeBackground() {
 
     const paths = measuringPaths as SVGPathElement[];
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let routeProgress = 0;
-    let cameraProgress = 0;
+    const saved = readSavedCamera();
+    let routeProgress = saved?.route ?? 0;
+    let cameraProgress = saved?.camera ?? 0;
     let previousScrollY = window.scrollY || root.scrollTop || 0;
     let lastScrollAt = performance.now() - SCROLL_IDLE_DELAY_MS;
     let previousFrameAt = performance.now();
@@ -192,9 +193,9 @@ export function MazeBackground() {
       world.setAttribute(
         'transform',
         `translate(${format(centerX)} ${format(centerY)}) ` +
-          `rotate(${format(camera.rotation)}) ` +
-          `scale(${format(camera.zoom)}) ` +
-          `translate(${format(-camera.x)} ${format(-camera.y)})`,
+        `rotate(${format(camera.rotation)}) ` +
+        `scale(${format(camera.zoom)}) ` +
+        `translate(${format(-camera.x)} ${format(-camera.y)})`,
       );
     };
 
@@ -202,6 +203,8 @@ export function MazeBackground() {
       const currentScrollY = window.scrollY || root.scrollTop || 0;
       const deltaY = currentScrollY - previousScrollY;
       previousScrollY = currentScrollY;
+      // A scroll reset caused by a page swap must not move the camera.
+      if (root.dataset.pageSwap) return;
       if (prefersReducedMotion || deltaY === 0) return;
       routeProgress += Math.abs(deltaY) / SCROLL_PIXELS_PER_LOOP;
       lastScrollAt = performance.now();
@@ -220,6 +223,18 @@ export function MazeBackground() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    const saveCamera = () => {
+      try {
+        const base = Math.floor(cameraProgress);
+        window.sessionStorage.setItem(
+          CAMERA_STORAGE_KEY,
+          JSON.stringify({ route: routeProgress - base, camera: cameraProgress - base }),
+        );
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('pagehide', saveCamera);
     renderCamera();
     if (!prefersReducedMotion) {
       animationFrameId = window.requestAnimationFrame(tick);
@@ -229,6 +244,8 @@ export function MazeBackground() {
     }
 
     return () => {
+      window.removeEventListener('pagehide', saveCamera);
+      saveCamera();
       window.removeEventListener('scroll', handleScroll);
       if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
     };
@@ -251,39 +268,7 @@ export function MazeBackground() {
         width={VIEWBOX.width}
         height={VIEWBOX.height}
       />
-      <g ref={worldRef} id="maze-world">
-        {(Object.keys(THEME_ASSETS) as SiteTheme[]).map((imageTheme) => (
-          <image
-            key={imageTheme}
-            className={`maze-image${activeTheme === imageTheme ? ' is-active' : ''}`}
-            data-theme={imageTheme}
-            data-loaded={loadedThemes.has(imageTheme) ? 'true' : 'false'}
-            x={VIEWBOX.x}
-            y={VIEWBOX.y}
-            width={VIEWBOX.width}
-            height={VIEWBOX.height}
-            preserveAspectRatio="none"
-            href={THEME_ASSETS[imageTheme].image}
-            onLoad={() => {
-              setLoadedThemes((current) => {
-                if (current.has(imageTheme)) return current;
-                const next = new Set(current);
-                next.add(imageTheme);
-                return next;
-              });
-              if (themeRef.current === imageTheme) activateTheme(imageTheme);
-            }}
-            onError={(event) => {
-              event.currentTarget.dataset.loadError = 'true';
-              console.error(`[MazeBackground] Could not load theme image: ${THEME_ASSETS[imageTheme].image}`);
-              const fallbackColor = THEME_ASSETS[imageTheme].color;
-              if (themeRef.current === imageTheme && fallbackColor && canvasRef.current) {
-                canvasRef.current.style.fill = fallbackColor;
-              }
-            }}
-          />
-        ))}
-      </g>
+      <g ref={worldRef} id="maze-world" />
       <path ref={routePathRef} d={routePathD} fill="none" stroke="none" aria-hidden="true" />
       {segmentGeometry.map((segment, index) => (
         <path

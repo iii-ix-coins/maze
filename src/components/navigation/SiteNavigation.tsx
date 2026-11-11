@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { GameViewSwitcher } from './GameViewSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { usePathname } from '../../app/navigation';
 
 type NavItem = {
   label: string;
@@ -96,6 +97,7 @@ function CompeteMenu({ open, setOpen, onNavigate }: { open: boolean; setOpen: (o
 }
 
 export function SiteNavigation() {
+  usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [competeOpen, setCompeteOpen] = useState(false);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);

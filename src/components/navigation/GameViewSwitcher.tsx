@@ -1,4 +1,5 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { navigateTo } from '../../app/navigation';
 
 const VIEWS = ['create', 'rooms', 'live'] as const;
 type GameView = (typeof VIEWS)[number];
@@ -34,7 +35,7 @@ export function GameViewSwitcher() {
     }
     const url = new URL('./maze.html', document.baseURI);
     url.searchParams.set('view', view);
-    window.location.assign(url.href);
+    navigateTo(url.href);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

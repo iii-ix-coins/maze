@@ -65,7 +65,7 @@
 
 /* Cross-document page transitions (Chrome / Safari — ignored elsewhere) */
 @view-transition {
-    navigation: auto;
+    navigation: none;
 }
 
 /* Typed custom properties → animatable + inheritable pointer/score/progress */

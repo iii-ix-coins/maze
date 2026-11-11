@@ -1,4 +1,3 @@
-
 import {
     createContext,
     useCallback,
@@ -9,6 +8,11 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { PageLoader } from './PageLoader';
+import {
+    LOADER_HIDE_EVENT,
+    LOADER_SHOW_EVENT,
+    playPageEnter,
+} from '../../app/navigation';
 
 type PageLoadingContextValue = {
     finishPageLoading: () => void;
@@ -26,9 +30,23 @@ export function PageLoadingProvider({
     const [loading, setLoading] = useState(true);
 
     const finishPageLoading = useCallback(() => {
+        // Must start before `page-loading` is removed so the content never flashes.
+        void playPageEnter();
         setLoading(false);
         document.body.classList.remove('page-loading');
         document.body.classList.add('page-loaded');
+    }, []);
+
+    // Loader shown by soft page transitions, on top of the persistent background.
+    useEffect(() => {
+        const show = () => setLoading(true);
+        const hide = () => setLoading(false);
+        window.addEventListener(LOADER_SHOW_EVENT, show);
+        window.addEventListener(LOADER_HIDE_EVENT, hide);
+        return () => {
+            window.removeEventListener(LOADER_SHOW_EVENT, show);
+            window.removeEventListener(LOADER_HIDE_EVENT, hide);
+        };
     }, []);
 
     useEffect(() => {
