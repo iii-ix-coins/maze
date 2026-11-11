@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type WheelEvent } from 'react';
 import { formatAmount } from '../../services/formatters';
+import { trackPageReadiness } from '../../app/page-readiness';
 
 export type FeedType = 'buyers' | 'holders';
 type FeedItem = Record<string, any>;
@@ -136,6 +137,7 @@ export function LiveFeedPanel() {
   const pendingScrollRef = useRef<{ snapshot: ScrollSnapshot | null; reset: boolean } | null>(null);
   const pendingEnteringRef = useRef<Set<string>>(new Set());
   const mountedRef = useRef(false);
+  const initialReadinessTrackedRef = useRef(false);
 
   const commitItems = useCallback((type: FeedType, nextItems: FeedItem[], resetScroll: boolean) => {
     const previousKeys = new Set(itemsRef.current.map((item) => getFeedKey(displayedFeedRef.current ?? type, item)));
@@ -221,7 +223,12 @@ export function LiveFeedPanel() {
   const runAndSchedule = useCallback((type: FeedType) => {
     const scheduleSequence = ++scheduleSequenceRef.current;
     if (timerRef.current !== undefined) window.clearTimeout(timerRef.current);
-    void loadFeed(type).finally(() => {
+    const request = loadFeed(type);
+    if (!initialReadinessTrackedRef.current) {
+      initialReadinessTrackedRef.current = true;
+      void trackPageReadiness(request, 'live-feed-initial-data');
+    }
+    void request.finally(() => {
       if (!mountedRef.current || scheduleSequence !== scheduleSequenceRef.current) return;
       const current = activeFeedRef.current;
       timerRef.current = window.setTimeout(() => runAndSchedule(current), REFRESH_INTERVAL);

@@ -4,6 +4,7 @@ import {
     useContext,
     useEffect,
     useState,
+    useRef,
     type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
@@ -13,6 +14,7 @@ import {
     LOADER_SHOW_EVENT,
     playPageEnter,
 } from '../../app/navigation';
+import { waitForPageReadiness } from '../../app/page-readiness';
 
 type PageLoadingContextValue = {
     finishPageLoading: () => void;
@@ -28,13 +30,19 @@ export function PageLoadingProvider({
     waitForMazeEngine?: boolean;
 }) {
     const [loading, setLoading] = useState(true);
+    const finishingRef = useRef(false);
 
     const finishPageLoading = useCallback(() => {
-        // Must start before `page-loading` is removed so the content never flashes.
-        void playPageEnter();
-        setLoading(false);
-        document.body.classList.remove('page-loading');
-        document.body.classList.add('page-loaded');
+        if (finishingRef.current) return;
+        finishingRef.current = true;
+        void (async () => {
+            await waitForPageReadiness();
+            // Start the enter animation before removing the initial loading class.
+            void playPageEnter();
+            setLoading(false);
+            document.body.classList.remove('page-loading');
+            document.body.classList.add('page-loaded');
+        })();
     }, []);
 
     // Loader shown by soft page transitions, on top of the persistent background.

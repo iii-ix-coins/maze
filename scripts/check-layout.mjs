@@ -184,9 +184,9 @@ if (/document\.createElement|createElementNS|appendChild\(|initMazeBackground/.t
   console.error('[layout] site background must be React-owned and must not use a DOM bootstrap.');
   process.exit(1);
 }
-const siteChromeSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
-if (!/\<MazeBackground\s*\/>/.test(siteChromeSource)) {
-  console.error('[layout] React site chrome must mount the React-owned Maze background.');
+const appSource = fs.readFileSync(path.join(root, 'src/app/App.tsx'), 'utf8');
+if (!/<MazeBackground\s*\/>/.test(appSource)) {
+  console.error('[layout] the persistent React App root must mount MazeBackground exactly once.');
   process.exit(1);
 }
 for (const component of ['function CreateWizard', 'export function RoomsPanel', 'export function LivePanel', 'export function RoomPanel']) {

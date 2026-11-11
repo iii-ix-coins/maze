@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { trackPageReadiness } from '../../app/page-readiness';
 
 export interface HolderItem extends Record<string, any> {
   wallet?: string;
@@ -93,7 +94,7 @@ export function useHolders(): HoldersState {
       }
     };
 
-    void load().finally(() => {
+    void trackPageReadiness(load(), 'holders-initial-data').finally(() => {
       if (active) timer = window.setInterval(() => void load(), 5000);
     });
 

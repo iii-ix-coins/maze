@@ -277,7 +277,6 @@ export function MazeBackground() {
         width={VIEWBOX.width}
         height={VIEWBOX.height}
       />
-
       <g ref={worldRef} id="maze-world">
         {(['grass', 'dark', 'light'] as const).map((imageTheme) => (
           <image
@@ -296,9 +295,7 @@ export function MazeBackground() {
                 return next;
               });
 
-              if (themeRef.current === imageTheme) {
-                setActiveTheme(imageTheme);
-              }
+              if (themeRef.current === imageTheme) setActiveTheme(imageTheme);
             }}
           />
         ))}

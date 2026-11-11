@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { MarketPayload } from './market-types';
+import { trackPageReadiness } from '../../app/page-readiness';
 
 export interface MarketDataState {
   payload: MarketPayload | null;
@@ -50,7 +51,7 @@ export function useMarketData(refreshInterval = 30_000): MarketDataState {
       }
     };
 
-    void load();
+    void trackPageReadiness(load(), 'market-initial-data');
     const timer = window.setInterval(() => void load(), refreshInterval);
     return () => {
       active = false;

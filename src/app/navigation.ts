@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { beginPageReadinessCycle, waitForPageReadiness } from './page-readiness';
 
 export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
@@ -140,12 +141,14 @@ async function swapTo(url: URL, push: boolean): Promise<void> {
         // The flag hides the incoming page and tells MazeBackground to ignore
         // the scroll reset (otherwise the camera would jump).
         root.dataset.pageSwap = 'true';
+        beginPageReadinessCycle();
         if (push) window.history.pushState(null, '', url.href);
         document.title = TITLES[normalizePath(url.pathname)] ?? document.title;
         resetScroll();
         emitPath();
 
         await nextPaint();
+        await waitForPageReadiness();
         await wait((reducedMotion() ? 0 : MIN_LOADER_MS) - (performance.now() - startedAt));
 
         window.dispatchEvent(new Event(LOADER_HIDE_EVENT));

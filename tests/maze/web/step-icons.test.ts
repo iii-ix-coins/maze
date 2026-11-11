@@ -8,6 +8,7 @@ const root = new URL('../../../', import.meta.url);
 const imageRoot = new URL('public/maze-assets/assets/images/', root);
 const reactMenu = fs.readFileSync(new URL('src/features/maze/ui/react/MazeMenu.tsx', root), 'utf8');
 const siteChrome = fs.readFileSync(new URL('src/components/layout/SiteChromeHosts.tsx', root), 'utf8');
+const router = fs.readFileSync(new URL('src/app/router.tsx', root), 'utf8');
 const homePage = fs.readFileSync(new URL('src/features/home/HomePage.tsx', root), 'utf8');
 const mazeLayoutCss = fs.readFileSync(new URL('src/features/maze/styles/maze-unify.css', root), 'utf8');
 const onlineClient = fs.readFileSync(new URL('src/features/maze/engine/online.ts', root), 'utf8');
@@ -67,14 +68,23 @@ test('the active React wizard drives every panel from the selected step state', 
     }
     assert.match(reactMenu, /state\.step === step \? ' is-active'/);
 });
-
-
 test('Maze route omits the generic Home brand headline and interaction dock', () => {
-    assert.match(homePage, /<SiteChromeHosts mazePage=\{isMazeRoute\} \/>/);
-    assert.match(siteChrome, /\{!mazePage && \(/);
-    assert.match(siteChrome, /<SiteNavigation \/>/);
-});
+    assert.ok(
+        router.includes("<SiteChromeHosts mazePage={pathname === '/maze.html'} />"),
+        'Router must pass the Maze route state to SiteChromeHosts'
+    );
 
+    assert.match(siteChrome, /<SiteNavigation \/>/);
+
+    assert.match(
+        siteChrome,
+        /\{!mazePage && \([\s\S]*?<InteractionBar \/>[\s\S]*?\)\}/,
+        'Brand headline and InteractionBar must be hidden on the Maze route'
+    );
+
+    assert.doesNotMatch(homePage, /<SiteChromeHosts/,
+        'HomePage must not own the shared site chrome');
+});
 test('Maze page overrides the fixed wizard shell in the unlayered layout stylesheet', () => {
     assert.match(mazeLayoutCss, /#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[\s\S]*?position:\s*relative/);
     assert.match(mazeLayoutCss, /#mazeApp\.maze-app\.in-menu > #createGame\.cg #cgViewCreate > \.cg-layout/);
