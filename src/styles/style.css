@@ -547,19 +547,24 @@
     }
 
     body::after {
-        /* glyph (logo silhouette) */
+        /* MAZE brand logo loader */
         content: "";
         position: fixed;
         left: 50%;
         top: 50%;
         z-index: 9999;
-        width: 58px;
-        height: 58px;
-        margin: -29px 0 0 -29px;
-        border-radius: 18px;
-        corner-shape: var(--corner, round);
-        background: linear-gradient(135deg, var(--brand-navy), var(--brand-steel));
-        box-shadow: inset 0 0 0 11px oklch(0.10 0.02 262), 0 0 60px -6px oklch(0.87 0.17 170 / 0.55);
+
+        width: 88px;
+        height: 70px;
+        margin: -35px 0 0 -44px;
+
+        background-image: url("/css/images/maze-logo.svg");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+
+        filter: drop-shadow(0 0 14px rgba(112, 224, 0, 0.35));
+
         pointer-events: none;
         visibility: hidden;
         opacity: 0;
@@ -579,7 +584,10 @@
     body.page-loaded::before {
         visibility: visible;
         opacity: 1;
-        animation: curtain-out 0.7s 0.05s var(--ease-out) forwards;
+        animation:
+            glyph-in 0.4s 0.22s both,
+            glyph-spin 3.2s linear 0.22s infinite,
+            glyph-failsafe 0.4s 3.4s forwards;
     }
 
     @keyframes curtain-out {
@@ -609,13 +617,12 @@
     }
 
     @keyframes glyph-spin {
-        0% {
+        from {
             rotate: 0deg;
         }
 
-        55%,
-        100% {
-            rotate: 90deg;
+        to {
+            rotate: 360deg;
         }
     }
 
