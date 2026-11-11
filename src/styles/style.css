@@ -2353,6 +2353,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 .nav-wallet-button.is-connected {
+    border: 1px solid rgba(92, 205, 170, .38);
     border: 1px solid color-mix(in oklch, var(--mint) 38%, var(--nav-border));
 }
 
@@ -2362,6 +2363,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     flex: none;
     border-radius: 50%;
     background: var(--mint);
+    box-shadow: 0 0 0 3px rgba(92, 205, 170, .18);
     box-shadow: 0 0 0 3px color-mix(in oklch, var(--mint) 18%, transparent);
 }
 
