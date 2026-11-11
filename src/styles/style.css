@@ -533,44 +533,6 @@
         }
     }
 
-    /* —— 4.3 Page loader: pure CSS, driven by the existing .page-loading → .page-loaded switch —— */
-    body::before {
-        /* curtain */
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 9998;
-        background: radial-gradient(70% 55% at 50% 45%, oklch(0.18 0.05 258), var(--ink-1000));
-        pointer-events: none;
-        visibility: hidden;
-        opacity: 0;
-    }
-
-    body.page-loading::before {
-        visibility: visible;
-        opacity: 1;
-        animation: curtain-failsafe 0.6s 3.4s forwards;
-    }
-
-    body.page-loaded::before {
-        visibility: visible;
-        opacity: 1;
-        animation: curtain-out 0.45s ease forwards;
-    }
-
-    @keyframes curtain-out {
-        to {
-            opacity: 0;
-            visibility: hidden;
-        }
-    }
-
-    @keyframes curtain-failsafe {
-        to {
-            opacity: 0;
-            visibility: hidden;
-        }
-    }
 
     /* —— 4.4 Staged entrance for the page blocks —— */
     body.page-loaded>#root>[id^="site-"] {
