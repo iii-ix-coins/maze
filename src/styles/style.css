@@ -183,6 +183,8 @@
     :root {
         color-scheme: dark;
 
+        --page-background: var(--ink-1000);
+
         /* —— Ink (navy-leaning neutrals; --ink-600 ≈ brand steel) —— */
         --ink-1000: oklch(0.100 0.022 262);
         --ink-950: oklch(0.130 0.025 262);
@@ -337,7 +339,8 @@
    ========================================================================== */
 @layer base {
     html {
-        background: var(--ink-1000);
+        background-color: var(--page-background);
+        background-image: none;
         scroll-behavior: smooth;
         scroll-padding-top: 7.5rem;
         scrollbar-width: thin;
@@ -426,11 +429,11 @@
     }
 
     .backdrop-aurora i:nth-child(1) {
+        display: none;
         width: 80vmax;
         height: 80vmax;
         left: -30vmax;
         top: -38vmax;
-        background: radial-gradient(closest-side, oklch(0.62 0.16 170 / 0.46), transparent);
         animation: aurora-a 34s ease-in-out infinite alternate;
     }
 
