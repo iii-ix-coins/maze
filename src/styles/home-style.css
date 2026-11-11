@@ -15,11 +15,13 @@
     .banner {
         position: relative; isolation: isolate; overflow: hidden;
         display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-        gap: clamp(20px, 3.6vw, 56px); align-items: center;
-        padding: clamp(24px, 4.4vw, 56px);
+        gap: clamp(12px, 2vw, 32px);
+        align-items: start;
+        padding: clamp(16px, 2.8vw, 36px) clamp(20px, 3.6vw, 44px);
         min-height: clamp(320px, 38vw, 460px);
         border-radius: var(--r-xl); corner-shape: var(--corner, round);
-        background: var(--panel-bg); border: 1px solid var(--stroke);
+        background: var(--panel-bg);
+        border: 1px solid var(--stroke);
         box-shadow: var(--shadow-2);
     }
     .banner::before {                                   /* mint bloom */

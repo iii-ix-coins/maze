@@ -769,7 +769,7 @@
     .brand-header {
         position: relative;
         border-radius: var(--r-lg);
-        background: var(--page-max);
+        background: var(--panel-bg);
         box-shadow: var(--brand-header-shadow);
     }
 
@@ -1455,16 +1455,16 @@
 
     .brand-description {
         min-width: 100%;
-        font-weight: 600;
+        font-weight: 400;
         font-stretch: 100%;
         letter-spacing: -0.01em;
-        font-size: clamp(1.3rem, 1.3rem + 3.9vw, 3.9rem);
+        font-size: clamp(0.75rem, 0.75rem + 2vw, 2.2rem);
     }
 
     .brand-description span {
         display: block;
         font-weight: 500;
-        font-size: clamp(1.2rem, 1.1rem + 0.8vw, 1.2rem);
+        font-size: clamp(1.25rem, 1.15rem + 0.35vw, 1.4rem);
     }
 
     .brand-footer {
