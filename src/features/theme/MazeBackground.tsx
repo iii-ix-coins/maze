@@ -39,6 +39,12 @@ const MAX_FRAME_DELTA_MS = 100;
 const CAMERA_SMOOTHING_MS = 150;
 const ZOOM_MULTIPLIER = 1.6;
 
+const THEME_ASSETS: Record<SiteTheme, { image: string }> = {
+  grass: { image: '/css/images/3D-bg-grass.svg' },
+  dark: { image: '/css/images/3D-bg-dark.svg' },
+  light: { image: '/css/images/3D-bg-light.svg' },
+};
+
 const CAMERA_ROUTE = [
   { u: 0.5, v: 0.5, zoom: 2.56, rotation: 0 },
   { u: 0.5, v: 0.265, zoom: 2.4, rotation: -0.05 },
@@ -129,6 +135,9 @@ export function MazeBackground() {
   const segmentPathRefs = useRef<Array<SVGPathElement | null>>([]);
   themeRef.current = theme;
 
+  useLayoutEffect(() => {
+    if (loadedThemes.has(theme)) setActiveTheme(theme);
+  }, [theme, loadedThemes]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -268,7 +277,32 @@ export function MazeBackground() {
         width={VIEWBOX.width}
         height={VIEWBOX.height}
       />
-      <g ref={worldRef} id="maze-world" />
+
+      <g ref={worldRef} id="maze-world">
+        {(['grass', 'dark', 'light'] as const).map((imageTheme) => (
+          <image
+            key={imageTheme}
+            href={THEME_ASSETS[imageTheme].image}
+            x={VIEWBOX.x}
+            y={VIEWBOX.y}
+            width={VIEWBOX.width}
+            height={VIEWBOX.height}
+            preserveAspectRatio="xMidYMid slice"
+            className={`maze-image${activeTheme === imageTheme ? ' is-active' : ''}`}
+            onLoad={() => {
+              setLoadedThemes((previous) => {
+                const next = new Set(previous);
+                next.add(imageTheme);
+                return next;
+              });
+
+              if (themeRef.current === imageTheme) {
+                setActiveTheme(imageTheme);
+              }
+            }}
+          />
+        ))}
+      </g>
       <path ref={routePathRef} d={routePathD} fill="none" stroke="none" aria-hidden="true" />
       {segmentGeometry.map((segment, index) => (
         <path
