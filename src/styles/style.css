@@ -223,8 +223,8 @@
         /* —— Surfaces —— */
         --stroke: oklch(1 0 0 / 0.075);
         --stroke-hi: oklch(1 0 0 / 0.16);
-        --panel-bg: linear-gradient(160deg, oklch(0.235 0.040 260 / 0.66), oklch(0.165 0.030 262 / 0.58));
-        --tile-bg: linear-gradient(155deg, oklch(0.265 0.042 260 / 0.72), oklch(0.190 0.032 262 / 0.62));
+        --panel-bg: linear-gradient(160deg, oklch(0.42 0.105 160 / 0.38), oklch(0.30 0.085 158 / 0.28));
+        --tile-bg: linear-gradient(160deg, oklch(0.42 0.105 160 / 0.28), oklch(0.30 0.085 158 / 0.18));
         --field-bg: oklch(0.07 0.02 262 / 0.46);
         --veil: oklch(1 0 0 / 0.045);
 
