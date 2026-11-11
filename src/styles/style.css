@@ -555,10 +555,7 @@
     body.page-loaded::before {
         visibility: visible;
         opacity: 1;
-        animation:
-            glyph-in 0.4s 0.22s both,
-            glyph-spin 3.2s linear 0.22s infinite,
-            glyph-failsafe 0.4s 3.4s forwards;
+        animation: curtain-out 0.45s ease forwards;
     }
 
     @keyframes curtain-out {
