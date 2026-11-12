@@ -5,7 +5,6 @@ import { AppRouter } from './router';
 import { AppErrorBoundary } from './error-boundary';
 import { initNavigation } from './navigation';
 import { MazePage } from '../features/maze/MazePage';
-import { MazeBackground } from '../features/theme/MazeBackground';
 import { PageLoadingProvider } from '../components/layout/PageLoadingProvider';
 
 /** One React tree owns the persistent background, site shell, routes and page loader. */
@@ -19,7 +18,6 @@ export function App() {
   return (
     <AppErrorBoundary>
       <AppProviders>
-        <MazeBackground />
         <PageLoadingProvider waitForMazeEngine={isMazePage}>
           <AppRouter />
           {isMazePage && mazeHost
