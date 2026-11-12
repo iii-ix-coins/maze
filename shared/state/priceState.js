@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { readJsonCached } = require('./readJsonCached');
 const STATE_DIR =
     __dirname;
 const STATE_FILE =
@@ -301,46 +302,9 @@ function setPriceState(
     }
 }
 function getPriceState() {
-    try {
-        if (
-            !fs.existsSync(
-                STATE_FILE
-            )
-        ) {
-            return null;
-        }
-        const raw =
-            fs.readFileSync(
-                STATE_FILE,
-                'utf8'
-            );
-        if (
-            !raw ||
-            !raw.trim()
-        ) {
-            return null;
-        }
-        const state =
-            JSON.parse(
-                raw
-            );
-        if (
-            !state ||
-            typeof state !== 'object' ||
-            Array.isArray(state)
-        ) {
-            return null;
-        }
-        if (
-            state.schemaVersion !==
-            SCHEMA_VERSION
-        ) {
-            return null;
-        }
-        return state;
-    } catch {
-        return null;
-    }
+    const state = readJsonCached(STATE_FILE);
+    if (!state || typeof state !== 'object' || Array.isArray(state)) return null;
+    return state.schemaVersion === SCHEMA_VERSION ? state : null;
 }
 function getPriceStateJson() {
     const state =

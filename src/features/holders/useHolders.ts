@@ -95,10 +95,13 @@ export function useHolders(): HoldersState {
     };
 
     void trackPageReadiness(load(), 'holders-initial-data').finally(() => {
-      if (active) timer = window.setInterval(() => void load(), 5000);
+      if (active) timer = window.setInterval(() => { if (!document.hidden) void load(); }, 5000);
     });
 
+    const onVisibility = () => { if (!document.hidden && active) void load(); };
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
       active = false;
       if (timer !== undefined) window.clearInterval(timer);
       requestController?.abort();

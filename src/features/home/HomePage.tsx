@@ -1,3 +1,4 @@
+import '../../styles/home-style.css';
 import { MarketSummary } from '../market/MarketSummary';
 import { LiveFeedPanel } from '../live-feed/LiveFeedPanel';
 import { HoldersPanel } from '../holders/HoldersPanel';

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { readJsonCached } = require('./readJsonCached');
 
 const STATE_PATH =
     path.join(
@@ -10,50 +11,9 @@ const STATE_PATH =
     );
 
 function getJupiterMarketState() {
-
-    try {
-
-        if (
-            !fs.existsSync(
-                STATE_PATH
-            )
-        ) {
-            return null;
-        }
-
-        const text =
-            fs.readFileSync(
-                STATE_PATH,
-                'utf8'
-            );
-
-        if (!text.trim()) {
-            return null;
-        }
-
-        const state =
-            JSON.parse(text);
-
-        if (
-            !state ||
-            typeof state !== 'object'
-        ) {
-            return null;
-        }
-
-        return state;
-
-    } catch (error) {
-
-        console.error(
-            '[Jupiter Market State]',
-            error?.message || error
-        );
-
-        return null;
-    }
+    const state = readJsonCached(STATE_PATH);
+    return state && typeof state === 'object' && !Array.isArray(state) ? state : null;
 }
-
 function getJupiterMarketStateJson() {
     const state = getJupiterMarketState();
     return state ? JSON.stringify(state) : null;

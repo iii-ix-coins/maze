@@ -1,11 +1,9 @@
-# Production compatibility baseline. Safari 14.1 / iOS 14.5 includes flexbox gap;
-# PostCSS supplies the missing Cascade Layers and modern color-function fallbacks.
 [production]
-safari >= 14.1
-ios_saf >= 14.5
-chrome >= 90
-firefox >= 90
-edge >= 90
+safari >= 16.4
+ios_saf >= 16.4
+chrome >= 111
+firefox >= 113
+edge >= 111
 
 [development]
 last 1 chrome version

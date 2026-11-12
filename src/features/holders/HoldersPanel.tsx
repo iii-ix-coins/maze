@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { memo, useMemo, type CSSProperties } from 'react';
 import { formatInteger } from '../../services/formatters';
 import { useHolders, type HolderItem } from './useHolders';
 
@@ -40,21 +40,18 @@ function walletHue(wallet: string): number {
   return Math.abs(hash) % 360;
 }
 
-function holderHeat(items: HolderItem[], amount: unknown): string {
-  const positive = items.map((item) => Number(item.uiAmount)).filter((value) => Number.isFinite(value) && value > 0);
-  const max = positive.length ? Math.max(...positive) : 0;
-  const min = positive.length ? Math.min(...positive) : 0;
-  const span = max > min ? Math.log(max) - Math.log(min) : 0;
+function holderHeat(amount: unknown, min: number, max: number): string {
   const value = Number(amount);
   if (!Number.isFinite(value) || value <= 0 || max <= 0) return '0';
+  const span = max > min ? Math.log(max) - Math.log(min) : 0;
   const heat = span > 0 ? (Math.log(value) - Math.log(min)) / span : 1;
   return (0.04 + heat * 0.96).toFixed(3);
 }
 
-function HolderRow({ holder, items }: { holder: HolderItem; items: HolderItem[] }) {
+const HolderRow = memo(function HolderRow({ holder, minAmount, maxAmount }: { holder: HolderItem; minAmount: number; maxAmount: number }) {
   const wallet = typeof holder.wallet === 'string' ? holder.wallet : '';
   const style = {
-    '--heat': holderHeat(items, holder.uiAmount),
+    '--heat': holderHeat(holder.uiAmount, minAmount, maxAmount),
     '--hue': walletHue(wallet),
   } as CSSProperties;
   const purchases = Number(holder.purchases);
@@ -67,10 +64,14 @@ function HolderRow({ holder, items }: { holder: HolderItem; items: HolderItem[] 
       <div className="holder-last-Purchases"><span className="holder-last-Purchases-value">{formatRelativeTime(holder.lastPurchaseBlockTime)}</span></div>
     </div>
   );
-}
+});
 
 export function HoldersPanel({ fullPage = false }: { fullPage?: boolean }) {
   const { items, totalHolders, status } = useHolders();
+  const bounds = useMemo(() => {
+    const values = items.map((item) => Number(item.uiAmount)).filter((value) => Number.isFinite(value) && value > 0);
+    return { minAmount: values.length ? Math.min(...values) : 0, maxAmount: values.length ? Math.max(...values) : 0 };
+  }, [items]);
   return (
     <section className={`holders-box${fullPage ? ' holders-box--page' : ''}`} aria-label="Token holders">
       <div className="holders-header">
@@ -89,11 +90,11 @@ export function HoldersPanel({ fullPage = false }: { fullPage?: boolean }) {
         <div className="holders-columns" aria-hidden="true">
           <span>#</span><span>Wallet</span><span>Holding</span><span>Buys</span><span>Last buy</span>
         </div>
-        <div id="holders-list" className="holders-list" aria-live="polite">
+        <div id="holders-list" className="holders-list">
           {status === 'loading' ? <div className="holders-status holders-status-loading">Loading holders…</div> : null}
           {status === 'error' ? <div className="holders-status holders-status-error">Unable to load holder data.</div> : null}
           {status === 'empty' ? <div className="holders-status holders-status-empty">No holder data available.</div> : null}
-          {status === 'ready' ? items.map((holder) => <HolderRow key={String(holder.wallet)} holder={holder} items={items} />) : null}
+          {status === 'ready' ? items.map((holder) => <HolderRow key={String(holder.wallet)} holder={holder} minAmount={bounds.minAmount} maxAmount={bounds.maxAmount} />) : null}
         </div>
       </div>
     </section>

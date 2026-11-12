@@ -1,3 +1,4 @@
+import '../../styles/feature-pages.css';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { formatAmount, formatInteger, formatUsd } from '../../services/formatters';
 import { getMarketEnvelope, getMarketToken, type MarketPayload, type UnknownRecord } from '../market/market-types';

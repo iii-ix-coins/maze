@@ -1,3 +1,4 @@
+import '../../styles/feature-pages.css';
 import { MarketSummary } from './MarketSummary';
 
 export function MarketPage() {

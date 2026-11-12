@@ -26,3 +26,6 @@ test-results/
 npm-debug.log*
 .DS_Store
 Thumbs.db
+
+# Runtime-generated state snapshots
+shared/state/*.json

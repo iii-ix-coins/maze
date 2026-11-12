@@ -1,3 +1,4 @@
+import '../../styles/feature-pages.css';
 import { HoldersPanel } from './HoldersPanel';
 
 export function HoldersPage() {

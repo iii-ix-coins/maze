@@ -3,6 +3,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 require('dotenv').config();
 
@@ -63,6 +64,13 @@ const {
 const app =
     express();
 
+// Small shared cache window reduces duplicate polling bursts without hiding fresh feed updates.
+function shortApiCache(req, res, next) {
+    res.setHeader('Cache-Control', 'public, max-age=2, stale-while-revalidate=10');
+    next();
+}
+
+
 const PORT =
     Number(
         process.env.PORT
@@ -81,6 +89,26 @@ app.use(
         limit: '16kb'
     })
 );
+
+// Lightweight native gzip for sizeable JSON/text API responses (no extra runtime dependency).
+app.use((req, res, next) => {
+    if (!/\bgzip\b/.test(String(req.headers['accept-encoding'] || ''))) return next();
+    res.vary('Accept-Encoding');
+    const send = res.send;
+    res.send = function compressedSend(body) {
+        const type = String(res.getHeader('Content-Type') || '');
+        const size = Buffer.isBuffer(body) ? body.length : typeof body === 'string' ? Buffer.byteLength(body) : 0;
+        if (size < 1024 || (!type.includes('json') && !type.startsWith('text/')) || res.getHeader('Content-Encoding')) {
+            return send.call(this, body);
+        }
+        const source = Buffer.isBuffer(body) ? body : Buffer.from(body);
+        const compressed = zlib.gzipSync(source, { level: zlib.constants.Z_BEST_SPEED });
+        res.setHeader('Content-Encoding', 'gzip');
+        res.removeHeader('Content-Length');
+        return send.call(this, compressed);
+    };
+    next();
+});
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SITE_DIST_DIR = path.join(__dirname, 'dist', 'site');
@@ -102,7 +130,7 @@ app.get('/maze-legacy.html', (req, res) => res.sendFile(LEGACY_MAZE_INDEX));
 app.use(
     express.static(PUBLIC_DIR, {
         index: false,
-        maxAge: 0,
+        maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
         etag: true
     })
 );
@@ -351,6 +379,7 @@ app.get(
 
 app.get(
     '/api/live-feed/buyers',
+    shortApiCache,
     (req, res) => {
 
         try {
@@ -381,6 +410,7 @@ app.get(
 
 app.get(
     '/api/live-feed/holders',
+    shortApiCache,
     (req, res) => {
 
         try {
@@ -423,6 +453,7 @@ app.get(
 
 app.get(
     '/api/stats',
+    shortApiCache,
     (req, res) => {
 
         const state =
@@ -522,6 +553,7 @@ app.post(
 
 app.get(
     '/api/holders-summary',
+    shortApiCache,
     (req, res) => {
 
         const state =
@@ -552,6 +584,7 @@ app.get(
 
 app.get(
     '/api/latest-buyers',
+    shortApiCache,
     (req, res) => {
 
         const state =
@@ -578,6 +611,7 @@ app.get(
 
 app.get(
     '/api/tx-state',
+    shortApiCache,
     (req, res) => {
 
         const state =
@@ -604,6 +638,13 @@ app.get(
  * Frontend
  * --------------------------------------------------
  */
+
+// Client routes must resolve to the shared Vite document on direct visits and refreshes.
+app.get(['/token', '/holders', '/market', '/coin.html', '/holders.html', '/market.html'], (req, res, next) => {
+    if (fs.existsSync(SITE_DIST_INDEX)) return res.sendFile(SITE_DIST_INDEX);
+    return next();
+});
+
 
 app.get(
     '/',

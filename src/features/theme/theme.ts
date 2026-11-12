@@ -15,7 +15,16 @@ export function normalizeSiteTheme(value: string | null | undefined): SiteTheme 
  */
 export function applySiteTheme(theme: string, persist = true): SiteTheme {
   const selectedTheme = normalizeSiteTheme(theme);
-  document.documentElement.dataset.theme = selectedTheme;
+  const updateDocument = () => {
+    document.documentElement.dataset.theme = selectedTheme;
+    window.dispatchEvent(new CustomEvent('site:themechange', { detail: { theme: selectedTheme } }));
+  };
+  const startTransition = (document as Document & { startViewTransition?: (callback: () => void) => unknown }).startViewTransition;
+  if (typeof startTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    startTransition.call(document, updateDocument);
+  } else {
+    updateDocument();
+  }
 
   if (persist) {
     try {
@@ -27,9 +36,6 @@ export function applySiteTheme(theme: string, persist = true): SiteTheme {
     }
   }
 
-  window.dispatchEvent(
-    new CustomEvent('site:themechange', { detail: { theme: selectedTheme } }),
-  );
 
   return selectedTheme;
 }

@@ -2977,3 +2977,9 @@ html[data-theme="grass"] .header {
     outline: 2px solid var(--hdr-focus);
     outline-offset: 3px;
 }
+
+/* Short, low-cost theme transition; avoid animating the entire document background. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation-duration: 160ms; }
+}

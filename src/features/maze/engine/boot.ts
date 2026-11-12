@@ -49,6 +49,12 @@ export function initOnload() {
         const saved = loadSave();
         if (saved) restoreGame(saved); else showMenu();
         requestAnimationFrame(frame);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                S.lastT = performance.now();
+                requestAnimationFrame(frame);
+            }
+        });
     };
 
     // React can mount after the browser's load event. Start immediately when the

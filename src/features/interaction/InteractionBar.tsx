@@ -119,8 +119,10 @@ export function InteractionBar() {
 
   useEffect(() => {
     void fetchStats(true);
-    const poll = window.setInterval(() => void fetchStats(false), 3000);
-    return () => window.clearInterval(poll);
+    const poll = window.setInterval(() => { if (!document.hidden) void fetchStats(false); }, 3000);
+    const onVisibility = () => { if (!document.hidden) void fetchStats(false); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { window.clearInterval(poll); document.removeEventListener('visibilitychange', onVisibility); };
   }, [fetchStats]);
 
   useEffect(() => () => {

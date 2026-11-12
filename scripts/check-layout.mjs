@@ -68,7 +68,7 @@ for (const retiredCss of ['style.css', 'header-scroll-scrim.css', 'maze-camera.c
   }
 }
 
-const activeHtmlPages = ['index.html', 'coin.html', 'holders.html', 'market.html'];
+const activeHtmlPages = ['index.html'];
 for (const page of activeHtmlPages) {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   if (/\bsrc=[\"'][^\"']*\/js\/[^\"']+\.js(?:[?#][^\"']*)?[\"']/i.test(html)) {
@@ -123,7 +123,7 @@ for (const file of activeFrontend) {
   }
 }
 
-const activeHtmlPagesForCss = ['index.html', 'coin.html', 'holders.html', 'market.html'];
+const activeHtmlPagesForCss = ['index.html'];
 for (const page of activeHtmlPagesForCss) {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   if (!html.includes('href="/src/styles/site.css"')) {
@@ -185,8 +185,8 @@ if (/document\.createElement|createElementNS|appendChild\(|initMazeBackground/.t
   process.exit(1);
 }
 const appSource = fs.readFileSync(path.join(root, 'src/app/App.tsx'), 'utf8');
-if (!/<MazeBackground\s*\/>/.test(appSource)) {
-  console.error('[layout] the persistent React App root must mount MazeBackground exactly once.');
+if (!/lazy\(\(\) => import\('..\/features\/maze\/MazePage'/.test(appSource)) {
+  console.error('[layout] MazePage must be loaded as a route-level lazy chunk.');
   process.exit(1);
 }
 for (const component of ['function CreateWizard', 'export function RoomsPanel', 'export function LivePanel', 'export function RoomPanel']) {
@@ -215,11 +215,9 @@ for (const route of ['/coin.html', '/holders.html', '/market.html']) {
   }
 }
 const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
-for (const page of ['coin.html', 'holders.html', 'market.html']) {
-  if (!viteConfig.includes(`'${page}'`)) {
-    console.error(`[layout] Vite production inputs are missing ${page}.`);
-    process.exit(1);
-  }
+if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
+  console.error('[layout] Vite production must emit one shared SPA document.');
+  process.exit(1);
 }
 
 console.log('[layout] React routes, migrated Maze UI and legacy-controller retirement verified.');

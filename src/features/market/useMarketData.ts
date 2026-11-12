@@ -52,8 +52,11 @@ export function useMarketData(refreshInterval = 30_000): MarketDataState {
     };
 
     void trackPageReadiness(load(), 'market-initial-data');
-    const timer = window.setInterval(() => void load(), refreshInterval);
+    const timer = window.setInterval(() => { if (!document.hidden) void load(); }, refreshInterval);
+    const onVisibility = () => { if (!document.hidden && active) void load(); };
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
       active = false;
       window.clearInterval(timer);
       requestController?.abort();

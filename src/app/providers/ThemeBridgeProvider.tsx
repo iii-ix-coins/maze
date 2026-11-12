@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, type ReactNode } from 'react';
-import { normalizeSiteTheme, type SiteTheme } from '../../features/theme/theme';
+import { applySiteTheme, normalizeSiteTheme, type SiteTheme } from '../../features/theme/theme';
 
 export const ThemeBridgeContext = createContext<SiteTheme>('grass');
 
@@ -14,13 +14,20 @@ export function ThemeBridgeProvider({ children }: { children: ReactNode }) {
       setTheme(normalizeSiteTheme(document.documentElement.dataset.theme));
     };
 
+    const onStorage = (event: StorageEvent) => {
+      if ((event.key === 'hollld-theme' || event.key === 'maze-theme') && event.newValue) {
+        applySiteTheme(event.newValue, false);
+      } else {
+        syncTheme();
+      }
+    };
     window.addEventListener('site:themechange', syncTheme);
-    window.addEventListener('storage', syncTheme);
+    window.addEventListener('storage', onStorage);
     syncTheme();
 
     return () => {
       window.removeEventListener('site:themechange', syncTheme);
-      window.removeEventListener('storage', syncTheme);
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 

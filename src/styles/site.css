@@ -1,13 +1,5 @@
 @import "./style.css";
 @import "./header-scroll-scrim.css";
 @import "./maze-camera.css";
-@import "./home-style.css";
-@import "./feature-pages.css";
-@import "../features/maze/styles/maze-site.css";
-@import "../features/maze/styles/maze-unify.css";
-@import "../features/maze/styles/maze-theme.css";
-@import "../features/maze/styles/create-game.css";
-@import "../features/maze/styles/lobby.css";
-@import "../features/maze/ui/react/maze-menu.css";
 @import "./page-loader.css";
 @import "./page-transition.css";

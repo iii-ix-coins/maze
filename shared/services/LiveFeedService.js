@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
+const { readJsonCached } = require('../state/readJsonCached');
 
 /* =========================================================
    DATABASE PATHS
@@ -42,6 +43,8 @@ const HOLDER_STATE_PATH = path.join(
 const DEFAULT_BUYER_LIMIT = 50;
 const DEFAULT_HOLDER_LIMIT = 100;
 const MAX_LIMIT = 100;
+const HOLDER_FEED_CACHE_MS = 3000;
+const holderFeedCache = new Map();
 
 /* =========================================================
    DATABASE INSTANCES
@@ -245,42 +248,8 @@ function parsePayments(
    * ========================================================= */
 
 function readHolderState() {
-    try {
-        if (
-            !fs.existsSync(
-                HOLDER_STATE_PATH
-            )
-        ) {
-            return null;
-        }
-
-        const raw =
-            fs.readFileSync(
-                HOLDER_STATE_PATH,
-                'utf8'
-            );
-
-        if (
-            !raw.trim()
-        ) {
-            return null;
-        }
-
-        const state =
-            JSON.parse(raw);
-
-        if (
-            !state ||
-            typeof state !== 'object'
-        ) {
-            return null;
-        }
-
-        return state;
-
-    } catch {
-        return null;
-    }
+    const state = readJsonCached(HOLDER_STATE_PATH);
+    return state && typeof state === 'object' && !Array.isArray(state) ? state : null;
 }
 
 /* =========================================================
@@ -390,6 +359,9 @@ function getTopHolders(
             DEFAULT_HOLDER_LIMIT
         );
 
+    const cached = holderFeedCache.get(limit);
+    if (cached && Date.now() - cached.createdAt < HOLDER_FEED_CACHE_MS) return cached.data;
+
     const db =
         getHolderDb();
 
@@ -445,7 +417,7 @@ function getTopHolders(
                 null
             );
 
-    return {
+    const payload = {
         type: 'top-holders',
 
         generatedAt:
@@ -508,6 +480,8 @@ function getTopHolders(
                 }
             )
     };
+    holderFeedCache.set(limit, { createdAt: Date.now(), data: payload });
+    return payload;
 }
 
 /* =========================================================

@@ -17,6 +17,8 @@ const TEMP_FILE = path.join(
 
 const SCHEMA_VERSION = 1;
 
+let holderStateCache = null;
+
 function ensureStateDirectory() {
     fs.mkdirSync(
         STATE_DIR,
@@ -49,18 +51,16 @@ function setHolderState(data) {
         TEMP_FILE,
         STATE_FILE
     );
+    holderStateCache = null;
 }
 
 function getHolderState() {
     try {
-        if (!fs.existsSync(STATE_FILE)) {
-            return null;
+        const stat = fs.statSync(STATE_FILE);
+        if (holderStateCache && holderStateCache.mtimeMs === stat.mtimeMs && holderStateCache.size === stat.size) {
+            return holderStateCache.data;
         }
-
-        const raw = fs.readFileSync(
-            STATE_FILE,
-            'utf8'
-        );
+        const raw = fs.readFileSync(STATE_FILE, 'utf8');
 
         if (!raw.trim()) {
             return null;
@@ -75,8 +75,10 @@ function getHolderState() {
             return null;
         }
 
+        holderStateCache = { mtimeMs: stat.mtimeMs, size: stat.size, data: state };
         return state;
     } catch (error) {
+        holderStateCache = null;
         return null;
     }
 }
@@ -90,6 +92,7 @@ function getHolderStateJson() {
 }
 
 function clearHolderState() {
+    holderStateCache = null;
     try {
         if (fs.existsSync(STATE_FILE)) {
             fs.unlinkSync(STATE_FILE);

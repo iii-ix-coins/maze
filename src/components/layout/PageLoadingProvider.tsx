@@ -14,7 +14,6 @@ import {
     LOADER_SHOW_EVENT,
     playPageEnter,
 } from '../../app/navigation';
-import { waitForPageReadiness } from '../../app/page-readiness';
 
 type PageLoadingContextValue = {
     finishPageLoading: () => void;
@@ -35,14 +34,12 @@ export function PageLoadingProvider({
     const finishPageLoading = useCallback(() => {
         if (finishingRef.current) return;
         finishingRef.current = true;
-        void (async () => {
-            await waitForPageReadiness();
-            // Start the enter animation before removing the initial loading class.
-            void playPageEnter();
-            setLoading(false);
-            document.body.classList.remove('page-loading');
-            document.body.classList.add('page-loaded');
-        })();
+        // Reveal the React page as soon as its critical bootstrap has completed.
+        // Fonts, images and non-critical API data settle progressively in the background.
+        void playPageEnter();
+        setLoading(false);
+        document.body.classList.remove('page-loading');
+        document.body.classList.add('page-loaded');
     }, []);
 
     // Loader shown by soft page transitions, on top of the persistent background.

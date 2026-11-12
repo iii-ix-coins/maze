@@ -1,11 +1,12 @@
-import type { ReactNode } from 'react';
-import { HomePage } from '../features/home/HomePage';
-import { CoinPage } from '../features/coin/CoinPage';
-import { HoldersPage } from '../features/holders/HoldersPage';
-import { MarketPage } from '../features/market/MarketPage';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
 import { usePathname } from './navigation';
+
+const HomePage = lazy(() => import('../features/home/HomePage').then((module) => ({ default: module.HomePage })));
+const CoinPage = lazy(() => import('../features/coin/CoinPage').then((module) => ({ default: module.CoinPage })));
+const HoldersPage = lazy(() => import('../features/holders/HoldersPage').then((module) => ({ default: module.HoldersPage })));
+const MarketPage = lazy(() => import('../features/market/MarketPage').then((module) => ({ default: module.MarketPage })));
 
 /** One React router dispatches all active site features without touching API routes. */
 export function AppRouter() {
@@ -21,7 +22,7 @@ export function AppRouter() {
   return (
     <>
       <SiteChromeHosts mazePage={pathname === '/maze.html'} />
-      {page}
+      <Suspense fallback={<div className="page-loading" role="status">Loading page…</div>}>{page}</Suspense>
     </>
   );
 }

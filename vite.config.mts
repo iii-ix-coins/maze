@@ -55,9 +55,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           main: path.resolve(root, 'index.html'),
-          coin: path.resolve(root, 'coin.html'),
-          holders: path.resolve(root, 'holders.html'),
-          market: path.resolve(root, 'market.html'),
         },
       },
       outDir: path.resolve(root, 'dist/site'),
@@ -65,7 +62,7 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       sourcemap: false,
       target: 'es2022',
-      cssTarget: ['safari14.1', 'ios14.5', 'chrome90', 'firefox90', 'edge90'],
+      cssTarget: ['safari16.4', 'ios16.4', 'chrome111', 'firefox113', 'edge111'],
       assetsDir: 'assets',
       // Keep classic compatibility scripts as files; data: URLs can be blocked by
       // stricter browser policies and do not preserve the previous script loading model.
