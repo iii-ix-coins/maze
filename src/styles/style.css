@@ -1386,34 +1386,6 @@
     }
 
     @media (max-width: 400px) {
-        .nav-inner {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            row-gap: 8px;
-        }
-
-        .nav-brand {
-            grid-column: 1;
-            grid-row: 1;
-        }
-
-        .nav-mobile-toggle {
-            grid-column: 2;
-            grid-row: 1;
-        }
-
-        /* گروه دکمه‌های کنترلی در ردیف دوم */
-        .nav-actions {
-            grid-column: 1 / -1;
-            grid-row: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-        }
-
         .interaction-bar {
             gap: 2px;
             padding: 4px;
@@ -3094,5 +3066,63 @@ html[data-theme="grass"] .header {
     ::view-transition-old(root),
     ::view-transition-new(root) {
         animation-duration: 160ms;
+    }
+}
+
+
+/* =========================================
+   EXTRA COMPACT HEADER — screens <= 400px
+   ========================================= */
+
+@media (max-width: 400px) {
+
+    /* Two-row header layout */
+    .nav .nav-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        justify-items: center;
+        column-gap: 6px;
+        row-gap: 8px;
+    }
+
+    /* Row 1 — Logo */
+    .nav .nav-brand {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+        min-width: 0;
+    }
+
+    /* Row 1 — Hamburger */
+    .nav .nav-mobile-toggle {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+    }
+
+    /* Row 2 — Game view controls */
+    .nav .nav-inner>.game-view-toggle {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: center;
+        min-width: 0;
+    }
+
+    /* Row 2 — Theme controls */
+    .nav .nav-inner>.theme-toggle:not(.game-view-toggle) {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: center;
+        min-width: 0;
+    }
+
+    /* Navigation panel — below the compact header */
+    .nav .nav-inner>.nav-content {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        width: 100%;
+        min-width: 0;
     }
 }
