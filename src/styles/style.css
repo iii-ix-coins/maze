@@ -1386,6 +1386,34 @@
     }
 
     @media (max-width: 400px) {
+        .nav-inner {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            row-gap: 8px;
+        }
+
+        .nav-brand {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .nav-mobile-toggle {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        /* گروه دکمه‌های کنترلی در ردیف دوم */
+        .nav-actions {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
         .interaction-bar {
             gap: 2px;
             padding: 4px;
