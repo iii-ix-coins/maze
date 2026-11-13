@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 
-const WalletRuntime = lazy(() => import('./WalletConnectRuntime').then((module) => ({ default: module.WalletConnectRuntime })));
+const WalletRuntime = lazy(() => import('./WalletConnectRuntime').then((module) => ({ default: module.WalletRuntime })));
 
 export function WalletConnectButton() {
   const [requested, setRequested] = useState(false);
