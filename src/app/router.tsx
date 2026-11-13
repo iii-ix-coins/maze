@@ -22,7 +22,9 @@ export function AppRouter() {
   return (
     <>
       <SiteChromeHosts mazePage={pathname === '/maze.html'} />
-      <Suspense fallback={<div className="page-loading" role="status">Loading page…</div>}>{page}</Suspense>
+      <Suspense fallback={null}>
+        {page}
+      </Suspense>
     </>
   );
 }
