@@ -2146,12 +2146,6 @@ html[data-theme="grass"] .nav {
 }
 
 
-.nav-brand-logo {
-    display: none;
-    height: 115%;
-    width: auto;
-}
-
 /* Theme -> logo:  grass = green (default), dark = white, light = black */
 .nav-brand-logo--green {
     display: block;
@@ -2747,6 +2741,71 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
+
+/* Compact mobile header */
+@media (max-width: 600px) {
+    .nav {
+        --nav-control-height: 30px;
+        --nav-fs: clamp(11px, 3vw, 13px);
+    }
+
+    .nav-inner {
+        gap: clamp(4px, 1.5vw, 8px);
+    }
+
+    /* Prevent the logo from collapsing */
+    .nav-brand {
+        flex: 0 0 auto;
+    }
+
+    .nav-brand-mark {
+        height: clamp(26px, 7vw, 32px);
+    }
+
+    .nav-brand-logo {
+        height: 100%;
+        max-height: 32px;
+        max-width: clamp(70px, 22vw, 110px);
+    }
+
+    /* Game and theme controls */
+    .theme-toggle {
+        --tt-size: clamp(21px, 6vw, 25px);
+        --tt-pad: 2px;
+    }
+
+    .theme-toggle__icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Hamburger */
+    .nav-mobile-toggle {
+        width: 30px;
+        height: 30px;
+        padding: 6px;
+        gap: 4px;
+    }
+
+    /* Navigation panel */
+    .nav-link {
+        min-height: 32px;
+        height: 32px;
+        font-size: var(--nav-fs);
+    }
+
+    .nav-dropdown .nav-dropdown-link {
+        min-height: 34px;
+    }
+
+    .nav-wallet-button {
+        min-height: 36px;
+        height: 36px;
+        font-size: var(--nav-fs);
+    }
+}
+
+
 /* ==========================================================================
    HEADER METRICS & MINT  ·  themed  —  single source of truth
    --------------------------------------------------------------------------
@@ -3003,6 +3062,9 @@ html[data-theme="grass"] .header {
 
 /* Short, low-cost theme transition; avoid animating the entire document background. */
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) { animation-duration: 160ms; }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 160ms;
+    }
 }
