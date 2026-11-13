@@ -2560,31 +2560,49 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* Desktop (>=821px): links, theme toggle and wallet share ONE row.
-   .nav-content / .nav-actions become layout-transparent so their children
-   are laid out directly by .nav-inner:  [logo links ........ theme wallet]
-   The .nav prefix beats the plain .nav-actions rule in maze-camera.css. */
+/* Desktop (>=821px): keep real flex wrappers in the layout tree.
+   This avoids display:contents flex quirks in Safari/WebKit and preserves
+   consistent layout across Safari, Chromium and Firefox. */
 @media (min-width: 821px) {
     .nav-brand {
+        flex: 0 0 auto;
         margin-inline-end: 6px;
     }
 
-    .nav .nav-content,
-    .nav .nav-actions {
-        display: contents;
+    .nav .nav-content {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-width: 0;
     }
 
     .nav .nav-links {
-        margin-inline-end: auto;
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
+        min-width: 0;
+        gap: 10px;
     }
 
+    .nav .nav-actions {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        margin-inline-start: auto;
+    }
 
     .nav .theme-toggle:not(.game-view-toggle) {
-        order: 2;
+        flex: 0 0 auto;
     }
 
     .nav .nav-wallet-button {
-        order: 3;
+        flex: 0 0 auto;
+    }
+
+    .nav .nav-mobile-toggle {
+        display: none;
     }
 }
 
@@ -2614,6 +2632,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     .nav-content {
         position: absolute;
+        z-index: 1001;
         top: calc(100% + 9px);
         left: 0;
         right: 0;
@@ -2661,6 +2680,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-menu {
+        position: relative;
         width: 100%;
     }
 
@@ -2688,7 +2708,10 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-actions {
+        display: flex;
+        flex: 0 0 auto;
         width: 100%;
+        margin-inline-start: 0;
     }
 
     .nav-wallet-button {

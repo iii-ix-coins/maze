@@ -1,0 +1,277 @@
+/* Shared feature primitives used on Home and feature routes.
+   Loaded with the site shell so Home is styled on direct entry and refresh.
+   Feature-specific page rules remain in the lazy feature-pages.css chunk. */
+/* React-owned Token, Market and Holders page presentation. */
+@layer pages {
+  .feature-page-shell {
+    width: min(1180px, calc(100% - 40px));
+    margin: clamp(24px, 4vw, 54px) auto 96px;
+    display: grid;
+    gap: clamp(20px, 3vw, 30px);
+  }
+
+  .site-home-content {
+    padding-top: 26px;
+  }
+
+  .feature-page-title {
+    display: grid;
+    gap: 8px;
+    padding: 8px 2px 4px;
+  }
+
+  .feature-page-title h1 {
+    margin: 0;
+    color: var(--text, #f5f7f8);
+    font-family: var(--font-display, Montserrat, sans-serif);
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+
+  .feature-page-title p,
+  .feature-page-footnote {
+    margin: 0;
+    color: var(--text-mute, #9ba8aa);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .feature-section {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .feature-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-inline: 2px;
+  }
+
+  .feature-section-heading>div {
+    display: grid;
+    gap: 5px;
+  }
+
+  .feature-section-heading h2 {
+    margin: 0;
+    color: var(--text, #f5f7f8);
+    font-family: var(--font-display, Montserrat, sans-serif);
+    font-size: clamp(1.35rem, 2.6vw, 1.8rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+  }
+
+  .eyebrow {
+    color: var(--mint, #78edc0);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .feature-refresh-state {
+    color: var(--text-mute, #9ba8aa);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .feature-status {
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--stroke, #334047);
+    border-radius: 12px;
+    color: var(--text-mute, #9ba8aa);
+    font-size: 0.82rem;
+  }
+
+  .feature-status--error {
+    color: var(--coral, #ff8c80);
+  }
+
+  /* Holders list */
+  .holders-box {
+    min-width: 0;
+    display: grid;
+    gap: 14px;
+    padding: clamp(16px, 2.6vw, 28px);
+    border: 1px solid var(--stroke, #334047);
+    border-radius: var(--r-xl, 22px);
+    background: var(--panel-bg, rgba(16, 28, 30, 0.78));
+    box-shadow: var(--shadow-2, 0 16px 50px rgba(0, 0, 0, .2));
+    overflow: hidden;
+  }
+
+  .holders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .holders-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--text, #f5f7f8);
+    font-size: 1.12rem;
+    font-weight: 750;
+  }
+
+  .holders-count {
+    color: var(--mint, #78edc0);
+    font-family: var(--font-mono, monospace);
+    font-size: .78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .holders-content {
+    min-width: 0;
+  }
+
+  .holders-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .feature-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--mint, #78edc0);
+    font-size: .73rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .feature-text-link span {
+    transition: transform .2s ease;
+  }
+
+  .feature-text-link:hover span {
+    transform: translateX(3px);
+  }
+
+  .holders-columns,
+  .holders-row {
+    display: grid;
+    grid-template-columns: 54px minmax(150px, 1.7fr) minmax(90px, 1fr) minmax(58px, .6fr) minmax(88px, .85fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .holders-columns {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 12px 14px;
+    color: var(--text-mute, #9ba8aa);
+    background: var(--panel-bg, #10201c);
+    border-bottom: 1px solid var(--stroke, #334047);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .holders-list {
+    display: grid;
+    max-height: 690px;
+    overflow: auto;
+    scrollbar-color: var(--ink-600, #526067) transparent;
+  }
+
+  .holder-row {
+    --heat: .2;
+    --hue: 160;
+    position: relative;
+    min-height: 54px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--stroke, rgba(51, 64, 71, .58));
+    border-bottom: 1px solid color-mix(in oklch, var(--stroke, #334047), transparent 42%);
+    color: var(--text, #f5f7f8);
+    font-size: .8rem;
+    font-variant-numeric: tabular-nums;
+    transition: background .22s ease;
+  }
+
+  .holder-row::before {
+    content: "";
+    position: absolute;
+    inset: 5px auto 5px 0;
+    width: 3px;
+    border-radius: 99px;
+    background: hsl(var(--hue) 75% 62% / calc(.12 + var(--heat) * .55));
+  }
+
+  .holder-row:hover {
+    background: oklch(1 0 0 / .035);
+  }
+
+  .holder-rank {
+    color: var(--text-mute, #9ba8aa);
+    font-weight: 750;
+  }
+
+  .holder-rank-value {
+    display: inline-grid;
+    min-width: 28px;
+    place-items: center;
+  }
+
+  .holder-wallet {
+    min-width: 0;
+  }
+
+  .wallet-address {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--mint, #78edc0);
+    font-family: var(--font-mono, monospace);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .holder-amount-value {
+    color: var(--text, #f5f7f8);
+    font-weight: 700;
+  }
+
+  .holder-purchases-value {
+    color: var(--text-soft, #c2cdcc);
+  }
+
+  .holder-last-Purchases-value {
+    color: var(--text-mute, #9ba8aa);
+    font-size: .72rem;
+    white-space: nowrap;
+  }
+
+  .holders-status {
+    display: grid;
+    min-height: 110px;
+    place-items: center;
+    color: var(--text-mute, #9ba8aa);
+    font-size: .85rem;
+    text-align: center;
+  }
+
+  .holders-status-error {
+    color: var(--coral, #ff8c80);
+  }
+
+  .holders-box--page .holders-list {
+    max-height: min(72vh, 900px);
+  }
+
+}
