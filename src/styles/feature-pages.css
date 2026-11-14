@@ -2,13 +2,13 @@
 @layer pages {
   .feature-page-shell {
     width: min(1180px, calc(100% - 40px));
-    margin: clamp(24px, 4vw, 54px) auto 96px;
+    margin: clamp(8px, 1.5vw, 16px) auto 96px;
     display: grid;
     gap: clamp(20px, 3vw, 30px);
   }
 
   .site-home-content {
-    padding-top: 26px;
+    padding-top: 8px;
   }
 
   .feature-page-title {
