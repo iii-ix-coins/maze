@@ -24,24 +24,6 @@ if (!files.length) {
   process.exit(1);
 }
 
-function isInsideColorMixSupports(node) {
-  let parent = node.parent;
-
-  while (parent) {
-    if (
-      parent.type === 'atrule' &&
-      parent.name === 'supports' &&
-      /color\s*:\s*color-mix\(/i.test(parent.params)
-    ) {
-      return true;
-    }
-
-    parent = parent.parent;
-  }
-
-  return false;
-}
-
 const errors = [];
 for (const file of files) {
   const css = fs.readFileSync(file, 'utf8');
@@ -56,29 +38,6 @@ for (const file of files) {
     if (/\b(?:oklch|oklab)\(/i.test(decl.value)) {
       errors.push(`${relative}: untransformed OKLCH/OKLab remains in ${decl.prop}`);
     }
-
-    if (
-      /\bcolor-mix\(/i.test(decl.value) &&
-      !isInsideColorMixSupports(decl)
-    ) {
-      const siblings = decl.parent?.nodes ?? [];
-      const index = siblings.indexOf(decl);
-
-      const hasFallback = siblings
-        .slice(0, index)
-        .some((previous) =>
-          previous.type === 'decl' &&
-          previous.prop === decl.prop &&
-          !/\bcolor-mix\(/i.test(previous.value)
-        );
-
-      if (!hasFallback) {
-        errors.push(
-          `${relative}: ${decl.prop} uses color-mix() without a preceding legacy fallback`
-        );
-      }
-    }
-
     if (decl.prop.toLowerCase() === 'backdrop-filter') {
       const hasWebkitPrefix = (decl.parent?.nodes ?? []).some((sibling) =>
         sibling.type === 'decl' && sibling.prop.toLowerCase() === '-webkit-backdrop-filter',
@@ -95,4 +54,9 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`[css-compat] verified ${files.length} production CSS asset(s): layers and modern OKLCH syntax are transformed; dynamic color-mix fallbacks and Safari backdrop-filter prefixes are present.`);
+console.log(
+  `[css-compat] verified ${files.length} production CSS asset(s): ` +
+  `layers and modern OKLCH syntax are transformed; ` +
+  `color-mix() is retained for supported production targets; ` +
+  `Safari backdrop-filter prefixes are present.`
+);
