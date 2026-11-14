@@ -2440,8 +2440,8 @@ html[data-theme="light"] .nav-brand-logo--black {
    ========================================================= */
 
 .theme-toggle:not(.game-view-toggle) {
-    --tt-size: clamp(24px, 2vw, 28px);
-    --tt-icon-size: clamp(13px, 1.1vw, 16px);
+    --tt-size: 28px;
+    --tt-icon-size: 16px;
     --tt-pad: 4px;
     --theme-index: 0;
 
@@ -3103,11 +3103,11 @@ html[data-theme="light"] .nav-brand-logo--black {
         max-width: clamp(70px, 22vw, 110px);
     }
 
-    /* Game and theme controls */
-    .theme-toggle {
-        --tt-size: clamp(20px, 6vw, 25px);
-        --tt-icon-size: clamp(12px, 3.5vw, 14px);
-        --tt-pad: 2px;
+    /* Fixed Theme Selector — Desktop & Mobile */
+    .theme-toggle:not(.game-view-toggle) {
+        --tt-size: 28px;
+        --tt-icon-size: 16px;
+        --tt-pad: 4px;
     }
 
     /* Hamburger */
