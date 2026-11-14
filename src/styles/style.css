@@ -831,7 +831,7 @@
     }
 
     /* compact state (desktop): one slim row — nav + ticker */
-    @media (min-width: 721px) {
+    @media (min-width: 1024px) {
         html[data-scrolled="true"] .header {
             grid-template-columns: auto minmax(0, 1fr);
             grid-template-areas: "nav metrics";
