@@ -2434,8 +2434,9 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 /* —— 7 · THEME TOGGLE (grass | dark | light) ——————————————————————————— */
 .theme-toggle {
-    --tt-size: 28px;
-    --tt-pad: 3px;
+    --tt-size: clamp(22px, 2vw, 28px);
+    --tt-icon-size: clamp(12px, 1.1vw, 16px);
+    --tt-pad: clamp(2px, 0.22vw, 3px);
     --theme-index: 0;
 
     position: relative;
@@ -2492,8 +2493,8 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 .theme-toggle__option img {
-    width: 16px;
-    height: 16px;
+    width: var(--tt-icon-size);
+    height: var(--tt-icon-size);
     display: block;
     object-fit: contain;
     pointer-events: none;
@@ -2548,6 +2549,94 @@ html[data-theme="light"] .nav-brand-logo--black {
     transform: rotate(360deg);
 }
 
+/* ==========================================================================
+   GAME VIEW SWITCHER — RESPONSIVE SEGMENTED CONTROL
+   Single geometry across desktop, tablet and mobile.
+   ========================================================================== */
+
+.nav .game-view-toggle {
+    --gvt-icon-size: clamp(11px, 1.1vw, 15px);
+
+    grid-area: game;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+
+    width: min(250px, 100%);
+    max-width: 250px;
+    min-width: 0;
+
+    height: auto;
+    min-height: 26px;
+    max-height: 36px;
+    aspect-ratio: 7 / 1;
+
+    padding: 3px;
+    gap: 3px;
+
+    justify-self: start;
+
+    border: 1px solid var(--nav-border);
+    border-radius: 999px;
+    background: var(--nav-panel);
+}
+
+.nav .game-view-toggle .theme-toggle__thumb {
+    display: none;
+}
+
+.nav .game-view-toggle .theme-toggle__option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+
+    padding: 0 4px;
+    gap: 4px;
+
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+
+    color: var(--nav-muted);
+}
+
+.nav .game-view-toggle .theme-toggle__option.is-active {
+    background: var(--nav-active-bg);
+    box-shadow: var(--nav-control-shadow);
+    color: var(--nav-active-text);
+}
+
+.nav .game-view-toggle .theme-toggle__icon {
+    display: block;
+
+    width: var(--gvt-icon-size);
+    height: var(--gvt-icon-size);
+    flex: 0 0 var(--gvt-icon-size);
+
+    pointer-events: none;
+    user-select: none;
+
+    transform: rotate(0deg);
+
+    transition:
+        transform 320ms cubic-bezier(0.2, 1.1, 0.4, 1.2),
+        color 320ms ease-in-out;
+}
+
+.game-view-toggle__label {
+    display: inline;
+
+    font-size: clamp(9px, 0.85vw, 11px);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
 /* —— 8 · RESPONSIVE ———————————————————————————————————————————————————— */
 
 /* Compact desktop (822–1050px): tighter spacing, font keeps scaling via --nav-fs */
@@ -2557,27 +2646,58 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* Desktop (>=821px): keep real flex wrappers in the layout tree.
-   This avoids display:contents flex quirks in Safari/WebKit and preserves
-   consistent layout across Safari, Chromium and Firefox. */
+/* ==========================================================================
+   RESPONSIVE NAVIGATION LAYOUT
+   Desktop: brand + links + theme on row 1, game selector on row 2.
+   Mobile: brand + theme + menu on row 1, game selector on row 2.
+   ========================================================================== */
+
+/* DESKTOP — 821px and above */
+
 @media (min-width: 821px) {
+
+    .nav-inner {
+        display: grid;
+
+        grid-template-columns: auto minmax(0, 1fr) auto;
+
+        grid-template-areas:
+            "brand content theme"
+            "game . .";
+
+        align-items: center;
+
+        column-gap: 16px;
+        row-gap: 6px;
+
+        width: min(1440px, 100%);
+    }
+
     .nav-brand {
+        grid-area: brand;
         flex: 0 0 auto;
-        margin-inline-end: 6px;
+        justify-self: start;
+        margin-inline-end: 0;
     }
 
     .nav .nav-content {
+        grid-area: content;
+
         display: flex;
         flex: 1 1 auto;
+
         align-items: center;
         justify-content: space-between;
+
         gap: 16px;
+        width: 100%;
         min-width: 0;
     }
 
     .nav .nav-links {
         display: flex;
         flex: 1 1 auto;
+
         align-items: center;
         min-width: 0;
         gap: 10px;
@@ -2586,12 +2706,15 @@ html[data-theme="light"] .nav-brand-logo--black {
     .nav .nav-actions {
         display: flex;
         flex: 0 0 auto;
+
         align-items: center;
         margin-inline-start: auto;
     }
 
     .nav .theme-toggle:not(.game-view-toggle) {
+        grid-area: theme;
         flex: 0 0 auto;
+        justify-self: end;
     }
 
     .nav .nav-wallet-button {
@@ -2603,27 +2726,38 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* Tablet + mobile (<=820px): [logo ........ theme hamburger] + dropdown panel */
+
+/* TABLET + MOBILE — 820px and below */
+
 @media (max-width: 820px) {
+
     .nav {
         --nav-fs: 15px;
     }
 
     .nav-inner {
         display: grid;
+
         grid-template-columns: minmax(0, 1fr) auto auto;
+
         grid-template-areas:
             "brand theme menu"
             "game game game";
+
         align-items: center;
+
         column-gap: 10px;
-        row-gap: 10px;
+        row-gap: 8px;
     }
 
     .nav-brand {
         grid-area: brand;
         justify-self: start;
         min-width: 0;
+    }
+
+    .nav-brand-mark {
+        height: var(--nav-control-height);
     }
 
     .nav .theme-toggle:not(.game-view-toggle) {
@@ -2634,96 +2768,46 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     .nav-mobile-toggle {
         grid-area: menu;
-        justify-self: end;
-    }
 
-    /* Full-width segmented game navigation */
-    .nav .game-view-toggle {
-        grid-area: game;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        align-items: center;
-        width: 100%;
-        min-width: 0;
-        height: auto;
-        padding: 4px;
-        gap: 4px;
-        border: 1px solid var(--nav-border);
-        border-radius: 999px;
-        background: var(--nav-panel);
-    }
-
-    .nav .game-view-toggle .theme-toggle__thumb {
-        display: none;
-    }
-
-    .nav .game-view-toggle .theme-toggle__option {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        width: 100%;
-        min-width: 0;
-        height: 36px;
-        padding: 0 8px;
-        border-radius: 999px;
-        background: transparent;
-        box-shadow: none;
-        color: var(--nav-muted);
-    }
-
-    .nav .game-view-toggle .theme-toggle__option.is-active {
-        background: var(--nav-active-bg);
-        box-shadow: var(--nav-control-shadow);
-        color: var(--nav-active-text);
-    }
-
-    .nav .game-view-toggle .theme-toggle__icon {
-        width: 16px;
-        height: 16px;
-        flex: 0 0 16px;
-    }
-
-    .game-view-toggle__label {
-        display: inline;
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    .nav-brand-mark {
-        height: var(--nav-control-height);
-    }
-
-    .nav .theme-toggle:not(.game-view-toggle) {
-        grid-area: theme;
-        margin-left: 0;
-    }
-
-    .nav-mobile-toggle {
         display: flex;
         flex-shrink: 0;
+
+        justify-self: end;
         margin-left: 0;
     }
+
+    /* Game selector remains left-aligned and compact */
+    .nav .game-view-toggle {
+        justify-self: start;
+    }
+
+    /* Mobile dropdown */
 
     .nav-content {
         position: absolute;
         z-index: 1001;
+
         top: calc(100% + 9px);
         left: 0;
         right: 0;
 
         display: none;
+
         align-items: stretch;
         flex-direction: column;
+
         gap: 9px;
+
         border-radius: var(--r-lg);
-        padding: 9px 9px;
+        padding: 9px;
 
         background: var(--nav-panel);
-        box-shadow: 0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
-        box-shadow: 0 18px 35px color-mix(in srgb, var(--nav-shadow), transparent);
+
+        box-shadow:
+            0 18px 35px rgba(0, 0, 0, 0.16);
+
+        box-shadow:
+            0 18px 35px color-mix(in srgb, var(--nav-shadow), transparent);
     }
 
     .nav-content.is-mobile-open {
@@ -2733,18 +2817,24 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     .nav-links {
         flex: none;
+
         width: 100%;
+
         align-items: stretch;
         flex-direction: column;
+
         gap: 6px;
     }
 
     .nav-link {
         width: 100%;
+
         min-height: 35px;
+
         justify-content: center;
         justify-items: center;
-        padding: 0px 9px;
+
+        padding: 0 9px;
     }
 
     .nav-link::before {
@@ -2767,19 +2857,23 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     .nav-dropdown {
         position: static;
+
         min-width: 0;
         margin-top: 5px;
         padding: 5px;
 
         border: 0;
         border-radius: 10px;
+
         background: var(--nav-sub-bg);
         box-shadow: none;
+
         animation: none;
     }
 
     .nav-dropdown .nav-dropdown-link {
         min-height: 46px;
+
         padding-left: 25px;
         padding-right: 14px;
     }
@@ -2787,6 +2881,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     .nav-actions {
         display: flex;
         flex: 0 0 auto;
+
         width: 100%;
         margin-inline-start: 0;
     }
@@ -2797,15 +2892,19 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
+
+/* EXTRA SMALL SCREENS */
+
 @media (max-width: 420px) {
+
     .nav-inner {
-        gap: 8px;
+        column-gap: 8px;
     }
 
-    .theme-toggle {
-        --tt-size: 25px;
-        --tt-pad: 3px;
+    .nav .game-view-toggle {
+        --gvt-icon-size: 11px;
     }
+
 }
 
 /* Reduced motion */
@@ -2853,13 +2952,9 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     /* Game and theme controls */
     .theme-toggle {
-        --tt-size: clamp(21px, 6vw, 25px);
+        --tt-size: clamp(20px, 6vw, 25px);
+        --tt-icon-size: clamp(12px, 3.5vw, 14px);
         --tt-pad: 2px;
-    }
-
-    .theme-toggle__icon {
-        width: 14px;
-        height: 14px;
     }
 
     /* Hamburger */
