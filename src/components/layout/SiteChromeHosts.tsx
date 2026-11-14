@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { InteractionBar } from '../../features/interaction/InteractionBar';
+import { HomeHeroSlider } from '../home/HomeHeroSlider';
 
 /**
  * React owns the original four body-level site regions. IDs, order and styling
@@ -46,12 +47,7 @@ export function SiteChromeHosts({
       <div id="site-header"><SiteNavigation /></div>
       {homePage && (
         <div id="site-brand-header" className="site-brand-header-host">
-          <div id="hold-info" className="brand-header">
-            <p className="brand-description">
-              Start Maze Mining<br />
-              <span>Create or join maze mining rooms</span>
-            </p>
-          </div>
+          <HomeHeroSlider />
         </div>
       )}
 
