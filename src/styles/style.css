@@ -537,55 +537,15 @@
     }
 
     /* =========================================================
-   MAZE — GLOBAL PAGE ENTRANCE SYSTEM
-   Initial entry + Soft navigation
-   ========================================================= */
-
-    @keyframes maze-page-enter {
-        from {
-            opacity: 0;
-            translate: 0 20px;
-            filter: blur(5px);
-        }
-
-        to {
-            opacity: 1;
-            translate: 0 0;
-            filter: blur(0);
-        }
-    }
-
-    /* Only active page content */
-
-    body.page-loaded .route-page {
-        animation:
-            maze-page-enter 750ms cubic-bezier(.16, 1, .3, 1) both;
-
-        min-width: 0;
-        width: 100%;
-    }
-
-    /* Accessibility */
-
-    @media (prefers-reduced-motion: reduce) {
-        body.page-loaded .route-page {
-            animation: none !important;
-        }
-    }
-
-
-    /* =========================================================
-   MAZE — UNIFIED ENTRANCE SYSTEM
-   Initial Site Entry + Soft Route Navigation
-   ========================================================= */
+       MAZE — UNIFIED ENTRANCE SYSTEM
+       Initial chrome entrance + soft route navigation
+       ========================================================= */
 
     :root {
-        --maze-enter-duration: 750ms;
+        --maze-enter-duration: 760ms;
         --maze-enter-easing: cubic-bezier(.16, 1, .3, 1);
         --maze-enter-distance: 20px;
     }
-
-    /* One unified entrance animation */
 
     @keyframes maze-unified-enter {
         from {
@@ -601,52 +561,38 @@
         }
     }
 
-    /* ---------------------------------------------------------
-   INITIAL ENTRY — persistent site components
-   These elements animate only on their first mount.
-   --------------------------------------------------------- */
+    /* Persistent chrome: each region animates only on its first appearance.
+       SiteChromeHosts marks each region as entered after its animation ends. */
 
-    /* Header / Logo / Navigation / Theme */
-
-    body.page-loaded #site-header {
-        animation:
-            maze-unified-enter 800ms var(--maze-enter-easing) 0ms both;
+    body.page-loaded:not(.maze-header-entered) #site-header {
+        animation: maze-unified-enter 800ms var(--maze-enter-easing) 0ms backwards;
     }
 
-    /* Interaction bar */
-
-    body.page-loaded .site-interaction-bar-host {
-        animation:
-            maze-unified-enter 800ms var(--maze-enter-easing) 180ms both;
+    body.page-loaded:not(.maze-brand-entered) #site-brand-header {
+        animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
     }
 
-    /* ---------------------------------------------------------
-   ROUTE ENTRY — active page content
-   Runs on initial entry and every soft navigation.
-   --------------------------------------------------------- */
+    body.page-loaded:not(.maze-interaction-entered) #site-interaction-bar {
+        animation: maze-unified-enter 800ms var(--maze-enter-easing) 140ms backwards;
+    }
+
+    /* Route content: a fresh keyed .route-page enters on every soft navigation. */
 
     body.page-loaded .route-page {
         width: 100%;
         min-width: 0;
-
-        animation:
-            maze-unified-enter var(--maze-enter-duration) var(--maze-enter-easing) 220ms both;
+        animation: maze-unified-enter var(--maze-enter-duration) var(--maze-enter-easing) 180ms backwards;
     }
 
-    /* ---------------------------------------------------------
-   ACCESSIBILITY
-   --------------------------------------------------------- */
-
     @media (prefers-reduced-motion: reduce) {
-
         body.page-loaded #site-header,
-        body.page-loaded .site-interaction-bar-host,
+        body.page-loaded #site-brand-header,
+        body.page-loaded #site-interaction-bar,
         body.page-loaded .route-page {
             animation: none !important;
             translate: none !important;
             filter: none !important;
         }
-
     }
 
     /* —— 4.5 View-transition timing —— */
