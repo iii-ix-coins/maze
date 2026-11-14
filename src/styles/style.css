@@ -2433,34 +2433,205 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 /* —— 7 · THEME TOGGLE (grass | dark | light) ——————————————————————————— */
-.theme-toggle {
-    --tt-size: clamp(22px, 2vw, 28px);
-    --tt-icon-size: clamp(12px, 1.1vw, 16px);
+
+/* =========================================================
+   MAZE — NEON THEME SELECTOR
+   Grass / Dark / Light
+   ========================================================= */
+
+.theme-toggle:not(.game-view-toggle) {
+    --tt-size: clamp(24px, 2vw, 28px);
+    --tt-icon-size: clamp(13px, 1.1vw, 16px);
     --tt-pad: 4px;
     --theme-index: 0;
 
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
-    height: calc( var(--tt-size) + var(--tt-pad) + var(--tt-pad) );
-    padding: var(--tt-pad-2px);
-    border: 0;
+
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+
+    height: calc(var(--tt-size) + 2 * var(--tt-pad) + 2px);
+
+    padding: var(--tt-pad);
+    box-sizing: border-box;
+
+    border: 1px solid var(--nav-border);
     border-radius: 999px;
-    background: var(--page-max);
+
+    background: var(--nav-panel);
+
+    box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, .28),
+        0 2px 8px rgba(0, 0, 0, .18);
+
+    isolation: isolate;
+
+    transition:
+        border-color 250ms ease,
+        box-shadow 250ms ease,
+        background 250ms ease;
 }
 
-.theme-toggle__thumb {
+/* Moving active indicator */
+
+.theme-toggle:not(.game-view-toggle) .theme-toggle__thumb {
     position: absolute;
-    padding: 3px;
+
+    left: calc(var(--tt-pad) + 1px);
+    top: 50%;
+
     width: var(--tt-size);
     height: var(--tt-size);
+
+    padding: 0;
+    box-sizing: border-box;
+
     border-radius: 50%;
-    box-shadow: var(--nav-control-shadow);
+
+    z-index: 0;
     pointer-events: none;
-    transform: translateX(calc(var(--theme-index) * var(--tt-size)));
+
+    transform: translate3d(calc(var(--theme-index) * var(--tt-size)),
+            -50%,
+            0);
+
     transition:
-        transform 350ms cubic-bezier(0.2, 1.6, 0.8, 1),
-        background 350ms ease-in-out,
+        transform 420ms cubic-bezier(.2, 1.4, .35, 1),
+        background 300ms ease,
+        box-shadow 300ms ease;
+}
+
+/* GRASS */
+
+.theme-toggle[data-theme="grass"] .theme-toggle__thumb {
+    background: linear-gradient(145deg,
+            #caff59,
+            #79e900);
+
+    box-shadow:
+        0 0 5px rgba(168, 255, 40, .65),
+        0 0 13px rgba(168, 255, 40, .28),
+        inset 0 1px 2px rgba(255, 255, 255, .35);
+}
+
+/* DARK */
+
+.theme-toggle[data-theme="dark"] .theme-toggle__thumb {
+    background: linear-gradient(145deg,
+            #e8edf5,
+            #a8b6c7);
+
+    box-shadow:
+        0 0 7px rgba(210, 225, 255, .3),
+        inset 0 1px 2px rgba(255, 255, 255, .7);
+}
+
+/* LIGHT */
+
+.theme-toggle[data-theme="light"] .theme-toggle__thumb {
+    background: linear-gradient(145deg,
+            #ffffff,
+            #cbd5e1);
+
+    box-shadow:
+        0 0 7px rgba(255, 255, 255, .35),
+        inset 0 1px 2px rgba(255, 255, 255, .9);
+}
+
+/* Theme buttons */
+
+.theme-toggle:not(.game-view-toggle) .theme-toggle__option {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 var(--tt-size);
+
+    width: var(--tt-size);
+    height: var(--tt-size);
+
+    padding: 0;
+    margin: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+    color: var(--nav-muted);
+
+    cursor: pointer;
+
+    transition:
+        background 220ms ease,
+        filter 220ms ease;
+}
+
+/* Theme icons */
+
+.theme-toggle:not(.game-view-toggle) .theme-toggle__option img {
+    display: block;
+
+    width: var(--tt-icon-size);
+    height: var(--tt-icon-size);
+
+    object-fit: contain;
+
+    pointer-events: none;
+    user-select: none;
+
+    transform: rotate(0deg);
+
+    transition:
+        transform 420ms cubic-bezier(.2, 1.2, .4, 1),
+        opacity 220ms ease,
+        filter 220ms ease;
+}
+
+/* Active icon */
+
+.theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active img {
+    transform: rotate(360deg);
+    filter: brightness(1.15);
+}
+
+/* Hover */
+
+@media (hover: hover) {
+    .theme-toggle:not(.game-view-toggle) .theme-toggle__option:not(.is-active):hover {
+        background: var(--nav-hover-bg);
+    }
+
+    .theme-toggle:not(.game-view-toggle):hover {
+        border-color: var(--nav-edge);
+
+        box-shadow:
+            inset 0 1px 3px rgba(0, 0, 0, .25),
+            0 0 12px rgba(168, 255, 40, .10);
+    }
+}
+
+/* Keyboard accessibility */
+
+.theme-toggle:not(.game-view-toggle) .theme-toggle__option:focus-visible {
+    outline: 2px solid var(--nav-accent);
+    outline-offset: -2px;
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .theme-toggle:not(.game-view-toggle),
+    .theme-toggle:not(.game-view-toggle) *,
+    .theme-toggle:not(.game-view-toggle) *::before {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
 }
 
 /* The thumb previews the theme it selects */
@@ -2474,21 +2645,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .theme-toggle[data-theme="light"] .theme-toggle__thumb {
     background: linear-gradient(145deg, hsla(0, 0%, 45%, 0.45), hsl(0, 0%, 5%, 0.45));
-}
-
-.theme-toggle__option {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: var(--tt-size);
-    height: var(--tt-size);
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-    transition: color 320ms ease-in-out;
 }
 
 .theme-toggle__option img {
