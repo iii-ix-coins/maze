@@ -2436,7 +2436,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 .theme-toggle {
     --tt-size: clamp(22px, 2vw, 28px);
     --tt-icon-size: clamp(12px, 1.1vw, 16px);
-    --tt-pad: 3px;
+    --tt-pad: 6px;
     --theme-index: 0;
 
     position: relative;
