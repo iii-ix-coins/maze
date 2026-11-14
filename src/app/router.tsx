@@ -23,7 +23,10 @@ export function AppRouter() {
   return (
     <>
       {/* Persistent site chrome: animate only on initial entry */}
-      <SiteChromeHosts mazePage={pathname === '/maze.html'} />
+      <SiteChromeHosts
+        mazePage={pathname === '/maze.html'}
+        homePage={pathname === '/'}
+      />
 
       {/* Only the active page gets an entrance animation */}
       <Suspense fallback={null}>
