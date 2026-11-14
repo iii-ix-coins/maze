@@ -573,51 +573,80 @@
         }
     }
 
-    /* —— 4.4 Staged entrance for the page blocks —— */
-    body.page-loaded>#root>[id^="site-"] {
-        animation: rise 0.9s var(--ease-out) backwards;
+
+    /* =========================================================
+   MAZE — UNIFIED ENTRANCE SYSTEM
+   Initial Site Entry + Soft Route Navigation
+   ========================================================= */
+
+    :root {
+        --maze-enter-duration: 750ms;
+        --maze-enter-easing: cubic-bezier(.16, 1, .3, 1);
+        --maze-enter-distance: 20px;
     }
 
-    body.page-loaded>#root>#site-header {
-        animation: fade-only 0.7s var(--ease-out) backwards;
-    }
+    /* One unified entrance animation */
 
-    /* opacity only: keeps fixed dock stable */
-    body.page-loaded>#root> :nth-child(3) {
-        animation-delay: 0.06s;
-    }
-
-    body.page-loaded>#root> :nth-child(4) {
-        animation-delay: 0.12s;
-    }
-
-    body.page-loaded>#root> :nth-child(5) {
-        animation-delay: 0.18s;
-    }
-
-    body.page-loaded>#root> :nth-child(6) {
-        animation-delay: 0.24s;
-    }
-
-    body.page-loaded>#root> :nth-child(7) {
-        animation-delay: 0.30s;
-    }
-
-    body.page-loaded>#root> :nth-child(8) {
-        animation-delay: 0.36s;
-    }
-
-    @keyframes rise {
+    @keyframes maze-unified-enter {
         from {
             opacity: 0;
-            translate: 0 22px;
+            translate: 0 var(--maze-enter-distance);
+            filter: blur(5px);
+        }
+
+        to {
+            opacity: 1;
+            translate: 0 0;
+            filter: blur(0);
         }
     }
 
-    @keyframes fade-only {
-        from {
-            opacity: 0;
+    /* ---------------------------------------------------------
+   INITIAL ENTRY — persistent site components
+   These elements animate only on their first mount.
+   --------------------------------------------------------- */
+
+    /* Header / Logo / Navigation / Theme */
+
+    body.page-loaded #site-header {
+        animation:
+            maze-unified-enter 800ms var(--maze-enter-easing) 0ms both;
+    }
+
+    /* Interaction bar */
+
+    body.page-loaded .site-interaction-bar-host {
+        animation:
+            maze-unified-enter 800ms var(--maze-enter-easing) 180ms both;
+    }
+
+    /* ---------------------------------------------------------
+   ROUTE ENTRY — active page content
+   Runs on initial entry and every soft navigation.
+   --------------------------------------------------------- */
+
+    body.page-loaded .route-page {
+        width: 100%;
+        min-width: 0;
+
+        animation:
+            maze-unified-enter var(--maze-enter-duration) var(--maze-enter-easing) 220ms both;
+    }
+
+    /* ---------------------------------------------------------
+   ACCESSIBILITY
+   --------------------------------------------------------- */
+
+    @media (prefers-reduced-motion: reduce) {
+
+        body.page-loaded #site-header,
+        body.page-loaded .site-interaction-bar-host,
+        body.page-loaded .route-page {
+            animation: none !important;
+            translate: none !important;
+            filter: none !important;
         }
+
     }
 
     /* —— 4.5 View-transition timing —— */
