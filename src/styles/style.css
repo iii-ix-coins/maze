@@ -2445,285 +2445,97 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* —— 7 · THEME TOGGLE (grass | dark | light) ——————————————————————————— */
+/* —— 7 · SHARED THREE-STATE SWITCHERS — theme + game section ———————— */
 
-/* =========================================================
-   MAZE — NEON THEME SELECTOR
-   Grass / Dark / Light
-   ========================================================= */
-
+/* Both controls share the same geometry. Their different content (icons only
+   vs. icon + label) is the only intentional visual distinction. */
 .theme-toggle:not(.game-view-toggle) {
     --tt-size: 28px;
     --tt-icon-size: 16px;
-    --tt-pad: 4px;
-    --theme-index: 0;
+    --tt-pad: 3px;
 
     position: relative;
-    display: inline-flex;
-    flex: 0 0 auto;
-
+    display: grid;
+    grid-template-columns: repeat(3, var(--tt-size));
     align-items: center;
     justify-content: center;
-    gap: 0;
+    flex: 0 0 auto;
 
-    height: calc(var(--tt-size) + 2 * var(--tt-pad) + 2px);
-
+    width: max-content;
+    height: 36px;
+    min-height: 36px;
     padding: var(--tt-pad);
+    gap: 3px;
     box-sizing: border-box;
-
-    border: 1px solid var(--nav-border);
-    border-radius: 999px;
-
-    background: var(--nav-panel);
-
-    box-shadow:
-        inset 0 1px 3px rgba(0, 0, 0, .28),
-        0 2px 8px rgba(0, 0, 0, .18);
-
     isolation: isolate;
 
     transition:
         border-color 250ms ease,
         box-shadow 250ms ease,
-        background 250ms ease;
+        background-color 250ms ease;
 }
 
-/* Moving active indicator */
-
-.theme-toggle:not(.game-view-toggle) .theme-toggle__thumb {
-    position: absolute;
-
-    left: calc(var(--tt-pad) + 1px);
-    top: 50%;
-
-    width: var(--tt-size);
-    height: var(--tt-size);
-
-    padding: 0;
-    box-sizing: border-box;
-
-    border-radius: 50%;
-
-    z-index: 0;
-    pointer-events: none;
-
-    transform: translate3d(calc(var(--theme-index) * var(--tt-size)),
-            -50%,
-            0);
-
-    transition:
-        transform 420ms cubic-bezier(.2, 1.4, .35, 1),
-        background 300ms ease,
-        box-shadow 300ms ease;
+/* The selected state is painted directly on the selected option in both
+   switchers; the old sliding thumb is no longer part of the visual model. */
+.theme-toggle__thumb {
+    display: none;
 }
-
-/* GRASS */
-
-.theme-toggle[data-theme="grass"] .theme-toggle__thumb {
-    background: linear-gradient(145deg,
-            #caff59,
-            #79e900);
-
-    box-shadow:
-        0 0 5px rgba(168, 255, 40, .65),
-        0 0 13px rgba(168, 255, 40, .28),
-        inset 0 1px 2px rgba(255, 255, 255, .35);
-}
-
-/* DARK */
-
-.theme-toggle[data-theme="dark"] .theme-toggle__thumb {
-    background: linear-gradient(145deg,
-            #e8edf5,
-            #a8b6c7);
-
-    box-shadow:
-        0 0 7px rgba(210, 225, 255, .3),
-        inset 0 1px 2px rgba(255, 255, 255, .7);
-}
-
-/* LIGHT */
-
-.theme-toggle[data-theme="light"] .theme-toggle__thumb {
-    background: linear-gradient(145deg,
-            #ffffff,
-            #cbd5e1);
-
-    box-shadow:
-        0 0 7px rgba(255, 255, 255, .35),
-        inset 0 1px 2px rgba(255, 255, 255, .9);
-}
-
-/* Theme buttons */
 
 .theme-toggle:not(.game-view-toggle) .theme-toggle__option {
     position: relative;
     z-index: 1;
-
     display: grid;
     place-items: center;
 
-    flex: 0 0 var(--tt-size);
-
-    width: var(--tt-size);
-    height: var(--tt-size);
-
+    width: 100%;
+    min-width: 0;
+    height: 100%;
     padding: 0;
     margin: 0;
 
     border: 0;
-    border-radius: 50%;
-
     background: transparent;
     color: var(--nav-muted);
-
     cursor: pointer;
 
     transition:
-        background 220ms ease,
+        color 220ms ease,
+        background-color 220ms ease,
         filter 220ms ease;
 }
-
-/* Theme icons */
 
 .theme-toggle:not(.game-view-toggle) .theme-toggle__option img {
     display: block;
-
     width: var(--tt-icon-size);
     height: var(--tt-icon-size);
-
     object-fit: contain;
-
     pointer-events: none;
     user-select: none;
-
     transform: rotate(0deg);
-
     transition:
-        transform 420ms cubic-bezier(.2, 1.2, .4, 1),
-        opacity 220ms ease,
+        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
         filter 220ms ease;
 }
 
-/* Active icon */
-
 .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active img {
     transform: rotate(360deg);
-    filter: brightness(1.15);
 }
-
-/* Hover */
 
 @media (hover: hover) {
     .theme-toggle:not(.game-view-toggle) .theme-toggle__option:not(.is-active):hover {
         background: var(--nav-hover-bg);
     }
-
-    .theme-toggle:not(.game-view-toggle):hover {
-        border-color: var(--nav-edge);
-
-        box-shadow:
-            inset 0 1px 3px rgba(0, 0, 0, .25),
-            0 0 12px rgba(168, 255, 40, .10);
-    }
 }
-
-/* Keyboard accessibility */
 
 .theme-toggle:not(.game-view-toggle) .theme-toggle__option:focus-visible {
     outline: 2px solid var(--nav-accent);
     outline-offset: -2px;
 }
 
-/* Reduced motion */
-
-@media (prefers-reduced-motion: reduce) {
-
-    .theme-toggle:not(.game-view-toggle),
-    .theme-toggle:not(.game-view-toggle) *,
-    .theme-toggle:not(.game-view-toggle) *::before {
-        transition-duration: .01ms !important;
-        animation-duration: .01ms !important;
-    }
-}
-
-/* The thumb previews the theme it selects */
-.theme-toggle[data-theme="grass"] .theme-toggle__thumb {
-    background: linear-gradient(145deg, hsla(108, 100%, 20%, 0.5), hsla(108, 100%, 30%, 0.5));
-}
-
-.theme-toggle[data-theme="dark"] .theme-toggle__thumb {
-    background: linear-gradient(145deg, hsl(0, 0%, 98%, 0.45), hsl(0, 0%, 65%, 0.45));
-}
-
-.theme-toggle[data-theme="light"] .theme-toggle__thumb {
-    background: linear-gradient(145deg, hsla(0, 0%, 45%, 0.45), hsl(0, 0%, 5%, 0.45));
-}
-
-.theme-toggle__option img {
-    width: var(--tt-icon-size);
-    height: var(--tt-icon-size);
-    display: block;
-    object-fit: contain;
-    pointer-events: none;
-    user-select: none;
-
-    transform: rotate(0deg);
-
-    transition:
-        transform 320ms cubic-bezier(0.2, 1.1, 0.4, 1.2);
-}
-
-
-/* Active icon takes the colour that contrasts with the thumb */
-.theme-toggle__option.is-active img {
-    transform: rotate(360deg);
-}
-
-/* Game section selector: intentionally reuses the ThemeSwitcher geometry. */
-.game-view-toggle .theme-toggle__thumb {
-    background: transparent;
-}
-
-.game-view-toggle__label {
-    display: none;
-}
-
-
-.game-view-toggle .theme-toggle__option {
-    border-radius: 50%;
-    transition:
-        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
-        box-shadow 250ms ease,
-        background-color 250ms ease;
-}
-
-.game-view-toggle .theme-toggle__option.is-active {
-    box-shadow: var(--nav-control-shadow);
-}
-
-.game-view-toggle .theme-toggle__icon {
-    display: block;
-    width: 16px;
-    height: 16px;
-    pointer-events: none;
-    user-select: none;
-    transform: rotate(0deg);
-    transition: transform 320ms cubic-bezier(0.2, 1.1, 0.4, 1.2), color 320ms ease-in-out;
-}
-
-.game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon {
-    color: #073b25;
-    transform: rotate(360deg);
-}
-
-/* ==========================================================================
-   GAME VIEW SWITCHER — RESPONSIVE SEGMENTED CONTROL
-   Single geometry across desktop, tablet and mobile.
-   ========================================================================== */
-
+/* Game section selector: same frame, height, option treatment and active
+   surface as ThemeSwitcher. Its wider cells simply accommodate text labels. */
 .nav .game-view-toggle {
-    --gvt-icon-size: clamp(11px, 1.1vw, 15px);
+    --gvt-icon-size: 14px;
 
     grid-area: game;
     display: grid;
@@ -2734,23 +2546,12 @@ html[data-theme="light"] .nav-brand-logo--black {
     max-width: 230px;
     min-width: 0;
     justify-self: start;
-    height: auto;
-    min-height: 26px;
+    height: 36px;
+    min-height: 36px;
     max-height: 36px;
-    aspect-ratio: 7 / 1;
 
     padding: 3px;
     gap: 3px;
-
-    justify-self: start;
-
-    border: 1px solid var(--nav-border);
-    border-radius: 999px;
-    background: var(--nav-panel);
-}
-
-.nav .game-view-toggle .theme-toggle__thumb {
-    display: none;
 }
 
 .nav .game-view-toggle .theme-toggle__option {
@@ -2760,49 +2561,60 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     width: 100%;
     min-width: 0;
-    min-height: 0;
     height: 100%;
+    min-height: 0;
+    padding: 0 5px;
+    gap: 5px;
 
-    padding: 0 4px;
-    gap: 4px;
-
-    border-radius: 999px;
     background: transparent;
-    box-shadow: none;
-
     color: var(--nav-muted);
-}
-
-.nav .game-view-toggle .theme-toggle__option.is-active {
-    background: var(--nav-active-bg);
-    box-shadow: var(--nav-control-shadow);
-    color: var(--nav-active-text);
+    box-shadow: none;
 }
 
 .nav .game-view-toggle .theme-toggle__icon {
     display: block;
-
     width: var(--gvt-icon-size);
     height: var(--gvt-icon-size);
     flex: 0 0 var(--gvt-icon-size);
-
     pointer-events: none;
     user-select: none;
-
     transform: rotate(0deg);
-
     transition:
-        transform 320ms cubic-bezier(0.2, 1.1, 0.4, 1.2),
-        color 320ms ease-in-out;
+        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
+        filter 220ms ease;
+}
+
+.nav .game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon {
+    transform: rotate(360deg);
 }
 
 .game-view-toggle__label {
     display: inline;
-
-    font-size: clamp(9px, 0.85vw, 11px);
-    font-weight: 700;
+    font-size: clamp(9px, .85vw, 11px);
+    font-weight: 800;
     line-height: 1;
     white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .nav .game-view-toggle .theme-toggle__option:not(.is-active):hover {
+        background: var(--nav-hover-bg);
+    }
+}
+
+.nav .game-view-toggle .theme-toggle__option:focus-visible {
+    outline: 2px solid var(--nav-accent);
+    outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-toggle:not(.game-view-toggle),
+    .theme-toggle:not(.game-view-toggle) *,
+    .nav .game-view-toggle,
+    .nav .game-view-toggle * {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
 }
 
 /* —— 8 · RESPONSIVE ———————————————————————————————————————————————————— */
@@ -3116,11 +2928,11 @@ html[data-theme="light"] .nav-brand-logo--black {
         max-width: clamp(70px, 22vw, 110px);
     }
 
-    /* Fixed Theme Selector — Desktop & Mobile */
+    /* Keep both three-state controls at the same compact height. */
     .theme-toggle:not(.game-view-toggle) {
         --tt-size: 28px;
         --tt-icon-size: 16px;
-        --tt-pad: 4px;
+        --tt-pad: 3px;
     }
 
     /* Hamburger */

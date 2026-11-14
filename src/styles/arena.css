@@ -130,13 +130,66 @@ h1, h2, h3 { text-transform: uppercase; letter-spacing: .03em; font-weight: 900;
 .nav-wallet-button:disabled { opacity: .55; }
 .nav-dropdown { border-radius: var(--r-md); border-color: var(--ar-line); }
 
-.nav .game-view-toggle, .theme-toggle { background: var(--ar-fill-2); box-shadow: inset 0 0 0 1px var(--ar-line); border-radius: var(--r-md); }
-.nav .game-view-toggle .theme-toggle__option { border-radius: var(--r-sm); }
-.nav .game-view-toggle .theme-toggle__option.is-active { background: var(--ar-accent); color: var(--ar-on-accent); box-shadow: none; }
-.nav .game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon { color: var(--ar-on-accent); }
-.game-view-toggle__label { text-transform: uppercase; letter-spacing: .1em; font-weight: 900; }
-.theme-toggle__thumb { border-radius: var(--r-sm); box-shadow: inset 0 0 0 1px var(--ar-accent); background: rgba(var(--ar-rgb), .18) !important; }
-.theme-toggle__option { border-radius: var(--r-sm); }
+/* —— 5a · MATCHED THREE-STATE CONTROLS ———————————————— */
+.nav .theme-toggle:not(.game-view-toggle),
+.nav .game-view-toggle {
+    --switcher-cut: 7px;
+    border: 1px solid var(--ar-line);
+    border-radius: 0;
+    clip-path: polygon(
+        var(--switcher-cut) 0,
+        100% 0,
+        100% calc(100% - var(--switcher-cut)),
+        calc(100% - var(--switcher-cut)) 100%,
+        0 100%,
+        0 var(--switcher-cut)
+    );
+    background: var(--ar-fill-2);
+    box-shadow: inset 0 0 0 1px var(--ar-line);
+}
+
+.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option,
+.nav .game-view-toggle .theme-toggle__option {
+    --option-cut: 5px;
+    border-radius: 0;
+    clip-path: polygon(
+        var(--option-cut) 0,
+        100% 0,
+        100% calc(100% - var(--option-cut)),
+        calc(100% - var(--option-cut)) 100%,
+        0 100%,
+        0 var(--option-cut)
+    );
+    background: rgba(var(--ar-rgb), .055);
+    color: var(--ar-soft);
+    box-shadow: none;
+}
+
+.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active,
+.nav .game-view-toggle .theme-toggle__option.is-active {
+    background: var(--ar-accent);
+    color: var(--ar-on-accent);
+    box-shadow: none;
+}
+
+.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active img,
+.nav .game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon {
+    filter: grayscale(1) brightness(.12);
+}
+
+.nav .game-view-toggle__label {
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-weight: 900;
+}
+
+@media (hover: hover) {
+    .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option:not(.is-active):hover,
+    .nav .game-view-toggle .theme-toggle__option:not(.is-active):hover {
+        background: rgba(var(--ar-rgb), .16);
+        color: var(--ar-text);
+    }
+}
 .nav-mobile-toggle { border-radius: var(--r-sm); border-color: var(--ar-line); background: var(--ar-fill-2); }
 .nav-mobile-toggle span { background: var(--ar-accent); }
 
