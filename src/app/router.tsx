@@ -19,11 +19,21 @@ export function AppRouter() {
   else if (pathname === '/market.html' || pathname === '/market') page = <MarketPage />;
   else return <NotFoundPage />;
 
+
   return (
     <>
+      {/* Persistent site chrome: animate only on initial entry */}
       <SiteChromeHosts mazePage={pathname === '/maze.html'} />
+
+      {/* Only the active page gets an entrance animation */}
       <Suspense fallback={null}>
-        {page}
+        <div
+          className="route-page"
+          key={pathname}
+          data-route-page={pathname}
+        >
+          {page}
+        </div>
       </Suspense>
     </>
   );
