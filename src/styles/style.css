@@ -2165,7 +2165,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 .nav-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     min-width: 0;
 
 }
@@ -2821,7 +2821,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
         align-items: center;
 
-        column-gap: 16px;
+        column-gap: 9px;
         row-gap: 6px;
 
         width: min(1440px, 100%);
