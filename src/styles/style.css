@@ -2452,8 +2452,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 .theme-toggle__thumb {
     position: absolute;
     padding: 3px;
-    top: var(--tt-pad);
-    left: var(--tt-pad);
     width: var(--tt-size);
     height: var(--tt-size);
     border-radius: 50%;
