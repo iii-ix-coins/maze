@@ -2442,7 +2442,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
-    height: var(--nav-control-height);
+    height: calc( var(--tt-size) + var(--tt-pad) + var(--tt-pad) );
     padding: var(--tt-pad);
     border: 0;
     border-radius: 999px;
