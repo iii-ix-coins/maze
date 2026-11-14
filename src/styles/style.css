@@ -2516,6 +2516,10 @@ html[data-theme="light"] .nav-brand-logo--black {
     background: transparent;
 }
 
+.game-view-toggle__label {
+    display: none;
+}
+
 
 .game-view-toggle .theme-toggle__option {
     border-radius: 50%;
@@ -2526,7 +2530,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 .game-view-toggle .theme-toggle__option.is-active {
-    background: var(--nav-active-bg);
     box-shadow: var(--nav-control-shadow);
 }
 
@@ -2607,7 +2610,86 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-inner {
-        gap: 12px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "brand theme menu"
+            "game game game";
+        align-items: center;
+        column-gap: 10px;
+        row-gap: 10px;
+    }
+
+    .nav-brand {
+        grid-area: brand;
+        justify-self: start;
+        min-width: 0;
+    }
+
+    .nav .theme-toggle:not(.game-view-toggle) {
+        grid-area: theme;
+        justify-self: end;
+        margin-left: 0;
+    }
+
+    .nav-mobile-toggle {
+        grid-area: menu;
+        justify-self: end;
+    }
+
+    /* Full-width segmented game navigation */
+    .nav .game-view-toggle {
+        grid-area: game;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        padding: 4px;
+        gap: 4px;
+        border: 1px solid var(--nav-border);
+        border-radius: 999px;
+        background: var(--nav-panel);
+    }
+
+    .nav .game-view-toggle .theme-toggle__thumb {
+        display: none;
+    }
+
+    .nav .game-view-toggle .theme-toggle__option {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        min-width: 0;
+        height: 36px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: transparent;
+        box-shadow: none;
+        color: var(--nav-muted);
+    }
+
+    .nav .game-view-toggle .theme-toggle__option.is-active {
+        background: var(--nav-active-bg);
+        box-shadow: var(--nav-control-shadow);
+        color: var(--nav-active-text);
+    }
+
+    .nav .game-view-toggle .theme-toggle__icon {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+    }
+
+    .game-view-toggle__label {
+        display: inline;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
     }
 
     .nav-brand-mark {
@@ -2615,7 +2697,8 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav .theme-toggle:not(.game-view-toggle) {
-        margin-left: auto;
+        grid-area: theme;
+        margin-left: 0;
     }
 
     .nav-mobile-toggle {

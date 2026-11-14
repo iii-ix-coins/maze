@@ -76,7 +76,15 @@ export function GameViewSwitcher() {
             tabIndex={active ? 0 : -1}
             onClick={() => navigate(view)}
           >
-            <img className="theme-toggle__icon" src={VIEW_ICONS[view]} alt="" aria-hidden="true" />
+            <img
+              className="theme-toggle__icon"
+              src={VIEW_ICONS[view]}
+              alt=""
+              aria-hidden="true"
+            />
+            <span className="game-view-toggle__label">
+              {VIEW_LABELS[view]}
+            </span>
           </button>
         );
       })}
