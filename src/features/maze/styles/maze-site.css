@@ -1499,21 +1499,29 @@
     .maze-app .cg-rail-btn[data-icon="size"] {
         --accent: var(--moss);
         --accent-rgb: var(--moss-rgb);
+        --accent-highlight: var(--moss-highlight);
+        --accent-depth: var(--moss-depth);
     }
 
     .maze-app .cg-rail-btn[data-icon="racers"] {
         --accent: var(--coral);
         --accent-rgb: var(--coral-rgb);
+        --accent-highlight: var(--coral-highlight);
+        --accent-depth: var(--coral-depth);
     }
 
     .maze-app .cg-rail-btn[data-icon="targets"] {
         --accent: var(--sky);
         --accent-rgb: var(--sky-rgb);
+        --accent-highlight: var(--sky-highlight);
+        --accent-depth: var(--sky-depth);
     }
 
     .maze-app .cg-rail-btn[data-icon="launch"] {
         --accent: var(--lantern);
         --accent-rgb: var(--lantern-rgb);
+        --accent-highlight: var(--lantern-highlight);
+        --accent-depth: var(--lantern-depth);
     }
 
     .maze-app .cg-rail-btn:disabled {
@@ -1549,9 +1557,7 @@
     /* Reached before, but you are elsewhere: solid, in its own colour. */
     .maze-app .cg-rail-btn.is-visited .cg-node {
         border: 2px solid rgba(var(--accent-rgb), .38);
-        border: 2px solid color-mix(in srgb, var(--accent) 38%, transparent);
         background: linear-gradient(180deg, rgba(var(--accent-rgb), .14), rgba(var(--accent-rgb), .05)), #0b1813;
-        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent) 5%, transparent)), #0b1813;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 var(--lip) 0 rgba(0, 0, 0, .4);
         color: var(--accent);
     }
@@ -1559,27 +1565,19 @@
     /* A step you have finished. The badge below is stamped on. */
     .maze-app .cg-rail-btn.is-done .cg-node {
         border-color: rgba(var(--accent-rgb), .80);
-        border-color: color-mix(in srgb, var(--accent) 80%, transparent);
         background: linear-gradient(180deg, rgba(var(--accent-rgb), .28), rgba(var(--accent-rgb), .12)), #0b1813;
-        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 28%, transparent), color-mix(in srgb, var(--accent) 12%, transparent)), #0b1813;
     }
 
     /* Where you are: lit, lifted, breathing. */
     .maze-app .cg-rail-btn.is-active .cg-node {
         --lip: 6px;
-        border: 2px solid var(--accent);
-        border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
+        border: 2px solid var(--accent-highlight, var(--accent));
         background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 52%), var(--accent);
         box-shadow:
             inset 0 -3px 0 rgba(0, 0, 0, .12),
-            0 var(--lip) 0 rgba(0, 0, 0, .52),
+            0 var(--lip) 0 var(--accent-depth, rgba(0, 0, 0, .52)),
             0 0 0 6px rgba(var(--accent-rgb), .14),
             0 12px 32px rgba(var(--accent-rgb), .38);
-        box-shadow:
-            inset 0 -3px 0 rgba(0, 0, 0, .12),
-            0 var(--lip) 0 color-mix(in srgb, var(--accent) 52%, #000),
-            0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent),
-            0 12px 32px color-mix(in srgb, var(--accent) 38%, transparent);
         color: #0d1a12;
         transform: translateY(-4px);
     }
@@ -1722,7 +1720,6 @@
         padding: 1px 8px;
         border-radius: 8px;
         background: rgba(var(--accent-rgb), .16);
-        background: color-mix(in srgb, var(--accent) 16%, transparent);
         color: var(--accent);
         font-size: .68rem;
         font-weight: 600;
@@ -1751,11 +1748,7 @@
         transition: transform .4s var(--ease), background-color .35s ease, border-color .35s ease, color .35s ease;
         box-shadow:
             inset 0 -3px 0 rgba(0, 0, 0, .12),
-            0 6px 0 rgba(0, 0, 0, .52),
-            0 calc(6px + var(--charge) * 8px) calc(20px + var(--charge) * 34px) calc(var(--charge) * 5px) rgba(255, 150, 60, calc(.3 + var(--charge) * .6));
-        box-shadow:
-            inset 0 -3px 0 rgba(0, 0, 0, .12),
-            0 6px 0 color-mix(in srgb, var(--accent) 52%, #000),
+            0 6px 0 var(--accent-depth, rgba(0, 0, 0, .52)),
             0 calc(6px + var(--charge) * 8px) calc(20px + var(--charge) * 34px) calc(var(--charge) * 5px) rgba(255, 150, 60, calc(.3 + var(--charge) * .6));
     }
 
@@ -4391,7 +4384,6 @@
         align-items: initial;
         justify-content: initial;
         --ground: rgba(16, 24, 39, .90);
-        --ground: color-mix(in srgb, var(--ink-950, #101827) 90%, transparent);
         --ground-2: var(--ink-900, #172235);
         --moss: var(--mint, #72e8c2);
         --lantern: var(--gold, #f0cf76);
@@ -4412,8 +4404,12 @@
         --fog: #9ef01a;
         --moss: #38b000;
         --moss-rgb: 56, 176, 0;
+        --moss-highlight: #92D473;
+        --moss-depth: #1D5C00;
         --lantern: #ccff33;
         --lantern-rgb: 204, 255, 51;
+        --lantern-highlight: #E3FF8F;
+        --lantern-depth: #6A851B;
     }
 
     /* Light */
@@ -4422,8 +4418,12 @@
         --fog: #374151;
         --moss: #166534;
         --moss-rgb: 22, 101, 52;
+        --moss-highlight: #7FAA8F;
+        --moss-depth: #0B351B;
         --lantern: #956000;
         --lantern-rgb: 149, 96, 0;
+        --lantern-highlight: #C5A873;
+        --lantern-depth: #4D3200;
     }
 
     .maze-app[data-theme="grass"] .cg {
@@ -4444,8 +4444,12 @@
         --ground-2: rgba(15, 22, 38, .94);
         --moss: var(--azure, #8fb0ff);
         --moss-rgb: 143, 176, 255;
+        --moss-highlight: #C1D4FF;
+        --moss-depth: #4A5C85;
         --lantern: var(--gold, #f0cf76);
         --lantern-rgb: 240, 207, 118;
+        --lantern-highlight: #F7E5B4;
+        --lantern-depth: #7D6C3D;
         --haze: #edf2ff;
         --fog: #a3aec2;
         --line: rgba(190, 205, 235, .17);
@@ -4457,8 +4461,12 @@
         --ground-2: rgba(255, 255, 255, .96);
         --sky: #315fba;
         --sky-rgb: 49, 95, 186;
+        --sky-highlight: #8EA7D9;
+        --sky-depth: #193161;
         --coral: #bd4b42;
         --coral-rgb: 189, 75, 66;
+        --coral-highlight: #DB9C97;
+        --coral-depth: #622722;
         --haze: #111827;
         --fog: #374151;
         --moss: #166534;

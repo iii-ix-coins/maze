@@ -61,8 +61,21 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       manifest: true,
       sourcemap: false,
-      target: 'es2022',
-      cssTarget: ['safari16.4', 'ios16.4', 'chrome111', 'firefox113', 'edge111'],
+      target: [
+        'safari13.1',
+        'ios13.4',
+        'chrome80',
+        'firefox74',
+        'edge80'
+      ],
+
+      cssTarget: [
+        'safari13.1',
+        'ios13.4',
+        'chrome80',
+        'firefox74',
+        'edge80'
+      ],
       assetsDir: 'assets',
       // Keep classic compatibility scripts as files; data: URLs can be blocked by
       // stricter browser policies and do not preserve the previous script loading model.

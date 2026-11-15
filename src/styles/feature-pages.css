@@ -194,7 +194,7 @@
     min-height: 54px;
     padding: 8px 14px;
     border-bottom: 1px solid var(--stroke, rgba(51, 64, 71, .58));
-    border-bottom: 1px solid color-mix(in oklch, var(--stroke, #334047), transparent 42%);
+    border-bottom: 1px solid var(--stroke-divider, rgba(51, 64, 71, .58));
     color: var(--text, #f5f7f8);
     font-size: .8rem;
     font-variant-numeric: tabular-nums;

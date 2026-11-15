@@ -283,7 +283,6 @@
         font-family: var(--font-display); font-weight: 800; font-size: clamp(6rem, 11vw, 9rem); line-height: 1; letter-spacing: -0.06em;
         color: transparent;
         -webkit-text-stroke: 1px rgba(var(--accent-rgb), .45);
-        -webkit-text-stroke: 1px color-mix(in oklab, var(--accent) 45%, transparent);
         opacity: 0.55; transition: opacity var(--t-slow), transform var(--t-slow) var(--ease-out);
     }
     .how-step:hover .how-step-no { opacity: 1; transform: translateY(6px); }
@@ -292,9 +291,7 @@
         border-radius: 18px; corner-shape: var(--corner, round);
         color: var(--accent);
         background: rgba(var(--accent-rgb), .14);
-        background: color-mix(in oklab, var(--accent) 14%, transparent);
         border: 1px solid rgba(var(--accent-rgb), .40);
-        border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
         box-shadow: 0 12px 34px -12px var(--accent);
     }
     .how-step-glyph svg { width: 26px; height: 26px; }

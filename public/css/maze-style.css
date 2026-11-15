@@ -60,6 +60,7 @@
     /* features bento */
     .maze-features { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 16px); }
     .maze-tile {
+        --accent-rgb: 0, 232, 181;
         position: relative; isolation: isolate; display: grid; align-content: start; gap: 10px; overflow: hidden;
         padding: clamp(18px, 2.2vw, 28px); border-radius: var(--r-lg); corner-shape: var(--corner, round);
         background: var(--tile-bg); border: 1px solid var(--stroke); box-shadow: var(--shadow-1); --accent: var(--mint);
@@ -67,7 +68,7 @@
     }
     .maze-tile::before {
         content: ""; position: absolute; inset: -1px; z-index: -1; pointer-events: none; border-radius: inherit; corner-shape: inherit; padding: 1px;
-        background: radial-gradient(260px circle at var(--mx) var(--my), color-mix(in oklab, var(--accent) 95%, transparent), transparent 66%);
+        background: radial-gradient(260px circle at var(--mx) var(--my), rgba(var(--accent-rgb), .95), transparent 66%);
         -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
                 mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
         opacity: 0; transition: opacity var(--t-base);
@@ -75,14 +76,14 @@
     .maze-tile:hover { transform: translateY(-3px); }
     .maze-tile:hover::before { opacity: 1; }
     .maze-tile:nth-child(1) { grid-column: span 3; --accent: var(--mint); }
-    .maze-tile:nth-child(2) { grid-column: span 3; --accent: var(--azure); }
+    .maze-tile:nth-child(2) { grid-column: span 3; --accent: var(--azure); --accent-rgb: 143, 176, 255; }
     .maze-tile:nth-child(3), .maze-tile:nth-child(4), .maze-tile:nth-child(5) { grid-column: span 2; }
-    .maze-tile:nth-child(3) { --accent: var(--gold); }
-    .maze-tile:nth-child(4) { --accent: var(--violet); }
-    .maze-tile:nth-child(5) { --accent: var(--coral); }
+    .maze-tile:nth-child(3) { --accent: var(--gold); --accent-rgb: 240, 207, 118; }
+    .maze-tile:nth-child(4) { --accent: var(--violet); --accent-rgb: 155, 124, 255; }
+    .maze-tile:nth-child(5) { --accent: var(--coral); --accent-rgb: 255, 155, 138; }
     .maze-tile-icon {
         display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; corner-shape: var(--corner, round);
-        color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 38%, transparent);
+        color: var(--accent); background: rgba(var(--accent-rgb), .14); border: 1px solid rgba(var(--accent-rgb), .38);
         box-shadow: 0 12px 32px -12px var(--accent);
     }
     .maze-tile-icon svg { width: 24px; height: 24px; }

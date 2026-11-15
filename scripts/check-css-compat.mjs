@@ -25,10 +25,40 @@ if (!files.length) {
 }
 
 const errors = [];
+// Enforce a source-level ban as well as checking the emitted production CSS.
+// Split the function name so this guard itself is not mistaken for a CSS usage.
+const forbiddenColorBlend = new RegExp(String.raw`\bcolor-${'mix'}\s*\(`, 'i');
+
+function collectSourceCss(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const ignoredDirs = new Set(['node_modules', 'dist', 'coverage', '.git']);
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      return ignoredDirs.has(entry.name) ? [] : collectSourceCss(full);
+    }
+    return entry.isFile() && entry.name.endsWith('.css') ? [full] : [];
+  });
+}
+
+// Scan all repository CSS, including legacy and currently unreferenced files.
+const sourceCssFiles = collectSourceCss(root);
+
+for (const file of sourceCssFiles) {
+  const source = fs.readFileSync(file, 'utf8');
+  if (forbiddenColorBlend.test(source)) {
+    errors.push(`${path.relative(root, file)}: unsupported dynamic color blending remains in source CSS`);
+  }
+}
+
 for (const file of files) {
   const css = fs.readFileSync(file, 'utf8');
   const relative = path.relative(root, file);
   const ast = postcss.parse(css, { from: relative });
+
+  if (forbiddenColorBlend.test(css)) {
+    errors.push(`${relative}: unsupported dynamic color blending remains in production CSS`);
+  }
 
   ast.walkAtRules('layer', (rule) => {
     errors.push(`${relative}: untransformed @layer remains in production CSS`);
@@ -56,7 +86,7 @@ if (errors.length) {
 
 console.log(
   `[css-compat] verified ${files.length} production CSS asset(s): ` +
+  `source and production CSS contain no unsupported dynamic color blending; ` +
   `layers and modern OKLCH syntax are transformed; ` +
-  `color-mix() is retained for supported production targets; ` +
   `Safari backdrop-filter prefixes are present.`
 );

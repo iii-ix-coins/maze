@@ -1,9 +1,9 @@
 [production]
-safari >= 16.4
-ios_saf >= 16.4
-chrome >= 111
-firefox >= 113
-edge >= 111
+safari >= 13.1
+ios_saf >= 13.4
+chrome >= 80
+firefox >= 74
+edge >= 80
 
 [development]
 last 1 chrome version
