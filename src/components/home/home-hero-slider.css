@@ -16,16 +16,16 @@
     overflow: hidden;
     border: 1px solid var(--hero-frame-border, var(--stroke, #526078));
 
-    --hero-cut: 8px;
+    --hero-cut: 16px;
 
     border-radius: 0;
 
-    clip-path: polygon(var(--hero-cut) 0,
-        100% 0,
-        100% calc(100% - var(--hero-cut)),
-        calc(100% - var(--hero-cut)) 100%,
-        0 100%,
-        0 var(--hero-cut));
+    clip-path: polygon(0 0,
+        calc(100% - var(--hero-cut)) 0,
+        100% var(--hero-cut),
+        100% 100%,
+        var(--hero-cut) 100%,
+        0 calc(100% - var(--hero-cut)));
 
     background:
       radial-gradient(ellipse at 12% 0%, rgba(139, 92, 246, .24), transparent 48%),
