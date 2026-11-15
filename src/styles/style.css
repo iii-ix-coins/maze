@@ -2590,7 +2590,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .game-view-toggle__label {
     display: inline;
-    font-size: clamp(9px, .85vw, 11px);
+    font-size: 11px;
     font-weight: 800;
     line-height: 1;
     white-space: nowrap;
@@ -2608,6 +2608,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .theme-toggle:not(.game-view-toggle),
     .theme-toggle:not(.game-view-toggle) *,
     .nav .game-view-toggle,
@@ -2710,6 +2711,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 @media (max-width: 1023px) {
 
     .nav {
+        --nav-control-height: 32px;
         --nav-fs: 15px;
     }
 
@@ -2724,14 +2726,23 @@ html[data-theme="light"] .nav-brand-logo--black {
 
         align-items: center;
 
-        column-gap: 10px;
-        row-gap: 8px;
+        column-gap: 8px;
+        row-gap: 10px;
     }
 
     .nav-brand {
         grid-area: brand;
         justify-self: start;
         min-width: 0;
+    }
+
+    .nav .theme-toggle:not(.game-view-toggle) {
+        height: 32px;
+        min-height: 32px;
+
+        --tt-size: 25px;
+        --tt-icon-size: 15px;
+        --tt-pad: 2px;
     }
 
     .nav-brand-mark {
@@ -2745,6 +2756,11 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-mobile-toggle {
+        width: 32px;
+        height: 32px;
+        padding: 7px;
+        gap: 4px;
+
         grid-area: menu;
 
         display: flex;
@@ -2879,10 +2895,6 @@ html[data-theme="light"] .nav-brand-logo--black {
         column-gap: 8px;
     }
 
-    .nav .game-view-toggle {
-        --gvt-icon-size: 11px;
-    }
-
 }
 
 /* Reduced motion */
@@ -2910,7 +2922,8 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 
     .nav-inner {
-        gap: clamp(4px, 1.5vw, 8px);
+        column-gap: clamp(4px, 1.2vw, 7px);
+        row-gap: 9px;
     }
 
     /* Prevent the logo from collapsing */
@@ -2930,9 +2943,12 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     /* Keep both three-state controls at the same compact height. */
     .theme-toggle:not(.game-view-toggle) {
-        --tt-size: 28px;
-        --tt-icon-size: 16px;
-        --tt-pad: 3px;
+        height: 30px;
+        min-height: 30px;
+
+        --tt-size: 24px;
+        --tt-icon-size: 14px;
+        --tt-pad: 2px;
     }
 
     /* Hamburger */
