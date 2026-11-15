@@ -8,6 +8,7 @@ type Slide = {
   primary: { label: string; href: string };
   secondary: { label: string; href: string };
   visual: 'maze' | 'create' | 'rooms' | 'race';
+  visualSrc: string;
   index: string;
 };
 
@@ -19,6 +20,7 @@ const SLIDES: Slide[] = [
     primary: { label: 'Start playing', href: '/maze.html?view=create' },
     secondary: { label: 'Explore rooms', href: '/maze.html?view=rooms' },
     visual: 'maze',
+    visualSrc: '/css/images/banner/banner-1.svg',
     index: '01',
   },
   {
@@ -28,6 +30,7 @@ const SLIDES: Slide[] = [
     primary: { label: 'Create a room', href: '/maze.html?view=create' },
     secondary: { label: 'Explore rooms', href: '/maze.html?view=rooms' },
     visual: 'create',
+    visualSrc: '/css/images/banner/banner-2.svg',
     index: '02',
   },
   {
@@ -37,6 +40,7 @@ const SLIDES: Slide[] = [
     primary: { label: 'Browse rooms', href: '/maze.html?view=rooms' },
     secondary: { label: 'Watch live races', href: '/maze.html?view=live' },
     visual: 'rooms',
+    visualSrc: '/css/images/banner/banner-3.svg',
     index: '03',
   },
   {
@@ -46,6 +50,7 @@ const SLIDES: Slide[] = [
     primary: { label: 'Play now', href: '/maze.html?view=create' },
     secondary: { label: 'See live races', href: '/maze.html?view=live' },
     visual: 'race',
+    visualSrc: '/css/images/banner/banner-4.svg',
     index: '04',
   },
 ];
@@ -110,19 +115,28 @@ export function HomeHeroSlider() {
         </div>
       </div>
 
-      <div className={`home-hero-art home-hero-art--${slide.visual}`} aria-hidden="true">
-        <div className="hero-art-orbit hero-art-orbit--one" />
-        <div className="hero-art-orbit hero-art-orbit--two" />
-        <div className="hero-maze-board">
-          <span className="maze-path maze-path--a" />
-          <span className="maze-path maze-path--b" />
-          <span className="maze-path maze-path--c" />
-          <span className="maze-path maze-path--d" />
-          <span className="maze-player">◆</span>
-          <span className="maze-goal">✦</span>
+      <div
+        className={`home-hero-art home-hero-art--${slide.visual}`}
+        aria-hidden="true"
+      >
+        <img
+          className="home-hero-visual"
+          src={slide.visualSrc}
+          alt=""
+          width="464"
+          height="464"
+          loading={active === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+
+        <div className="hero-art-chip hero-art-chip--top">
+          MAZE / PLAY
         </div>
-        <div className="hero-art-chip hero-art-chip--top">MAZE / PLAY</div>
-        <div className="hero-art-chip hero-art-chip--bottom"><span /> LIVE CHALLENGE</div>
+
+        <div className="hero-art-chip hero-art-chip--bottom">
+          <span />
+          LIVE CHALLENGE
+        </div>
       </div>
 
       <div className="home-hero-footer">
