@@ -1977,7 +1977,7 @@
 /* —— 1 · TOKENS ———————————————————————————————————————————————————————— */
 .nav {
     /* Shared vertical rhythm for links, wallet action and the 3-way view/theme controls. */
-    --nav-control-height: 34px;
+    --nav-control-height: 30px;
 
     /* type scale: 12.5px at 821px → 15px from 1050px up (always fits the bar) */
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
