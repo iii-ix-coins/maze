@@ -157,7 +157,6 @@
     place-items: center;
     min-width: 0;
     min-height: 230px;
-    perspective: 900px;
     animation: home-hero-art-in .7s cubic-bezier(.2, .8, .2, 1) both;
   }
 
@@ -169,7 +168,7 @@
     height: auto;
     aspect-ratio: 1;
     object-fit: contain;
-    transform: perspective(900px) rotateX(9deg) rotateZ(-8deg);
+    transform: perspective(0px) rotateX(0deg) rotateZ(33deg);
     mix-blend-mode: screen;
     filter: drop-shadow(0 14px 28px rgba(139, 92, 246, .20));
   }
