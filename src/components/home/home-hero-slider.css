@@ -168,7 +168,7 @@
     height: auto;
     aspect-ratio: 1;
     object-fit: contain;
-    transform: perspective(1px) rotateX(1deg) rotateZ(0deg);
+    transform: perspective(2px) rotateX(0deg) rotateZ(0deg);
     mix-blend-mode: screen;
     filter: drop-shadow(0 14px 28px rgba(139, 92, 246, .20));
   }
