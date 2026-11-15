@@ -2542,10 +2542,10 @@ html[data-theme="light"] .nav-brand-logo--black {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
 
-    width: min(230px, 100%);
-    max-width: 230px;
+    width: 100%;
+    max-width: none;
     min-width: 0;
-    justify-self: start;
+    justify-self: stretch;
     height: 36px;
     min-height: 36px;
     max-height: 36px;
@@ -2642,7 +2642,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
         grid-template-areas:
             "brand content theme"
-            "game game .";
+            "game game game";
 
         align-items: center;
 
