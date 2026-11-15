@@ -129,14 +129,6 @@ export function HomeHeroSlider() {
           decoding="async"
         />
 
-        <div className="hero-art-chip hero-art-chip--top">
-          MAZE / PLAY
-        </div>
-
-        <div className="hero-art-chip hero-art-chip--bottom">
-          <span />
-          LIVE CHALLENGE
-        </div>
       </div>
 
       <div className="home-hero-footer">

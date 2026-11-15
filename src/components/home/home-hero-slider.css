@@ -66,8 +66,7 @@
     letter-spacing: .19em;
   }
 
-  .home-hero-eyebrow i,
-  .hero-art-chip--bottom span {
+  .home-hero-eyebrow i {
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -289,37 +288,6 @@
     transform: rotateX(62deg) rotateZ(48deg);
   }
 
-  .hero-art-chip {
-    position: absolute;
-    z-index: 3;
-    padding: 9px 12px;
-    border: 1px solid var(--stroke, #d5d8e0);
-    border-radius: 10px;
-    color: var(--text, #172033);
-    background: var(--surface-glass, rgba(255, 255, 255, .90));
-    box-shadow: 0 8px 25px #17203318;
-    font-size: .58rem;
-    font-weight: 850;
-    letter-spacing: .12em;
-    backdrop-filter: blur(12px);
-  }
-
-  .hero-art-chip--top {
-    top: 9%;
-    right: 2%;
-  }
-
-  .hero-art-chip--bottom {
-    bottom: 8%;
-    left: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .hero-art-chip--bottom span {
-    color: #16b994;
-  }
 
   .home-hero-art--create .hero-maze-board {
     transform: rotateX(9deg) rotateZ(4deg) scale(.94);
@@ -537,9 +505,6 @@
       min-height: 175px;
     }
 
-    .hero-art-chip--top {
-      right: 0;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
