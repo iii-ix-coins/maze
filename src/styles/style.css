@@ -2549,6 +2549,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     height: 36px;
     min-height: 36px;
     max-height: 36px;
+    margin-top: 10px;
 
     padding: 3px;
     gap: 3px;
@@ -2590,9 +2591,8 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .game-view-toggle__label {
     display: inline;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
+    font-size: 13px;
+    line-height: 1.2;
     white-space: nowrap;
 }
 
