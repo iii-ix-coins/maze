@@ -205,6 +205,11 @@ h3 {
     font-weight: 900;
 }
 
+.home-hero-slider .home-hero-copy h1 {
+    font-weight: 600;
+    letter-spacing: -.045em;
+}
+
 [class*="eyebrow"],
 [class*="kicker"],
 [class*="label"] {
@@ -354,7 +359,7 @@ h3 {
 .nav-mobile-toggle {
     --cut: 8px;
 
-    border: 0;
+    border: 1px solid var(--ar-line);
     border-radius: 0;
 
     clip-path: polygon(var(--cut) 0,
