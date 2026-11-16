@@ -563,8 +563,6 @@
     .home-hero-slider {
       min-height: clamp(200px, 54vw, 260px);
 
-      grid-template-rows: minmax(min-content, 1fr) auto;
-
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
     }
@@ -713,8 +711,6 @@
       max-height: 222px;
 
       height: auto;
-
-      grid-template-rows: minmax(min-content, 1fr) auto;
 
       gap: 3px;
       padding: 7px;
