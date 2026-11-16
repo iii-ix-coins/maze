@@ -160,11 +160,13 @@
 
     width: 65%;
 
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 
     min-width: 0;
     min-height: 0;
+
     pointer-events: none;
 
     animation: home-hero-art-in .7s cubic-bezier(.2, .8, .2, 1) both;
@@ -175,16 +177,22 @@
     position: relative;
     z-index: 1;
 
-    width: min(100%, 680px);
-    height: auto;
+    flex: 0 0 auto;
 
-    max-height: 138%;
+    width: min(112%, 720px);
+    max-width: none;
+
+    height: auto;
+    max-height: 145%;
+
     aspect-ratio: 1;
 
     object-fit: contain;
-    object-position: center;
+    object-position: right center;
 
-    transform-origin: center center;
+    /* Zoom only — no rotation or perspective */
+    transform: scale(1.10);
+    transform-origin: right center;
 
     mix-blend-mode: screen;
 
@@ -211,7 +219,6 @@
     width: min(100%, 330px);
     aspect-ratio: 1;
     overflow: hidden;
-    transform: rotateX(9deg) rotateZ(-8deg);
     border: 1px solid rgba(155, 124, 255, .64);
     border-radius: 25px;
     background-color: var(--surface-solid, #fffdf6);
@@ -314,22 +321,11 @@
     aspect-ratio: 1;
     border: 1px solid rgba(139, 92, 246, .22);
     border-radius: 50%;
-    transform: rotateX(62deg) rotateZ(-18deg);
   }
 
   .hero-art-orbit--two {
     width: 75%;
     border-color: rgba(33, 191, 160, .22);
-    transform: rotateX(62deg) rotateZ(48deg);
-  }
-
-
-  .home-hero-art--create .hero-maze-board {
-    transform: rotateX(9deg) rotateZ(4deg) scale(.94);
-  }
-
-  .home-hero-art--rooms .hero-maze-board {
-    transform: rotateX(13deg) rotateZ(-13deg) scale(.96);
   }
 
   .home-hero-art--race .maze-player {
@@ -453,15 +449,13 @@
 
   @keyframes home-hero-art-in {
     from {
-      opacity: 0;
-      scale: .92;
-      rotate: -3deg;
+      scale: .96;
+      rotate: 0deg;
     }
 
     to {
-      opacity: 1;
       scale: 1;
-      rotate: 0;
+      rotate: 0deg;
     }
   }
 
@@ -499,18 +493,29 @@
     }
 
     .home-hero-art {
-      top: 12%;
-      right: -18%;
-      bottom: 15%;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
 
-      width: 85%;
+      width: auto;
+
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
 
       opacity: .28;
     }
 
     .home-hero-visual {
-      width: min(100%, 460px);
-      max-height: 100%;
+      width: min(118%, 520px);
+      max-width: none;
+      max-height: none;
+
+      object-position: right top;
+
+      transform: scale(1.08);
+      transform-origin: right top;
     }
 
     .hero-maze-board {
@@ -554,8 +559,6 @@
     }
 
     .home-hero-art {
-      right: -30%;
-      width: 95%;
       opacity: .20;
     }
 
