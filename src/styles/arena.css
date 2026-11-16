@@ -349,9 +349,7 @@ h3 {
 }
 
 .nav-mobile-toggle {
-    --cut: 8px;
-
-    border: 1px solid var(--ar-line);
+    --cut: 9px;
     border-radius: 0;
 
     clip-path: polygon(var(--cut) 0,
@@ -363,17 +361,14 @@ h3 {
 
     background: rgba(var(--ar-rgb), .06);
 
-    box-shadow: inset 0 0 0 1px var(--ar-line);
 }
 
 .nav-mobile-toggle:hover {
-    background: rgba(var(--ar-rgb), .16);
-    box-shadow: inset 0 0 0 1px var(--ar-accent);
+    background: rgba(var(--ar-rgb), .21);
 }
 
 .nav-mobile-toggle[aria-expanded="true"] {
     background: rgba(var(--ar-rgb), .13);
-    box-shadow: inset 0 0 0 1px var(--ar-accent);
 }
 
 .nav-mobile-toggle span {
