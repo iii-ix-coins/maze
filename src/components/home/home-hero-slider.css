@@ -493,8 +493,8 @@
     }
 
     .home-hero-art {
-      top: 0;
-      right: 0;
+      top: -30;
+      right: -30;
       bottom: 0;
       left: 0;
 
