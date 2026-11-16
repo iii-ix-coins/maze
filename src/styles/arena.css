@@ -266,8 +266,7 @@ h3 {
 /* —— 5a · MATCHED THREE-STATE CONTROLS ———————————————— */
 .nav .theme-toggle:not(.game-view-toggle),
 .nav .game-view-toggle {
-    --switcher-cut: 7px;
-    border: 1px solid var(--ar-line);
+    --switcher-cut: 9px;
     border-radius: 0;
     clip-path: polygon(var(--switcher-cut) 0,
             100% 0,
@@ -276,12 +275,11 @@ h3 {
             0 100%,
             0 var(--switcher-cut));
     background: var(--ar-fill-2);
-    box-shadow: inset 0 0 0 1px var(--ar-line);
 }
 
 .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option,
 .nav .game-view-toggle .theme-toggle__option {
-    --option-cut: 5px;
+    --option-cut: 7px;
     border-radius: 0;
     clip-path: polygon(var(--option-cut) 0,
             100% 0,
@@ -289,7 +287,7 @@ h3 {
             calc(100% - var(--option-cut)) 100%,
             0 100%,
             0 var(--option-cut));
-    background: rgba(var(--ar-rgb), .055);
+    background: rgba(var(--ar-rgb), .063);
     color: var(--ar-soft);
     box-shadow: none;
 }
@@ -315,17 +313,11 @@ h3 {
 /* —— GAME VIEW SWITCHER · INDEPENDENT COLOR IDENTITY —— */
 
 .nav .game-view-toggle {
-    border-color: rgba(var(--gvt-rgb), .72);
-
     background:
         linear-gradient(180deg,
             rgba(var(--gvt-rgb), .12),
             rgba(var(--gvt-rgb), .045)),
         var(--ar-fill-2);
-
-    box-shadow:
-        inset 0 0 0 1px rgba(var(--gvt-rgb), .22),
-        0 0 16px rgba(var(--gvt-rgb), .08);
 }
 
 .nav .game-view-toggle .theme-toggle__option {
