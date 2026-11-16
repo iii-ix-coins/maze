@@ -17,10 +17,15 @@
     width: 100%;
     height: auto;
 
+    /* Desktop/tablet only. On phones this is reset to `auto` in the
+       max-width: 760px block: older Safari (iOS 15.x) transfers `min-height`
+       through `aspect-ratio` into an implicit min-width, which made the
+       slider ~445px wide and pushed the page out of the viewport. */
     aspect-ratio: 2.2 / 1;
 
     min-height: 0;
-    max-width: none;
+    min-width: 0;
+    max-width: 100%;
     box-sizing: border-box;
 
     align-items: stretch;
@@ -61,7 +66,7 @@
     position: absolute;
     z-index: -1;
     width: 460px;
-    aspect-ratio: 1;
+    height: 460px;
     right: 9%;
     top: -65%;
     border-radius: 50%;
@@ -561,6 +566,8 @@
   @media (max-width: 760px) {
 
     .home-hero-slider {
+      /* Height comes from content + min-height, never from a ratio. */
+      aspect-ratio: auto;
       min-height: clamp(200px, 54vw, 260px);
 
       -webkit-text-size-adjust: 100%;
@@ -587,8 +594,6 @@
 
     /* Compact banner proportions */
     .home-hero-slider {
-      aspect-ratio: 1.75 / 1;
-
       padding: 8px 8px 7px;
       gap: 4px;
 
@@ -704,8 +709,6 @@
 
     /* Banner geometry */
     .home-hero-slider {
-      aspect-ratio: 1.35 / 1;
-
       min-height: 180px;
       max-height: 222px;
 
