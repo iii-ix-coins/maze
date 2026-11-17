@@ -29,6 +29,12 @@ function initWalletModal() {
       url: appOrigin,
       icons: [`${appOrigin}/css/images/maze-logo-white.svg`],
     },
+
+    features: {
+      analytics: false,
+      email: false,
+      socials: [],
+    },
   });
 
   // Keep MazeBackground's existing optimization without changing Reown's UI.
