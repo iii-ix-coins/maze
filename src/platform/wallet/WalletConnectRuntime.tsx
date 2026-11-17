@@ -1,22 +1,54 @@
-import './appkit';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppKit, useAppKitAccount, useAppKitTheme } from '@reown/appkit/react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
+import { getWalletTheme } from './appkit'; // importing also runs createAppKit()
 
-function shortenAddress(address: string | undefined): string {
-  if (!address) return 'Wallet Connected';
-  return address.length <= 14 ? address : `${address.slice(0, 5)}…${address.slice(-5)}`;
-}
+export type WalletOpenOptions = Parameters<ReturnType<typeof useAppKit>['open']>[0];
+export type WalletOpenFn = (options?: WalletOpenOptions) => unknown;
 
-export function WalletRuntime() {
+export type WalletSnapshot = {
+  address: string | undefined;
+  isConnected: boolean;
+  status: string | undefined;
+};
+
+export type WalletRuntimeProps = {
+  /** Latest Solana account state, pushed to the persistent nav button. */
+  onSnapshot: (snapshot: WalletSnapshot) => void;
+  /** Hands the stable `open` function to the button (null on unmount). */
+  onReady: (open: WalletOpenFn | null) => void;
+};
+
+/**
+ * Headless bridge between AppKit hooks and the nav button. It renders nothing:
+ * the visible button lives in WalletConnectButton so it is never replaced
+ * (no lost focus, no "first click only loads the runtime").
+ */
+export function WalletRuntime({ onSnapshot, onReady }: WalletRuntimeProps) {
   const { open } = useAppKit();
   const { address, isConnected, status } = useAppKitAccount({ namespace: 'solana' });
   const { setThemeMode, setThemeVariables } = useAppKitTheme();
   const theme = useSiteTheme();
+
+  const openRef = useRef(open);
   useEffect(() => {
-    setThemeMode(theme === 'light' ? 'light' : 'dark');
-    setThemeVariables({ '--apkt-color-mix': theme === 'grass' ? '#70e000' : '#78edc0', '--apkt-color-mix-strength': 42 });
+    openRef.current = open;
+  });
+
+  useEffect(() => {
+    onReady((options) => openRef.current(options));
+    return () => onReady(null);
+  }, [onReady]);
+
+  useEffect(() => {
+    onSnapshot({ address, isConnected, status });
+  }, [address, isConnected, status, onSnapshot]);
+
+  useEffect(() => {
+    const { themeMode, themeVariables } = getWalletTheme(theme);
+    setThemeMode(themeMode);
+    setThemeVariables(themeVariables);
   }, [theme, setThemeMode, setThemeVariables]);
-  const isBusy = status === 'connecting' || status === 'reconnecting';
-  return <button className={`nav-wallet-button${isConnected ? ' is-connected' : ''}`} type="button" data-nav-action="connect-wallet" data-wallet-status={status ?? 'disconnected'} aria-label={isConnected ? `Wallet ${address ?? ''}. Open wallet options` : 'Connect Solana wallet'} aria-busy={isBusy} onClick={() => void open(isConnected ? { view: 'Account' } : { view: 'Connect', namespace: 'solana' })}>{isConnected ? <><span className="nav-wallet-indicator" aria-hidden="true" /><span className="nav-wallet-address">{shortenAddress(address)}</span></> : <span>{isBusy ? 'Connecting…' : 'Connect Wallet'}</span>}</button>;
+
+  return null;
 }
