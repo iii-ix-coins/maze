@@ -90,28 +90,6 @@
     animation: home-hero-copy-in .55s cubic-bezier(.2, .8, .2, 1) both;
   }
 
-  .home-hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: clamp(5px, .8vw, 9px);
-
-    margin-bottom: clamp(4px, 1.1vw, 17px);
-
-    color: var(--mint, #10a889);
-
-    font-size: clamp(8px, .85vw, 11px);
-    font-weight: 850;
-    letter-spacing: .19em;
-  }
-
-  .home-hero-eyebrow i {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: 0 0 14px currentColor;
-  }
-
   .home-hero-copy h1 {
     max-width: 650px;
 
@@ -120,10 +98,10 @@
     color: var(--text, #172033);
     font-family: var(--font-display, Montserrat, sans-serif);
 
-    font-size: clamp(14px, 4.15vw, 54px);
-    line-height: 1.06;
+    font-size: clamp(12px, 3.2vw, 44px);
+    line-height: 1.08;
 
-    font-weight: 850;
+    font-weight: 600;
     letter-spacing: -.065em;
 
     text-wrap: balance;
@@ -132,14 +110,13 @@
   .home-hero-copy p {
     max-width: 570px;
 
-    margin: clamp(5px, 1.2vw, 18px) 0 0;
+    margin: clamp(3px, 1.2vw, 15px) 0 0;
 
-    color: var(--text-mute, #667085);
+    color: var(--text-mute, #454c5a);
 
-    font-size: clamp(9px, 1.15vw, 16px);
-    font-weight: 520;
+    font-size: clamp(10px, 1.2vw, 20px);
 
-    line-height: 1.55;
+    line-height: 1.08;
   }
 
   .home-hero-actions {
