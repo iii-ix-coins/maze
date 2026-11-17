@@ -2,7 +2,7 @@ import { createAppKit } from '@reown/appkit/react';
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
 import { solana } from '@reown/appkit/networks';
 import { normalizeSiteTheme, type SiteTheme } from '../../features/theme/theme';
-import { installWalletModalSkin } from './walletModalSkin';
+import { installWalletModalSkin, refreshWalletModalSkin } from './walletModalSkin';
 
 /**
  * Reown AppKit is the wallet-connection transport for the Solana wallet layer.
@@ -90,8 +90,12 @@ function initWalletModal() {
   // Expose "modal is open" to CSS/JS (e.g. MazeBackground pauses its per-frame work).
   const root = document.documentElement;
   modal.subscribeState((state) => {
-    if (state.open) root.setAttribute('data-wallet-modal', 'open');
-    else root.removeAttribute('data-wallet-modal');
+    if (state.open) {
+      root.setAttribute('data-wallet-modal', 'open');
+      refreshWalletModalSkin();
+    } else {
+      root.removeAttribute('data-wallet-modal');
+    }
   });
 
   return modal;
