@@ -50,7 +50,7 @@ export function getWalletTheme(theme: SiteTheme) {
     themeVariables: {
       '--apkt-accent': readToken('--ar-accent') || fallback.accent,
       '--apkt-color-mix': readToken('--ar-bg') || fallback.surface,
-      '--apkt-color-mix-strength': SURFACE_MIX_STRENGTH,
+      '--apkt-color-mix-strength': 0,
       '--apkt-font-family': 'Montserrat, system-ui, sans-serif',
       '--apkt-border-radius-master': '0px', // corners are chamfered by walletModalSkin, not rounded
     },
