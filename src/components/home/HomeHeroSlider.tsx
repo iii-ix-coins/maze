@@ -101,10 +101,8 @@ export function HomeHeroSlider() {
         <p>{slide.description}</p>
         <div className="home-hero-actions">
           <a className="home-hero-cta home-hero-cta--primary" href={slide.primary.href}>
-            {slide.primary.label}<span aria-hidden="true">↗</span>
           </a>
           <a className="home-hero-cta home-hero-cta--secondary" href={slide.secondary.href}>
-            {slide.secondary.label}<span aria-hidden="true">→</span>
           </a>
         </div>
       </div>
