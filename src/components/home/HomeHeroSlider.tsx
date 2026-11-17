@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import './home-hero-slider.css';
 
 type Slide = {
-  eyebrow: string;
   title: string;
   description: string;
   primary: { label: string; href: string };
@@ -14,7 +13,6 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    eyebrow: 'WELCOME TO MAZE',
     title: 'Your next challenge starts here.',
     description: 'Create a maze room or jump into one that is already waiting. Find your route and make every move count.',
     primary: { label: 'Start playing', href: '/maze.html?view=create' },
@@ -24,7 +22,6 @@ const SLIDES: Slide[] = [
     index: '01',
   },
   {
-    eyebrow: 'MAKE IT YOUR MAZE',
     title: 'Set up a challenge of your own.',
     description: 'Choose the maze difficulty, player count and goals, then create a room for your next run.',
     primary: { label: 'Create a room', href: '/maze.html?view=create' },
@@ -34,7 +31,6 @@ const SLIDES: Slide[] = [
     index: '02',
   },
   {
-    eyebrow: 'FIND YOUR ROOM',
     title: 'The next race could be one click away.',
     description: 'Browse waiting rooms, find an open seat and join the maze action. You can also explore races already in progress.',
     primary: { label: 'Browse rooms', href: '/maze.html?view=rooms' },
@@ -44,7 +40,6 @@ const SLIDES: Slide[] = [
     index: '03',
   },
   {
-    eyebrow: 'READY, SET, MAZE',
     title: 'Find the route. Reach the goals.',
     description: 'Navigate a generated maze, keep your focus and race toward the goals. Your next run is ready when you are.',
     primary: { label: 'Play now', href: '/maze.html?view=create' },
@@ -102,7 +97,6 @@ export function HomeHeroSlider() {
     >
       <div className="home-hero-glow" aria-hidden="true" />
       <div className="home-hero-copy" key={slide.index}>
-        <span className="home-hero-eyebrow"><i />{slide.eyebrow}</span>
         <h1>{slide.title}</h1>
         <p>{slide.description}</p>
         <div className="home-hero-actions">
@@ -143,7 +137,6 @@ export function HomeHeroSlider() {
               key={item.index}
               type="button"
               className={`home-hero-dot${index === active ? ' is-active' : ''}`}
-              aria-label={`Go to slide ${index + 1}: ${item.eyebrow}`}
               aria-current={index === active ? 'true' : undefined}
               onClick={() => setActive(index)}
             />
