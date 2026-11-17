@@ -88,6 +88,36 @@ html[data-theme="light"] {
     --nav-wallet-connected-border: rgba(75, 44, 145, .53);
 }
 
+/* Paste at the end of src/styles/arena.css (unlayered, after the palettes).
+   These are the only values the AppKit skin reads; change the look here. */
+html[data-theme] {
+    --wallet-cut: 18px;
+    /* window: same as .home-hero-slider --hero-cut */
+    --wallet-cut-sm: 8px;
+    /* buttons / rows: same as .nav-link --cut */
+    --wallet-modal-bg-size: 240%;
+    /* zoom into the maze like MazeBackground does */
+    --wallet-modal-bg-position: 60% 40%;
+}
+
+html[data-theme="grass"] {
+    --wallet-modal-bg-image: url("/css/images/3D-bg-grass.svg");
+    --wallet-modal-overlay: rgba(5, 11, 9, .80);
+    --wallet-modal-line: rgba(182, 255, 46, .34);
+}
+
+html[data-theme="dark"] {
+    --wallet-modal-bg-image: url("/css/images/3D-bg-dark.svg");
+    --wallet-modal-overlay: rgba(7, 8, 16, .80);
+    --wallet-modal-line: rgba(120, 150, 255, .36);
+}
+
+html[data-theme="light"] {
+    --wallet-modal-bg-image: url("/css/images/3D-bg-light.svg");
+    --wallet-modal-overlay: rgba(255, 253, 246, .84);
+    --wallet-modal-line: rgba(16, 19, 26, .70);
+}
+
 /* —— 2 · TOKENS (re-point the existing design system) ——————————————————— */
 html[data-theme] {
     --ar-brk: linear-gradient(var(--ar-accent), var(--ar-accent));

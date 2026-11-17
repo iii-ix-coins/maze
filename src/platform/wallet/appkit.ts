@@ -2,6 +2,7 @@ import { createAppKit } from '@reown/appkit/react';
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
 import { solana } from '@reown/appkit/networks';
 import { normalizeSiteTheme, type SiteTheme } from '../../features/theme/theme';
+import { installWalletModalSkin } from './walletModalSkin';
 
 /**
  * Reown AppKit is the wallet-connection transport for the Solana wallet layer.
@@ -51,7 +52,7 @@ export function getWalletTheme(theme: SiteTheme) {
       '--apkt-color-mix': readToken('--ar-bg') || fallback.surface,
       '--apkt-color-mix-strength': SURFACE_MIX_STRENGTH,
       '--apkt-font-family': 'Montserrat, system-ui, sans-serif',
-      '--apkt-border-radius-master': '2px',
+      '--apkt-border-radius-master': '0px', // corners are chamfered by walletModalSkin, not rounded
     },
   };
 }
@@ -83,6 +84,8 @@ function initWalletModal() {
     themeMode: initialTheme.themeMode,
     themeVariables: initialTheme.themeVariables,
   });
+
+  installWalletModalSkin();
 
   // Expose "modal is open" to CSS/JS (e.g. MazeBackground pauses its per-frame work).
   const root = document.documentElement;
