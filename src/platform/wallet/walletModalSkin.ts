@@ -5,6 +5,10 @@ wui-card {
   --wallet-c: var(--wallet-cut, 18px);
   border-radius: 0;
   background-color: transparent;
+  background-image: var(--wallet-modal-bg-image, none);
+  background-size: var(--wallet-modal-bg-size, 900px);
+  background-position: var(--wallet-modal-bg-position, center);
+  background-repeat: no-repeat;
   box-shadow: inset 0 0 0 1px var(--wallet-modal-line, rgba(182, 255, 46, .3));
   clip-path: polygon(0 0, calc(100% - var(--wallet-c)) 0, 100% var(--wallet-c), 100% 100%, var(--wallet-c) 100%, 0 calc(100% - var(--wallet-c)));
 }

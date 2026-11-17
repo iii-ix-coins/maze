@@ -98,19 +98,16 @@ html[data-theme] {
 
 html[data-theme="grass"] {
     --wallet-modal-bg-image: url("/css/images/wallet-bg-grass.svg");
-    --wallet-modal-overlay: rgba(5, 11, 9, .45);
     --wallet-modal-line: rgba(182, 255, 46, .34);
 }
 
 html[data-theme="dark"] {
     --wallet-modal-bg-image: url("/css/images/wallet-bg-dark.svg");
-    --wallet-modal-overlay: rgba(7, 8, 16, .40);
     --wallet-modal-line: rgba(120, 150, 255, .36);
 }
 
 html[data-theme="light"] {
     --wallet-modal-bg-image: url("/css/images/wallet-bg-light.svg");
-    --wallet-modal-overlay: rgba(255, 253, 246, .40);
     --wallet-modal-line: rgba(16, 19, 26, .70);
 }
 
