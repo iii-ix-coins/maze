@@ -19,7 +19,7 @@ const FONT_CSS = `
  * Do not override the mobile card positioning: AppKit's native bottom-sheet
  * layout and slide-up transition must remain in control below 640px.
  */
-const DESKTOP_LAYOUT_CSS = ` {
+const DESKTOP_LAYOUT_CSS = `
   wui-card {
     position: fixed !important;
     inset: 50% auto auto 50% !important;
@@ -30,7 +30,6 @@ const DESKTOP_LAYOUT_CSS = ` {
     max-inline-size: min(400px, calc(100vw - 32px)) !important;
     max-block-size: calc(100dvh - 32px) !important;
   }
-}
 `;
 
 
