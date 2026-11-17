@@ -1,18 +1,19 @@
 # Solana wallet platform
 
-The wallet platform owns wallet discovery and connection UI. It must not depend on Maze Game Loop, simulation state, room state, or the multiplayer protocol.
+The wallet platform owns wallet connection and account-state integration. It must not depend on Maze Game Loop, simulation state, room state, or the multiplayer protocol.
 
-## Current connection implementation
+## Connection implementation
 
 - **Connection SDK:** Reown AppKit with its Solana adapter.
-- **Browser wallet discovery:** Wallet Standard / injected Solana wallet integrations exposed through the adapter.
+- **UI:** Official, unmodified Reown AppKit modal and internal views.
+- **Navigation trigger:** The existing Maze-owned `WalletConnectButton` remains unchanged. It opens the official Reown modal through AppKit's `open()` API and displays the current Solana address/status.
+- **Browser wallet discovery:** Wallet integrations exposed by the Solana adapter.
 - **Remote and mobile connection:** WalletConnect through Reown's wallet network and QR/deep-link flow.
 - **Supported chain:** Solana mainnet only.
-- **UI entry point:** `WalletConnectButton` inside the existing `SiteNavigation`.
-- **Theme:** the AppKit modal follows the existing `ThemeBridgeProvider` theme (dark, light, grass) and uses Maze's mint/grass accent.
+- **Theme:** AppKit uses its defaults, including system color-scheme behavior. Maze theme tokens do not alter the Reown modal.
 - **Existing Solana SDK:** `@solana/web3.js` remains installed and unchanged for current SPL-token and engine consumers.
 
-Reown documents direct connections to 40+ major wallets and WalletConnect-based connections. This is broad coverage, not a guarantee that literally every Solana-capable wallet is supported. Wallet availability depends on each wallet's connector support and platform.
+No AppKit `themeMode`, `themeVariables`, feature overrides, or custom Shadow DOM styles are configured. The `metadata` object identifies Maze to wallets and supplies the actual current origin; it is not a modal theme override.
 
 ## Setup
 
@@ -22,18 +23,15 @@ Reown documents direct connections to 40+ major wallets and WalletConnect-based 
    npm install
    ```
 
-   This updates `package-lock.json` to match `package.json`.
-
 2. Create a project at [Reown Dashboard](https://dashboard.reown.com) and copy its public Project ID.
 
-3. Add these values to the local `.env` file and to the production **build environment**:
+3. Add the public Project ID to the local `.env` file and production **build environment**:
 
    ```dotenv
    VITE_REOWN_PROJECT_ID=your_public_project_id
-   VITE_APP_URL=https://hollld.fun
    ```
 
-4. Add the exact production origin (and development origin if needed) to the project's allowed domains in the Reown Dashboard.
+4. Add each exact serving origin (production and development, if used) to the project's allowed domains in the Reown Dashboard.
 
 5. Build and verify:
 
@@ -46,7 +44,11 @@ Reown documents direct connections to 40+ major wallets and WalletConnect-based 
 
 `VITE_REOWN_PROJECT_ID` is intentionally public because Vite embeds `VITE_*` values into the browser bundle. It is an application identifier, not a private API secret. Never put a seed phrase, private key, or server secret in a `VITE_*` variable.
 
-If the Project ID is missing, the navigation button remains visibly disabled and explains which build variable is missing; it does not pretend a wallet is connected.
+If the Project ID is missing, the existing navigation button remains visibly disabled and explains which build variable is missing; it does not pretend a wallet is connected.
+
+## Modal visibility signal
+
+The AppKit state subscription sets `data-wallet-modal="open"` on the document root while the modal is open. `MazeBackground` uses this attribute to pause its per-frame SVG camera work. This signal does not style or modify AppKit's UI and should be retained unless the MazeBackground optimization is removed separately.
 
 ## Connection is not authentication
 
@@ -58,4 +60,4 @@ No transaction is requested by the current connection flow. Do not request or st
 
 ## Future wallet coverage
 
-Reown AppKit is the first integration because it combines browser wallet discovery with WalletConnect's QR/mobile path while allowing the existing navigation button to remain Maze-owned. If device testing identifies Android wallets that are only reachable through Solana Mobile Wallet Adapter (MWA), add MWA as a separate transport adapter inside this boundary. Do not replace the existing AppKit flow or change the Maze engine to add it.
+Reown AppKit is used because it combines browser wallet discovery with WalletConnect's QR/mobile path while allowing the existing Maze navigation button to remain unchanged. If device testing identifies Android wallets that are only reachable through Solana Mobile Wallet Adapter (MWA), add MWA as a separate transport adapter inside this boundary. Do not change the Maze engine to add it.

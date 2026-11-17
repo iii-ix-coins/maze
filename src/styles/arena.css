@@ -88,29 +88,6 @@ html[data-theme="light"] {
     --nav-wallet-connected-border: rgba(75, 44, 145, .53);
 }
 
-html[data-theme] {
-    --wallet-cut: 18px;      /* window: same as .home-hero-slider --hero-cut */
-    --wallet-cut-sm: 8px;    /* buttons / rows: same as .nav-link --cut */
-    /* Fixed pixel scale: same maze cell size on desktop and phone (a % size changes with card width). */
-    --wallet-modal-bg-size: 900px;
-    --wallet-modal-bg-position: 60% 40%;
-}
-
-html[data-theme="grass"] {
-    --wallet-modal-bg-image: url("/css/images/wallet-bg-grass.svg");
-    --wallet-modal-line: rgba(182, 255, 46, .34);
-}
-
-html[data-theme="dark"] {
-    --wallet-modal-bg-image: url("/css/images/wallet-bg-dark.svg");
-    --wallet-modal-line: rgba(120, 150, 255, .36);
-}
-
-html[data-theme="light"] {
-    --wallet-modal-bg-image: url("/css/images/wallet-bg-light.svg");
-    --wallet-modal-line: rgba(16, 19, 26, .70);
-}
-
 /* —— 2 · TOKENS (re-point the existing design system) ——————————————————— */
 html[data-theme] {
     --ar-brk: linear-gradient(var(--ar-accent), var(--ar-accent));
