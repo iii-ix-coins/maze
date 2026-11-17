@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useAppKit, useAppKitAccount, useAppKitTheme } from '@reown/appkit/react';
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
-import { getWalletTheme } from './appkit'; // importing also runs createAppKit()
+import { applyWalletTheme } from './appkit'; // importing also runs createAppKit()
 
 export type WalletOpenOptions = Parameters<ReturnType<typeof useAppKit>['open']>[0];
 export type WalletOpenFn = (options?: WalletOpenOptions) => unknown;
@@ -27,7 +27,6 @@ export type WalletRuntimeProps = {
 export function WalletRuntime({ onSnapshot, onReady }: WalletRuntimeProps) {
   const { open } = useAppKit();
   const { address, isConnected, status } = useAppKitAccount({ namespace: 'solana' });
-  const { setThemeMode, setThemeVariables } = useAppKitTheme();
   const theme = useSiteTheme();
 
   const openRef = useRef(open);
@@ -44,11 +43,10 @@ export function WalletRuntime({ onSnapshot, onReady }: WalletRuntimeProps) {
     onSnapshot({ address, isConnected, status });
   }, [address, isConnected, status, onSnapshot]);
 
+  // Only the site theme drives this; no AppKit hook is subscribed to what it writes.
   useEffect(() => {
-    const { themeMode, themeVariables } = getWalletTheme(theme);
-    setThemeMode(themeMode);
-    setThemeVariables(themeVariables);
-  }, [theme, setThemeMode, setThemeVariables]);
+    applyWalletTheme(theme);
+  }, [theme]);
 
   return null;
 }

@@ -88,6 +88,8 @@ export function WalletConnectButton() {
   }, []);
 
   const handleSnapshot = useCallback((next: WalletSnapshot) => {
+    const prev = snapshotRef.current;
+    if (prev.address === next.address && prev.isConnected === next.isConnected && prev.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
   }, []);
@@ -112,13 +114,17 @@ export function WalletConnectButton() {
       const options: WalletOpenOptions = snapshotRef.current.isConnected
         ? { view: 'Account' }
         : { view: 'Connect', namespace: 'solana' };
-      try {
-        void Promise.resolve(openRef.current?.(options)).catch((error: unknown) => {
+      // Open on the next task: not inside the click dispatch nor React's effect flush,
+      // so the click can finish and AppKit's heavy first render does not block the commit.
+      window.setTimeout(() => {
+        try {
+          void Promise.resolve(openRef.current?.(options)).catch((error: unknown) => {
+            console.error('[wallet] failed to open the wallet modal', error);
+          });
+        } catch (error) {
           console.error('[wallet] failed to open the wallet modal', error);
-        });
-      } catch (error) {
-        console.error('[wallet] failed to open the wallet modal', error);
-      }
+        }
+      }, 0);
     };
 
     if (snapshot.status !== 'reconnecting') {

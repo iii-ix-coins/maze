@@ -220,6 +220,12 @@ export function MazeBackground() {
     };
 
     const tick = (now: number) => {
+      // The wallet modal covers the page: skip the SVG camera work while it is open.
+      if (root.hasAttribute('data-wallet-modal')) {
+        previousFrameAt = now;
+        animationFrameId = window.requestAnimationFrame(tick);
+        return;
+      }
       const deltaMs = clamp(now - previousFrameAt, 0, MAX_FRAME_DELTA_MS);
       previousFrameAt = now;
       if (!prefersReducedMotion && now - lastScrollAt > SCROLL_IDLE_DELAY_MS) {

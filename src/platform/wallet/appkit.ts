@@ -3,6 +3,19 @@ import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
 import { solana } from '@reown/appkit/networks';
 import { normalizeSiteTheme, type SiteTheme } from '../../features/theme/theme';
 
+/**
+ * Reown AppKit is the wallet-connection transport for the Solana wallet layer.
+ *
+ * The public Project ID is required for WalletConnect/mobile discovery. The
+ * module is safe to import before configuration: the UI renders a clear
+ * disabled state until VITE_REOWN_PROJECT_ID is supplied at build time.
+ *
+ * Domain handling: `metadata.url` is always the origin the page is actually
+ * served from. WalletConnect/Reown compare it with the browser origin and with
+ * the dashboard allowlist, so a fixed env value (e.g. hollld.fun) breaks the
+ * connection on every other host (e.g. *.up.railway.app). Every host that serves
+ * the site must be listed in the Reown Dashboard allowlist.
+ */
 const projectId = String(import.meta.env.VITE_REOWN_PROJECT_ID ?? '').trim();
 
 export const isWalletConnectionConfigured = projectId.length > 0;
@@ -43,11 +56,15 @@ export function getWalletTheme(theme: SiteTheme) {
   };
 }
 
-if (isWalletConnectionConfigured) {
+/** Last theme pushed to AppKit; identical themes are never re-applied. */
+let appliedThemeKey = '';
+
+function initWalletModal() {
   const appOrigin = window.location.origin;
   const initialTheme = getWalletTheme(normalizeSiteTheme(document.documentElement.dataset.theme));
+  appliedThemeKey = JSON.stringify(initialTheme);
 
-  createAppKit({
+  const modal = createAppKit({
     adapters: [new SolanaAdapter()],
     networks: [solana],
     defaultNetwork: solana,
@@ -66,4 +83,32 @@ if (isWalletConnectionConfigured) {
     themeMode: initialTheme.themeMode,
     themeVariables: initialTheme.themeVariables,
   });
+
+  // Expose "modal is open" to CSS/JS (e.g. MazeBackground pauses its per-frame work).
+  const root = document.documentElement;
+  modal.subscribeState((state) => {
+    if (state.open) root.setAttribute('data-wallet-modal', 'open');
+    else root.removeAttribute('data-wallet-modal');
+  });
+
+  return modal;
+}
+
+/** Created once, at module evaluation; null when no Project ID is configured. */
+export const walletModal = isWalletConnectionConfigured ? initWalletModal() : null;
+
+/**
+ * Imperative theme sync. Deliberately NOT done with the `useAppKitTheme` hook:
+ * that hook subscribes the component to the very store it writes to, so a
+ * set-in-effect can feed back into itself. Here nothing re-renders, and an
+ * unchanged theme is a no-op.
+ */
+export function applyWalletTheme(theme: SiteTheme): void {
+  if (!walletModal) return;
+  const next = getWalletTheme(theme);
+  const key = JSON.stringify(next);
+  if (key === appliedThemeKey) return;
+  appliedThemeKey = key;
+  walletModal.setThemeMode(next.themeMode);
+  walletModal.setThemeVariables(next.themeVariables);
 }
