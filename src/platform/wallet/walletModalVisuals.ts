@@ -2,7 +2,6 @@ const MODAL_HOST = /^(w3m|appkit)-modal$/;
 const STYLE_MARKERS = {
   font: 'data-maze-wallet-font',
   desktop: 'data-maze-wallet-desktop-layout',
-  backdrop: 'data-maze-wallet-backdrop',
   root: 'data-maze-wallet-modal-root',
 } as const;
 
@@ -35,18 +34,6 @@ const DESKTOP_LAYOUT_CSS = `
 }
 `;
 
-/* Known AppKit backdrop elements. The inline fallback below covers version
- * differences where the backdrop is implemented by another internal element. */
-const BACKDROP_CSS = `
-w3m-modal-backdrop,
-wui-overlay,
-w3m-overlay,
-[part="overlay"] {
-  background: var(--maze-wallet-overlay, rgba(34, 229, 255, .24)) !important;
-  backdrop-filter: blur(7px) !important;
-  -webkit-backdrop-filter: blur(7px) !important;
-}
-`;
 
 /* A separate, wider ambient halo. It does not cast shadows on card contents. */
 const ROOT_GLOW_CSS = `
@@ -71,9 +58,7 @@ const ROOT_GLOW_CSS = `
 
 const styledRoots = new WeakSet<ShadowRoot>();
 const watchedRoots = new WeakSet<ShadowRoot>();
-const tintedBackdrops = new WeakSet<Element>();
 let installed = false;
-let activeOverlay = 'rgba(34, 229, 255, .24)';
 
 function readAccent(): { rgb: string; overlay: string } {
   const styles = window.getComputedStyle(document.documentElement);
@@ -95,7 +80,6 @@ function readAccent(): { rgb: string; overlay: string } {
 
 function applyThemeTokens(): void {
   const { rgb, overlay } = readAccent();
-  activeOverlay = overlay;
   const host = document.querySelector('w3m-modal, appkit-modal');
   if (host instanceof HTMLElement) {
     host.style.setProperty('--maze-wallet-rgb', rgb);
@@ -111,40 +95,7 @@ function appendStyle(root: ShadowRoot, marker: string, css: string): void {
   root.appendChild(style);
 }
 
-function tintLargeBackdropCandidates(root: ShadowRoot): void {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const selectors = 'w3m-modal-backdrop, wui-overlay, w3m-overlay, [part="overlay"]';
 
-  root.querySelectorAll(selectors).forEach((element) => {
-    if (!(element instanceof HTMLElement) || element.localName === 'wui-card') return;
-    const rect = element.getBoundingClientRect();
-    if (rect.width < width * 0.75 || rect.height < height * 0.75) return;
-
-    element.style.setProperty('background', activeOverlay, 'important');
-    element.style.setProperty('backdrop-filter', 'blur(7px)', 'important');
-    element.style.setProperty('-webkit-backdrop-filter', 'blur(7px)', 'important');
-    tintedBackdrops.add(element);
-  });
-
-  // Fallback for AppKit patch releases that rename the backdrop custom element.
-  // Only full-screen elements inside the modal's own shadow tree are considered.
-  root.querySelectorAll('*').forEach((element) => {
-    if (!(element instanceof HTMLElement) || element.localName === 'wui-card') return;
-    const rect = element.getBoundingClientRect();
-    if (rect.width < width * 0.88 || rect.height < height * 0.88) return;
-    const position = window.getComputedStyle(element).position;
-    if (position !== 'fixed' && position !== 'absolute') return;
-
-    const background = window.getComputedStyle(element).backgroundColor;
-    if (!background || background === 'transparent' || background === 'rgba(0, 0, 0, 0)') return;
-    element.style.setProperty('background-color', activeOverlay, 'important');
-    element.style.setProperty('background-image', 'none', 'important');
-    element.style.setProperty('backdrop-filter', 'blur(7px)', 'important');
-    element.style.setProperty('-webkit-backdrop-filter', 'blur(7px)', 'important');
-    tintedBackdrops.add(element);
-  });
-}
 
 function scanElement(element: Element): void {
   if (element.shadowRoot) adoptShadowRoot(element.shadowRoot);
@@ -154,12 +105,10 @@ function adoptShadowRoot(root: ShadowRoot, isModalRoot = false): void {
   if (!styledRoots.has(root)) {
     appendStyle(root, STYLE_MARKERS.font, FONT_CSS);
     appendStyle(root, STYLE_MARKERS.desktop, DESKTOP_LAYOUT_CSS);
-    appendStyle(root, STYLE_MARKERS.backdrop, BACKDROP_CSS);
     styledRoots.add(root);
   }
   if (isModalRoot) appendStyle(root, STYLE_MARKERS.root, ROOT_GLOW_CSS);
 
-  tintLargeBackdropCandidates(root);
 
   if (!watchedRoots.has(root)) {
     watchedRoots.add(root);
@@ -169,7 +118,6 @@ function adoptShadowRoot(root: ShadowRoot, isModalRoot = false): void {
           if (node instanceof Element) scanElement(node);
         });
       }
-      tintLargeBackdropCandidates(root);
     });
     observer.observe(root, { childList: true, subtree: true });
   }
@@ -215,11 +163,6 @@ export function installWalletModalVisuals(): void {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('w3m-modal, appkit-modal').forEach((host) => {
-        if (host.shadowRoot) tintLargeBackdropCandidates(host.shadowRoot);
-      });
-    }, { passive: true });
   };
 
   if (document.body) start();
