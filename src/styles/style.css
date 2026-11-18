@@ -743,7 +743,6 @@
     :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>span {
         display: block;
         font-size: var(--fs-xs);
-        font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--text-mute);
@@ -752,7 +751,6 @@
     :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>strong {
         display: block;
         font-family: var(--font-display);
-        font-weight: 650;
         letter-spacing: -0.015em;
         font-variant-numeric: tabular-nums;
         overflow-wrap: anywhere;
@@ -962,7 +960,7 @@
     .bar-box>span,
     .change-period {
         font-weight: 600;
-        font-size: 0.89rem;
+        font-size: 0.9rem;
         letter-spacing: 0.03em;
         text-transform: uppercase;
         white-space: nowrap;
@@ -970,7 +968,7 @@
 
     .metric-value {
         font-family: var(--font-mono);
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
     }
@@ -979,7 +977,7 @@
     .change-box>div:not(.change-period) {
         font-family: var(--font-mono);
         font-weight: 500;
-        font-size: 0.96rem;
+        font-size: 0.9rem;
         letter-spacing: -0.02em;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
@@ -990,7 +988,7 @@
     .change-box>div.text-loss::before {
         display: inline-block;
         margin-right: 5px;
-        font-size: 0.6em;
+        font-size: 0.9rem;
         vertical-align: 0.14em;
     }
 
@@ -1027,7 +1025,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         font-family: var(--font-mono);
-        font-size: 0.78rem;
+        font-size: 0.9rem;
         letter-spacing: -0.01em;
         color: var(--text-soft);
     }
@@ -1459,10 +1457,9 @@
 
     .brand-description {
         min-width: 100%;
-        font-weight: 400;
         font-stretch: 100%;
         letter-spacing: -0.01em;
-        font-size: clamp(0.75rem, 0.75rem + 2vw, 2.2rem);
+        font-size: clamp(0.9rem, 0.9rem + 2vw, 0.7rem);
     }
 
     .brand-description span {
@@ -1541,8 +1538,6 @@
         gap: 10px;
         padding: 0.9rem 1.7rem;
         border-radius: var(--r-pill);
-        font-size: var(--fs-base);
-        font-weight: 680;
         letter-spacing: -0.005em;
         white-space: nowrap;
         transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base), background var(--t-base), color var(--t-base);
@@ -1677,7 +1672,6 @@
         padding: 0.72rem 1.8rem;
         border-radius: var(--r-pill);
         font-size: var(--fs-sm);
-        font-weight: 600;
         color: var(--text-soft);
         border: 1px solid var(--stroke-hi);
         background: var(--veil);
@@ -1752,7 +1746,6 @@
         align-items: center;
         gap: 10px;
         font-size: var(--fs-xs);
-        font-weight: 700;
         letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--mint);
@@ -1773,7 +1766,6 @@
         padding: 5px 12px;
         border-radius: var(--r-pill);
         font-size: var(--fs-xs);
-        font-weight: 650;
         letter-spacing: 0.04em;
         background: var(--veil);
         border: 1px solid var(--stroke);
@@ -2090,8 +2082,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     background: transparent;
     color: var(--nav-text);
     font: inherit;
-    font-size: .86rem;
-    font-weight: 650;
+    font-size: 0.9rem;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
@@ -2111,7 +2102,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     width: 18px;
     flex: 0 0 18px;
     color: var(--nav-accent);
-    font-size: 1.15rem;
+    font-size: 0.9rem;
     line-height: 1;
 }
 
@@ -2271,9 +2262,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 .nav-wallet-button .nav-wallet-address {
-    font-family: var(--font-mono);
-    font-size: 0.82em;
-    letter-spacing: -0.02em;
+    font-size: 0.9rem;
 }
 
 .nav-wallet-button:disabled {
