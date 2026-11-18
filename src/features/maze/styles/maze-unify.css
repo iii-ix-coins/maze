@@ -130,9 +130,7 @@
 body.in-menu {
     --section-gap: 10px;
     height: 100vh;
-    height: 100dvh;
     min-height: 100vh;
-    min-height: 100dvh;
     gap: 10px;
     align-items: stretch;
     overflow-y: hidden;
@@ -142,7 +140,6 @@ body.in-menu {
 body.in-menu #site-header {
     position: relative;
     top: auto;
-    z-index: 1000;
     flex: 0 0 auto;
 }
 
@@ -210,7 +207,6 @@ body.in-menu #site-share-modal {
     #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
         height: 100%;
         overflow: hidden;
-            overflow: clip;
     }
 
     /* The shared site navigation now occupies its own row above the wizard.
@@ -218,6 +214,22 @@ body.in-menu #site-share-modal {
        underneath the header or get clipped at the bottom of short viewports. */
     #mazeApp.maze-app.in-menu > #createGame.cg {
         --maze-side: min(100vh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
-        --maze-side: min(100dvh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
+    }
+    @supports (overflow: clip) {
+        #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
+            overflow: clip;
+        }
+    }
+    @supports (height: 100dvh) {
+        #mazeApp.maze-app.in-menu > #createGame.cg {
+            --maze-side: min(100dvh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
+        }
+    }
+}
+
+@supports (height: 100dvh) {
+    body.in-menu {
+        height: 100dvh;
+        min-height: 100dvh;
     }
 }

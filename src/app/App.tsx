@@ -4,6 +4,7 @@ import { AppProviders } from './providers/AppProviders';
 import { AppRouter } from './router';
 import { AppErrorBoundary } from './error-boundary';
 import { initNavigation, usePathname } from './navigation';
+import { resolveSiteRoute, SITE_DEFAULT_TITLE } from './routes';
 import { PageLoadingProvider } from '../components/layout/PageLoadingProvider';
 
 const MazePage = lazy(() => import('../features/maze/MazePage').then((module) => ({ default: module.MazePage })));
@@ -11,18 +12,14 @@ const MazePage = lazy(() => import('../features/maze/MazePage').then((module) =>
 /** One React tree owns the persistent background, site shell, routes and page loader. */
 export function App() {
   const pathname = usePathname();
+  const route = resolveSiteRoute(pathname);
   const mazeHost = document.getElementById('maze-root');
-  const isMazePage = pathname === '/maze.html' && Boolean(mazeHost);
+  const isMazePage = route?.id === 'maze' && Boolean(mazeHost);
 
   useEffect(() => initNavigation(), []);
   useEffect(() => {
-    const titles: Record<string, string> = {
-      '/': 'Hollld.fun', '/coin.html': 'Token Market · Hollld', '/token': 'Token Market · Hollld',
-      '/holders.html': 'Top Holders · Hollld', '/holders': 'Top Holders · Hollld',
-      '/market.html': 'Market · Hollld', '/market': 'Market · Hollld', '/profile': 'Profile · Hollld', '/maze.html': 'Maze · Hollld',
-    };
-    document.title = titles[pathname] ?? 'Hollld.fun';
-  }, [pathname]);
+    document.title = route?.title ?? SITE_DEFAULT_TITLE;
+  }, [route?.title]);
 
   return (
     <AppErrorBoundary>

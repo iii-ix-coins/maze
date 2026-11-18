@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { trackPageReadiness } from '../../app/page-readiness';
+import { API_PATHS } from '../../services/api/contracts';
 
 export interface HolderItem extends Record<string, any> {
   wallet?: string;
@@ -55,7 +56,7 @@ export function useHolders(): HoldersState {
       }
 
       try {
-        const response = await fetch('/api/live-feed/holders?limit=100', {
+        const response = await fetch(`${API_PATHS.liveFeedHolders}?limit=100`, {
           method: 'GET', cache: 'no-store', headers: { Accept: 'application/json' },
           signal: controller.signal,
         });

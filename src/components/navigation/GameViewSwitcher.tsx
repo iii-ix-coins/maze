@@ -1,6 +1,8 @@
 
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
 import { navigateTo } from '../../app/navigation';
+import { isMazeDocumentPath } from '../../app/routes';
+import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 
 const VIEWS = ['create', 'rooms', 'live'] as const;
 
@@ -25,11 +27,7 @@ const VIEW_ICONS: Record<GameView, string> = {
  * Inside Maze routes, the default section remains Create.
  */
 function readCurrentView(): GameView | null {
-  const isMazeRoute = /(?:\/maze\.html|\/play\/?$)/i.test(
-    window.location.pathname
-  );
-
-  if (!isMazeRoute) return null;
+  if (!isMazeDocumentPath(window.location.pathname)) return null;
 
   const requestedView = new URLSearchParams(
     window.location.search
@@ -62,11 +60,7 @@ export function GameViewSwitcher() {
         ?.focus();
     }
 
-    const url = new URL('./maze.html', document.baseURI);
-
-    url.searchParams.set('view', view);
-
-    navigateTo(url.href);
+    navigateTo(new URL(MAZE_VIEW_URLS[view], document.baseURI).href);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MarketPayload } from './market-types';
 import { trackPageReadiness } from '../../app/page-readiness';
+import { API_PATHS } from '../../services/api/contracts';
 
 export interface MarketDataState {
   payload: MarketPayload | null;
@@ -28,7 +29,7 @@ export function useMarketData(refreshInterval = 30_000): MarketDataState {
       requestController = controller;
 
       try {
-        const response = await fetch('/api/jupiter-market', {
+        const response = await fetch(API_PATHS.jupiterMarket, {
           method: 'GET',
           cache: 'no-store',
           headers: { Accept: 'application/json' },

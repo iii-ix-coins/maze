@@ -1,3 +1,4 @@
+import { getSiteRoutePath } from '../../app/routes';
 import { memo, useMemo, type CSSProperties } from 'react';
 import { formatInteger } from '../../services/formatters';
 import { useHolders, type HolderItem } from './useHolders';
@@ -82,7 +83,7 @@ export function HoldersPanel({ fullPage = false }: { fullPage?: boolean }) {
           </span>
         </div>
         <div className="holders-header-actions">
-          {!fullPage ? <a className="feature-text-link" href="/holders.html">View all <span aria-hidden="true">→</span></a> : null}
+          {!fullPage ? <a className="feature-text-link" href={getSiteRoutePath('holders')}>View all <span aria-hidden="true">→</span></a> : null}
           <span className="feature-refresh-state">Top 100 · refreshes every 5s</span>
         </div>
       </div>

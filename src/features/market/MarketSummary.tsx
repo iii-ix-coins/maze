@@ -1,6 +1,7 @@
 import { getMarketToken, type MarketPayload } from './market-types';
 import { useMarketData } from './useMarketData';
 import { formatInteger, formatUsd } from '../../services/formatters';
+import { getSiteRoutePath } from '../../app/routes';
 
 interface MarketSummaryProps {
   showTitle?: boolean;
@@ -36,7 +37,7 @@ function TokenSummaryContent({ payload, error }: { payload: MarketPayload | null
           </div>
           <span id="token-summary-verified" className="token-summary-badge" hidden={token?.isVerified !== true}>Verified</span>
         </div>
-        <a href="/coin.html" className="token-summary-link">Token details <span aria-hidden="true">→</span></a>
+        <a href={getSiteRoutePath('coin')} className="token-summary-link">Token details <span aria-hidden="true">→</span></a>
       </div>
 
       <div className="token-summary-grid">

@@ -961,16 +961,7 @@
 
 /* Buttons */
 .lb-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 18px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--glass);
-    color: var(--haze);
     font-size: .86rem;
-    font-weight: 600;
     transition: transform .25s var(--ease), background .25s ease, box-shadow .3s ease, opacity .3s ease;
 }
 
@@ -979,19 +970,11 @@
 }
 
 .lb-btn.is-primary {
-    border-color: transparent;
-    background: var(--haze);
-    color: #0a1a12;
     box-shadow: 0 10px 30px rgba(139, 224, 164, .16);
 }
 
 .lb-btn:active {
     transform: scale(.96);
-}
-
-.lb-btn:disabled {
-    opacity: .45;
-    cursor: default;
 }
 
 @media (hover: hover) {
@@ -1012,18 +995,7 @@
 }
 
 .lb-room-screen {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    align-items: center;
     justify-items: center;
-}
-
-.lb-room-stage {
-    position: relative;
-    width: min(76vw, 340px);
-    margin: 0;
-    aspect-ratio: 1;
 }
 
 .lb-bloom-xl {
@@ -1046,14 +1018,7 @@
 
 .lb-big-count {
     display: inline-flex;
-    color: var(--haze);
-    font-size: clamp(2.6rem, 12vw, 4rem);
     text-shadow: 0 2px 22px rgba(8, 19, 15, .9);
-}
-
-.lb-big-of {
-    color: var(--fog);
-    font-size: .76rem;
 }
 
 /* Big flowers have no empty middle: the count moves to a pill under it. */
@@ -1078,28 +1043,18 @@
 
 .lb-eyebrow {
     margin: 0;
-    color: var(--lantern);
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .18em;
-    text-transform: uppercase;
 }
 
 .lb-room-title {
-    margin: 0;
     outline: 0;
-    font-size: clamp(1.6rem, 5.4vw, 2.3rem);
     font-weight: 700;
     letter-spacing: -.03em;
-    line-height: 1.1;
 }
 
 .lb-room-text {
     min-height: 2.9em;
     margin: 0;
-    color: var(--fog);
     font-size: .9rem;
-    line-height: 1.55;
 }
 
 .lb-room-live {
@@ -1108,42 +1063,17 @@
     gap: 12px;
 }
 
-.lb-code-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
-    border: 1px dashed rgba(255, 215, 154, .45);
-    border-radius: 16px;
-    background: rgba(255, 215, 154, .05);
-}
-
 .lb-code-box small {
-    display: block;
-    color: var(--fog);
-    font-size: .66rem;
     letter-spacing: .1em;
     text-transform: uppercase;
 }
 
 .lb-code-big {
     display: block;
-    color: var(--lantern);
-    font: 700 1.8rem ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-    letter-spacing: .22em;
 }
 
 .lb-copy {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 14px;
     border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--glass);
-    color: var(--haze);
-    font-size: .78rem;
     font-weight: 600;
     transition: background .25s ease, color .25s ease, transform .25s var(--ease);
 }
@@ -1158,22 +1088,9 @@
 
 .lb-copy.is-done {
     border-color: rgba(139, 224, 164, .5);
-    color: var(--moss);
-}
-
-.lb-chips-static {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
 }
 
 .lb-chips-static li {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     padding: 5px 11px;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -1189,32 +1106,15 @@
 }
 
 .lb-members {
-    display: flex;
     flex-direction: column;
-    gap: 6px;
     max-height: min(32vh, 280px);
-    max-height: min(32dvh, 280px);
-    margin: 0;
-    padding: 0;
     overflow-y: auto;
-    list-style: none;
     scrollbar-width: thin;
     scrollbar-color: rgba(228, 246, 234, .2) transparent;
 }
 
 .lb-members:empty {
     display: none;
-}
-
-.lb-member {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 10px;
-    border: 1px solid transparent;
-    border-radius: 14px;
-    background: var(--glass);
-    font-size: .86rem;
 }
 
 .lb-member .lb-av {
@@ -1235,18 +1135,9 @@
     border-color: rgba(255, 155, 138, .4);
 }
 
-.lb-member-badges {
-    display: flex;
-    gap: 6px;
-}
-
 .lb-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
     padding: 2px 8px;
     border-radius: 999px;
-    font-size: .64rem;
     font-weight: 700;
     letter-spacing: .06em;
 }
@@ -1258,26 +1149,15 @@
 
 .lb-tag.is-host {
     background: rgba(255, 215, 154, .16);
-    color: var(--lantern);
 }
 
 .lb-tag.is-you {
     background: rgba(255, 155, 138, .16);
-    color: var(--coral);
 }
 
 .lb-room-note {
     min-height: 2.8em;
     margin: 0;
-    color: var(--fog);
-    font-size: .8rem;
-    line-height: 1.5;
-}
-
-.lb-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 #lbRoom[data-mode="joining"] .lb-code-box,
@@ -1325,7 +1205,6 @@
 
     .lb-room-stage {
         width: min(100%, 62vh, 470px);
-        width: min(100%, 62dvh, 470px);
         justify-self: center;
     }
 
@@ -1340,16 +1219,14 @@
     #lbRoom[data-mode="notice"] .lb-room-panel {
         justify-self: center;
     }
+
+    @supports (height: 100dvh) {
+  .lb-room-stage { width: min(100%, 62dvh, 470px); } }
 }
 
 /* ── Toast ── */
 .lb-toast {
-    position: fixed;
-    left: 50%;
-    bottom: max(22px, env(safe-area-inset-bottom));
-    z-index: 6;
     width: min(92vw, 470px);
-    transform: translateX(-50%);
     pointer-events: none;
 }
 
@@ -1525,7 +1402,6 @@
         position: sticky;
         top: 8px;
         width: min(100%, 64vh);
-        width: min(100%, 64dvh);
     }
 
     .lb-room-text,
@@ -1535,8 +1411,11 @@
 
     .lb-members {
         max-height: 26vh;
-        max-height: 26dvh;
     }
+
+    @supports (height: 100dvh) {
+  .lb-room-stage { width: min(100%, 64dvh); }
+  .lb-members { max-height: 26dvh; } }
 }
 
 /* ── Keyframes ── */
@@ -1585,3 +1464,6 @@
         transition-duration: .01ms !important;
     }
 }
+
+@supports (height: 100dvh) {
+ .lb-members { max-height: min(32dvh, 280px); } }

@@ -18,13 +18,13 @@ const required = [
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/components/navigation/GameViewSwitcher.tsx',
   'src/platform/wallet/WalletConnectButton.tsx',
-  'src/features/profile/ProfilePage.tsx',
+  'src/features/profile/ProfilePage.tsx', 'src/app/routes.ts', 'src/app/routes.test.ts',
   'src/features/interaction/InteractionBar.tsx',
   'src/features/theme/MazeBackground.tsx',
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
   'src/features/maze/engine/frame.ts', 'src/features/maze/canvas/index.ts',
-  'shared/maze/src/index.ts', 'engines/maze-server/src/server.ts',
-  'server.js', 'start.js', 'src/styles/site.css', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
+  'shared/maze/src/index.ts', 'shared/site-routes.json', 'engines/maze-server/src/server.ts',
+  'server.js', 'start.js', 'src/styles/site.css', 'scripts/check-css-duplicates.mjs', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
 ];
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -85,8 +85,20 @@ for (const page of activeHtmlPages) {
     console.error(`[layout] active page must contain exactly one shared-styles marker: ${page}`);
     process.exit(1);
   }
+  if (/document\.title\s*=/.test(html)) {
+    console.error(`[layout] document.title must be owned by the React route manifest, not inline HTML: ${page}`);
+    process.exit(1);
+  }
   if (!html.includes("localStorage.getItem('hollld-theme')")) {
     console.error(`[layout] active page is missing pre-paint theme initialization: ${page}`);
+    process.exit(1);
+  }
+  if (!html.includes('/* @maze-route-paths */')) {
+    console.error(`[layout] Maze pre-paint route setup must be injected from the shared route manifest: ${page}`);
+    process.exit(1);
+  }
+  if (!html.includes('<!-- @site-default-title -->')) {
+    console.error(`[layout] the static document title must be injected from the shared route manifest: ${page}`);
     process.exit(1);
   }
 }
@@ -210,11 +222,9 @@ for (const obsolete of ['rooms-view.ts', 'room-view.ts', 'live-view.ts', 'card-l
   }
 }
 const featureRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
-for (const route of ['/coin.html', '/holders.html', '/market.html']) {
-  if (!featureRouter.includes(route)) {
-    console.error(`[layout] React router is missing active site route: ${route}`);
-    process.exit(1);
-  }
+if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE_COMPONENTS')) {
+  console.error('[layout] React router must resolve active routes from the shared route manifest.');
+  process.exit(1);
 }
 
 const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
@@ -225,37 +235,135 @@ if (utilitiesPosition < 0 || walletPosition < utilitiesPosition) {
   console.error('[layout] WalletConnectButton must remain in the header utilities row, outside the mobile links panel.');
   process.exit(1);
 }
-const gameSwitcherPosition = navigationComponent.indexOf('<GameViewSwitcher />');
-const themeSwitcherPosition = navigationComponent.indexOf('<ThemeSwitcher />');
-if (gameSwitcherPosition < 0 || themeSwitcherPosition < 0 || gameSwitcherPosition > themeSwitcherPosition) {
-  console.error('[layout] GameViewSwitcher must precede ThemeSwitcher in the shared second header row.');
+const secondaryRowMatch = navigationComponent.match(/<div className="nav-secondary-row">([\s\S]*?)<\/div>/);
+if (!secondaryRowMatch || !secondaryRowMatch[1].includes('<GameViewSwitcher />') || !secondaryRowMatch[1].includes('<ThemeSwitcher />')) {
+  console.error('[layout] GameViewSwitcher and ThemeSwitcher must share the independent nav-secondary-row.');
   process.exit(1);
 }
 if (!walletComponent.includes('if (snapshot.isConnected)') || !walletComponent.includes("view: 'Account'") || !walletComponent.includes("view: 'Connect'")) {
   console.error('[layout] Wallet menu must preserve the existing direct-connect and Reown Account/Connect routing.');
   process.exit(1);
 }
+
+const apiRouteManifest = JSON.parse(fs.readFileSync(path.join(root, 'shared/api-routes.json'), 'utf8'));
+const sharedApiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
+const apiServerManifestSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+const apiRouteValues = Object.values(apiRouteManifest);
+if (new Set(apiRouteValues).size !== apiRouteValues.length || apiRouteValues.some((route) => typeof route !== 'string' || !route.startsWith('/'))) {
+  console.error('[layout] shared API route manifest contains duplicate or invalid endpoint paths.');
+  process.exit(1);
+}
+if (!sharedApiContractSource.includes("../../../shared/api-routes.json") || !apiServerManifestSource.includes("require('./shared/api-routes.json')")) {
+  console.error('[layout] Browser API clients and Express must consume the same API route manifest.');
+  process.exit(1);
+}
+if (/['"]\/api\//.test(sharedApiContractSource) || /['"]\/(?:health|api\/)/.test(apiServerManifestSource)) {
+  console.error('[layout] API endpoint paths must not be duplicated as string literals in clients or Express.');
+  process.exit(1);
+}
+
+const routeManifest = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8'));
+const allRoutePaths = routeManifest.routes.flatMap((route) => route.paths);
+if (new Set(allRoutePaths).size !== allRoutePaths.length) {
+  console.error('[layout] shared route manifest contains duplicate path declarations.');
+  process.exit(1);
+}
+const mazeRoute = routeManifest.routes.find((route) => route.id === 'maze');
+if (!mazeRoute?.paths.includes('/maze.html') || !mazeRoute.paths.includes('/play') || mazeRoute.server !== 'maze' || mazeRoute.soft) {
+  console.error('[layout] Maze document aliases must be declared once in the shared route manifest and remain hard navigations.');
+  process.exit(1);
+}
+for (const routeId of ['home', 'maze', 'coin', 'holders', 'market', 'profile']) {
+  if (!routeManifest.routes.some((route) => route.id === routeId)) {
+    console.error(`[layout] shared route manifest is missing route: ${routeId}`);
+    process.exit(1);
+  }
+}
+const profileRoute = routeManifest.routes.find((route) => route.id === 'profile');
+if (!profileRoute?.paths.includes('/profile') || profileRoute.server !== 'spa' || !profileRoute.soft) {
+  console.error('[layout] Profile must be registered once for the React router, soft navigation and server refresh.');
+  process.exit(1);
+}
 const profileRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
 const profileNavigation = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const profileServer = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
-if (!profileRouter.includes("pathname === '/profile'") || !profileNavigation.includes("'/profile'") || !profileServer.includes("'/profile'")) {
-  console.error('[layout] Profile must be supported by the React router, soft navigation and server refresh route.');
+if (!profileRouter.includes('resolveSiteRoute') || !profileNavigation.includes('SOFT_NAVIGATION_PATHS') || !profileServer.includes("require('./shared/site-routes.json')")) {
+  console.error('[layout] React, soft navigation and Express must consume the shared route manifest.');
+  process.exit(1);
+}
+if (profileNavigation.includes('document.title')) {
+  console.error('[layout] document.title must have one owner (App.tsx), not be assigned by both navigation and React effects.');
+  process.exit(1);
+}
+const appTitleSource = fs.readFileSync(path.join(root, 'src/app/App.tsx'), 'utf8');
+const sharedRoutesSource = fs.readFileSync(path.join(root, 'src/app/routes.ts'), 'utf8');
+if ((appTitleSource.match(/document\.title\s*=/g) || []).length !== 1 || !appTitleSource.includes('SITE_DEFAULT_TITLE') || !sharedRoutesSource.includes('SITE_DEFAULT_TITLE')) {
+  console.error('[layout] document title must be assigned once and sourced from the route manifest.');
   process.exit(1);
 }
 
 const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
+const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 if (
-  !sharedSiteStyles.includes('"brand content utilities"') ||
-  !sharedSiteStyles.includes('"game game theme"') ||
-  !sharedSiteStyles.includes('"brand utilities"') ||
-  !sharedSiteStyles.includes('"game theme"') ||
-  !sharedSiteStyles.includes('.nav-inner > .nav-utilities')
+  !sharedSiteStyles.includes('grid-template-areas:\n            "brand content utilities"\n            "secondary secondary secondary"') ||
+  !sharedSiteStyles.includes('grid-template-areas:\n            "brand utilities"\n            "secondary secondary"') ||
+  !sharedSiteStyles.includes('.nav-secondary-row') ||
+  !sharedSiteStyles.includes('gap: 6px;')
 ) {
-  console.error('[layout] shared site CSS must keep wallet/utilities in row one and game/theme controls together in row two.');
+  console.error('[layout] site.css must be the single owner of the responsive header grid and six-pixel switcher gap.');
+  process.exit(1);
+}
+if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*grid/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*flex/s.test(globalStyles)) {
+  console.error('[layout] style.css must not define a second nav-inner layout.');
+  process.exit(1);
+}
+if (/\.nav\s+\.game-view-toggle\s*\{[^}]*margin-top\s*:/s.test(globalStyles)) {
+  console.error('[layout] GameViewSwitcher must not add a separate top margin outside nav-secondary-row.');
   process.exit(1);
 }
 
+const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
+const mazeStyleEntry = fs.readFileSync(path.join(root, 'src/features/maze/styles/index.css'), 'utf8');
+if ((mazePageSource.match(/\.\/styles\/index\.css/g) || []).length !== 1 || /\.\/styles\/(?:maze-site|maze-unify|maze-theme|create-game|lobby)\.css/.test(mazePageSource)) {
+  console.error('[layout] MazePage must load its feature styles through one canonical CSS entry.');
+  process.exit(1);
+}
+for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.css', 'create-game.css', 'lobby.css', 'maze-menu.css']) {
+  if (!mazeStyleEntry.includes(requiredMazeStyle)) {
+    console.error(`[layout] Maze CSS entry is missing ${requiredMazeStyle}.`);
+    process.exit(1);
+  }
+}
+
+const apiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
+for (const apiConsumer of [
+  'src/features/interaction/InteractionBar.tsx',
+  'src/features/live-feed/LiveFeedPanel.tsx',
+  'src/features/holders/useHolders.ts',
+  'src/features/coin/CoinPage.tsx',
+  'src/features/market/useMarketData.ts',
+]) {
+  const source = fs.readFileSync(path.join(root, apiConsumer), 'utf8');
+  if (!source.includes('API_PATHS') || !source.includes("services/api/contracts")) {
+    console.error(`[layout] client API consumer must use the shared API contract: ${apiConsumer}`);
+    process.exit(1);
+  }
+}
+if (!apiContractSource.includes('export const API_PATHS')) {
+  console.error('[layout] shared API contract is missing API_PATHS.');
+  process.exit(1);
+}
+
+const packageConfig = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+if (!packageConfig.scripts['test:maze:run'] || !packageConfig.scripts.check.includes('test:maze:run') || !packageConfig.scripts['check:css:duplicates'] || !packageConfig.scripts.check.includes('check:css:duplicates')) {
+  console.error('[layout] npm run check must execute Maze tests against the server build created earlier in the same check.');
+  process.exit(1);
+}
 const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
+if (!viteConfig.includes("shared/site-routes.json") || !viteConfig.includes("@maze-route-paths") || !viteConfig.includes("@site-default-title")) {
+  console.error('[layout] Vite must inject pre-paint Maze route paths and the default title from the shared site route manifest.');
+  process.exit(1);
+}
 if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   console.error('[layout] Vite production must emit one shared SPA document.');
   process.exit(1);

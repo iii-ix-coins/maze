@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getSiteRoutePath } from '../../app/routes';
 import type { ComponentType } from 'react';
 import type {
   WalletOpenFn,
@@ -224,7 +225,7 @@ export function WalletConnectButton() {
           <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label="Wallet options">
             <a
               className="nav-wallet-menu-item"
-              href="/profile"
+              href={getSiteRoutePath('profile')}
               role="menuitem"
               onClick={() => setWalletMenuOpen(false)}
             >

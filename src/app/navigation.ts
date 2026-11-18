@@ -1,27 +1,13 @@
 import { useSyncExternalStore } from 'react';
-
+import {
+    CLIENT_ROUTE_PATHS,
+    normalizePath,
+    resolveSiteRoute,
+    SOFT_NAVIGATION_PATHS,
+} from './routes';
 
 export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
-
-/* ---------- route table ---------- */
-const SOFT_PATHS = new Set(['/', '/coin.html', '/token', '/holders.html', '/holders', '/market.html', '/market', '/profile']);
-const PAGE_PATHS = new Set([...SOFT_PATHS, '/maze.html']);
-const TITLES: Record<string, string> = {
-    '/': 'Hollld.fun',
-    '/coin.html': 'Token Market · Hollld',
-    '/token': 'Token Market · Hollld',
-    '/holders.html': 'Top Holders · Hollld',
-    '/holders': 'Top Holders · Hollld',
-    '/market.html': 'Market · Hollld',
-    '/market': 'Market · Hollld',
-    '/profile': 'Profile · Hollld',
-};
-
-export function normalizePath(pathname: string) {
-    const path = pathname.toLowerCase().replace(/\/+$/, '') || '/';
-    return path === '/index.html' ? '/' : path;
-}
 
 /* ---------- pathname store (lets the router react to pushState) ---------- */
 const listeners = new Set<() => void>();
@@ -58,7 +44,6 @@ export function playPageEnter(): Promise<void> {
 
 function swapTo(url: URL, push: boolean): void {
     if (push) window.history.pushState(null, '', url.href);
-    document.title = TITLES[normalizePath(url.pathname)] ?? document.title;
     resetScroll();
     emitPath();
 }
@@ -70,7 +55,7 @@ export function navigateTo(href: string) {
         return;
     }
     if (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.search === window.location.search) return;
-    if (!SOFT_PATHS.has(normalizePath(url.pathname))) {
+    if (!SOFT_NAVIGATION_PATHS.has(normalizePath(url.pathname))) {
         window.location.assign(url.href);
         return;
     }
@@ -86,7 +71,7 @@ function onClick(event: MouseEvent) {
     if (!anchor || (anchor.target && anchor.target !== '_self') || anchor.hasAttribute('download')) return;
 
     const url = new URL(anchor.href, window.location.href);
-    if (url.origin !== window.location.origin || !PAGE_PATHS.has(normalizePath(url.pathname))) return;
+    if (url.origin !== window.location.origin || !CLIENT_ROUTE_PATHS.has(normalizePath(url.pathname))) return;
 
     const samePage =
         normalizePath(url.pathname) === normalizePath(window.location.pathname) &&
@@ -96,6 +81,7 @@ function onClick(event: MouseEvent) {
         return;
     }
 
+    if (!resolveSiteRoute(url.pathname)) return;
     event.preventDefault();
     navigateTo(url.href);
 }
@@ -106,7 +92,7 @@ function onPopState() {
 }
 
 function onPageShow(event: PageTransitionEvent) {
-    if (!event.persisted) return; // restored from bfcache: undo any half-finished exit
+    if (!event.persisted) return; // restored from bfcache: resync the route snapshot
     emitPath();
 }
 

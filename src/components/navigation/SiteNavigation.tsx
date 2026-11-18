@@ -3,6 +3,7 @@ import { GameViewSwitcher } from './GameViewSwitcher';
 import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { usePathname } from '../../app/navigation';
+import { getSiteRoutePath, getSiteRoutePathByNavKey, normalizePath, resolveSiteRoute } from '../../app/routes';
 
 type NavItem = {
   label: string;
@@ -16,25 +17,20 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Competitions', href: './competitions.html', key: 'competitions', group: 'compete', disabled: true, title: 'Competitions are coming soon.' },
   { label: 'Leaderboard', href: './leaderboard.html', key: 'leaderboard', group: 'compete', disabled: true, title: 'Leaderboard is coming soon.' },
-  { label: 'Market', href: '/market.html', key: 'market' },
-  { label: 'Token', href: '/coin.html', key: 'token' },
-  { label: 'Holders', href: '/holders.html', key: 'holders' },
+  { label: 'Market', href: getSiteRoutePathByNavKey('market'), key: 'market' },
+  { label: 'Token', href: getSiteRoutePathByNavKey('token'), key: 'token' },
+  { label: 'Holders', href: getSiteRoutePathByNavKey('holders'), key: 'holders' },
   { label: 'How to Play', href: './how-to-play.html', key: 'how-to-play', disabled: true, title: 'How to Play Maze' },
 ];
 
 function getCurrentPageKey(): string | null {
-  const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
-  if (path === '' || path === '/' || path.endsWith('/index.html')) return 'index';
-  const routes: Array<{ suffixes: string[]; key: string }> = [
-    { suffixes: ['/maze.html', '/play'], key: 'maze' },
-    { suffixes: ['/competitions.html', '/competitions'], key: 'competitions' },
-    { suffixes: ['/leaderboard.html', '/leaderboard'], key: 'leaderboard' },
-    { suffixes: ['/market.html', '/market'], key: 'market' },
-    { suffixes: ['/coin.html', '/token'], key: 'token' },
-    { suffixes: ['/holders.html', '/holders'], key: 'holders' },
-    { suffixes: ['/how-to-play.html', '/how-to-play'], key: 'how-to-play' },
-  ];
-  return routes.find((route) => route.suffixes.some((suffix) => path.endsWith(suffix)))?.key ?? null;
+  const path = normalizePath(window.location.pathname);
+  const routeKey = resolveSiteRoute(path)?.navKey;
+  if (routeKey) return routeKey;
+  if (path.endsWith('/competitions.html') || path.endsWith('/competitions')) return 'competitions';
+  if (path.endsWith('/leaderboard.html') || path.endsWith('/leaderboard')) return 'leaderboard';
+  if (path.endsWith('/how-to-play.html') || path.endsWith('/how-to-play')) return 'how-to-play';
+  return null;
 }
 
 function NavItemLink({ item, onNavigate, dropdown = false }: { item: NavItem; onNavigate: () => void; dropdown?: boolean }) {
@@ -134,7 +130,7 @@ export function SiteNavigation() {
     <header className="header">
       <nav className="nav" aria-label="Main navigation" onKeyDown={handleNavigationKeyDown}>
         <div className="nav-inner">
-          <a href="./" className="nav-brand" aria-label="Maze home">
+          <a href={getSiteRoutePath('home')} className="nav-brand" aria-label="Maze home">
             <span className="nav-brand-mark" aria-hidden="true">
               <img className="nav-brand-logo nav-brand-logo--white" src="/css/images/maze-logo-white.svg" alt="" decoding="async" />
               <img className="nav-brand-logo nav-brand-logo--black" src="/css/images/maze-logo-black.svg" alt="" decoding="async" />
@@ -169,8 +165,10 @@ export function SiteNavigation() {
             </button>
           </div>
 
-          <GameViewSwitcher />
-          <ThemeSwitcher />
+          <div className="nav-secondary-row">
+            <GameViewSwitcher />
+            <ThemeSwitcher />
+          </div>
         </div>
       </nav>
     </header>

@@ -1,9 +1,4 @@
-import './styles/maze-site.css';
-import './styles/maze-unify.css';
-import './styles/maze-theme.css';
-import './styles/create-game.css';
-import './styles/lobby.css';
-import './ui/react/maze-menu.css';
+import './styles/index.css';
 import { useEffect } from 'react';
 import { usePageLoading } from '../../components/layout/PageLoadingProvider';
 import { MazeMarkup } from './MazeMarkup';

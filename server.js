@@ -115,10 +115,24 @@ const SITE_DIST_DIR = path.join(__dirname, 'dist', 'site');
 const SITE_DIST_INDEX = path.join(SITE_DIST_DIR, 'index.html');
 const LEGACY_SITE_INDEX = path.join(__dirname, 'legacy', 'home.html');
 const LEGACY_MAZE_INDEX = path.join(__dirname, 'legacy', 'maze.html');
+const SITE_ROUTE_CONFIG = require('./shared/site-routes.json').routes;
+const API_PATHS = require('./shared/api-routes.json');
+const SPA_ROUTE_PATHS = SITE_ROUTE_CONFIG
+    .filter((route) => route.server === 'spa')
+    .flatMap((route) => route.paths);
+function getConfiguredDocumentPaths(serverRole) {
+    const route = SITE_ROUTE_CONFIG.find((entry) => entry.server === serverRole);
+    if (!route?.paths?.length) {
+        throw new Error(`Missing site route manifest entry for server role: ${serverRole}`);
+    }
+    return route.paths;
+}
+const MAZE_DOCUMENT_PATHS = getConfiguredDocumentPaths('maze');
+const HOME_DOCUMENT_PATH = getConfiguredDocumentPaths('root')[0];
 
 // Both `/` and `/maze.html` are routes in the same root React/Vite application.
 // The old standalone documents remain available only as explicit rollback URLs.
-app.get('/maze.html', (req, res) => {
+app.get(MAZE_DOCUMENT_PATHS, (req, res) => {
     const page = fs.existsSync(SITE_DIST_INDEX) ? SITE_DIST_INDEX : LEGACY_MAZE_INDEX;
     return res.sendFile(page);
 });
@@ -153,7 +167,7 @@ app.use(
  */
 
 app.get(
-    '/health',
+    API_PATHS.health,
     (req, res) => {
         return res.json({
             ok: true,
@@ -169,7 +183,7 @@ app.get(
  */
 
 app.get(
-    '/api/config',
+    API_PATHS.config,
     (req, res) => {
 
         return res.json({
@@ -181,7 +195,7 @@ app.get(
 );
 
 app.get(
-    '/api/coin-age',
+    API_PATHS.coinAge,
     (req, res) => {
 
         return res.json({
@@ -199,7 +213,7 @@ app.get(
  */
 
 app.get(
-    '/api/live-price',
+    API_PATHS.livePrice,
     (req, res) => {
 
         const jsonStr =
@@ -231,7 +245,7 @@ app.get(
  */
 
 app.get(
-    '/api/jupiter-market',
+    API_PATHS.jupiterMarket,
     (req, res) => {
 
         try {
@@ -274,7 +288,7 @@ app.get(
 );
 
 app.get(
-    '/api/jupiter-market/raw',
+    API_PATHS.jupiterMarketRaw,
     (req, res) => {
         if (process.env.NODE_ENV === 'production') {
             return res.status(404).json({
@@ -299,7 +313,7 @@ app.get(
 );
 
 app.get(
-    '/api/jupiter-market/history',
+    API_PATHS.jupiterMarketHistory,
     (req, res) => {
 
         try {
@@ -378,7 +392,7 @@ app.get(
  */
 
 app.get(
-    '/api/live-feed/buyers',
+    API_PATHS.liveFeedBuyers,
     shortApiCache,
     (req, res) => {
 
@@ -409,7 +423,7 @@ app.get(
 );
 
 app.get(
-    '/api/live-feed/holders',
+    API_PATHS.liveFeedHolders,
     shortApiCache,
     (req, res) => {
 
@@ -452,7 +466,7 @@ app.get(
  */
 
 app.get(
-    '/api/stats',
+    API_PATHS.stats,
     shortApiCache,
     (req, res) => {
 
@@ -516,7 +530,7 @@ async function handleInteraction(
 }
 
 app.post(
-    '/api/stats/view',
+    API_PATHS.statsView,
     (req, res) =>
         handleInteraction(
             'view',
@@ -526,7 +540,7 @@ app.post(
 );
 
 app.post(
-    '/api/stats/like',
+    API_PATHS.statsLike,
     (req, res) =>
         handleInteraction(
             'like',
@@ -536,7 +550,7 @@ app.post(
 );
 
 app.post(
-    '/api/stats/share',
+    API_PATHS.statsShare,
     (req, res) =>
         handleInteraction(
             'share',
@@ -552,7 +566,7 @@ app.post(
  */
 
 app.get(
-    '/api/holders-summary',
+    API_PATHS.holdersSummary,
     shortApiCache,
     (req, res) => {
 
@@ -583,7 +597,7 @@ app.get(
  */
 
 app.get(
-    '/api/latest-buyers',
+    API_PATHS.latestBuyers,
     shortApiCache,
     (req, res) => {
 
@@ -610,7 +624,7 @@ app.get(
 );
 
 app.get(
-    '/api/tx-state',
+    API_PATHS.txState,
     shortApiCache,
     (req, res) => {
 
@@ -640,14 +654,14 @@ app.get(
  */
 
 // Client routes must resolve to the shared Vite document on direct visits and refreshes.
-app.get(['/token', '/holders', '/market', '/profile', '/coin.html', '/holders.html', '/market.html'], (req, res, next) => {
+app.get(SPA_ROUTE_PATHS, (req, res, next) => {
     if (fs.existsSync(SITE_DIST_INDEX)) return res.sendFile(SITE_DIST_INDEX);
     return next();
 });
 
 
 app.get(
-    '/',
+    HOME_DOCUMENT_PATH,
     (req, res) => {
         // Use the single root Vite/React build when present. If it has not been built yet,
         // fall back to the untouched legacy Home document so deployment is reversible.

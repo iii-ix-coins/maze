@@ -5,7 +5,6 @@
     --maze-text-primary: #70e000;
     --maze-text-secondary: #9ef01a;
     --maze-text-muted: #ccff33;
-    --maze-accent: #38b000;
 
     --haze: var(--maze-text-primary);
     --fog: var(--maze-text-secondary);
@@ -23,7 +22,6 @@
     --maze-text-primary: #111827;
     --maze-text-secondary: #374151;
     --maze-text-muted: #64748b;
-    --maze-accent: #166534;
 
     --haze: var(--maze-text-primary);
     --fog: var(--maze-text-secondary);

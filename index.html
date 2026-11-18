@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#08130f" />
     <meta name="description" content="Hollld — Maze mining, token information and online maze races." />
     <meta name="maze-multiplayer-url" content="" />
-    <title>Hollld.fun</title>
+    <title><!-- @site-default-title --></title>
     <link rel="icon" type="image/x-icon" href="/css/images/maze-logo.svg" />
     <!-- Keep the original theme bootstrap before styles and React to avoid a theme flash. -->
     <!-- Synchronous theme preference initialization prevents a first-paint theme flash. -->
@@ -26,16 +26,12 @@
     <!-- One complete, order-sensitive CSS graph is processed by Vite + PostCSS. -->
     <!-- @shared-styles -->
     <link rel="stylesheet" href="/src/styles/site.css" />
-    <!-- Keep the shared navigation above the Maze page surface. -->
-    <style>
-      body.in-menu #site-header { z-index: 1000; }
-    </style>
   </head>
   <body class="page-loading">
     <script>
-      if (window.location.pathname === '/maze.html') {
+      const mazeDocumentPaths = /* @maze-route-paths */;
+      if (mazeDocumentPaths.includes(window.location.pathname)) {
         document.body.classList.add('in-menu');
-        document.title = 'Play Maze · Hollld';
       }
     </script>
     <!-- Both hosts stay direct body children; this preserves the legacy CSS selectors. -->

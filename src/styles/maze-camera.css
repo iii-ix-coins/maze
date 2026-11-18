@@ -71,11 +71,3 @@ html::before {
     }
 }
 
-/* Nav actions (theme toggle styles live in style.css: "Theme toggle") */
-.nav-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    flex: 0 0 auto;
-}

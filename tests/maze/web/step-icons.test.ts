@@ -9,6 +9,7 @@ const imageRoot = new URL('public/maze-assets/assets/images/', root);
 const reactMenu = fs.readFileSync(new URL('src/features/maze/ui/react/MazeMenu.tsx', root), 'utf8');
 const siteChrome = fs.readFileSync(new URL('src/components/layout/SiteChromeHosts.tsx', root), 'utf8');
 const router = fs.readFileSync(new URL('src/app/router.tsx', root), 'utf8');
+const siteRoutes = JSON.parse(fs.readFileSync(new URL('shared/site-routes.json', root), 'utf8'));
 const homePage = fs.readFileSync(new URL('src/features/home/HomePage.tsx', root), 'utf8');
 const mazeLayoutCss = fs.readFileSync(new URL('src/features/maze/styles/maze-unify.css', root), 'utf8');
 const onlineClient = fs.readFileSync(new URL('src/features/maze/engine/online.ts', root), 'utf8');
@@ -69,10 +70,10 @@ test('the active React wizard drives every panel from the selected step state', 
     assert.match(reactMenu, /state\.step === step \? ' is-active'/);
 });
 test('Maze route omits the generic Home brand headline and interaction dock', () => {
-    assert.ok(
-        router.includes("<SiteChromeHosts mazePage={pathname === '/maze.html'} />"),
-        'Router must pass the Maze route state to SiteChromeHosts'
-    );
+    assert.match(router, /mazePage=\{route\.id === 'maze'\}/,
+        'Router must derive Maze chrome state from the shared route manifest');
+    assert.equal(siteRoutes.routes.find((route) => route.id === 'maze')?.page, 'maze',
+        'Maze must have a dedicated route shell rather than being dispatched as HomePage');
 
     assert.match(siteChrome, /<SiteNavigation \/>/);
 

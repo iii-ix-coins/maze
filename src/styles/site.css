@@ -6,36 +6,39 @@
 @import "./home-shared.css";
 @import "./arena.css";
 
-/*
- * FINAL SHARED NAVIGATION LAYOUT
- * Keep this block after every imported stylesheet. The navigation JSX places
- * brand, links, utilities, game switcher and theme switcher as direct children
- * of .nav-inner; these explicit grid areas prevent earlier component styles
- * from moving the theme or wallet into an implicit extra row.
- */
+/* The shared header must stay above the Maze page surface on Maze routes. */
+body.in-menu #site-header {
+    z-index: 1000;
+}
 
+/*
+ * SINGLE HEADER LAYOUT OWNER
+ *
+ * style.css owns navigation component appearance and arena.css owns theme
+ * colours. This file alone owns header placement, responsive rows and menu
+ * positioning. Keep the JSX row grouping in SiteNavigation.tsx in sync.
+ */
 .nav-inner {
     display: grid;
     align-items: center;
-    width: min(1440px, 100%);
     min-width: 0;
-    margin-inline: auto;
 }
 
-.nav-inner>.nav-brand {
+.nav-inner > .nav-brand {
     grid-area: brand;
     min-width: 0;
     justify-self: start;
 }
 
-.nav-inner>.nav-content {
+.nav-inner > .nav-content {
     grid-area: content;
     min-width: 0;
 }
 
-.nav-inner>.nav-utilities {
+.nav-inner > .nav-utilities {
     grid-area: utilities;
     display: flex;
+    flex: 0 0 auto;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
@@ -48,7 +51,7 @@
     white-space: nowrap;
 }
 
-.nav-inner>.nav-utilities>.nav-actions {
+.nav-inner > .nav-utilities > .nav-actions {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -67,30 +70,37 @@
 
 .nav-inner .nav-wallet-button {
     flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
     white-space: nowrap;
 }
 
-.nav-inner>.game-view-toggle {
-    grid-area: game;
-    justify-self: stretch;
-    align-self: center;
+.nav-inner > .nav-utilities > .nav-mobile-toggle {
+    display: none;
+}
+
+/* The game and theme controls form one independent second-row layout. */
+.nav-secondary-row {
+    grid-area: secondary;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+
+.nav-secondary-row > .game-view-toggle {
     width: 100%;
     min-width: 0;
     max-width: none;
     margin: 0;
 }
 
-.nav-inner>.theme-toggle:not(.game-view-toggle) {
-    grid-area: theme;
-    justify-self: end;
-    align-self: center;
+.nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
     flex: 0 0 auto;
+    justify-self: end;
     margin: 0;
-}
-
-.nav-inner>.nav-utilities>.nav-mobile-toggle {
-    grid-area: auto;
-    display: none;
 }
 
 @media (min-width: 1024px) {
@@ -98,12 +108,12 @@
         grid-template-columns: auto minmax(0, 1fr) auto;
         grid-template-areas:
             "brand content utilities"
-            "game game theme";
+            "secondary secondary secondary";
         column-gap: 6px;
         row-gap: 6px;
     }
 
-    .nav-inner>.nav-content {
+    .nav-inner > .nav-content {
         position: static;
         display: flex;
         align-items: center;
@@ -115,7 +125,7 @@
         box-shadow: none;
     }
 
-    .nav-inner>.nav-content>.nav-links {
+    .nav-inner > .nav-content > .nav-links {
         display: flex;
         flex: 1 1 auto;
         align-items: center;
@@ -123,12 +133,8 @@
         gap: 9px;
     }
 
-    .nav-inner>.nav-utilities {
+    .nav-inner > .nav-utilities {
         gap: 8px;
-    }
-
-    .nav-inner>.game-view-toggle {
-        margin-top: 0;
     }
 }
 
@@ -137,16 +143,12 @@
         grid-template-columns: minmax(0, 1fr) auto;
         grid-template-areas:
             "brand utilities"
-            "game theme";
+            "secondary secondary";
         column-gap: 6px;
         row-gap: 8px;
     }
 
-    .nav-inner>.nav-brand {
-        min-width: 0;
-    }
-
-    .nav-inner>.nav-content {
+    .nav-inner > .nav-content {
         position: absolute;
         z-index: 1001;
         top: calc(100% + 9px);
@@ -163,12 +165,12 @@
         box-shadow: 0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
     }
 
-    .nav-inner>.nav-content.is-mobile-open {
+    .nav-inner > .nav-content.is-mobile-open {
         display: flex;
         animation: maze-dropdown-in 160ms ease both;
     }
 
-    .nav-inner>.nav-content>.nav-links {
+    .nav-inner > .nav-content > .nav-links {
         display: flex;
         flex: none;
         flex-direction: column;
@@ -178,16 +180,16 @@
         min-width: 0;
     }
 
-    .nav-inner>.nav-utilities {
+    .nav-inner > .nav-utilities {
         gap: 8px;
     }
 
-    .nav-inner>.nav-utilities>.nav-actions {
+    .nav-inner > .nav-utilities > .nav-actions {
         width: auto;
         margin: 0;
     }
 
-    .nav-inner>.nav-utilities>.nav-mobile-toggle {
+    .nav-inner > .nav-utilities > .nav-mobile-toggle {
         display: flex;
         flex: 0 0 auto;
         align-items: center;
@@ -199,25 +201,17 @@
         gap: 4px;
     }
 
-    .nav-inner>.game-view-toggle {
-        width: 100%;
-        min-width: 0;
-        margin: 0;
-    }
-
-    .nav-inner>.theme-toggle:not(.game-view-toggle) {
+    .nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
         height: 32px;
         min-height: 32px;
         --tt-size: 25px;
         --tt-icon-size: 15px;
         --tt-pad: 2px;
-        margin: 0;
     }
 
     .nav-inner .nav-wallet-button {
-        width: auto;
-        min-height: 32px;
         height: 32px;
+        min-height: 32px;
         padding-inline: 9px;
         font-size: var(--nav-fs, 15px);
     }
@@ -229,7 +223,7 @@
         row-gap: 8px;
     }
 
-    .nav-inner>.nav-utilities {
+    .nav-inner > .nav-utilities {
         gap: clamp(4px, 1.2vw, 7px);
     }
 
@@ -243,7 +237,7 @@
         max-width: clamp(70px, 22vw, 110px);
     }
 
-    .nav-inner>.theme-toggle:not(.game-view-toggle) {
+    .nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
         height: 30px;
         min-height: 30px;
         --tt-size: 24px;
@@ -251,7 +245,7 @@
         --tt-pad: 2px;
     }
 
-    .nav-inner>.game-view-toggle {
+    .nav-secondary-row > .game-view-toggle {
         --gvt-icon-size: 12px;
     }
 
@@ -260,7 +254,7 @@
         letter-spacing: .06em;
     }
 
-    .nav-inner>.nav-utilities>.nav-mobile-toggle {
+    .nav-inner > .nav-utilities > .nav-mobile-toggle {
         width: 30px;
         height: 30px;
         padding: 6px;
@@ -276,12 +270,12 @@
 }
 
 @media (max-width: 360px) {
-    .nav-inner>.game-view-toggle {
+    .nav-secondary-row > .game-view-toggle {
         padding: 2px;
         gap: 1px;
     }
 
-    .nav-inner>.game-view-toggle .theme-toggle__option {
+    .nav-secondary-row > .game-view-toggle .theme-toggle__option {
         padding-inline: 2px;
         gap: 3px;
     }
@@ -290,11 +284,4 @@
         font-size: 9px;
         letter-spacing: 0;
     }
-}
-
-.nav .nav-inner>.game-view-toggle {
-    justify-self: stretch;
-    width: 100%;
-    min-width: 0;
-    max-width: none;
 }

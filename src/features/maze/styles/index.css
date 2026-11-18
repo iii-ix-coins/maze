@@ -1,3 +1,8 @@
-@import './style.css';
+/* Single ordered stylesheet entry for the React-owned Maze feature.
+   Keep this order aligned with the cascade notes in maze-unify.css. */
+@import './maze-site.css';
+@import './maze-unify.css';
+@import './maze-theme.css';
 @import './create-game.css';
 @import './lobby.css';
+@import '../ui/react/maze-menu.css';

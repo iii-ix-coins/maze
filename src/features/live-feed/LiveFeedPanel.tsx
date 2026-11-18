@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type WheelEvent } from 'react';
 import { formatAmount } from '../../services/formatters';
 import { trackPageReadiness } from '../../app/page-readiness';
+import { API_PATHS } from '../../services/api/contracts';
 
 export type FeedType = 'buyers' | 'holders';
 type FeedItem = Record<string, any>;
@@ -170,7 +171,8 @@ export function LiveFeedPanel() {
     if (isInitialLoad) setStatus('loading');
 
     try {
-      const response = await fetch(`/api/live-feed/${encodeURIComponent(type)}?limit=${FEED_LIMIT}`, {
+      const endpoint = type === 'buyers' ? API_PATHS.liveFeedBuyers : API_PATHS.liveFeedHolders;
+      const response = await fetch(`${endpoint}?limit=${FEED_LIMIT}`, {
         method: 'GET', cache: 'no-store', signal: controller.signal,
         headers: { Accept: 'application/json' },
       });

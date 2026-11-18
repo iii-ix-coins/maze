@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { formatAmount, formatInteger, formatUsd } from '../../services/formatters';
 import { getMarketEnvelope, getMarketToken, type MarketPayload, type UnknownRecord } from '../market/market-types';
 import { useMarketData } from '../market/useMarketData';
+import { API_PATHS } from '../../services/api/contracts';
 
 type SparkPoint = { t: number; price: number };
 const PERIODS = ['5m', '1h', '6h', '24h'] as const;
@@ -50,7 +51,7 @@ function useMarketHistory(): { points: SparkPoint[]; change: number | null } {
       controller?.abort();
       controller = new AbortController();
       try {
-        const response = await fetch('/api/jupiter-market/history?limit=240', {
+        const response = await fetch(`${API_PATHS.jupiterMarketHistory}?limit=240`, {
           method: 'GET', cache: 'no-store', signal: controller.signal,
         });
         if (!response.ok) throw new Error(`History request failed: ${response.status}`);

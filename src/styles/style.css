@@ -2,8 +2,8 @@
    HOLLLD → MAZE  ·  "OBSIDIAN LABYRINTH" design system
    style.css  —  GLOBAL layer (tokens, base, backdrop FX, shell, shared UI)
 
-   Page styles live in:  home-style.css · coin-style.css · holders-style.css
-                         maze-style.css  (maze game + lobby, scoped to .maze-app)
+   Page styles live in dedicated feature sheets. The Maze feature is loaded
+   through src/features/maze/styles/index.css; this file owns shared site UI.
 
    Architecture
    ------------
@@ -20,14 +20,7 @@
 @layer reset, tokens, base, fx, layout, components, pages, utilities;
 
 :root {
-    --dark-spruce: #004b23ff;
     --green: #006400ff;
-    --green-2: #007200ff;
-    --green-3: #008000ff;
-    --bright-fern: #38b000ff;
-    --radioactive-grass: #70e000ff;
-    --slime-lime: #9ef01aff;
-    --chartreuse: #ccff33ff;
 }
 
 /* ==========================================================================
@@ -187,14 +180,9 @@
 
         /* —— Ink (navy-leaning neutrals; --ink-600 ≈ brand steel) —— */
         --ink-1000: oklch(0.100 0.022 262);
-        --ink-950: oklch(0.130 0.025 262);
         --ink-900: oklch(0.160 0.029 262);
         --ink-850: oklch(0.190 0.033 261);
-        --ink-800: oklch(0.230 0.037 260);
-        --ink-700: oklch(0.300 0.043 259);
         --ink-600: oklch(0.390 0.052 258);
-        --brand-navy: #242f42;
-        --brand-steel: #3e5274;
 
         /* —— Text —— */
         --text: oklch(0.970 0.008 250);
@@ -210,15 +198,11 @@
         --azure: oklch(0.790 0.120 225);
         --violet: oklch(0.710 0.170 292);
         --gold: oklch(0.840 0.130 88);
-        --gold-soft: oklch(0.940 0.050 85);
         --coral: oklch(0.730 0.185 20);
         --gain: var(--mint);
         --loss: var(--coral);
 
         /* External brand colours (kept literal, used only on their own buttons) */
-        --brand-sol: #00e8b5;
-        --brand-pump: #5fcb88;
-        --brand-jup: #14bad6;
 
         /* —— Surfaces —— */
         --stroke: oklch(1 0 0 / 0.075);
@@ -235,7 +219,6 @@
         --glow-mint: 0 0 0 1px oklch(0.87 0.17 170 / 0.4), 0 0 44px -8px oklch(0.87 0.17 170 / 0.5);
 
         /* —— Shape —— */
-        --r-xs: 8px;
         --r-sm: 12px;
         --r-md: 18px;
         --r-lg: 24px;
@@ -254,19 +237,16 @@
         --fs-lg: clamp(1.2rem, 1.05rem + 0.7vw, 1.55rem);
         --fs-xl: clamp(1.5rem, 1.15rem + 1.5vw, 2.3rem);
         --fs-2xl: clamp(2rem, 1.3rem + 3vw, 3.5rem);
-        --fs-hero: clamp(2.7rem, 1rem + 7.4vw, 7.2rem);
 
         /* —— Layout —— */
         --page-max: 1240px;
         --gutter: clamp(14px, 3.4vw, 32px);
         --section-gap: clamp(8px, 2vw, 16px);
-        --dock-h: 66px;
 
         /* —— Motion —— */
         --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
         --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
         --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
-        --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
         --t-fast: 160ms;
         --t-base: 280ms;
         --t-slow: 520ms;
@@ -332,6 +312,12 @@
             --corner: squircle;
         }
     }
+    @supports (animation-timing-function: linear(0, 1)){
+
+        :root{
+        --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
+        }
+    }
 }
 
 /* ==========================================================================
@@ -349,7 +335,6 @@
 
     body {
         min-height: 100vh;
-        min-height: 100dvh;
         font-family: var(--font-body);
         font-size: var(--fs-base);
         font-weight: 500;
@@ -358,7 +343,6 @@
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        overflow-x: hidden;
         overflow-x: clip;
     }
 
@@ -402,6 +386,12 @@
     .popup-img,
     .token-summary-icon {
         image-rendering: auto;
+    }
+    @supports (height: 100dvh){
+
+        body{
+        min-height: 100dvh;
+        }
     }
 }
 
@@ -1964,9 +1954,8 @@
    --------------------------------------------------------------------------
    • Intentionally UNLAYERED: it has to out-rank maze-camera.css (.nav-actions)
      and any other sheet that ships outside the cascade layers.
-   • Every colour below comes from a --nav-* token that is set ONCE per theme
-     (dark = default · light · grass). No rule hard-codes a theme colour, so
-     adding or tuning a theme never means touching a component rule again.
+   • arena.css is the sole owner of theme colour tokens; this file owns
+     navigation component geometry, typography and non-colour presentation.
    • Typography is driven by ONE token (--nav-fs). Padding, badges, logo and
      wallet size are derived from it, so a single edit rescales the whole bar.
    • Backgrounds measured from the theme SVGs:
@@ -1974,136 +1963,25 @@
        dark  #000000 / #080808  →  light text
    ========================================================================== */
 
-/* —— 1 · TOKENS ———————————————————————————————————————————————————————— */
+/* —— 1 · LAYOUT TOKENS ———————————————————————————————————————————————— */
 .nav {
-    /* Shared vertical rhythm for links, wallet action and the 3-way view/theme controls. */
+    /* Shared geometry and typography tokens; arena.css owns theme colours. */
     --nav-control-height: 30px;
-
-    /* type scale: 12.5px at 821px → 15px from 1050px up (always fits the bar) */
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
 
-    /* palette · DARK (default) */
-    --nav-text: #f4f7f5;
-    --nav-muted: #9ba8a0;
-    --nav-accent: #b8ff5c;
-    --nav-disabled: #68736b;
-    --nav-panel: #111815;
-    --nav-border: rgba(255, 255, 255, 0.08);
-    --nav-edge: rgba(184, 255, 92, 0.45);
-    --nav-shadow: rgba(0, 0, 0, 0.32);
+    /* Theme-specific panel shadows remain local to the navigation surface. */
+    --nav-shadow: rgba(0, 0, 0, .32);
     --nav-shadow-soft: rgba(0, 0, 0, .16);
-    --nav-hover-bg: rgba(255, 255, 255, 0.055);
-    --nav-sub-bg: rgba(255, 255, 255, 0.035);
-    --nav-active-bg: rgba(184, 255, 92, 0.075);
-    --nav-active-text: #b8ff5c;
-    --nav-active-shadow: var(--nav-control-shadow-hover);
-    --nav-chip-bg: rgba(255, 255, 255, 0.05);
-    --nav-soon-text: var(--gold);
-    --nav-soon-bg: oklch(0.84 0.13 88 / 0.14);
-    --nav-soon-border: oklch(0.84 0.13 88 / 0.3);
-
-    --nav-control-shadow:
-        0 4px 12px rgba(0, 0, 0, .50),
-        0 0 0 1px rgba(0, 232, 181, .20),
-        0 0 14px rgba(0, 232, 181, .16);
-
-    --nav-control-shadow-hover:
-        0 8px 20px rgba(0, 0, 0, .60),
-        0 0 0 1px rgba(0, 232, 181, .34),
-        0 0 22px rgba(0, 232, 181, .30);
-
-    --nav-control-shadow-active:
-        0 3px 9px rgba(0, 0, 0, .46),
-        0 0 0 1px rgba(0, 232, 181, .22),
-        0 0 11px rgba(0, 232, 181, .19);
-
 }
-
-/* palette · LIGHT — dark ink on white; active page = inverse (dark) chip */
 
 html[data-theme="light"] .nav {
-    --nav-text: #111827;
-    --nav-muted: #374151;
-    --nav-accent: #111827;
-    --nav-disabled: #9ca3af;
-
-    --nav-panel: #ffffff;
-    --nav-border: rgba(17, 24, 39, .13);
-    --nav-edge: rgba(17, 24, 39, .22);
     --nav-shadow: rgba(17, 24, 39, .15);
     --nav-shadow-soft: rgba(17, 24, 39, .075);
-
-    --nav-hover-bg: rgba(17, 24, 39, .06);
-    --nav-sub-bg: rgba(17, 24, 39, .035);
-
-    --nav-active-bg: rgba(17, 24, 39, .08);
-    --nav-active-text: #111827;
-    --nav-active-shadow: var(--nav-control-shadow-hover);
-
-    --nav-chip-bg: transparent;
-
-    --nav-soon-text: #64748b;
-    --nav-soon-bg: rgba(100, 116, 139, .10);
-    --nav-soon-border: rgba(100, 116, 139, .2);
-
-    --nav-control-shadow:
-        0 4px 12px rgba(17, 24, 39, .22),
-        0 0 0 1px rgba(17, 24, 39, .13),
-        0 0 12px rgba(17, 24, 39, .09);
-
-    --nav-control-shadow-hover:
-        0 8px 20px rgba(17, 24, 39, .30),
-        0 0 0 1px rgba(17, 24, 39, .20),
-        0 0 20px rgba(17, 24, 39, .14);
-
-    --nav-control-shadow-active:
-        0 3px 9px rgba(17, 24, 39, .24),
-        0 0 0 1px rgba(17, 24, 39, .15),
-        0 0 10px rgba(17, 24, 39, .10);
 }
 
-
-/* palette · GRASS — white ink on green; active page = inverse (white) chip.
-   The panel is a deep green, so the same tokens read correctly on the bar
-   AND inside the dropdown / mobile menu (no per-panel re-scoping needed). */
 html[data-theme="grass"] .nav {
-    --nav-text: #70e000;
-    --nav-muted: #9ef01a;
-    --nav-accent: #ccff33;
-    --nav-disabled: #38b000;
-
-    --nav-panel: #08230f;
-    --nav-border: rgba(112, 224, 0, .18);
-    --nav-edge: rgba(158, 240, 26, .45);
     --nav-shadow: rgba(0, 25, 5, .45);
     --nav-shadow-soft: rgba(0, 25, 5, .225);
-
-    --nav-hover-bg: rgba(112, 224, 0, .10);
-    --nav-sub-bg: rgba(112, 224, 0, .07);
-
-    --nav-active-bg: rgba(112, 224, 0, .13);
-    --nav-active-text: #ccff33;
-    --nav-active-shadow: var(--nav-control-shadow-hover);
-
-    --nav-chip-bg: transparent;
-
-    --nav-soon-text: #9ef01a;
-    --nav-soon-bg: rgba(112, 224, 0, .10);
-    --nav-soon-border: rgba(112, 224, 0, .25);
-
-    --nav-control-shadow:
-        0 4px 12px rgba(0, 15, 5, .45),
-        0 0 0 1px rgba(112, 224, 0, .16),
-        0 0 12px rgba(112, 224, 0, .13);
-
-    --nav-control-shadow-hover:
-        0 8px 20px rgba(0, 15, 5, .55),
-        0 0 0 1px rgba(112, 224, 0, .30),
-        0 0 20px rgba(112, 224, 0, .27);
-
-    --nav-control-shadow-active:
-        0 3px 9px rgba(0, 25, 5, .42),
-        0 0 9px rgba(158, 240, 26, .19);
 }
 
 /* —— 2 · STRUCTURE ————————————————————————————————————————————————————— */
@@ -2133,10 +2011,6 @@ html[data-theme="grass"] .nav {
 }
 
 .nav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
     width: min(1440px, 100%);
     min-height: 0;
     margin-inline: auto;
@@ -2176,36 +2050,13 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 /* Link group + actions */
-.nav-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 0;
 
-}
 
-.nav-links {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    gap: 10px;
-    /* No overflow here on purpose: an overflow:auto parent clips the Compete
-       dropdown (absolute child) and collapses the mobile list to 0px height. */
-}
 
-.nav-actions {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-}
 
-.nav-utilities {
-    display: flex;
-    align-items: center;
-    justify-self: end;
-    gap: 8px;
-    min-width: 0;
-}
+
+
+
 
 .nav-wallet-wrap {
     position: relative;
@@ -2280,12 +2131,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     min-height: var(--nav-control-height);
     height: var(--nav-control-height);
     padding-inline: 12px;
-    background: var(--page-max);
-    box-shadow: var(--nav-control-shadow);
-    border-radius: var(--r-sm);
     color: var(--nav-muted);
-    font-size: 1.05rem;
-    font-weight: 600;
     white-space: nowrap;
 
 
@@ -2297,20 +2143,13 @@ html[data-theme="light"] .nav-brand-logo--black {
         border-color 180ms ease;
 }
 
-.nav-link:hover:not(.nav-link-disabled):not(:disabled) {
-    box-shadow: var(--nav-control-shadow-hover);
-    transform: translateY(-1px);
-}
-
 .nav-link:active {
-    box-shadow: var(--nav-control-shadow-active);
     transform: scale(.96);
 }
 
 .nav-link.active {
     color: var(--nav-active-text);
     background: var(--nav-active-bg);
-    box-shadow: var(--nav-active-shadow);
 }
 
 .nav-link.active::before {
@@ -2364,7 +2203,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     padding: 7px;
 
     border: 1px solid var(--nav-border);
-    border-radius: 14px;
     background: var(--nav-panel);
     box-shadow: 0 16px 45px var(--nav-shadow);
 
@@ -2399,11 +2237,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     height: var(--nav-control-height);
     padding: 0 12px;
 
-    border-radius: var(--r-sm);
-    background: var(--page-max);
-    box-shadow: var(--nav-control-shadow);
-    font-weight: 600;
-    font-size: 1.05rem;
     white-space: nowrap;
 
     cursor: pointer;
@@ -2419,20 +2252,12 @@ html[data-theme="light"] .nav-brand-logo--black {
     flex-shrink: 0;
 }
 
-.nav-wallet-button:hover {
-    background: var(--nav-hover-bg);
-    box-shadow: var(--nav-control-shadow-hover);
-    transform: translateY(-1px);
-}
-
 .nav-wallet-button:active {
     background: var(--nav-active-bg);
-    box-shadow: var(--nav-control-shadow-active);
     transform: scale(.97);
 }
 
 .nav-wallet-button.is-connected {
-    border: 1px solid rgba(92, 205, 170, .38);
     border: 1px solid var(--nav-wallet-connected-border, rgba(92, 205, 170, .38));
 }
 
@@ -2453,7 +2278,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .nav-wallet-button:disabled {
     cursor: not-allowed;
-    opacity: 0.62;
     transform: none;
 }
 
@@ -2470,8 +2294,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     gap: 5px;
 
     border: 1px solid var(--nav-border);
-    border-radius: 10px;
-    background: transparent;
 
     cursor: pointer;
 }
@@ -2481,7 +2303,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     width: 18px;
     height: 2px;
     border-radius: 2px;
-    background: var(--nav-text);
     transition: transform 180ms ease, opacity 180ms ease;
 }
 
@@ -2565,8 +2386,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     margin: 0;
 
     border: 0;
-    background: transparent;
-    color: var(--nav-muted);
     cursor: pointer;
 
     transition:
@@ -2592,12 +2411,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     transform: rotate(360deg);
 }
 
-@media (hover: hover) {
-    .theme-toggle:not(.game-view-toggle) .theme-toggle__option:not(.is-active):hover {
-        background: var(--nav-hover-bg);
-    }
-}
-
 .theme-toggle:not(.game-view-toggle) .theme-toggle__option:focus-visible {
     outline: 2px solid var(--nav-accent);
     outline-offset: -2px;
@@ -2608,20 +2421,13 @@ html[data-theme="light"] .nav-brand-logo--black {
 .nav .game-view-toggle {
     --gvt-icon-size: 14px;
 
-    grid-area: game;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
 
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    justify-self: stretch;
     height: 36px;
     min-height: 36px;
     max-height: 36px;
-    margin-top: 10px;
-
     padding: 3px;
     gap: 3px;
 }
@@ -2638,9 +2444,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     padding: 0 5px;
     gap: 5px;
 
-    background: transparent;
-    color: var(--nav-muted);
-    box-shadow: none;
 }
 
 .nav .game-view-toggle .theme-toggle__icon {
@@ -2665,12 +2468,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     font-size: 13px;
     line-height: 1.2;
     white-space: nowrap;
-}
-
-@media (hover: hover) {
-    .nav .game-view-toggle .theme-toggle__option:not(.is-active):hover {
-        background: var(--nav-hover-bg);
-    }
 }
 
 .nav .game-view-toggle .theme-toggle__option:focus-visible {
@@ -2698,207 +2495,23 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* ==========================================================================
-   RESPONSIVE NAVIGATION LAYOUT
-   Desktop: brand + links + theme on row 1, game selector on row 2.
-   Mobile: brand + theme + menu on row 1, game selector on row 2.
-   ========================================================================== */
-
-
-@media (min-width: 1024px) {
-
-    .nav-inner {
-        display: grid;
-
-        grid-template-columns: auto minmax(0, 1fr) auto;
-
-        grid-template-areas:
-            "brand content theme"
-            "game game game";
-
-        align-items: center;
-
-        column-gap: 12px;
-        row-gap: 6px;
-
-        width: min(1440px, 100%);
-    }
-
-    .nav-brand {
-        grid-area: brand;
-        flex: 0 0 auto;
-        justify-self: start;
-        margin-inline-end: 0;
-    }
-
-    .nav .nav-content {
-        grid-area: content;
-
-        display: flex;
-        flex: 1 1 auto;
-
-        align-items: center;
-        justify-content: space-between;
-
-        gap: 9px;
-        width: 100%;
-        min-width: 0;
-    }
-
-    .nav .nav-links {
-        display: flex;
-        flex: 1 1 auto;
-
-        align-items: center;
-        min-width: 0;
-        gap: 9px;
-    }
-
-    .nav .nav-actions {
-        display: flex;
-        flex: 0 0 auto;
-
-        align-items: center;
-        margin-inline-start: auto;
-    }
-
-    .nav .theme-toggle:not(.game-view-toggle) {
-        grid-area: theme;
-        flex: 0 0 auto;
-        justify-self: end;
-    }
-
-    .nav .nav-wallet-button {
-        flex: 0 0 auto;
-    }
-
-    .nav .nav-mobile-toggle {
-        display: none;
-    }
-}
-
-
-
+/* Responsive menu presentation. Header row placement and switcher sizing are
+   owned by src/styles/site.css so this file contains no competing nav grid. */
 @media (max-width: 1023px) {
-
     .nav {
         --nav-control-height: 32px;
         --nav-fs: 15px;
-    }
-
-    .nav-inner {
-        display: grid;
-
-        grid-template-columns: minmax(0, 1fr) auto auto;
-
-        grid-template-areas:
-            "brand theme menu"
-            "game game game";
-
-        align-items: center;
-
-        column-gap: 8px;
-        row-gap: 10px;
-    }
-
-    .nav-brand {
-        grid-area: brand;
-        justify-self: start;
-        min-width: 0;
-    }
-
-    .nav .theme-toggle:not(.game-view-toggle) {
-        height: 32px;
-        min-height: 32px;
-
-        --tt-size: 25px;
-        --tt-icon-size: 15px;
-        --tt-pad: 2px;
     }
 
     .nav-brand-mark {
         height: var(--nav-control-height);
     }
 
-    .nav .theme-toggle:not(.game-view-toggle) {
-        grid-area: theme;
-        justify-self: end;
-        margin-left: 0;
-    }
-
-    .nav-mobile-toggle {
-        width: 32px;
-        height: 32px;
-        padding: 7px;
-        gap: 4px;
-
-        grid-area: menu;
-
-        display: flex;
-        flex-shrink: 0;
-
-        justify-self: end;
-        margin-left: 0;
-    }
-
-    /* Game selector remains left-aligned and compact */
-    .nav .game-view-toggle {
-        justify-self: start;
-    }
-
-    /* Mobile dropdown */
-
-    .nav-content {
-        position: absolute;
-        z-index: 1001;
-
-        top: calc(100% + 9px);
-        left: 0;
-        right: 0;
-
-        display: none;
-
-        align-items: stretch;
-        flex-direction: column;
-
-        gap: 9px;
-
-        border-radius: var(--r-lg);
-        padding: 9px;
-
-        background: var(--nav-panel);
-
-        box-shadow:
-            0 18px 35px rgba(0, 0, 0, 0.16);
-
-        box-shadow:
-            0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
-    }
-
-    .nav-content.is-mobile-open {
-        display: flex;
-        animation: maze-dropdown-in 160ms ease both;
-    }
-
-    .nav-links {
-        flex: none;
-
-        width: 100%;
-
-        align-items: stretch;
-        flex-direction: column;
-
-        gap: 6px;
-    }
-
     .nav-link {
         width: 100%;
-
         min-height: 35px;
-
         justify-content: center;
         justify-items: center;
-
         padding: 0 9px;
     }
 
@@ -2922,50 +2535,21 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     .nav-dropdown {
         position: static;
-
         min-width: 0;
         margin-top: 5px;
         padding: 5px;
-
         border: 0;
         border-radius: 10px;
-
         background: var(--nav-sub-bg);
         box-shadow: none;
-
         animation: none;
     }
 
     .nav-dropdown .nav-dropdown-link {
         min-height: 46px;
-
         padding-left: 25px;
         padding-right: 14px;
     }
-
-    .nav-actions {
-        display: flex;
-        flex: 0 0 auto;
-
-        width: 100%;
-        margin-inline-start: 0;
-    }
-
-    .nav-wallet-button {
-        width: 100%;
-        min-height: 46px;
-    }
-}
-
-
-/* EXTRA SMALL SCREENS */
-
-@media (max-width: 420px) {
-
-    .nav-inner {
-        column-gap: 8px;
-    }
-
 }
 
 /* Reduced motion */
@@ -2985,52 +2569,13 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 
-/* Compact mobile header */
+/* Compact mobile menu content; header geometry is centralized in site.css. */
 @media (max-width: 600px) {
     .nav {
         --nav-control-height: 30px;
         --nav-fs: clamp(11px, 3vw, 13px);
     }
 
-    .nav-inner {
-        column-gap: clamp(4px, 1.2vw, 7px);
-        row-gap: 9px;
-    }
-
-    /* Prevent the logo from collapsing */
-    .nav-brand {
-        flex: 0 0 auto;
-    }
-
-    .nav-brand-mark {
-        height: clamp(26px, 7vw, 32px);
-    }
-
-    .nav-brand-logo {
-        height: 100%;
-        max-height: 32px;
-        max-width: clamp(70px, 22vw, 110px);
-    }
-
-    /* Keep both three-state controls at the same compact height. */
-    .theme-toggle:not(.game-view-toggle) {
-        height: 30px;
-        min-height: 30px;
-
-        --tt-size: 24px;
-        --tt-icon-size: 14px;
-        --tt-pad: 2px;
-    }
-
-    /* Hamburger */
-    .nav-mobile-toggle {
-        width: 30px;
-        height: 30px;
-        padding: 6px;
-        gap: 4px;
-    }
-
-    /* Navigation panel */
     .nav-link {
         min-height: 32px;
         height: 32px;
@@ -3040,12 +2585,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     .nav-dropdown .nav-dropdown-link {
         min-height: 34px;
     }
-
-    .nav-wallet-button {
-        min-height: 36px;
-        height: 36px;
-        font-size: var(--nav-fs);
-    }
 }
 
 
@@ -3054,7 +2593,7 @@ html[data-theme="light"] .nav-brand-logo--black {
    --------------------------------------------------------------------------
    Scope : .price-metrics-row (.bar-box / .change-box)  and  .mint-bar
            (.mint-box / .mint-copy-btn / .btn-link).   .nav is NOT touched:
-           it keeps its own --nav-* palette block above.
+           it keeps its own component geometry above.
    Method: same pattern as the .nav block —
            • every colour comes from a --hdr-* token set ONCE per theme
              (dark = default · light · grass); no rule below hard-codes a

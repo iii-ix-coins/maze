@@ -53,8 +53,7 @@
     --cg-tabs-h: 42px;                           /* the tab bar's height (lobby.css: 40px) plus a little slack */
 
     /* rhythm */
-    --cg-row: clamp(10px, 1.8vh, 16px);        /* vertical space between blocks */
-    --cg-row: clamp(10px, 1.8dvh, 16px);        /* vertical space between blocks */
+    --cg-row: clamp(10px, 1.8vh, 16px);        /* vertical space between blocks */        /* vertical space between blocks */
     --cg-gap: clamp(20px, 3.4vw, 48px);         /* minimum space between maze and controls */
     --cg-aside: clamp(340px, 36vw, 480px);      /* width of the controls column (landscape) */
 
@@ -64,10 +63,8 @@
     --sub-h: 1.3rem;                             /* the caption line under the title (landscape) */
 
     /* what the preview and the dial are allowed to take */
-    --maze-m: clamp(140px, 30vh, 440px);       /* stacked layout: side of the visible maze */
-    --maze-m: clamp(140px, 30dvh, 440px);       /* stacked layout: side of the visible maze */
+    --maze-m: clamp(140px, 30vh, 440px);       /* stacked layout: side of the visible maze */       /* stacked layout: side of the visible maze */
     --dial: clamp(130px, 22vh, 240px);
-    --dial: clamp(130px, 22dvh, 240px);
     --glow-x: 50%;
     --glow-y: 36%;
     --charge: 0;
@@ -267,9 +264,7 @@
 @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
     .cg {
         --node: clamp(44px, 7.6vh, 54px);
-        --node: clamp(44px, 7.6dvh, 54px);
         --dial: clamp(130px, 27vh, 240px);
-        --dial: clamp(130px, 27dvh, 240px);
         /* everything above and below the maze: tab bar, padding, tile band, gaps */
         --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
         --maze-cap: 760px;
@@ -277,7 +272,6 @@
         /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
         --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
         --maze-side: min(100vh - var(--v-chrome), var(--maze-cap), var(--maze-w));
-        --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
         --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
         --glow-y: 56%;
     }
@@ -286,14 +280,12 @@
         /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
            The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
         overflow: hidden;
-            overflow: clip;
         /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
            that is too tall scrolls inside its own box instead of pushing the whole page down. */
         flex: none;
         /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
            below the tab bar; on a short one it takes all of it. */
         height: min(100vh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-        height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
         margin-block: auto;
         grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
         grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(0, 1fr) auto;
@@ -348,6 +340,23 @@
         padding: 14px 0 0;
         border-top: 1px solid var(--line);
         background: none;
+    }
+
+    @supports (height: 100dvh) {
+        .cg {
+            --node: clamp(44px, 7.6dvh, 54px);
+            --dial: clamp(130px, 27dvh, 240px);
+            --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
+        }
+        .cg-layout {
+            height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
+        }
+    }
+
+    @supports (overflow: clip) {
+        .cg-layout {
+            overflow: clip;
+        }
     }
 }
 
@@ -1254,8 +1263,6 @@
     color: var(--haze);
     font-size: .98rem;
     font-weight: 600;
-    touch-action: none;
-    user-select: none;
     -webkit-user-select: none;
     transition: border-color .3s ease, box-shadow .4s ease, transform .3s var(--ease);
 }
@@ -1372,9 +1379,13 @@
        (max-height: 700px) and (max-width: 559px) {
     .cg {
         --maze-m: clamp(96px, 20vh, 200px);
-        --maze-m: clamp(96px, 20dvh, 200px);
         --dial: clamp(120px, 20vh, 170px);
-        --dial: clamp(120px, 20dvh, 170px);
+    }
+    @supports (height: 100dvh) {
+        .cg {
+            --maze-m: clamp(96px, 20dvh, 200px);
+            --dial: clamp(120px, 20dvh, 170px);
+        }
     }
 }
 
@@ -1436,7 +1447,6 @@
         --cg-pad-t: 8px;
         --cg-pad-b: max(8px, env(safe-area-inset-bottom));
         --dial: clamp(96px, 28vh, 140px);
-        --dial: clamp(96px, 28dvh, 140px);
     }
 
     .cg-stage figcaption,
@@ -1511,6 +1521,12 @@
         min-height: 34px;
         padding-top: 8px;
     }
+
+    @supports (height: 100dvh) {
+        .cg {
+            --dial: clamp(96px, 28dvh, 140px);
+        }
+    }
 }
 
 /* ── Keyframes ── */
@@ -1570,6 +1586,14 @@
     .cg.show {
         animation: none !important;
         transition: none !important;
+    }
+}
+
+@supports (height: 100dvh) {
+    .cg {
+        --cg-row: clamp(10px, 1.8dvh, 16px);
+        --maze-m: clamp(140px, 30dvh, 440px);
+        --dial: clamp(130px, 22dvh, 240px);
     }
 }
 

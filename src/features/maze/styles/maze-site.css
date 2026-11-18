@@ -1,91 +1,26 @@
 @layer pages {
     .maze-app {
-        --bg-dark: #000000;
-        --text-main: #f1f5f9;
-        --text-muted: #727272;
-        --text-dark: #141b2dff;
         --border-color: #242f42;
-        --border-color-trans: hsla(218, 29%, 20%, 0.18);
-        --border-color-2: #3e5274;
-        --gold-dark: #d4af37;
-        --gold-light: #f7e7ce;
-        --dark-shadow: hsl(217, 27%, 18%);
-        --border-light: rgba(255, 255, 255, 0.1);
         --sol: #00e8b6;
         --pump: #5fcb88;
-        --solhover: #00e8b580;
-        --pumphover: #5fcb887f;
-        --lred: #ff0000ff;
-        --vgreen: #00ff00ff;
         --jup: #14bad6ff;
-        --juphover: #14b9d680;
-        --ui-bg: #05080d;
         --ui-surface: #0a111a;
-        --ui-surface-2: #0d1621;
-        --ui-text: #eaf2ff;
-        --ui-muted: #718096;
-        --ui-primary: #00e8b6;
-        --ui-danger: #ff4d67;
         --ui-border: rgba(255, 255, 255, 0.08);
-        --ui-border-strong: rgba(255, 255, 255, 0.14);
-        --ui-radius-sm: 10px;
-        --ui-radius-md: 14px;
-        --ui-radius-lg: 18px;
-        --ui-shadow: 0 0 18px rgba(0, 232, 182, 0.035);
         --board-surround: #004d00;
         --panel-w: 176px;
         --v: 640px;
     }
 
-    /* Montserrat Regular */
-    @font-face {
-        font-family: "Montserrat";
-        src: url("/css/font/montserrat-regular-webfont.woff2") format("woff2"),
-            url("/css/font/montserrat-regular-webfont.woff") format("woff");
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-    }
 
-    /* Montserrat SemiBold */
-    @font-face {
-        font-family: "Montserrat";
-        src: url("/css/font/montserrat-semibold-webfont.woff2") format("woff2"),
-            url("/css/font/montserrat-semibold-webfont.woff") format("woff");
-        font-weight: 600;
-        font-style: normal;
-        font-display: swap;
-    }
 
-    /* Montserrat Bold */
-    @font-face {
-        font-family: "Montserrat";
-        src: url("/css/font/montserrat-bold-webfont.woff2") format("woff2"),
-            url("/css/font/montserrat-bold-webfont.woff") format("woff");
-        font-weight: 700;
-        font-style: normal;
-        font-display: swap;
-    }
+
+
+
 
     .maze-app {
-        font-family: "Montserrat", sans-serif;
-        font-size: 15px;
-        font-style: normal;
-        font-weight: 400;
-    }
-
-    .maze-app {
-        background: radial-gradient(ellipse at 50% 0%, #10200f 0%, #0a0a0c 62%);
-        color: #e5ebf5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         min-height: 100vh;
-        min-height: 100dvh;
         margin: 0;
         overflow-x: hidden;
-        overscroll-behavior-y: none;
-        font-family: "Montserrat", sans-serif;
         font-size: 15px;
         font-style: normal;
         font-weight: 400;
@@ -93,28 +28,22 @@
 
     .maze-app .game-container {
         text-align: center;
-        padding: 10px;
-        max-width: 100%;
         box-sizing: border-box;
     }
 
     .maze-app h1 {
         margin: 0 0 10px;
         font-size: 0.9rem;
-        color: #7fc77f;
     }
 
     .maze-app .game-layout {
         display: flex;
         direction: ltr;
         gap: 14px;
-        align-items: flex-start;
-        justify-content: center;
     }
 
     .maze-app .maze-wrapper {
         position: relative;
-        background-color: var(--board-surround);
         display: inline-block;
         border-radius: 12px;
         overflow: hidden;
@@ -141,7 +70,6 @@
     }
 
     .maze-app .panel {
-        width: var(--panel-w);
         flex: none;
         display: flex;
         flex-direction: column;
@@ -186,7 +114,6 @@
     .maze-app .tools {
         display: flex;
         flex-direction: column;
-        gap: 8px;
     }
 
     .maze-app .grp {
@@ -501,7 +428,6 @@
         border: none;
         color: white;
         padding: 12px 28px;
-        font-size: 1rem;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -603,26 +529,7 @@
    PRO LOBBY & RACE UI — component styles
    ────────────────────────────────────────────────────────────────────────── */
     .maze-app {
-        --pro-bg: #071008;
-        --pro-panel: rgba(8, 22, 10, .94);
-        --pro-line: rgba(133, 231, 139, .16);
         --pro-green: #23e052;
-        --pro-green-deep: #058a14;
-        --pro-copy: #f2fff2;
-        --pro-subtle: #9cb6a0;
-        --pro-gold: #ffd56a;
-    }
-
-    .maze-app {
-        background:
-            radial-gradient(ellipse at 50% -10%, rgba(25, 91, 30, .24), transparent 48%),
-            radial-gradient(ellipse at 100% 100%, rgba(0, 80, 26, .12), transparent 35%),
-            #070a08;
-    }
-
-    .maze-app .game-container {
-        width: max-content;
-        max-width: 100%;
     }
 
     .maze-app .game-layout {
@@ -1102,21 +1009,14 @@
         --ease: cubic-bezier(.2, .8, .2, 1);
 
         /* the shared container: tab bar, title, maze, controls (and the lobby's .lb) all use it */
-        --cg-max: 1180px;
-        --cg-gutter: clamp(16px, 4vw, 44px);
-        --cg-top-pad: max(8px, env(safe-area-inset-top));
-        --cg-pad-t: 12px;
         --cg-pad-b: max(12px, env(safe-area-inset-bottom));
         --cg-tabs-h: 42px;
         /* the tab bar's height (lobby.css: 40px) plus a little slack */
 
         /* rhythm */
         --cg-row: clamp(10px, 1.8vh, 16px);
-        --cg-row: clamp(10px, 1.8dvh, 16px);
         /* vertical space between blocks */
-        --cg-gap: clamp(20px, 3.4vw, 48px);
         /* minimum space between maze and controls */
-        --cg-aside: clamp(340px, 36vw, 480px);
         /* width of the controls column (landscape) */
 
         /* progress tiles */
@@ -1128,17 +1028,11 @@
 
         /* what the preview and the dial are allowed to take */
         --maze-m: clamp(140px, 30vh, 440px);
-        --maze-m: clamp(140px, 30dvh, 440px);
         /* stacked layout: side of the visible maze */
         --dial: clamp(130px, 22vh, 240px);
-        --dial: clamp(130px, 22dvh, 240px);
         --glow-x: 50%;
         --glow-y: 36%;
         --charge: 0;
-
-        position: fixed;
-        inset: 0;
-        z-index: 100;
         display: none;
         flex-direction: column;
         overflow-x: hidden;
@@ -1147,10 +1041,6 @@
         color: var(--haze);
         font-family: "Montserrat", sans-serif;
         text-align: left;
-        background:
-            radial-gradient(60% 70% at var(--glow-x) var(--glow-y), rgba(255, 215, 154, .10), transparent 70%),
-            radial-gradient(50% 60% at 92% 4%, rgba(139, 224, 164, .10), transparent 65%),
-            linear-gradient(180deg, #0a1612 0%, #07110d 100%);
         -webkit-tap-highlight-color: transparent;
     }
 
@@ -1330,9 +1220,7 @@
     @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
         .maze-app .cg {
             --node: clamp(44px, 7.6vh, 54px);
-            --node: clamp(44px, 7.6dvh, 54px);
             --dial: clamp(130px, 27vh, 240px);
-            --dial: clamp(130px, 27dvh, 240px);
             /* everything above and below the maze: tab bar, padding, tile band, gaps */
             --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
             --maze-cap: 760px;
@@ -1341,7 +1229,6 @@
             /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
             --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
             --maze-side: min(100vh - var(--v-chrome), var(--maze-cap), var(--maze-w));
-            --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
             --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
             --glow-y: 56%;
         }
@@ -1350,14 +1237,12 @@
             /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
            The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
             overflow: hidden;
-            overflow: clip;
             /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
            that is too tall scrolls inside its own box instead of pushing the whole page down. */
             flex: none;
             /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
            below the tab bar; on a short one it takes all of it. */
             height: min(100vh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-            height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
             margin-block: auto;
             grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
             grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(0, 1fr) auto;
@@ -1410,6 +1295,28 @@
             padding: 14px 0 0;
             border-top: 1px solid var(--line);
             background: none;
+        }
+
+        @supports (height: 100dvh) {
+            .maze-app .cg {
+                --node: clamp(44px, 7.6dvh, 54px);
+                --dial: clamp(130px, 27dvh, 240px);
+                --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
+
+            }
+            .maze-app .cg-layout {
+                height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
+
+            }
+
+        }
+
+        @supports (overflow: clip) {
+            .maze-app .cg-layout {
+                overflow: clip;
+
+            }
+
         }
     }
 
@@ -2473,9 +2380,15 @@
     (max-height: 700px) and (max-width: 419px) {
         .maze-app .cg {
             --maze-m: clamp(96px, 20vh, 200px);
-            --maze-m: clamp(96px, 20dvh, 200px);
             --dial: clamp(120px, 20vh, 170px);
-            --dial: clamp(120px, 20dvh, 170px);
+        }
+        @supports (height: 100dvh) {
+            .maze-app .cg {
+                --maze-m: clamp(96px, 20dvh, 200px);
+                --dial: clamp(120px, 20dvh, 170px);
+
+            }
+
         }
     }
 
@@ -2538,7 +2451,6 @@
             --cg-pad-t: 8px;
             --cg-pad-b: max(8px, env(safe-area-inset-bottom));
             --dial: clamp(96px, 28vh, 140px);
-            --dial: clamp(96px, 28dvh, 140px);
         }
 
         .maze-app .cg-stage figcaption,
@@ -2612,131 +2524,17 @@
             min-height: 34px;
             padding-top: 8px;
         }
+
+        @supports (height: 100dvh) {
+            .maze-app .cg {
+                --dial: clamp(96px, 28dvh, 140px);
+
+            }
+
+        }
     }
 
     /* ── Keyframes ── */
-    @keyframes cgFade {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    @keyframes cgPulse {
-
-        0%,
-        100% {
-            opacity: .6;
-            transform: scale(.9);
-        }
-
-        50% {
-            opacity: 1;
-            transform: scale(1.15);
-        }
-    }
-
-    @keyframes cgRing {
-        0% {
-            transform: scale(1);
-            opacity: .75;
-        }
-
-        100% {
-            transform: scale(1.5);
-            opacity: 0;
-        }
-    }
-
-    @keyframes cgBob {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-2.5px);
-        }
-    }
-
-    @keyframes cgShine {
-        0% {
-            background-position: -140% 0;
-            opacity: 1;
-        }
-
-        100% {
-            background-position: 140% 0;
-            opacity: 1;
-        }
-    }
-
-    @keyframes cgChip {
-        0% {
-            transform: scale(.8);
-        }
-
-        55% {
-            transform: scale(1.16);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    @keyframes cgRumble {
-
-        0%,
-        100% {
-            transform: translate(0, 0) rotate(0deg);
-        }
-
-        25% {
-            transform: translate(calc(var(--charge) * -1.8px), calc(var(--charge) * .9px)) rotate(calc(var(--charge) * -5deg));
-        }
-
-        75% {
-            transform: translate(calc(var(--charge) * 1.8px), calc(var(--charge) * -.9px)) rotate(calc(var(--charge) * 5deg));
-        }
-    }
-
-    @keyframes cgLiftoff {
-        0% {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        20% {
-            transform: translateY(4px) scaleY(.9);
-            opacity: 1;
-        }
-
-        100% {
-            transform: translateY(-220%) scaleY(1.25);
-            opacity: 0;
-        }
-    }
-
-    @keyframes cgShake {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        25% {
-            transform: translateX(-5px);
-        }
-
-        75% {
-            transform: translateX(5px);
-        }
-    }
 
     @media (prefers-reduced-motion: reduce) {
 
@@ -2781,7 +2579,6 @@
 
     .maze-app .cg-tabs {
         position: relative;
-        display: grid;
         grid-template-columns: repeat(3, minmax(88px, 1fr));
         padding: 4px;
         border: none;
@@ -2877,8 +2674,6 @@
     }
 
     .maze-app .lb {
-        width: 100%;
-        max-width: 1180px;
         margin: 0 auto;
         box-sizing: border-box;
         flex: 1 0 auto;
@@ -3958,7 +3753,6 @@
         flex-direction: column;
         gap: 6px;
         max-height: min(32vh, 280px);
-        max-height: min(32dvh, 280px);
         margin: 0;
         padding: 0;
         overflow-y: auto;
@@ -4090,7 +3884,6 @@
 
         .maze-app .lb-room-stage {
             width: min(100%, 62vh, 470px);
-            width: min(100%, 62dvh, 470px);
             justify-self: center;
         }
 
@@ -4104,6 +3897,14 @@
 
         .maze-app #lbRoom[data-mode="notice"] .lb-room-panel {
             justify-self: center;
+        }
+
+        @supports (height: 100dvh) {
+            .maze-app .lb-room-stage {
+                width: min(100%, 62dvh, 470px);
+
+            }
+
         }
     }
 
@@ -4290,7 +4091,6 @@
             position: sticky;
             top: 8px;
             width: min(100%, 64vh);
-            width: min(100%, 64dvh);
         }
 
         .maze-app .lb-room-text,
@@ -4300,60 +4100,22 @@
 
         .maze-app .lb-members {
             max-height: 26vh;
-            max-height: 26dvh;
+        }
+
+        @supports (height: 100dvh) {
+            .maze-app .lb-room-stage {
+                width: min(100%, 64dvh);
+
+            }
+            .maze-app .lb-members {
+                max-height: 26dvh;
+
+            }
+
         }
     }
 
     /* ── Keyframes ── */
-    @keyframes lbShimmer {
-        to {
-            background-position: -300% 0;
-        }
-    }
-
-    @keyframes lbSweep {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    @keyframes lbSpin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    @keyframes lbBlink {
-        50% {
-            opacity: .35;
-        }
-    }
-
-    @keyframes lbFade {
-        from {
-            opacity: 0;
-            transform: translateY(6px);
-        }
-    }
-
-    @keyframes lbTabBump {
-        35% {
-            transform: scale(1.35);
-        }
-    }
-
-    @keyframes lbBump {
-        30% {
-            transform: scale(1.025);
-            box-shadow: 0 0 0 2px rgb(var(--tint, 139 224 164) / .55), 0 24px 54px rgba(0, 0, 0, .34);
-        }
-    }
-
-    @keyframes lbHot {
-        50% {
-            box-shadow: 0 18px 40px rgba(0, 0, 0, .26), 0 0 28px rgba(255, 215, 154, .22);
-        }
-    }
 
     @media (prefers-reduced-motion: reduce) {
 
@@ -4380,7 +4142,6 @@
         isolation: isolate;
         display: block;
         background: transparent;
-        min-height: 0;
         align-items: initial;
         justify-content: initial;
         --ground: rgba(16, 24, 39, .90);
@@ -4665,6 +4426,24 @@
         padding-top: 10px;
     }
 
+    @supports (height: 100dvh) {
+        .maze-app {
+            min-height: 100dvh;
+
+        }
+        .maze-app .cg {
+            --cg-row: clamp(10px, 1.8dvh, 16px);
+            --maze-m: clamp(140px, 30dvh, 440px);
+            --dial: clamp(130px, 22dvh, 240px);
+
+        }
+        .maze-app .lb-members {
+            max-height: min(32dvh, 280px);
+
+        }
+
+    }
+
 }
 
 /* =========================================
@@ -4677,9 +4456,6 @@ body.in-menu>#root>#site-brand-header:empty {
 }
 
 /* The shared home-page section rhythm must not insert a gap before the Maze UI. */
-body.in-menu {
-    --section-gap: 0px;
-}
 
 /*
  * #site-header is a normal-flow sibling of #mazeApp on /maze.html. Its height
@@ -4713,7 +4489,6 @@ body.in-menu {
         --node: clamp(30px, 7vw, 38px);
         --rail-below: 34px;
         --dial: clamp(104px, 29vh, 142px);
-        --dial: clamp(104px, 29dvh, 142px);
     }
 
     .maze-app .cg-layout {
@@ -4735,7 +4510,6 @@ body.in-menu {
         align-content: stretch;
         justify-content: stretch;
         overflow: hidden;
-            overflow: clip;
     }
 
     .maze-app .cg-title {
@@ -4800,5 +4574,21 @@ body.in-menu {
         padding: 7px 0 0;
         border-top: 1px solid var(--line);
         background: none;
+    }
+
+    @supports (height: 100dvh) {
+        .maze-app .cg {
+            --dial: clamp(104px, 29dvh, 142px);
+
+        }
+
+    }
+
+    @supports (overflow: clip) {
+        .maze-app .cg-layout {
+            overflow: clip;
+
+        }
+
     }
 }

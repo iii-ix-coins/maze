@@ -1,0 +1,74 @@
+{
+  "routes": [
+    {
+      "id": "home",
+      "paths": [
+        "/"
+      ],
+      "title": "Hollld.fun",
+      "page": "home",
+      "soft": true,
+      "server": "root",
+      "navKey": "index"
+    },
+    {
+      "id": "maze",
+      "paths": [
+        "/maze.html",
+        "/play"
+      ],
+      "title": "Maze · Hollld",
+      "page": "maze",
+      "soft": false,
+      "server": "maze",
+      "navKey": "maze"
+    },
+    {
+      "id": "coin",
+      "paths": [
+        "/coin.html",
+        "/token"
+      ],
+      "title": "Token Market · Hollld",
+      "page": "coin",
+      "soft": true,
+      "server": "spa",
+      "navKey": "token"
+    },
+    {
+      "id": "holders",
+      "paths": [
+        "/holders.html",
+        "/holders"
+      ],
+      "title": "Top Holders · Hollld",
+      "page": "holders",
+      "soft": true,
+      "server": "spa",
+      "navKey": "holders"
+    },
+    {
+      "id": "market",
+      "paths": [
+        "/market.html",
+        "/market"
+      ],
+      "title": "Market · Hollld",
+      "page": "market",
+      "soft": true,
+      "server": "spa",
+      "navKey": "market"
+    },
+    {
+      "id": "profile",
+      "paths": [
+        "/profile"
+      ],
+      "title": "Profile · Hollld",
+      "page": "profile",
+      "soft": true,
+      "server": "spa",
+      "navKey": null
+    }
+  ]
+}

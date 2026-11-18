@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { API_PATHS } from '../../services/api/contracts';
 
 interface InteractionStats {
   views: number;
@@ -103,7 +104,7 @@ export function InteractionBar() {
     inFlightRef.current = true;
 
     try {
-      const response = await fetch(recordView ? '/api/stats/view' : '/api/stats', {
+      const response = await fetch(recordView ? API_PATHS.statsView : API_PATHS.stats, {
         method: recordView ? 'POST' : 'GET',
         cache: 'no-store',
         headers: { Accept: 'application/json' },
@@ -138,7 +139,7 @@ export function InteractionBar() {
     likeTimerRef.current = window.setTimeout(() => setLikeAnimating(false), 180);
 
     try {
-      const response = await fetch('/api/stats/like', { method: 'POST' });
+      const response = await fetch(API_PATHS.statsLike, { method: 'POST' });
       if (!response.ok) throw new Error(`Like request failed: ${response.status}`);
       updateStats(await response.json() as InteractionStats);
     } catch (error) {
@@ -177,7 +178,7 @@ export function InteractionBar() {
       // Preserve the original interaction contract: counting the share is
       // fire-and-forget and the copied modal closes after 1.5s regardless of
       // API latency. The request still uses the same endpoint and payload.
-      void fetch('/api/stats/share', { method: 'POST' })
+      void fetch(API_PATHS.statsShare, { method: 'POST' })
         .then(async (response) => {
           if (!response.ok) throw new Error(`Share request failed: ${response.status}`);
           updateStats(await response.json() as InteractionStats);

@@ -1,4 +1,4 @@
-/* OPTIONAL — paste AFTER header-theme.css. Not included in style.css.
+/* Optional scroll scrim, imported after the global shell in site.css.
    Puts a blurred, theme-coloured band behind the sticky header only while the
    page is scrolled (pure CSS scroll-driven animation; ignored by older browsers). */
 

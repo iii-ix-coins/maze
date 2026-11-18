@@ -1,0 +1,47 @@
+فایل‌های داخل این بسته (فقط فایل‌های جدید یا تغییر‌یافته):
+
+index.html
+package.json
+scripts/check-css-duplicates.mjs
+scripts/check-layout.mjs
+server.js
+shared/api-routes.json
+shared/site-routes.json
+src/app/App.tsx
+src/app/navigation.ts
+src/app/router.tsx
+src/app/routes.test.ts
+src/app/routes.ts
+src/components/home/HomeHeroSlider.tsx
+src/components/navigation/GameViewSwitcher.tsx
+src/components/navigation/SiteNavigation.tsx
+src/features/coin/CoinPage.tsx
+src/features/holders/HoldersPanel.tsx
+src/features/holders/useHolders.ts
+src/features/home/HomePage.tsx
+src/features/interaction/InteractionBar.tsx
+src/features/live-feed/LiveFeedPanel.tsx
+src/features/market/MarketSummary.tsx
+src/features/market/useMarketData.ts
+src/features/maze/MazePage.tsx
+src/features/maze/maze-routes.ts
+src/features/maze/styles/create-game.css
+src/features/maze/styles/index.css
+src/features/maze/styles/lobby.css
+src/features/maze/styles/maze-site.css
+src/features/maze/styles/maze-theme.css
+src/features/maze/styles/maze-unify.css
+src/platform/wallet/WalletConnectButton.tsx
+src/services/api/contracts.ts
+src/styles/arena.css
+src/styles/feature-pages.css
+src/styles/header-scroll-scrim.css
+src/styles/home-shared.css
+src/styles/maze-camera.css
+src/styles/site.css
+src/styles/style.css
+tests/maze/web/step-icons.test.ts
+vite.config.mts
+
+گزارش ممیزی: AUDIT-REPORT-FA-2026-11-18.md
+راهنمای حذف فایل‌های قدیمی: DELETE-MANIFEST.txt

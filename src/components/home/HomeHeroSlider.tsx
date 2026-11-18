@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 import './home-hero-slider.css';
 
 type Slide = {
@@ -15,8 +16,8 @@ const SLIDES: Slide[] = [
   {
     title: 'Your next challenge starts here.',
     description: 'Create a maze room or jump into one that is already waiting. Find your route and make every move count.',
-    primary: { label: 'Start playing', href: '/maze.html?view=create' },
-    secondary: { label: 'Explore rooms', href: '/maze.html?view=rooms' },
+    primary: { label: 'Start playing', href: MAZE_VIEW_URLS.create },
+    secondary: { label: 'Explore rooms', href: MAZE_VIEW_URLS.rooms },
     visual: 'maze',
     visualSrc: '/css/images/banner/banner-1.svg',
     index: '01',
@@ -24,8 +25,8 @@ const SLIDES: Slide[] = [
   {
     title: 'Set up a challenge of your own.',
     description: 'Choose the maze difficulty, player count and goals, then create a room for your next run.',
-    primary: { label: 'Create a room', href: '/maze.html?view=create' },
-    secondary: { label: 'Explore rooms', href: '/maze.html?view=rooms' },
+    primary: { label: 'Create a room', href: MAZE_VIEW_URLS.create },
+    secondary: { label: 'Explore rooms', href: MAZE_VIEW_URLS.rooms },
     visual: 'create',
     visualSrc: '/css/images/banner/banner-2.svg',
     index: '02',
@@ -33,8 +34,8 @@ const SLIDES: Slide[] = [
   {
     title: 'The next race could be one click away.',
     description: 'Browse waiting rooms, find an open seat and join the maze action. You can also explore races already in progress.',
-    primary: { label: 'Browse rooms', href: '/maze.html?view=rooms' },
-    secondary: { label: 'Watch live races', href: '/maze.html?view=live' },
+    primary: { label: 'Browse rooms', href: MAZE_VIEW_URLS.rooms },
+    secondary: { label: 'Watch live races', href: MAZE_VIEW_URLS.live },
     visual: 'rooms',
     visualSrc: '/css/images/banner/banner-3.svg',
     index: '03',
@@ -42,8 +43,8 @@ const SLIDES: Slide[] = [
   {
     title: 'Find the route. Reach the goals.',
     description: 'Navigate a generated maze, keep your focus and race toward the goals. Your next run is ready when you are.',
-    primary: { label: 'Play now', href: '/maze.html?view=create' },
-    secondary: { label: 'See live races', href: '/maze.html?view=live' },
+    primary: { label: 'Play now', href: MAZE_VIEW_URLS.create },
+    secondary: { label: 'See live races', href: MAZE_VIEW_URLS.live },
     visual: 'race',
     visualSrc: '/css/images/banner/banner-4.svg',
     index: '04',

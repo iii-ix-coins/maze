@@ -1,7 +1,8 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense } from 'react';
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
 import { usePathname } from './navigation';
+import { resolveSiteRoute } from './routes';
 
 const HomePage = lazy(() => import('../features/home/HomePage').then((module) => ({ default: module.HomePage })));
 const CoinPage = lazy(() => import('../features/coin/CoinPage').then((module) => ({ default: module.CoinPage })));
@@ -9,25 +10,32 @@ const HoldersPage = lazy(() => import('../features/holders/HoldersPage').then((m
 const MarketPage = lazy(() => import('../features/market/MarketPage').then((module) => ({ default: module.MarketPage })));
 const ProfilePage = lazy(() => import('../features/profile/ProfilePage').then((module) => ({ default: module.ProfilePage })));
 
+// Maze itself is mounted by App.tsx into the dedicated #maze-root portal.
+function MazeRouteShell() { return null; }
+
+const PAGE_COMPONENTS = {
+  home: HomePage,
+  maze: MazeRouteShell,
+  coin: CoinPage,
+  holders: HoldersPage,
+  market: MarketPage,
+  profile: ProfilePage,
+};
+
 /** One React router dispatches all active site features without touching API routes. */
 export function AppRouter() {
   const pathname = usePathname();
+  const route = resolveSiteRoute(pathname);
+  const Page = route ? PAGE_COMPONENTS[route.page as keyof typeof PAGE_COMPONENTS] : undefined;
 
-  let page: ReactNode;
-  if (pathname === '/' || pathname === '/maze.html') page = <HomePage />;
-  else if (pathname === '/coin.html' || pathname === '/token') page = <CoinPage />;
-  else if (pathname === '/holders.html' || pathname === '/holders') page = <HoldersPage />;
-  else if (pathname === '/market.html' || pathname === '/market') page = <MarketPage />;
-  else if (pathname === '/profile') page = <ProfilePage />;
-  else return <NotFoundPage />;
-
+  if (!route || !Page) return <NotFoundPage />;
 
   return (
     <>
       {/* Persistent site chrome: animate only on initial entry */}
       <SiteChromeHosts
-        mazePage={pathname === '/maze.html'}
-        homePage={pathname === '/'}
+        mazePage={route.id === 'maze'}
+        homePage={route.id === 'home'}
       />
 
       {/* Only the active page gets an entrance animation */}
@@ -37,7 +45,7 @@ export function AppRouter() {
           key={pathname}
           data-route-page={pathname}
         >
-          {page}
+          <Page />
         </div>
       </Suspense>
     </>
