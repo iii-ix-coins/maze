@@ -19,8 +19,6 @@ html[data-theme="grass"] {
     --ar-text: #eafff0;
     --ar-soft: #b9d6c3;
     --ar-mute: #7fa08c;
-    --gvt-rgb: 34, 229, 255;
-    --gvt-ink: #04151A;
 
     /* Precomputed, legacy-browser-safe design tokens. */
     --surface-solid: #091a13;
@@ -47,8 +45,6 @@ html[data-theme="dark"] {
     --ar-text: #eef1ff;
     --ar-soft: #b7bfe6;
     --ar-mute: #7c86b8;
-    --gvt-rgb: 167, 139, 250;
-    --gvt-ink: #100B20;
 
     --surface-solid: #111326;
     --surface-glass: rgba(9, 10, 22, .88);
@@ -74,8 +70,6 @@ html[data-theme="light"] {
     --ar-text: #10131a;
     --ar-soft: #3b4252;
     --ar-mute: #6b7280;
-    --gvt-rgb: 0, 165, 142;
-    --gvt-ink: #04231E;
 
     --surface-solid: #fffdf6;
     --surface-glass: rgba(255, 253, 246, .90);
@@ -310,28 +304,6 @@ h3 {
     font-weight: 900;
 }
 
-/* —— GAME VIEW SWITCHER · INDEPENDENT COLOR IDENTITY —— */
-
-.nav .game-view-toggle {
-    background:
-        linear-gradient(180deg,
-            rgba(var(--gvt-rgb), .12),
-            rgba(var(--gvt-rgb), .045)),
-        var(--ar-fill-2);
-}
-
-.nav .game-view-toggle .theme-toggle__option {
-    background: rgba(var(--gvt-rgb), .075);
-    color: var(--ar-soft);
-}
-
-.nav .game-view-toggle .theme-toggle__option.is-active {
-    background: rgb(var(--gvt-rgb));
-    color: var(--gvt-ink);
-
-    box-shadow:
-        0 0 14px rgba(var(--gvt-rgb), .35);
-}
 
 @media (hover: hover) {
 
@@ -343,7 +315,7 @@ h3 {
 
     /* Game View Switcher */
     .nav .game-view-toggle .theme-toggle__option:not(.is-active):hover {
-        background: rgba(var(--gvt-rgb), .18);
+        background: rgba(var(--ar-rgb), .16);
         color: var(--ar-text);
     }
 }
