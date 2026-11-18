@@ -2454,8 +2454,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 .game-view-toggle__label {
     display: inline;
-    font-size: 13px;
-    line-height: 1.2;
+    font-size: 0.9rem;
     white-space: nowrap;
 }
 
