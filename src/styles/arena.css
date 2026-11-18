@@ -180,13 +180,13 @@ h1,
 h2,
 h3 {
     text-transform: uppercase;
-    letter-spacing: .03em;
+    letter-spacing: -.055em;
     font-weight: 700;
 }
 
 .home-hero-slider .home-hero-copy h1 {
     font-weight: 700;
-    letter-spacing: -.045em;
+    letter-spacing: -.055em;
 }
 
 [class*="eyebrow"],
@@ -204,8 +204,9 @@ h3 {
     background: rgba(var(--ar-rgb), .06);
     box-shadow: inset 0 0 0 1px var(--ar-line);
     text-transform: uppercase;
-    letter-spacing: .08em;
-    font-size: 0.9rem;
+    font-size: clamp(11px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
 }
 
 .nav-link:hover:not(.nav-link-disabled):not(:disabled) {
@@ -276,9 +277,9 @@ h3 {
     background: rgba(var(--ar-rgb), .063);
     color: var(--ar-soft);
     box-shadow: inset 0 0 0 1px var(--ar-line);
-    font-size: 0.9rem;
-    letter-spacing: .075em;
-    line-height: 1.15;
+    font-size: clamp(11px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
     text-align: center;
     text-transform: uppercase;
     text-decoration: none;
@@ -328,7 +329,9 @@ h3 {
     display: block;
     padding: 3px 5px 1px;
     color: var(--ar-text);
-    font-size: 0.75rem;
+    font-size: clamp(11px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
     line-height: 1.35;
     text-align: center;
 }
@@ -469,7 +472,7 @@ h3 {
 .brand-description {
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .16em;
+    letter-spacing: -.035em;
     background: linear-gradient(90deg, var(--ar-accent), var(--ar-accent-2));
     -webkit-background-clip: text;
     background-clip: text;
@@ -480,8 +483,9 @@ h3 {
 .brand-description span {
     display: inline-block;
     margin-top: .35em;
-    font-size: 0.9rem;
-    letter-spacing: .34em;
+    font-size: clamp(11px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
     -webkit-text-fill-color: var(--ar-soft) !important;
     color: var(--ar-soft) !important;
 }
@@ -504,8 +508,9 @@ h3 {
     background: var(--ar-accent) !important;
     color: var(--ar-on-accent) !important;
     text-transform: uppercase;
-    letter-spacing: .1em;
-    font-weight: 700;
+    font-size: clamp(11px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
     box-shadow: none;
     border: 0;
 }
