@@ -2567,7 +2567,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     .nav-link {
         min-height: 32px;
         height: 32px;
-        font-size: var(--nav-fs);
     }
 
     .nav-dropdown .nav-dropdown-link {
