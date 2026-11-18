@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import type {
   WalletOpenFn,
   WalletOpenOptions,
+  WalletDisconnectFn,
   WalletRuntimeProps,
   WalletSnapshot,
 } from './WalletConnectRuntime'; // type-only: does not pull the AppKit bundle
@@ -56,10 +57,14 @@ export function WalletConnectButton() {
   const [openReady, setOpenReady] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
+  const [disconnectReady, setDisconnectReady] = useState(false);
+  const [disconnectPending, setDisconnectPending] = useState(false);
+  const [disconnectError, setDisconnectError] = useState<string | null>(null);
 
   const walletRootRef = useRef<HTMLDivElement>(null);
   const walletButtonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<WalletOpenFn | null>(null);
+  const disconnectRef = useRef<WalletDisconnectFn | null>(null);
   const snapshotRef = useRef<WalletSnapshot>(DISCONNECTED);
   const loadingRef = useRef(false);
   const mountedRef = useRef(true);
@@ -96,13 +101,40 @@ export function WalletConnectButton() {
     if (prev.address === next.address && prev.isConnected === next.isConnected && prev.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
-    if (!next.isConnected) setWalletMenuOpen(false);
+    if (!next.isConnected) {
+      setWalletMenuOpen(false);
+      setDisconnectPending(false);
+      setDisconnectError(null);
+    }
   }, []);
 
   const handleReady = useCallback((open: WalletOpenFn | null) => {
     openRef.current = open;
     setOpenReady(open !== null);
   }, []);
+
+  const handleDisconnectReady = useCallback((disconnect: WalletDisconnectFn | null) => {
+    disconnectRef.current = disconnect;
+    setDisconnectReady(disconnect !== null);
+  }, []);
+
+  const handleDisconnect = useCallback(async () => {
+    const disconnect = disconnectRef.current;
+    if (!disconnect || disconnectPending) return;
+
+    setDisconnectError(null);
+    setDisconnectPending(true);
+    try {
+      // Use Reown AppKit's own disconnect action, scoped to the connected Solana namespace.
+      await Promise.resolve(disconnect());
+      setWalletMenuOpen(false);
+    } catch (error) {
+      console.error('[wallet] failed to disconnect the Solana wallet', error);
+      setDisconnectError('Could not disconnect. Please try again.');
+    } finally {
+      setDisconnectPending(false);
+    }
+  }, [disconnectPending]);
 
   // Returning users: boot on idle so the session is restored and the first click is instant.
   useEffect(() => {
@@ -203,6 +235,7 @@ export function WalletConnectButton() {
           onTouchStart={loadRuntime}
           onClick={() => {
             if (snapshot.isConnected) {
+              setDisconnectError(null);
               setWalletMenuOpen((current) => !current);
               return;
             }
@@ -222,7 +255,7 @@ export function WalletConnectButton() {
         </button>
 
         {isConnected && walletMenuOpen ? (
-          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label="Wallet options">
+          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label="Wallet options" aria-busy={disconnectPending}>
             <a
               className="nav-wallet-menu-item"
               href={getSiteRoutePath('profile')}
@@ -235,7 +268,7 @@ export function WalletConnectButton() {
                   <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
                 </svg>
               </span>
-              <span>Profile</span>
+              <span className="nav-wallet-menu-label">Profile</span>
             </a>
             <button
               className="nav-wallet-menu-item"
@@ -253,12 +286,28 @@ export function WalletConnectButton() {
                   <path d="M3 9h18M16 14h2" />
                 </svg>
               </span>
-              <span>Wallet</span>
+              <span className="nav-wallet-menu-label">Wallet</span>
             </button>
+            <button
+              className="nav-wallet-menu-item"
+              type="button"
+              role="menuitem"
+              disabled={!disconnectReady || disconnectPending}
+              onClick={() => { void handleDisconnect(); }}
+            >
+              <span className="nav-wallet-menu-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2.8v9.1" />
+                  <path d="M7.2 5.8a8 8 0 1 0 9.6 0" />
+                </svg>
+              </span>
+              <span className="nav-wallet-menu-label" aria-live="polite">{disconnectPending ? 'Disconnecting…' : 'Disconnect'}</span>
+            </button>
+            {disconnectError ? <span className="nav-wallet-menu-error" role="alert">{disconnectError}</span> : null}
           </div>
         ) : null}
       </div>
-      {Runtime ? <Runtime.Component onSnapshot={handleSnapshot} onReady={handleReady} /> : null}
+      {Runtime ? <Runtime.Component onSnapshot={handleSnapshot} onReady={handleReady} onDisconnectReady={handleDisconnectReady} /> : null}
     </>
   );
 }

@@ -237,6 +237,104 @@ h3 {
     opacity: .55;
 }
 
+/* Wallet submenu follows the same chamfered HUD surface as the theme/game controls. */
+.nav .nav-wallet-menu {
+    --wallet-menu-cut: 9px;
+    width: min(176px, calc(100vw - 24px));
+    min-width: min(176px, calc(100vw - 24px));
+    gap: 5px;
+    padding: 7px;
+    border: 1px solid var(--ar-line);
+    border-radius: 0;
+    clip-path: polygon(var(--wallet-menu-cut) 0,
+            100% 0,
+            100% calc(100% - var(--wallet-menu-cut)),
+            calc(100% - var(--wallet-menu-cut)) 100%,
+            0 100%,
+            0 var(--wallet-menu-cut));
+    background: var(--ar-fill-2);
+    box-shadow: none;
+    filter: drop-shadow(0 14px 20px var(--nav-shadow));
+}
+
+.nav .nav-wallet-menu-item {
+    --wallet-item-cut: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 38px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 0;
+    clip-path: polygon(var(--wallet-item-cut) 0,
+            100% 0,
+            100% calc(100% - var(--wallet-item-cut)),
+            calc(100% - var(--wallet-item-cut)) 100%,
+            0 100%,
+            0 var(--wallet-item-cut));
+    background: rgba(var(--ar-rgb), .063);
+    color: var(--ar-soft);
+    box-shadow: inset 0 0 0 1px var(--ar-line);
+    font-size: .78rem;
+    font-weight: 850;
+    letter-spacing: .075em;
+    line-height: 1.15;
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.nav .nav-wallet-menu-item:hover:not(:disabled),
+.nav .nav-wallet-menu-item:focus-visible {
+    outline: none;
+    background: rgba(var(--ar-rgb), .16);
+    color: var(--ar-text);
+    box-shadow: inset 0 0 0 1px var(--ar-accent);
+}
+
+.nav .nav-wallet-menu-item:active:not(:disabled) {
+    background: var(--ar-accent);
+    color: var(--ar-on-accent);
+}
+
+.nav .nav-wallet-menu-item:disabled {
+    cursor: wait;
+    opacity: .58;
+}
+
+.nav .nav-wallet-menu-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: var(--ar-accent);
+}
+
+.nav .nav-wallet-menu-icon svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+.nav .nav-wallet-menu-label {
+    display: inline-block;
+    min-width: 0;
+    text-align: center;
+}
+
+.nav .nav-wallet-menu-error {
+    display: block;
+    padding: 3px 5px 1px;
+    color: var(--ar-text);
+    font-size: .68rem;
+    line-height: 1.35;
+    text-align: center;
+}
+
 .nav-dropdown {
     border-radius: var(--r-md);
     border-color: var(--ar-line);
