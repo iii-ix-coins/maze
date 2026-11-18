@@ -640,7 +640,7 @@ app.get(
  */
 
 // Client routes must resolve to the shared Vite document on direct visits and refreshes.
-app.get(['/token', '/holders', '/market', '/coin.html', '/holders.html', '/market.html'], (req, res, next) => {
+app.get(['/token', '/holders', '/market', '/profile', '/coin.html', '/holders.html', '/market.html'], (req, res, next) => {
     if (fs.existsSync(SITE_DIST_INDEX)) return res.sendFile(SITE_DIST_INDEX);
     return next();
 });

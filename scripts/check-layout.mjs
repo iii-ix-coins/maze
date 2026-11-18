@@ -17,6 +17,8 @@ const required = [
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/components/navigation/GameViewSwitcher.tsx',
+  'src/platform/wallet/WalletConnectButton.tsx',
+  'src/features/profile/ProfilePage.tsx',
   'src/features/interaction/InteractionBar.tsx',
   'src/features/theme/MazeBackground.tsx',
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
@@ -214,6 +216,33 @@ for (const route of ['/coin.html', '/holders.html', '/market.html']) {
     process.exit(1);
   }
 }
+
+const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
+const walletComponent = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
+const utilitiesPosition = navigationComponent.indexOf('className="nav-utilities"');
+const walletPosition = navigationComponent.indexOf('<WalletConnectButton />');
+if (utilitiesPosition < 0 || walletPosition < utilitiesPosition) {
+  console.error('[layout] WalletConnectButton must remain in the header utilities row, outside the mobile links panel.');
+  process.exit(1);
+}
+const gameSwitcherPosition = navigationComponent.indexOf('<GameViewSwitcher />');
+const themeSwitcherPosition = navigationComponent.indexOf('<ThemeSwitcher />');
+if (gameSwitcherPosition < 0 || themeSwitcherPosition < 0 || gameSwitcherPosition > themeSwitcherPosition) {
+  console.error('[layout] GameViewSwitcher must precede ThemeSwitcher in the shared second header row.');
+  process.exit(1);
+}
+if (!walletComponent.includes('if (snapshot.isConnected)') || !walletComponent.includes("view: 'Account'") || !walletComponent.includes("view: 'Connect'")) {
+  console.error('[layout] Wallet menu must preserve the existing direct-connect and Reown Account/Connect routing.');
+  process.exit(1);
+}
+const profileRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
+const profileNavigation = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
+const profileServer = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+if (!profileRouter.includes("pathname === '/profile'") || !profileNavigation.includes("'/profile'") || !profileServer.includes("'/profile'")) {
+  console.error('[layout] Profile must be supported by the React router, soft navigation and server refresh route.');
+  process.exit(1);
+}
+
 const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
 if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   console.error('[layout] Vite production must emit one shared SPA document.');

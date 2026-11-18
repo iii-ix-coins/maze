@@ -7,6 +7,7 @@ const HomePage = lazy(() => import('../features/home/HomePage').then((module) =>
 const CoinPage = lazy(() => import('../features/coin/CoinPage').then((module) => ({ default: module.CoinPage })));
 const HoldersPage = lazy(() => import('../features/holders/HoldersPage').then((module) => ({ default: module.HoldersPage })));
 const MarketPage = lazy(() => import('../features/market/MarketPage').then((module) => ({ default: module.MarketPage })));
+const ProfilePage = lazy(() => import('../features/profile/ProfilePage').then((module) => ({ default: module.ProfilePage })));
 
 /** One React router dispatches all active site features without touching API routes. */
 export function AppRouter() {
@@ -17,6 +18,7 @@ export function AppRouter() {
   else if (pathname === '/coin.html' || pathname === '/token') page = <CoinPage />;
   else if (pathname === '/holders.html' || pathname === '/holders') page = <HoldersPage />;
   else if (pathname === '/market.html' || pathname === '/market') page = <MarketPage />;
+  else if (pathname === '/profile') page = <ProfilePage />;
   else return <NotFoundPage />;
 
 

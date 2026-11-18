@@ -19,7 +19,7 @@ export function App() {
     const titles: Record<string, string> = {
       '/': 'Hollld.fun', '/coin.html': 'Token Market · Hollld', '/token': 'Token Market · Hollld',
       '/holders.html': 'Top Holders · Hollld', '/holders': 'Top Holders · Hollld',
-      '/market.html': 'Market · Hollld', '/market': 'Market · Hollld', '/maze.html': 'Maze · Hollld',
+      '/market.html': 'Market · Hollld', '/market': 'Market · Hollld', '/profile': 'Profile · Hollld', '/maze.html': 'Maze · Hollld',
     };
     document.title = titles[pathname] ?? 'Hollld.fun';
   }, [pathname]);

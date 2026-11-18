@@ -54,7 +54,10 @@ export function WalletConnectButton() {
   const [snapshot, setSnapshot] = useState<WalletSnapshot>(DISCONNECTED);
   const [openReady, setOpenReady] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false);
 
+  const walletRootRef = useRef<HTMLDivElement>(null);
+  const walletButtonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<WalletOpenFn | null>(null);
   const snapshotRef = useRef<WalletSnapshot>(DISCONNECTED);
   const loadingRef = useRef(false);
@@ -92,6 +95,7 @@ export function WalletConnectButton() {
     if (prev.address === next.address && prev.isConnected === next.isConnected && prev.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
+    if (!next.isConnected) setWalletMenuOpen(false);
   }, []);
 
   const handleReady = useCallback((open: WalletOpenFn | null) => {
@@ -104,6 +108,28 @@ export function WalletConnectButton() {
     if (!isConfigured || !hasStoredWalletSession()) return undefined;
     return scheduleIdle(loadRuntime);
   }, [loadRuntime]);
+
+  useEffect(() => {
+    if (!walletMenuOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!walletRootRef.current?.contains(event.target as Node)) {
+        setWalletMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setWalletMenuOpen(false);
+      walletButtonRef.current?.focus();
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [walletMenuOpen]);
 
   // A click that arrived before the runtime was ready (or while restoring a session) opens the modal here.
   useEffect(() => {
@@ -157,32 +183,80 @@ export function WalletConnectButton() {
 
   return (
     <>
-      <button
-        className={`nav-wallet-button${isConnected ? ' is-connected' : ''}`}
-        type="button"
-        data-nav-action="connect-wallet"
-        data-wallet-status={status ?? 'disconnected'}
-        data-wallet-load={loadState}
-        aria-busy={isBusy}
-        aria-label={isConnected ? `Wallet ${address ?? ''}. Open wallet options` : 'Connect Solana wallet'}
-        title={loadState === 'error' ? 'Wallet failed to load. Click to retry.' : undefined}
-        onPointerEnter={loadRuntime}
-        onFocus={loadRuntime}
-        onTouchStart={loadRuntime}
-        onClick={() => {
-          setPendingOpen(true);
-          loadRuntime();
-        }}
-      >
-        {isConnected ? (
-          <>
-            <span className="nav-wallet-indicator" aria-hidden="true" />
-            <span className="nav-wallet-address">{shortenAddress(address)}</span>
-          </>
-        ) : (
-          <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : 'Connect Wallet'}</span>
-        )}
-      </button>
+      <div className="nav-wallet-wrap" ref={walletRootRef}>
+        <button
+          ref={walletButtonRef}
+          className={`nav-wallet-button${isConnected ? ' is-connected' : ''}`}
+          type="button"
+          data-nav-action="connect-wallet"
+          data-wallet-status={status ?? 'disconnected'}
+          data-wallet-load={loadState}
+          aria-busy={isBusy}
+          aria-haspopup={isConnected ? 'menu' : undefined}
+          aria-expanded={isConnected ? walletMenuOpen : undefined}
+          aria-controls={isConnected && walletMenuOpen ? 'nav-wallet-menu' : undefined}
+          aria-label={isConnected ? `Wallet ${address ?? ''}. Open profile and wallet menu` : 'Connect Solana wallet'}
+          title={loadState === 'error' ? 'Wallet failed to load. Click to retry.' : undefined}
+          onPointerEnter={loadRuntime}
+          onFocus={loadRuntime}
+          onTouchStart={loadRuntime}
+          onClick={() => {
+            if (snapshot.isConnected) {
+              setWalletMenuOpen((current) => !current);
+              return;
+            }
+            setWalletMenuOpen(false);
+            setPendingOpen(true);
+            loadRuntime();
+          }}
+        >
+          {isConnected ? (
+            <>
+              <span className="nav-wallet-indicator" aria-hidden="true" />
+              <span className="nav-wallet-address">{shortenAddress(address)}</span>
+            </>
+          ) : (
+            <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : 'Connect Wallet'}</span>
+          )}
+        </button>
+
+        {isConnected && walletMenuOpen ? (
+          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label="Wallet options">
+            <a
+              className="nav-wallet-menu-item"
+              href="/profile"
+              role="menuitem"
+              onClick={() => setWalletMenuOpen(false)}
+            >
+              <span className="nav-wallet-menu-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="3.2" />
+                  <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+                </svg>
+              </span>
+              <span>Profile</span>
+            </a>
+            <button
+              className="nav-wallet-menu-item"
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setWalletMenuOpen(false);
+                setPendingOpen(true);
+                loadRuntime();
+              }}
+            >
+              <span className="nav-wallet-menu-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="6" width="18" height="14" rx="2" />
+                  <path d="M3 9h18M16 14h2" />
+                </svg>
+              </span>
+              <span>Wallet</span>
+            </button>
+          </div>
+        ) : null}
+      </div>
       {Runtime ? <Runtime.Component onSnapshot={handleSnapshot} onReady={handleReady} /> : null}
     </>
   );

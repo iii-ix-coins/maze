@@ -5,7 +5,7 @@ export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
 
 /* ---------- route table ---------- */
-const SOFT_PATHS = new Set(['/', '/coin.html', '/token', '/holders.html', '/holders', '/market.html', '/market']);
+const SOFT_PATHS = new Set(['/', '/coin.html', '/token', '/holders.html', '/holders', '/market.html', '/market', '/profile']);
 const PAGE_PATHS = new Set([...SOFT_PATHS, '/maze.html']);
 const TITLES: Record<string, string> = {
     '/': 'Hollld.fun',
@@ -15,6 +15,7 @@ const TITLES: Record<string, string> = {
     '/holders': 'Top Holders · Hollld',
     '/market.html': 'Market · Hollld',
     '/market': 'Market · Hollld',
+    '/profile': 'Profile · Hollld',
 };
 
 export function normalizePath(pathname: string) {

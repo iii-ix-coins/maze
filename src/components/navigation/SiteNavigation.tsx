@@ -98,11 +98,30 @@ function CompeteMenu({ open, setOpen, onNavigate }: { open: boolean; setOpen: (o
 }
 
 export function SiteNavigation() {
-  usePathname();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [competeOpen, setCompeteOpen] = useState(false);
+  const navContentRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const closeMobile = () => setMobileOpen(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setCompeteOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (navContentRef.current?.contains(target) || mobileToggleRef.current?.contains(target)) return;
+      setMobileOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer);
+  }, [mobileOpen]);
 
   const handleNavigationKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Escape') return;
@@ -123,33 +142,35 @@ export function SiteNavigation() {
             </span>
           </a>
 
-          <GameViewSwitcher />
-
-          <div className={`nav-content${mobileOpen ? ' is-mobile-open' : ''}`} id="maze-nav-content">
+          <div ref={navContentRef} className={`nav-content${mobileOpen ? ' is-mobile-open' : ''}`} id="maze-nav-content">
             <div className="nav-links">
               <CompeteMenu open={competeOpen} setOpen={setCompeteOpen} onNavigate={closeMobile} />
               {NAV_ITEMS.filter((item) => item.group !== 'compete').map((item) => (
                 <NavItemLink key={item.key} item={item} onNavigate={closeMobile} />
               ))}
             </div>
+          </div>
+
+          <div className="nav-utilities">
             <div className="nav-actions">
               <WalletConnectButton />
             </div>
+
+            <button
+              ref={mobileToggleRef}
+              type="button"
+              className="nav-mobile-toggle"
+              aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileOpen}
+              aria-controls="maze-nav-content"
+              onClick={() => setMobileOpen((current) => !current)}
+            >
+              <span /><span /><span />
+            </button>
           </div>
 
+          <GameViewSwitcher />
           <ThemeSwitcher />
-
-          <button
-            ref={mobileToggleRef}
-            type="button"
-            className="nav-mobile-toggle"
-            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={mobileOpen}
-            aria-controls="maze-nav-content"
-            onClick={() => setMobileOpen((current) => !current)}
-          >
-            <span /><span /><span />
-          </button>
         </div>
       </nav>
     </header>
