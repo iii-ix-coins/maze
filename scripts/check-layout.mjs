@@ -243,6 +243,18 @@ if (!profileRouter.includes("pathname === '/profile'") || !profileNavigation.inc
   process.exit(1);
 }
 
+const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
+if (
+  !sharedSiteStyles.includes('"brand content utilities"') ||
+  !sharedSiteStyles.includes('"game game theme"') ||
+  !sharedSiteStyles.includes('"brand utilities"') ||
+  !sharedSiteStyles.includes('"game theme"') ||
+  !sharedSiteStyles.includes('.nav-inner > .nav-utilities')
+) {
+  console.error('[layout] shared site CSS must keep wallet/utilities in row one and game/theme controls together in row two.');
+  process.exit(1);
+}
+
 const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
 if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   console.error('[layout] Vite production must emit one shared SPA document.');

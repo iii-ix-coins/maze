@@ -2199,6 +2199,77 @@ html[data-theme="light"] .nav-brand-logo--black {
     flex: 0 0 auto;
 }
 
+.nav-utilities {
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nav-wallet-wrap {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.nav-wallet-menu {
+    position: absolute;
+    z-index: 1100;
+    top: calc(100% + 8px);
+    right: 0;
+    display: grid;
+    gap: 4px;
+    min-width: 148px;
+    padding: 6px;
+    border: 1px solid var(--nav-border);
+    background: var(--nav-panel);
+    box-shadow: 0 14px 36px var(--nav-shadow);
+    animation: maze-dropdown-in 140ms ease both;
+}
+
+.nav-wallet-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    color: var(--nav-text);
+    font: inherit;
+    font-size: .86rem;
+    font-weight: 650;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.nav-wallet-menu-item:hover,
+.nav-wallet-menu-item:focus-visible {
+    outline: none;
+    background: var(--nav-hover-bg);
+    color: var(--nav-active-text);
+}
+
+.nav-wallet-menu-icon {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    flex: 0 0 18px;
+    color: var(--nav-accent);
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.nav-wallet-menu-icon svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
 /* —— 3 · LINKS ————————————————————————————————————————————————————————— */
 .nav-link {
     position: relative;

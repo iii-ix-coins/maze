@@ -5,3 +5,289 @@
 @import "./page-transition.css";
 @import "./home-shared.css";
 @import "./arena.css";
+
+/*
+ * FINAL SHARED NAVIGATION LAYOUT
+ * Keep this block after every imported stylesheet. The navigation JSX places
+ * brand, links, utilities, game switcher and theme switcher as direct children
+ * of .nav-inner; these explicit grid areas prevent earlier component styles
+ * from moving the theme or wallet into an implicit extra row.
+ */
+
+.nav-inner {
+    display: grid;
+    align-items: center;
+    width: min(1440px, 100%);
+    min-width: 0;
+    margin-inline: auto;
+}
+
+.nav-inner > .nav-brand {
+    grid-area: brand;
+    min-width: 0;
+    justify-self: start;
+}
+
+.nav-inner > .nav-content {
+    grid-area: content;
+    min-width: 0;
+}
+
+.nav-inner > .nav-utilities {
+    grid-area: utilities;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-self: end;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
+    width: max-content;
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+.nav-inner > .nav-utilities > .nav-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+}
+
+.nav-inner .nav-wallet-wrap {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.nav-inner .nav-wallet-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.nav-inner > .game-view-toggle {
+    grid-area: game;
+    justify-self: stretch;
+    align-self: center;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+}
+
+.nav-inner > .theme-toggle:not(.game-view-toggle) {
+    grid-area: theme;
+    justify-self: end;
+    align-self: center;
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.nav-inner > .nav-utilities > .nav-mobile-toggle {
+    grid-area: auto;
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .nav-inner {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "brand content utilities"
+            "game game theme";
+        column-gap: 12px;
+        row-gap: 6px;
+    }
+
+    .nav-inner > .nav-content {
+        position: static;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .nav-inner > .nav-content > .nav-links {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
+        min-width: 0;
+        gap: 9px;
+    }
+
+    .nav-inner > .nav-utilities {
+        gap: 8px;
+    }
+
+    .nav-inner > .game-view-toggle {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 1023px) {
+    .nav-inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "brand utilities"
+            "game theme";
+        column-gap: 8px;
+        row-gap: 8px;
+    }
+
+    .nav-inner > .nav-brand {
+        min-width: 0;
+    }
+
+    .nav-inner > .nav-content {
+        position: absolute;
+        z-index: 1001;
+        top: calc(100% + 9px);
+        left: 0;
+        right: 0;
+        display: none;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 9px;
+        min-width: 0;
+        padding: 9px;
+        border-radius: var(--r-lg);
+        background: var(--nav-panel);
+        box-shadow: 0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
+    }
+
+    .nav-inner > .nav-content.is-mobile-open {
+        display: flex;
+        animation: maze-dropdown-in 160ms ease both;
+    }
+
+    .nav-inner > .nav-content > .nav-links {
+        display: flex;
+        flex: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .nav-inner > .nav-utilities {
+        gap: 8px;
+    }
+
+    .nav-inner > .nav-utilities > .nav-actions {
+        width: auto;
+        margin: 0;
+    }
+
+    .nav-inner > .nav-utilities > .nav-mobile-toggle {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin: 0;
+        padding: 7px;
+        gap: 4px;
+    }
+
+    .nav-inner > .game-view-toggle {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .nav-inner > .theme-toggle:not(.game-view-toggle) {
+        height: 32px;
+        min-height: 32px;
+        --tt-size: 25px;
+        --tt-icon-size: 15px;
+        --tt-pad: 2px;
+        margin: 0;
+    }
+
+    .nav-inner .nav-wallet-button {
+        width: auto;
+        min-height: 32px;
+        height: 32px;
+        padding-inline: 9px;
+        font-size: var(--nav-fs, 15px);
+    }
+}
+
+@media (max-width: 600px) {
+    .nav-inner {
+        column-gap: clamp(4px, 1.2vw, 7px);
+        row-gap: 8px;
+    }
+
+    .nav-inner > .nav-utilities {
+        gap: clamp(4px, 1.2vw, 7px);
+    }
+
+    .nav-inner .nav-brand-mark {
+        height: clamp(26px, 7vw, 32px);
+    }
+
+    .nav-inner .nav-brand-logo {
+        height: 100%;
+        max-height: 32px;
+        max-width: clamp(70px, 22vw, 110px);
+    }
+
+    .nav-inner > .theme-toggle:not(.game-view-toggle) {
+        height: 30px;
+        min-height: 30px;
+        --tt-size: 24px;
+        --tt-icon-size: 14px;
+        --tt-pad: 2px;
+    }
+
+    .nav-inner > .game-view-toggle {
+        --gvt-icon-size: 12px;
+    }
+
+    .nav-inner .game-view-toggle__label {
+        font-size: clamp(10px, 3vw, 12px);
+        letter-spacing: .06em;
+    }
+
+    .nav-inner > .nav-utilities > .nav-mobile-toggle {
+        width: 30px;
+        height: 30px;
+        padding: 6px;
+        gap: 4px;
+    }
+
+    .nav-inner .nav-wallet-button {
+        height: 30px;
+        min-height: 30px;
+        padding-inline: 7px;
+        font-size: clamp(10px, 2.8vw, 12px);
+    }
+}
+
+@media (max-width: 360px) {
+    .nav-inner > .game-view-toggle {
+        padding: 2px;
+        gap: 1px;
+    }
+
+    .nav-inner > .game-view-toggle .theme-toggle__option {
+        padding-inline: 2px;
+        gap: 3px;
+    }
+
+    .nav-inner .game-view-toggle__label {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+}
