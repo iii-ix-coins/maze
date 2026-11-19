@@ -108,7 +108,7 @@
     /* ======================================================================
        TOKEN SUMMARY · bento
        ====================================================================== */
-    .site-home-content .market-feature .token-summary {
+    .site-home-content .market-feature--compact > .token-summary {
         display: grid;
         width: 100%;
         min-width: 0;
@@ -128,9 +128,10 @@
             0 var(--market-cut)
         );
         box-shadow: none;
-        filter: drop-shadow(0 6px 9px rgba(0, 0, 0, .28));
+        filter: none;
+        -webkit-filter: none;
     }
-    .site-home-content .market-feature .token-summary::before {
+    .site-home-content .market-feature--compact > .token-summary::before {
         content: none;
         display: none;
     }
@@ -251,7 +252,7 @@
         .maze-teaser-art { order: -1; width: min(100%, 380px); }
     }
     @media (max-width: 600px) {
-        .site-home-content .market-feature .token-summary {
+        .site-home-content .market-feature--compact > .token-summary {
             --market-cut: 13px;
             gap: 8px;
             padding: 9px 10px;
@@ -280,7 +281,7 @@
 /* Home-only Market Overview: sharp, borderless surface with Hero-like fluid sizing.
    Keep these rules unlayered so the shared component recipes cannot add a rim,
    rounded corners, or a theme-specific shadow back to this Home instance. */
-.site-home-content .market-feature .token-summary {
+.site-home-content .market-feature--compact > .token-summary {
     --market-cut: clamp(10px, 1.3vw, 18px);
     display: grid;
     width: 100%;
@@ -288,14 +289,26 @@
     box-sizing: border-box;
     gap: clamp(5px, .65vw, 9px);
     padding: clamp(6px, .85vw, 12px) clamp(8px, 1.15vw, 16px);
+    position: relative;
+    isolation: isolate;
     overflow: hidden;
-    border: 0;
-    border-radius: 0;
+    background: var(--panel-bg);
+    border: 0 !important;
+    border-radius: 0 !important;
     corner-shape: bevel;
-    outline: 0;
-    box-shadow: none;
-    filter: none;
+    outline: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
     clip-path: polygon(
+        var(--market-cut) 0,
+        100% 0,
+        100% calc(100% - var(--market-cut)),
+        calc(100% - var(--market-cut)) 100%,
+        0 100%,
+        0 var(--market-cut)
+    );
+    -webkit-clip-path: polygon(
         var(--market-cut) 0,
         100% 0,
         100% calc(100% - var(--market-cut)),
@@ -305,13 +318,13 @@
     );
 }
 
-.site-home-content .market-feature .token-summary::before,
-.site-home-content .market-feature .token-summary::after {
-    content: none;
-    display: none;
-    border: 0;
-    box-shadow: none;
-    filter: none;
+.site-home-content .market-feature--compact > .token-summary::before,
+.site-home-content .market-feature--compact > .token-summary::after {
+    content: none !important;
+    display: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
 }
 
 .site-home-content .market-feature .token-summary-header {
@@ -471,7 +484,7 @@
 }
 
 @media (max-width: 600px) {
-    .site-home-content .market-feature .token-summary {
+    .site-home-content .market-feature--compact > .token-summary {
         --market-cut: 10px;
         gap: 6px;
         padding: 6px 7px;

@@ -759,8 +759,19 @@
     }
 
     /* Panel recipe (large surfaces) */
-    :is(.token-summary, .slider-card, .coin-hero, .coin-address-card, .coin-section,
+    :is(.slider-card, .coin-hero, .coin-address-card, .coin-section,
         .holders-box, .modal-box, .interaction-bar) {
+        position: relative;
+        border-radius: var(--r-xl);
+        corner-shape: var(--corner, round);
+        background: var(--panel-bg);
+        border: 1px solid var(--stroke);
+        box-shadow: var(--shadow-2);
+    }
+
+    /* Token Summary is variant-owned: the standalone Market page keeps the
+       normal panel recipe, while the Home compact variant has no global rim. */
+    .market-feature:not(.market-feature--compact) > .token-summary {
         position: relative;
         border-radius: var(--r-xl);
         corner-shape: var(--corner, round);
