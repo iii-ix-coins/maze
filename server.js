@@ -55,13 +55,13 @@ function sanitizeJupiterMarketState(state) {
 
 const {
     getTopHolders,
-    close: closeLiveFeedService
-} = require('./shared/services/LiveFeedService');
+    close: closeHoldersSnapshotService
+} = require('./shared/services/HoldersSnapshotService');
 
 const app =
     express();
 
-// Small shared cache window reduces duplicate polling bursts without hiding fresh feed updates.
+// Small shared cache window reduces duplicate polling bursts without hiding fresh holder snapshots.
 function shortApiCache(req, res, next) {
     res.setHeader('Cache-Control', 'public, max-age=2, stale-while-revalidate=10');
     next();
@@ -384,12 +384,12 @@ app.get(
 
 /*
  * --------------------------------------------------
- * Live Feed API
+ * Top Holders API
  * --------------------------------------------------
  */
 
 app.get(
-    API_PATHS.liveFeedHolders,
+    API_PATHS.holdersTop,
     shortApiCache,
     (req, res) => {
 
@@ -414,13 +414,13 @@ app.get(
         } catch (error) {
 
             console.error(
-                '[Web] Top holders feed failed:',
+                '[Web] Top holders request failed:',
                 error?.message || error
             );
 
             return res.status(503).json({
                 error:
-                    'Top holders data is temporarily unavailable.'
+                    'Top holders snapshot is temporarily unavailable.'
             });
         }
     }
@@ -666,10 +666,10 @@ function shutdown(signal) {
     }
 
     try {
-        closeLiveFeedService();
+        closeHoldersSnapshotService();
     } catch (error) {
         console.warn(
-            '[Web] Failed to close Live Feed holder database:',
+            '[Web] Failed to close holders snapshot database:',
             error?.message || error
         );
     }

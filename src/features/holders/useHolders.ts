@@ -28,7 +28,7 @@ function dataVersion(data: HoldersPayload, items: HolderItem[]): string {
   return `${snapshot}::${itemState}`;
 }
 
-/** Existing holders endpoint, limit, no-store policy and five-second refresh cadence. */
+/** Dedicated top-holders endpoint with no-store policy and five-second refresh cadence. */
 export function useHolders(): HoldersState {
   const [state, setState] = useState<HoldersState>({
     items: [], totalHolders: 0, status: 'loading',
@@ -53,7 +53,7 @@ export function useHolders(): HoldersState {
       }
 
       try {
-        const response = await fetch(`${API_PATHS.liveFeedHolders}?limit=100`, {
+        const response = await fetch(`${API_PATHS.holdersTop}?limit=100`, {
           method: 'GET', cache: 'no-store', headers: { Accept: 'application/json' },
           signal: controller.signal,
         });

@@ -266,7 +266,7 @@ export function finishMultiplayerGame(message) {
 }
 export function handleMultiplayerMessage(message) {
     if (!message || typeof message.type !== 'string') return;
-    // Lobby traffic (rooms, live feed, thumbnails, waiting-room state) belongs to the lobby.
+    // Lobby traffic (rooms, live-room state, thumbnails, waiting-room state) belongs to the lobby.
     if (lobbyHub.handleMessage(message)) return;
     switch (message.type) {
         case 'lobby:counts':

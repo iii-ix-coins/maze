@@ -28,8 +28,8 @@ const HOLDER_STATE_PATH = path.join(
 
 const DEFAULT_HOLDER_LIMIT = 100;
 const MAX_LIMIT = 100;
-const HOLDER_FEED_CACHE_MS = 3000;
-const holderFeedCache = new Map();
+const HOLDER_SNAPSHOT_CACHE_MS = 3000;
+const holderSnapshotCache = new Map();
 
 let holderDb = null;
 
@@ -58,11 +58,11 @@ function readHolderState() {
         : null;
 }
 
-/** Read the current Top-100 holder snapshot. */
+/** Read the current Top-100 holder snapshot independently of page presentation. */
 function getTopHolders(options = {}) {
     const limit = clampLimit(options.limit, DEFAULT_HOLDER_LIMIT);
-    const cached = holderFeedCache.get(limit);
-    if (cached && Date.now() - cached.createdAt < HOLDER_FEED_CACHE_MS) {
+    const cached = holderSnapshotCache.get(limit);
+    if (cached && Date.now() - cached.createdAt < HOLDER_SNAPSHOT_CACHE_MS) {
         return cached.data;
     }
 
@@ -105,7 +105,7 @@ function getTopHolders(options = {}) {
         }))
     };
 
-    holderFeedCache.set(limit, { createdAt: Date.now(), data: payload });
+    holderSnapshotCache.set(limit, { createdAt: Date.now(), data: payload });
     return payload;
 }
 

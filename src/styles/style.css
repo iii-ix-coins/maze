@@ -679,7 +679,7 @@
     /* —— 6.1 Tile recipe: glass tile + cursor spotlight ring ————————————
        Every "label / value" card on the site shares this surface.            */
     :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot) {
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
         position: relative;
         isolation: isolate;
         border-radius: var(--r-md);
@@ -691,7 +691,7 @@
     }
 
     :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot)::before {
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::before {
         content: "";
         position: absolute;
         inset: -1px;
@@ -713,7 +713,7 @@
     }
 
     :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot)::after {
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -729,14 +729,14 @@
     @media (hover: hover) {
 
         :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot):hover::before,
+            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::before,
         :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot):hover::after {
+            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::after {
             opacity: 1;
         }
 
         :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .live-card, .spot):hover {
+            .coin-period-card, .spot):hover {
             transform: translateY(-3px);
         }
     }
@@ -759,7 +759,7 @@
     }
 
     /* Panel recipe (large surfaces) */
-    :is(.token-summary, .slider-card, .live-bar, .coin-hero, .coin-address-card, .coin-section,
+    :is(.token-summary, .slider-card, .coin-hero, .coin-address-card, .coin-section,
         .holders-box, .modal-box, .interaction-bar) {
         position: relative;
         border-radius: var(--r-xl);

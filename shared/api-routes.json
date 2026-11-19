@@ -6,7 +6,7 @@
   "jupiterMarket": "/api/jupiter-market",
   "jupiterMarketRaw": "/api/jupiter-market/raw",
   "jupiterMarketHistory": "/api/jupiter-market/history",
-  "liveFeedHolders": "/api/live-feed/holders",
+  "holdersTop": "/api/holders/top",
   "stats": "/api/stats",
   "statsView": "/api/stats/view",
   "statsLike": "/api/stats/like",

@@ -494,7 +494,7 @@ h3 {
 }
 
 /* —— 7 · SURFACES, BUTTONS, DOCK ————————————————————————————————————— */
-:is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .live-card, .bar-box, .change-box, .interact-btn, .spot) {
+:is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
     border-color: transparent;
     border-radius: var(--r-md);
 }

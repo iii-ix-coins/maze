@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
   'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.mts', 'package.json',
   'src/app', 'src/components', 'src/features/home', 'src/features/market',
-  'src/features/holders', 'src/features/live-feed', 'src/features/coin',
+  'src/features/holders', 'src/features/coin',
   'src/features/interaction', 'src/features/theme', 'src/features/maze/lobby',
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
@@ -24,7 +24,7 @@ const required = [
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
   'src/features/maze/engine/frame.ts', 'src/features/maze/canvas/index.ts',
   'shared/maze/src/index.ts', 'shared/site-routes.json', 'engines/maze-server/src/server.ts',
-  'server.js', 'start.js', 'src/styles/site.css', 'scripts/check-css-duplicates.mjs', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
+  'server.js', 'start.js', 'shared/services/HoldersSnapshotService.js', 'src/features/holders/useHolders.ts', 'src/styles/site.css', 'scripts/check-css-duplicates.mjs', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
 ];
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -127,7 +127,6 @@ const activeFrontend = [
   'src/features/coin/CoinPage.tsx',
   'src/features/holders/HoldersPanel.tsx',
   'src/features/holders/HoldersPage.tsx',
-  'src/features/live-feed/LiveFeedPanel.tsx',
 ];
 for (const file of activeFrontend) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
@@ -338,7 +337,6 @@ for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.
 const apiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
 for (const apiConsumer of [
   'src/features/interaction/InteractionBar.tsx',
-  'src/features/live-feed/LiveFeedPanel.tsx',
   'src/features/holders/useHolders.ts',
   'src/features/coin/CoinPage.tsx',
   'src/features/market/useMarketData.ts',
@@ -379,13 +377,55 @@ for (const retiredPath of [
   'shared/state/tx-state.json',
 ]) {
   if (fs.existsSync(path.join(root, retiredPath))) {
-    console.error(`[layout] retired transaction/verification artifact remains: ${retiredPath}`);
+    console.error(`[layout] retired legacy artifact remains: ${legacyPath}`);
     process.exit(1);
   }
 }
+// The Home Live Feed feature is retired; Holders now owns its dedicated snapshot API.
+for (const retiredPath of [
+  'src/features/live-feed',
+  'shared/services/LiveFeedService.js',
+]) {
+  if (fs.existsSync(path.join(root, retiredPath))) {
+    console.error(`[layout] retired Live Feed artifact remains: ${retiredPath}`);
+    process.exit(1);
+  }
+}
+const apiManifest = JSON.parse(fs.readFileSync(path.join(root, 'shared/api-routes.json'), 'utf8'));
+if (apiManifest.liveFeedHolders || apiManifest.holdersTop !== '/api/holders/top') {
+  console.error('[layout] API manifest must expose holdersTop and must not expose the retired Live Feed endpoint.');
+  process.exit(1);
+}
+const holdersHook = fs.readFileSync(path.join(root, 'src/features/holders/useHolders.ts'), 'utf8');
+const homePage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
+const holdersService = fs.readFileSync(path.join(root, 'shared/services/HoldersSnapshotService.js'), 'utf8');
+const serverSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+if (!holdersHook.includes('API_PATHS.holdersTop') || !homePage.includes('<HoldersPanel />') || homePage.includes('LiveFeedPanel')) {
+  console.error('[layout] Home and Holders must use the dedicated Holders feature, without a Live Feed component.');
+  process.exit(1);
+}
+if (!holdersService.includes('function getTopHolders') || !serverSource.includes('API_PATHS.holdersTop') || !serverSource.includes('HoldersSnapshotService')) {
+  console.error('[layout] HoldersSnapshotService and /api/holders/top must be connected through the shared API contract.');
+  process.exit(1);
+}
+for (const [file, source] of [['server.js', serverSource], ['useHolders.ts', holdersHook], ['HomePage.tsx', homePage], ['HoldersSnapshotService.js', holdersService]]) {
+  if (/LiveFeed|liveFeed|live-feed|\/api\/live-feed\/holders|live-feed-rail-scroll/i.test(source)) {
+    console.error(`[layout] retired Live Feed runtime reference remains in ${file}.`);
+    process.exit(1);
+  }
+}
+const activeCssSources = ['src/styles/home-style.css', 'src/styles/style.css', 'src/styles/arena.css']
+  .map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
+for (const [file, source] of activeCssSources) {
+  if (/\.live-(?:bar|bar-menu|menu-btn|feed-panel|feed-rail-scroll|feed-state|card)(?:[\s:#.\[]|$)|\.holder-live-card-vote|@keyframes\s+ping-dot/.test(source)) {
+    console.error(`[layout] retired Live Feed CSS remains in ${file}.`);
+    process.exit(1);
+  }
+}
+
 const retiredSources = [
-  'start.js', 'server.js', 'shared/services/LiveFeedService.js',
-  'src/features/live-feed/LiveFeedPanel.tsx', 'src/features/holders/HoldersPanel.tsx',
+  'start.js', 'server.js', 'shared/services/HoldersSnapshotService.js',
+  'src/features/holders/HoldersPanel.tsx',
   'src/features/holders/useHolders.ts', 'shared/api-routes.json',
 ].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
 for (const [file, source] of retiredSources) {

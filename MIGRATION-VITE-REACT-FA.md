@@ -45,11 +45,11 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 
 ### انجام‌شده در فاز چهارم — Site Features React
 
-1. Home اکنون از `MarketSummary`، `LiveFeedPanel` و `HoldersPanel` تشکیل شده است؛ این سه بخش به‌طور کامل توسط React state و lifecycle مدیریت می‌شوند.
+1. Home اکنون از `MarketSummary` و `HoldersPanel` تشکیل شده است؛ هر دو بخش توسط React state و lifecycle مدیریت می‌شوند و Live Feed صفحه Home حذف شده است.
 2. Market route در `/market.html` و Token/Coin route در `/coin.html` به‌عنوان ورودی‌های مستقل Vite فعال شده‌اند؛ `/holders.html` نیز صفحهٔ جداگانهٔ React برای فهرست Top 100 است.
-3. `useMarketData`، `useHolders` و `LiveFeedPanel` مسئول درخواست‌ها، زمان‌بندی refresh، لغو درخواست قبلی، رد پاسخ stale و مدیریت وضعیت‌های loading/error/empty هستند.
+3. `useMarketData` و `useHolders` مسئول درخواست‌ها، زمان‌بندی refresh، لغو درخواست قبلی، رد پاسخ stale و مدیریت وضعیت‌های loading/error/empty هستند.
 4. Market Summary همان `GET /api/jupiter-market` با `cache: no-store`، هدر `Accept: application/json` و فاصلهٔ ۳۰ ثانیه را حفظ می‌کند. Token page نیز همان endpoint و cadence را دارد. Sparkline همان `/api/jupiter-market/history?limit=240` را با فاصلهٔ ۶۰ ثانیه فراخوانی می‌کند.
-5. Holders همان `/api/live-feed/holders?limit=100` با cadence پنج‌ثانیه‌ای و منطق data-version را حفظ می‌کند. Live Feed فقط Top 100 Holders را از endpoint مربوطه با limit=100 دریافت می‌کند؛ request sequence، cancel و refresh پنج‌ثانیه‌ای پس از پایان درخواست حفظ شده‌اند. Feed خریدها حذف شده است.
+5. Holders از endpoint مستقل `/api/holders/top?limit=100` استفاده می‌کند و cadence پنج‌ثانیه‌ای، no-store، request sequence، cancellation و منطق data-version را حفظ می‌کند. Live Feed صفحه Home، کامپوننت، endpoint و سرویس نام‌گذاری‌شده آن بازنشسته شده‌اند؛ Holders به `HoldersSnapshotService` وابسته است.
 6. Vite اکنون `index.html`، `market.html`، `coin.html` و `holders.html` را به‌عنوان build input می‌شناسد. این کار از طریق Multi-page frontend build انجام شده و نیازی به تغییر `server.js` نداشته است.
 7. هیچ فایل `server.js`، `start.js`، `engines/`، `shared/` یا قرارداد API تغییر نکرده است؛ مسیرها، متدها، queryها و ساختار پاسخ سرویس‌ها دست‌نخورده‌اند.
 8. کنترلرهای DOM قدیمی و نسخه‌های تکراری آن‌ها از `src/features/home/legacy-scripts/` و `public/js/` حذف شده‌اند؛ bundle قدیمی JavaScript/CSS بازی نیز حذف شده است. دو فایل `legacy/` فقط fallback ایستا برای مسیرهای موجود در Express هستند و هیچ script یا controller بارگذاری نمی‌کنند.
@@ -69,7 +69,7 @@ Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شب�
 
 ### فاز 4 — Site Features React
 
-- Market / Token Summary، Token detail page، Holders و Live Feed منتقل شده‌اند.
+- Market / Token Summary و Token detail page و Holders منتقل شده‌اند؛ Live Feed صفحه Home بعداً به‌طور کامل بازنشسته شد.
 - مسیرهای `/market.html`، `/coin.html` و `/holders.html` در ورودی‌های build فرانت‌اند فعال هستند.
 
 ### فاز 4 — حذف Legacy UI
@@ -107,7 +107,7 @@ Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شب�
 
 ## آزمون‌های فعلی و محدودیت
 
-`node scripts/check-layout.mjs` اکنون ساختار React بازی و مسیرهای Market/Token/Holders/Live Feed را نیز بررسی می‌کند؛ این بررسی موفق است. بررسی نحوی TypeScript/TSX با transpiler سراسری TypeScript برای ۹۵ فایل انجام شد و ۱۳۷ فایل JavaScript نیز با `node --check` بدون خطا بررسی شدند. Typecheckهای هدفمند برای Race Board و HUD store، adapter مربوط به HUD، کنترلر صفحه‌کلید و کامپوننت‌های React انجام شدند؛ بررسی JSX با shim حداقلی React بود و جایگزین بررسی با declarationهای نصب‌شدهٔ `@types/react` نیست. سه تست Race Board، سه تست HUD/UI store و دو تست موجود رتبه‌بندی بازیکنان (در مجموع ۸ تست) موفق‌اند. پنج فایل هسته‌ای `frame.ts`، `update.ts`، `render.ts`، `camera.ts` و `maze-generator.ts` نسبت به ZIP فاز قبل بایت‌به‌بایت بدون تغییر مانده‌اند. برای Typecheck کامل پروژه، Vite Production Build و تست بصری مرورگر باید وابستگی‌های محلی نصب و اجرای مرورگر انجام شود. این محیط `node_modules` ندارد؛ بنابراین این سه مورد در این تحویل تأییدشده محسوب نمی‌شوند.
+`node scripts/check-layout.mjs` اکنون ساختار React بازی و مسیرهای Market/Token/Holders را نیز بررسی می‌کند؛ این بررسی موفق است. بررسی نحوی TypeScript/TSX با transpiler سراسری TypeScript برای ۹۵ فایل انجام شد و ۱۳۷ فایل JavaScript نیز با `node --check` بدون خطا بررسی شدند. Typecheckهای هدفمند برای Race Board و HUD store، adapter مربوط به HUD، کنترلر صفحه‌کلید و کامپوننت‌های React انجام شدند؛ بررسی JSX با shim حداقلی React بود و جایگزین بررسی با declarationهای نصب‌شدهٔ `@types/react` نیست. سه تست Race Board، سه تست HUD/UI store و دو تست موجود رتبه‌بندی بازیکنان (در مجموع ۸ تست) موفق‌اند. پنج فایل هسته‌ای `frame.ts`، `update.ts`، `render.ts`، `camera.ts` و `maze-generator.ts` نسبت به ZIP فاز قبل بایت‌به‌بایت بدون تغییر مانده‌اند. برای Typecheck کامل پروژه، Vite Production Build و تست بصری مرورگر باید وابستگی‌های محلی نصب و اجرای مرورگر انجام شود. این محیط `node_modules` ندارد؛ بنابراین این سه مورد در این تحویل تأییدشده محسوب نمی‌شوند.
 
 
 برای فاز Site Features، transpile نحوی ۸۰ فایل TypeScript/TSX موفق بود و `node --check` برای فایل‌های JavaScript قدیمی/public بدون خطا اجرا شد. Typecheck هدفمند Featureهای جدید با declaration shim موقت React موفق بود؛ این بررسی جایگزین typecheck واقعی با `@types/react` نصب‌شده نیست. دو فایل تست جدید برای formatterها و unwrap کردن payload بازار اضافه شده‌اند، اما به‌دلیل نبود `node_modules` اجرای Vitest در این محیط ممکن نبود. Typecheck کامل و Production Build نیز اجرا نشدند؛ بنابراین خروجی build تولیدی و visual parity مرورگر هنوز تأییدشده محسوب نمی‌شوند.
