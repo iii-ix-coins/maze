@@ -312,10 +312,11 @@
             --corner: squircle;
         }
     }
-    @supports (animation-timing-function: linear(0, 1)){
 
-        :root{
-        --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
+    @supports (animation-timing-function: linear(0, 1)) {
+
+        :root {
+            --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
         }
     }
 }
@@ -387,10 +388,11 @@
     .token-summary-icon {
         image-rendering: auto;
     }
-    @supports (height: 100dvh){
 
-        body{
-        min-height: 100dvh;
+    @supports (height: 100dvh) {
+
+        body {
+            min-height: 100dvh;
         }
     }
 }
@@ -2062,27 +2064,27 @@ html[data-theme="light"] .nav-brand-logo--black {
     top: calc(100% + 8px);
     right: 0;
     display: grid;
-    gap: 4px;
+    gap: 3px;
     min-width: 148px;
-    padding: 6px;
-    border: 1px solid var(--nav-border);
+    padding: 3px;
     background: var(--nav-panel);
-    box-shadow: 0 14px 36px var(--nav-shadow);
-    animation: maze-dropdown-in 140ms ease both;
+    animation: maze-dropdown-in 150ms ease both;
 }
 
 .nav-wallet-menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
-    min-height: 36px;
-    padding: 0 10px;
+    min-height: 33px;
+    padding: 0 5px;
     border: 0;
     background: transparent;
     color: var(--nav-text);
     font: inherit;
-    font-size: 0.9rem;
+    font-size: clamp(13px, 3.2vw, 13px);
+    font-weight: 650;
+    letter-spacing: -.035em;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
