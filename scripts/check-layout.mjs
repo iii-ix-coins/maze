@@ -398,10 +398,17 @@ if (apiManifest.liveFeedHolders || apiManifest.holdersTop !== '/api/holders/top'
 }
 const holdersHook = fs.readFileSync(path.join(root, 'src/features/holders/useHolders.ts'), 'utf8');
 const homePage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
+const holdersPage = fs.readFileSync(path.join(root, 'src/features/holders/HoldersPage.tsx'), 'utf8');
 const holdersService = fs.readFileSync(path.join(root, 'shared/services/HoldersSnapshotService.js'), 'utf8');
 const serverSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
-if (!holdersHook.includes('API_PATHS.holdersTop') || !homePage.includes('<HoldersPanel />') || homePage.includes('LiveFeedPanel')) {
-  console.error('[layout] Home and Holders must use the dedicated Holders feature, without a Live Feed component.');
+if (
+  !holdersHook.includes('API_PATHS.holdersTop') ||
+  !homePage.includes('<MarketSummary />') ||
+  homePage.includes('<HoldersPanel') ||
+  homePage.includes('LiveFeedPanel') ||
+  !holdersPage.includes('<HoldersPanel fullPage />')
+) {
+  console.error('[layout] Home must show MarketSummary without Holders/Live Feed; the dedicated Holders page must retain HoldersPanel.');
   process.exit(1);
 }
 if (!holdersService.includes('function getTopHolders') || !serverSource.includes('API_PATHS.holdersTop') || !serverSource.includes('HoldersSnapshotService')) {
