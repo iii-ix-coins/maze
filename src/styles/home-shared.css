@@ -272,7 +272,7 @@
   .route-page--home>.site-home-content.feature-page-shell {
     width: min(calc(100% - 2 * var(--gutter)), var(--page-max));
     max-width: var(--page-max);
-    margin: clamp(12px, 1.15vw, 16px) auto 12px;
+    margin: clamp(6px, .75vw, 10px) auto 12px;
     padding-top: 0;
     gap: 0;
   }

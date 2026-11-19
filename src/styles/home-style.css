@@ -167,16 +167,6 @@
     .site-home-content .market-feature .token-summary-item:nth-child(6) { --dot: var(--azure); }
     .site-home-content .market-feature .token-summary-item > strong { font-size: clamp(1.04rem, 1.25vw, 1.2rem); font-weight: 650; line-height: 1; letter-spacing: -.025em; }
 
-    /* Keep the original crisp Paper Arcade shadow; reduce glow on Grass/Dark. */
-    html[data-theme="grass"] .site-home-content .market-feature .token-summary,
-    html[data-theme="dark"] .site-home-content .market-feature .token-summary {
-        filter: drop-shadow(0 6px 9px rgba(0, 0, 0, .28));
-    }
-
-    html[data-theme="light"] .site-home-content .market-feature .token-summary {
-        filter: drop-shadow(6px 6px 0 var(--ar-line));
-    }
-
     /* ======================================================================
        HOW IT WORKS  (components/HowItWorks.js)
        ====================================================================== */
@@ -283,45 +273,116 @@
     }
 }
 
-/* Home-only compact market surface. These scoped unlayered rules deliberately
-   outrank the global Arena tile recipe without changing the Market route. */
 .site-home-content .market-feature {
     gap: 0;
 }
 
-.site-home-content .market-feature .token-summary-item {
+/* Home-only Market Overview: sharp, borderless surface with Hero-like fluid sizing.
+   Keep these rules unlayered so the shared component recipes cannot add a rim,
+   rounded corners, or a theme-specific shadow back to this Home instance. */
+.site-home-content .market-feature .token-summary {
+    --market-cut: clamp(10px, 1.3vw, 18px);
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: clamp(5px, .65vw, 9px);
+    padding: clamp(6px, .85vw, 12px) clamp(8px, 1.15vw, 16px);
+    overflow: hidden;
     border: 0;
     border-radius: 0;
-    --market-item-cut: 7px;
-    clip-path: polygon(
-        var(--market-item-cut) 0,
-        100% 0,
-        100% calc(100% - var(--market-item-cut)),
-        calc(100% - var(--market-item-cut)) 100%,
-        0 100%,
-        0 var(--market-item-cut)
-    );
-    background: linear-gradient(180deg, rgba(var(--ar-rgb), .045), rgba(var(--ar-rgb), .022));
+    corner-shape: bevel;
+    outline: 0;
     box-shadow: none;
+    filter: none;
+    clip-path: polygon(
+        var(--market-cut) 0,
+        100% 0,
+        100% calc(100% - var(--market-cut)),
+        calc(100% - var(--market-cut)) 100%,
+        0 100%,
+        0 var(--market-cut)
+    );
 }
 
-.site-home-content .market-feature .token-summary-item::before,
-.site-home-content .market-feature .token-summary-item::after {
+.site-home-content .market-feature .token-summary::before,
+.site-home-content .market-feature .token-summary::after {
     content: none;
     display: none;
+    border: 0;
+    box-shadow: none;
+    filter: none;
 }
 
-.site-home-content .market-feature .token-summary-item:hover {
-    transform: none;
+.site-home-content .market-feature .token-summary-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(5px, .8vw, 11px);
+}
+
+.site-home-content .market-feature .token-summary-identity {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, .75vw, 10px);
+    min-width: 0;
+}
+
+.site-home-content .market-feature .token-summary-icon {
+    flex: none;
+    width: clamp(28px, 3.05vw, 44px);
+    height: clamp(28px, 3.05vw, 44px);
+    border: 0;
+    border-radius: 0;
+    corner-shape: bevel;
+    outline: 0;
+    box-shadow: none;
+    object-fit: cover;
+}
+
+.site-home-content .market-feature .token-summary-title {
+    min-width: 0;
+    font-size: clamp(12px, 1.35vw, 18px);
+    font-weight: 650;
+    line-height: 1.08;
+    letter-spacing: -.035em;
+}
+
+.site-home-content .market-feature .token-summary-symbol {
+    font-size: clamp(9px, .82vw, 11px);
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.site-home-content .market-feature .token-summary-badge {
+    gap: 4px;
+    padding: clamp(2px, .25vw, 4px) clamp(5px, .65vw, 9px);
+    border: 0;
+    border-radius: 0;
+    font-size: clamp(8px, .78vw, 11px);
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: .035em;
+}
+
+.site-home-content .market-feature .token-summary-badge::before {
+    width: clamp(8px, .75vw, 11px);
+    height: clamp(8px, .75vw, 11px);
 }
 
 .site-home-content .market-feature .token-summary-link {
-    min-height: 29px;
-    padding: .38rem .8rem;
-    gap: 6px;
-    font-size: .67rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, .45vw, 6px);
+    min-height: clamp(24px, 2.45vw, 34px);
+    padding: clamp(4px, .48vw, 7px) clamp(8px, 1vw, 14px);
+    border: 0;
+    border-radius: 0;
+    font-size: clamp(9px, .88vw, 12px);
     font-weight: 650;
-    letter-spacing: -.01em;
+    line-height: 1;
     box-shadow: none;
 }
 
@@ -330,17 +391,149 @@
     box-shadow: none;
 }
 
-.site-home-content .market-feature .token-summary-badge {
-    gap: 4px;
-    padding: 3px 8px;
-    border: 0;
-    border-radius: 0;
-    font-size: .60rem;
-    font-weight: 650;
-    letter-spacing: .045em;
+.site-home-content .market-feature .token-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(4px, .55vw, 8px);
+    min-width: 0;
 }
 
-.site-home-content .market-feature .token-summary-badge::before {
-    width: 10px;
-    height: 10px;
+.site-home-content .market-feature .token-summary-item {
+    display: grid;
+    align-content: center;
+    gap: clamp(2px, .25vw, 4px);
+    min-width: 0;
+    min-height: clamp(32px, 4.1vw, 46px);
+    padding: clamp(4px, .58vw, 8px) clamp(6px, .82vw, 11px);
+    border: 0;
+    border-radius: 0;
+    corner-shape: bevel;
+    outline: 0;
+    box-shadow: none;
+    filter: none;
+    --market-item-cut: clamp(5px, .55vw, 7px);
+    clip-path: polygon(
+        var(--market-item-cut) 0,
+        100% 0,
+        100% calc(100% - var(--market-item-cut)),
+        calc(100% - var(--market-item-cut)) 100%,
+        0 100%,
+        0 var(--market-item-cut)
+    );
+    background: linear-gradient(180deg, rgba(var(--ar-rgb), .035), rgba(var(--ar-rgb), .018));
+}
+
+.site-home-content .market-feature .token-summary-item::before,
+.site-home-content .market-feature .token-summary-item::after {
+    content: none;
+    display: none;
+    border: 0;
+    box-shadow: none;
+    filter: none;
+}
+
+.site-home-content .market-feature .token-summary-item:hover {
+    transform: none;
+}
+
+.site-home-content .market-feature .token-summary-item > span {
+    font-size: clamp(8px, .86vw, 11.5px);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: .055em;
+}
+
+.site-home-content .market-feature .token-summary-item > span::before {
+    width: clamp(4px, .4vw, 6px);
+    height: clamp(4px, .4vw, 6px);
+    margin-right: clamp(4px, .48vw, 7px);
+    box-shadow: none;
+}
+
+.site-home-content .market-feature .token-summary-item > strong {
+    font-size: clamp(12px, 1.35vw, 18px);
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: -.025em;
+}
+
+@media (max-width: 980px) {
+    .site-home-content .market-feature .token-summary-title,
+    .site-home-content .market-feature .token-summary-item > strong {
+        font-weight: 600;
+    }
+
+    .site-home-content .market-feature .token-summary-item > span,
+    .site-home-content .market-feature .token-summary-link,
+    .site-home-content .market-feature .token-summary-badge {
+        font-weight: 550;
+    }
+}
+
+@media (max-width: 600px) {
+    .site-home-content .market-feature .token-summary {
+        --market-cut: 10px;
+        gap: 6px;
+        padding: 6px 7px;
+    }
+
+    .site-home-content .market-feature .token-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .site-home-content .market-feature .token-summary-item {
+        min-height: clamp(30px, 8vw, 38px);
+        padding: 5px 7px;
+    }
+
+    .site-home-content .market-feature .token-summary-item > span {
+        font-size: clamp(7.5px, 2.5vw, 9px);
+    }
+
+    .site-home-content .market-feature .token-summary-item > strong {
+        font-size: clamp(10.5px, 3.6vw, 14px);
+    }
+
+    .site-home-content .market-feature .token-summary-title {
+        font-size: clamp(10.5px, 3.5vw, 13.5px);
+    }
+
+    .site-home-content .market-feature .token-summary-symbol {
+        font-size: clamp(8px, 2.3vw, 9.5px);
+    }
+
+    .site-home-content .market-feature .token-summary-icon {
+        width: clamp(25px, 8vw, 34px);
+        height: clamp(25px, 8vw, 34px);
+    }
+
+    .site-home-content .market-feature .token-summary-link {
+        min-height: 23px;
+        padding: 4px 7px;
+        font-size: clamp(8px, 2.35vw, 9.5px);
+    }
+
+    .site-home-content .market-feature .token-summary-badge {
+        font-size: clamp(7px, 2.1vw, 8.5px);
+    }
+}
+
+@media (max-width: 360px) {
+    .site-home-content .market-feature .token-summary-header {
+        gap: 4px;
+    }
+
+    .site-home-content .market-feature .token-summary-identity {
+        gap: 5px;
+    }
+
+    .site-home-content .market-feature .token-summary-link {
+        min-height: 21px;
+        padding: 3px 5px;
+    }
+
+    .site-home-content .market-feature .token-summary-item {
+        padding-inline: 5px;
+    }
 }
