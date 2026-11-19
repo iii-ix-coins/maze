@@ -3,7 +3,7 @@ import { MarketSummary } from '../market/MarketSummary';
 export function HomePage() {
   return (
     <main className="site-home-content feature-page-shell">
-      <MarketSummary />
+      <MarketSummary showTitle={false} />
     </main>
   );
 }

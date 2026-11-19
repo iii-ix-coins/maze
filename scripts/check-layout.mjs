@@ -403,7 +403,7 @@ const holdersService = fs.readFileSync(path.join(root, 'shared/services/HoldersS
 const serverSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
 if (
   !holdersHook.includes('API_PATHS.holdersTop') ||
-  !homePage.includes('<MarketSummary />') ||
+  !/<MarketSummary\b[^>]*\bshowTitle=\{false\}/.test(homePage) ||
   homePage.includes('<HoldersPanel') ||
   homePage.includes('LiveFeedPanel') ||
   !holdersPage.includes('<HoldersPanel fullPage />')

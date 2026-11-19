@@ -270,9 +270,11 @@
 
   /* Home page — unified compact spacing */
   .route-page--home>.site-home-content.feature-page-shell {
-    margin: 12px auto;
+    width: min(calc(100% - 2 * var(--gutter)), var(--page-max));
+    max-width: var(--page-max);
+    margin: clamp(12px, 1.15vw, 16px) auto 12px;
     padding-top: 0;
-    gap: 12px;
+    gap: 0;
   }
 
   /* Keep the Hero spacing owned by the Home page wrapper */
