@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 class HolderDatabase {
-    static SCHEMA_VERSION = 7;
+    static SCHEMA_VERSION = 8;
     static CLASSIFICATION_CACHE_BATCH_SIZE = 900;
 
     constructor(dbPath) {
@@ -316,36 +316,6 @@ class HolderDatabase {
             }
 
             if (version < 3) {
-                this.db.prepare(`
-                    CREATE TABLE IF NOT EXISTS holder_verification (
-                        wallet TEXT PRIMARY KEY,
-                        birthday_ms INTEGER DEFAULT NULL,
-                        birthday_signature TEXT DEFAULT NULL,
-                        age_seconds INTEGER NOT NULL DEFAULT 0,
-                        verification_state TEXT NOT NULL
-                            CHECK (
-                                verification_state IN (
-                                    'pending',
-                                    'active',
-                                    'sold_all',
-                                    'no_buy',
-                                    'unknown'
-                                )
-                            ),
-                        last_verified_ms INTEGER NOT NULL
-                    )
-                `).run();
-
-                this.db.prepare(`
-                    CREATE TABLE IF NOT EXISTS holder_purchase_stats (
-                        wallet TEXT PRIMARY KEY,
-                        buy_count INTEGER NOT NULL DEFAULT 0,
-                        total_buys_raw TEXT NOT NULL DEFAULT '0',
-                        last_buy_block_time INTEGER DEFAULT NULL,
-                        last_buy_signature TEXT DEFAULT NULL,
-                        updated_at_ms INTEGER NOT NULL
-                    )
-                `).run();
 
                 this.db.prepare(`
                     CREATE TABLE IF NOT EXISTS holder_projection_cursor (
@@ -390,45 +360,6 @@ class HolderDatabase {
                 this.db.prepare(`
                     CREATE INDEX IF NOT EXISTS idx_holders_last_sell
                     ON holders_list(last_sell_all_time)
-                `).run();
-
-                this.db.prepare(`
-                    CREATE INDEX IF NOT EXISTS idx_holder_verification_state
-                    ON holder_verification(verification_state)
-                `).run();
-
-                this.db.prepare(`
-                    DROP VIEW IF EXISTS holder_profile
-                `).run();
-
-                this.db.prepare(`
-                    CREATE VIEW holder_profile AS
-                    SELECT
-                        h.wallet,
-                        h.raw_amount,
-                        h.ui_amount,
-                        h.state,
-                        h.activity,
-                        h.last_updated_ms,
-                        h.last_sell_all_time,
-                        r.rank,
-                        v.birthday_ms,
-                        v.birthday_signature,
-                        v.age_seconds,
-                        COALESCE(v.verification_state, 'unknown')
-                            AS verification_state,
-                        COALESCE(p.buy_count, 0) AS buy_count,
-                        COALESCE(p.total_buys_raw, '0') AS total_buys_raw,
-                        p.last_buy_block_time,
-                        p.last_buy_signature,
-                        COALESCE(s.likes, 0) AS likes,
-                        COALESCE(s.shares, 0) AS shares,
-                        COALESCE(s.views, 0) AS views
-                    FROM holders_list h
-                    LEFT JOIN holder_rankings r ON r.wallet = h.wallet
-                    LEFT JOIN holder_verification v ON v.wallet = h.wallet
-                    LEFT JOIN holder_purchase_stats p ON p.wallet = h.wallet
-                    LEFT JOIN holder_social_stats s ON s.wallet = h.wallet
                 `).run();
 
                 version = 4;
@@ -567,6 +498,16 @@ class HolderDatabase {
 
                 version = 7;
                 this.db.pragma('user_version = 7');
+            }
+
+            if (version < 8) {
+                this.db.prepare('DROP VIEW IF EXISTS holder_profile').run();
+                this.db.prepare('DROP TABLE IF EXISTS holder_verification').run();
+                this.db.prepare('DROP TABLE IF EXISTS holder_purchase_stats').run();
+                this.db.prepare('DROP INDEX IF EXISTS idx_holder_verification_state').run();
+
+                version = 8;
+                this.db.pragma('user_version = 8');
             }
         });
 
@@ -771,30 +712,6 @@ class HolderDatabase {
                     updated_at_ms = excluded.updated_at_ms
             `),
 
-            getHolderProfile: this.db.prepare(`
-                SELECT
-                    wallet,
-                    raw_amount AS rawAmount,
-                    ui_amount AS uiAmount,
-                    state,
-                    activity,
-                    last_updated_ms AS lastUpdatedMs,
-                    last_sell_all_time AS lastSellAllTime,
-                    rank,
-                    birthday_ms AS birthdayMs,
-                    birthday_signature AS birthdaySignature,
-                    age_seconds AS ageSeconds,
-                    verification_state AS verificationState,
-                    buy_count AS buyCount,
-                    total_buys_raw AS totalBuysRaw,
-                    last_buy_block_time AS lastBuyBlockTime,
-                    last_buy_signature AS lastBuySignature,
-                    likes,
-                    shares,
-                    views
-                FROM holder_profile
-                WHERE wallet = ?
-            `),
 
             incrementLike: this.db.prepare(`
                 INSERT INTO holder_social_stats (
@@ -844,31 +761,6 @@ class HolderDatabase {
                     updated_at_ms = excluded.updated_at_ms
             `),
 
-            upsertPurchaseStats: this.db.prepare(`
-                INSERT INTO holder_purchase_stats (
-                    wallet,
-                    buy_count,
-                    total_buys_raw,
-                    last_buy_block_time,
-                    last_buy_signature,
-                    updated_at_ms
-                )
-                VALUES (
-                    @wallet,
-                    @buyCount,
-                    @totalBuysRaw,
-                    @lastBuyBlockTime,
-                    @lastBuySignature,
-                    @updatedAtMs
-                )
-                ON CONFLICT(wallet)
-                DO UPDATE SET
-                    buy_count = excluded.buy_count,
-                    total_buys_raw = excluded.total_buys_raw,
-                    last_buy_block_time = excluded.last_buy_block_time,
-                    last_buy_signature = excluded.last_buy_signature,
-                    updated_at_ms = excluded.updated_at_ms
-            `)
         };
     }
 
@@ -1107,56 +999,6 @@ class HolderDatabase {
         `).all(safeLimit);
     }
 
-    // =============================================================
-    // Holder profile
-    // =============================================================
-
-    getHolderProfile(wallet) {
-        const normalizedWallet = this._normalizeWallet(wallet);
-
-        const row = this.statements.getHolderProfile.get(
-            normalizedWallet
-        );
-
-        if (!row) {
-            return null;
-        }
-
-        let ageSeconds = Number.isInteger(row.ageSeconds)
-            ? row.ageSeconds
-            : 0;
-
-        if (Number.isFinite(row.birthdayMs)) {
-            ageSeconds = Math.max(
-                0,
-                Math.floor(
-                    (Date.now() - Number(row.birthdayMs)) / 1000
-                )
-            );
-        }
-
-        return {
-            wallet: row.wallet,
-            rawAmount: row.rawAmount,
-            uiAmount: row.uiAmount,
-            state: row.state,
-            activity: row.activity,
-            rank: row.rank ?? null,
-            lastUpdatedMs: row.lastUpdatedMs,
-            lastSellAllTime: row.lastSellAllTime ?? null,
-            birthdayMs: row.birthdayMs ?? null,
-            birthdaySignature: row.birthdaySignature ?? null,
-            ageSeconds,
-            verificationState: row.verificationState,
-            buyCount: Number(row.buyCount ?? 0),
-            totalBuysRaw: String(row.totalBuysRaw ?? '0'),
-            lastBuyBlockTime: row.lastBuyBlockTime ?? null,
-            lastBuySignature: row.lastBuySignature ?? null,
-            likes: Number(row.likes ?? 0),
-            shares: Number(row.shares ?? 0),
-            views: Number(row.views ?? 0)
-        };
-    }
 
     // =============================================================
     // Projection cursor
@@ -1221,56 +1063,6 @@ class HolderDatabase {
         );
     }
 
-    // =============================================================
-    // Purchase projection
-    // =============================================================
-
-    upsertPurchaseStats({
-        wallet,
-        buyCount,
-        totalBuysRaw,
-        lastBuyBlockTime = null,
-        lastBuySignature = null,
-        updatedAtMs = Date.now()
-    }) {
-        const normalizedWallet = this._normalizeWallet(wallet);
-        const normalizedBuyCount = Number(buyCount);
-
-        if (
-            !Number.isInteger(normalizedBuyCount) ||
-            normalizedBuyCount < 0
-        ) {
-            throw new TypeError(
-                'buyCount must be a non-negative integer.'
-            );
-        }
-
-        const normalizedTotalBuysRaw =
-            this._normalizeRawAmount(totalBuysRaw);
-
-        const normalizedUpdatedAt = Number(updatedAtMs);
-
-        if (!Number.isFinite(normalizedUpdatedAt)) {
-            throw new TypeError(
-                'updatedAtMs must be a valid number.'
-            );
-        }
-
-        this.statements.upsertPurchaseStats.run({
-            wallet: normalizedWallet,
-            buyCount: normalizedBuyCount,
-            totalBuysRaw: normalizedTotalBuysRaw,
-            lastBuyBlockTime:
-                lastBuyBlockTime === null
-                    ? null
-                    : Number(lastBuyBlockTime),
-            lastBuySignature:
-                lastBuySignature
-                    ? String(lastBuySignature)
-                    : null,
-            updatedAtMs: normalizedUpdatedAt
-        });
-    }
 
     // =============================================================
     // Social counters

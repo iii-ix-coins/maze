@@ -5,26 +5,12 @@ const { spawn } = require('child_process');
 
 const ROOT_DIR = __dirname;
 
-const dotenvResult = require('dotenv').config({
+require('dotenv').config({
     path: path.join(
         ROOT_DIR,
         '.env'
     )
 });
-
-if (dotenvResult?.parsed && Object.prototype.hasOwnProperty.call(dotenvResult.parsed, 'TX_WS_ENABLED')) {
-    const fileValue = String(dotenvResult.parsed.TX_WS_ENABLED).trim().toLowerCase();
-    const effectiveValue = String(process.env.TX_WS_ENABLED ?? '').trim().toLowerCase();
-    if (fileValue !== effectiveValue) {
-        console.warn(
-            `[Launcher] TX_WS_ENABLED conflict: .env=${fileValue}, process=${effectiveValue}. Existing process environment wins.`
-        );
-    }
-}
-
-console.log(
-    `[Launcher] Effective TX_WS_ENABLED=${String(process.env.TX_WS_ENABLED ?? 'undefined')}`
-);
 
 function envBoolean(value, fallback = false) {
     const normalized = String(value ?? '')
@@ -106,31 +92,11 @@ const SERVICES = [
             )
     },
     {
-        name: 'Transaction Engine',
-        script: path.join(
-            ROOT_DIR,
-            'engines',
-            'tx-engine',
-            'index.js'
-        ),
-        restart: true
-    },
-    {
         name: 'Holder Engine',
         script: path.join(
             ROOT_DIR,
             'engines',
             'holder-engine',
-            'index.js'
-        ),
-        restart: true
-    },
-    {
-        name: 'Verify Engine',
-        script: path.join(
-            ROOT_DIR,
-            'engines',
-            'verify-engine',
             'index.js'
         ),
         restart: true

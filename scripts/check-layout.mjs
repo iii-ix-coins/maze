@@ -370,3 +370,33 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
 }
 
 console.log('[layout] React routes, migrated Maze UI and legacy-controller retirement verified.');
+
+// Retired transaction/verification engines and buyer feed must stay removed.
+for (const retiredPath of [
+  'engines/tx-engine',
+  'engines/verify-engine',
+  'shared/state/txState.js',
+  'shared/state/tx-state.json',
+]) {
+  if (fs.existsSync(path.join(root, retiredPath))) {
+    console.error(`[layout] retired transaction/verification artifact remains: ${retiredPath}`);
+    process.exit(1);
+  }
+}
+const retiredSources = [
+  'start.js', 'server.js', 'shared/services/LiveFeedService.js',
+  'src/features/live-feed/LiveFeedPanel.tsx', 'src/features/holders/HoldersPanel.tsx',
+  'src/features/holders/useHolders.ts', 'shared/api-routes.json',
+].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
+for (const [file, source] of retiredSources) {
+  if (/tx-engine|verify-engine|Transaction Engine|Verify Engine|Last 100 Purchases|liveFeedBuyers|latestBuyers|txState|lastPurchaseBlockTime|holder-purchases-value|holder-last-Purchases-value/i.test(source)) {
+    console.error(`[layout] removed transaction/purchase feature is still referenced: ${file}`);
+    process.exit(1);
+  }
+}
+const holderDbSource = fs.readFileSync(path.join(root, 'engines/holder-engine/lib/db.js'), 'utf8');
+if (!/static SCHEMA_VERSION = 8/.test(holderDbSource) || !/DROP TABLE IF EXISTS holder_purchase_stats/.test(holderDbSource) || !/DROP TABLE IF EXISTS holder_verification/.test(holderDbSource)) {
+  console.error('[layout] Holder DB must migrate existing volumes away from retired purchase/verification tables.');
+  process.exit(1);
+}
+

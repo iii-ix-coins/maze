@@ -210,17 +210,17 @@
         transition: opacity 0.5s var(--ease-out), transform 0.55s var(--ease-out), border-color var(--t-base), box-shadow var(--t-base);
     }
     .live-card.is-entering { opacity: 0; transform: translateY(16px) scale(0.96); }
-    .live-card-vote, .holder-live-card-vote {
+    .holder-live-card-vote {
         justify-self: end; padding: 5px 12px; border-radius: var(--r-pill);
         font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em;
         color: var(--gold); background: oklch(0.84 0.13 88 / 0.12); border: 1px solid oklch(0.84 0.13 88 / 0.3);
         transition: background var(--t-base), color var(--t-base), transform var(--t-base) var(--ease-spring), box-shadow var(--t-base);
     }
-    .live-card-vote:hover, .holder-live-card-vote:hover {
+    .holder-live-card-vote:hover {
         color: var(--ink-1000); background: linear-gradient(135deg, var(--gold), oklch(0.88 0.12 100));
         box-shadow: 0 8px 22px -8px oklch(0.84 0.13 88 / 0.9); transform: translateY(-1px);
     }
-    .live-card-vote:active, .holder-live-card-vote:active { transform: scale(0.92); }
+    .holder-live-card-vote:active { transform: scale(0.92); }
     .holder-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .live-card-rank {
         font-family: var(--font-display); font-weight: 800; font-size: 1.55rem; letter-spacing: -0.04em; line-height: 1;

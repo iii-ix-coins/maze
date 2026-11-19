@@ -538,7 +538,7 @@
 
     .holders-columns,
     .holders-row {
-      grid-template-columns: 34px minmax(110px, 1fr) minmax(76px, .8fr) 44px 74px;
+      grid-template-columns: 34px minmax(110px, 1fr) minmax(76px, .8fr);
       gap: 8px;
     }
 
@@ -554,10 +554,6 @@
       letter-spacing: -.035em;
     }
 
-    .holder-last-Purchases-value {
-      font-size: clamp(10px, 3.2vw, 11px);
-      letter-spacing: -.055em;
-    }
 
     .coin-hero {
       align-items: flex-start;

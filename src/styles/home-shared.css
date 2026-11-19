@@ -164,7 +164,7 @@
   .holders-columns,
   .holders-row {
     display: grid;
-    grid-template-columns: 54px minmax(150px, 1.7fr) minmax(90px, 1fr) minmax(58px, .6fr) minmax(88px, .85fr);
+    grid-template-columns: 54px minmax(150px, 1.7fr) minmax(90px, 1fr);
     align-items: center;
     gap: 12px;
   }
@@ -246,15 +246,6 @@
     font-weight: 700;
   }
 
-  .holder-purchases-value {
-    color: var(--text-soft, #c2cdcc);
-  }
-
-  .holder-last-Purchases-value {
-    color: var(--text-mute, #9ba8aa);
-    font-size: .72rem;
-    white-space: nowrap;
-  }
 
   .holders-status {
     display: grid;

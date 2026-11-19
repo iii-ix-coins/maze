@@ -6,8 +6,6 @@ export interface HolderItem extends Record<string, any> {
   wallet?: string;
   rank?: number | string;
   uiAmount?: number | string;
-  purchases?: number | string;
-  lastPurchaseBlockTime?: number | string | null;
 }
 
 interface HoldersPayload {
@@ -26,7 +24,6 @@ function dataVersion(data: HoldersPayload, items: HolderItem[]): string {
   const snapshot = data?.snapshotTimestamp || '';
   const itemState = items.map((item) => [
     item.rank ?? '', item.wallet ?? '', item.uiAmount ?? '',
-    item.purchases ?? 0, item.lastPurchaseBlockTime ?? '',
   ].join(':')).join('|');
   return `${snapshot}::${itemState}`;
 }

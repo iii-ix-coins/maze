@@ -18,20 +18,6 @@ function formatHolderAmount(value: unknown): string {
   return amount.toLocaleString('en-US', { maximumFractionDigits: 4 });
 }
 
-function formatRelativeTime(blockTime: unknown): string {
-  if (blockTime == null) return 'Never';
-  const secondsValue = Number(blockTime);
-  if (!Number.isFinite(secondsValue)) return '--';
-  const difference = Date.now() - secondsValue * 1000;
-  if (difference < 0) return 'Just now';
-  const seconds = Math.floor(difference / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
 
 function walletHue(wallet: string): number {
   let hash = 0;
@@ -55,14 +41,11 @@ const HolderRow = memo(function HolderRow({ holder, minAmount, maxAmount }: { ho
     '--heat': holderHeat(holder.uiAmount, minAmount, maxAmount),
     '--hue': walletHue(wallet),
   } as CSSProperties;
-  const purchases = Number(holder.purchases);
   return (
     <div className="holders-row holder-row" data-wallet={wallet} style={style} key={wallet}>
       <div className="holder-rank"><span className="holder-rank-value">{holder.rank ?? '--'}</span></div>
       <div className="holder-wallet"><span className="wallet-address" title={wallet}>{shortWallet(wallet)}</span></div>
       <div className="holder-amount"><span className="holder-amount-value">{formatHolderAmount(holder.uiAmount)}</span></div>
-      <div className="holder-Purchases"><span className="holder-purchases-value">{Number.isFinite(purchases) ? purchases.toLocaleString('en-US') : '0'}</span></div>
-      <div className="holder-last-Purchases"><span className="holder-last-Purchases-value">{formatRelativeTime(holder.lastPurchaseBlockTime)}</span></div>
     </div>
   );
 });
@@ -89,7 +72,7 @@ export function HoldersPanel({ fullPage = false }: { fullPage?: boolean }) {
       </div>
       <div className="holders-content">
         <div className="holders-columns" aria-hidden="true">
-          <span>#</span><span>Wallet</span><span>Holding</span><span>Buys</span><span>Last buy</span>
+          <span>#</span><span>Wallet</span><span>Holding</span>
         </div>
         <div id="holders-list" className="holders-list">
           {status === 'loading' ? <div className="holders-status holders-status-loading">Loading holders…</div> : null}

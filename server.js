@@ -24,9 +24,6 @@ const {
     getPriceStateJson
 } = require('./shared/state/priceState');
 
-const {
-    getTxState
-} = require('./shared/state/txState');
 
 const {
     getJupiterMarketState,
@@ -57,8 +54,8 @@ function sanitizeJupiterMarketState(state) {
 }
 
 const {
-    getLatestPurchases,
-    getTopHolders
+    getTopHolders,
+    close: closeLiveFeedService
 } = require('./shared/services/LiveFeedService');
 
 const app =
@@ -392,37 +389,6 @@ app.get(
  */
 
 app.get(
-    API_PATHS.liveFeedBuyers,
-    shortApiCache,
-    (req, res) => {
-
-        try {
-
-            const data =
-                getLatestPurchases({
-                    limit: req.query.limit
-                });
-
-            return res.json(
-                data
-            );
-
-        } catch (error) {
-
-            console.error(
-                '[Web] Live buyers feed failed:',
-                error?.message || error
-            );
-
-            return res.status(503).json({
-                error:
-                    'Live buyers data is temporarily unavailable.'
-            });
-        }
-    }
-);
-
-app.get(
     API_PATHS.liveFeedHolders,
     shortApiCache,
     (req, res) => {
@@ -590,62 +556,6 @@ app.get(
     }
 );
 
-/*
- * --------------------------------------------------
- * Transaction / Buyers API
- * --------------------------------------------------
- */
-
-app.get(
-    API_PATHS.latestBuyers,
-    shortApiCache,
-    (req, res) => {
-
-        const state =
-            getTxState();
-
-        if (
-            state &&
-            Array.isArray(
-                state.latestBuyers
-            )
-        ) {
-
-            return res.json(
-                state.latestBuyers
-            );
-        }
-
-        return res.status(503).json({
-            error:
-                'Transaction engine is warming up. Please wait...'
-        });
-    }
-);
-
-app.get(
-    API_PATHS.txState,
-    shortApiCache,
-    (req, res) => {
-
-        const state =
-            getTxState();
-
-        if (
-            state &&
-            state.state
-        ) {
-
-            return res.json(
-                state.state
-            );
-        }
-
-        return res.json({
-            status: 'loading'
-        });
-    }
-);
 
 /*
  * --------------------------------------------------
@@ -751,6 +661,15 @@ function shutdown(signal) {
     } catch (error) {
         console.warn(
             '[Web] Failed to close Jupiter Market read service:',
+            error?.message || error
+        );
+    }
+
+    try {
+        closeLiveFeedService();
+    } catch (error) {
+        console.warn(
+            '[Web] Failed to close Live Feed holder database:',
             error?.message || error
         );
     }

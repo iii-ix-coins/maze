@@ -1,5 +1,3 @@
-# Live Feed feature — React
+# Live Feed
 
-`LiveFeedPanel` owns the buyer/holder tabs, cards, loading/error/empty states and horizontal rail. It preserves the existing GET endpoints (`/api/live-feed/buyers?limit=100` and `/api/live-feed/holders?limit=100`), query values, no-store request policy, request cancellation, stale-response checks, feed-version comparison, five-second post-request refresh schedule, wallet shortening and amount formatting. The previous feed remains visible while a newly selected feed is loading; scroll anchoring is preserved during same-feed updates.
-
-The previous DOM-based controller and its duplicate archive have been deleted; the React component is the only active Live Feed UI implementation.
+`LiveFeedPanel` displays the Top 100 Holders feed only. It reads `/api/live-feed/holders?limit=100` with `cache: 'no-store'`, cancels superseded requests, ignores stale responses, compares feed versions, refreshes five seconds after each request, preserves horizontal scroll anchoring, and animates newly appearing holder cards. The former buyer/purchase feed and its transaction-database dependency have been removed.

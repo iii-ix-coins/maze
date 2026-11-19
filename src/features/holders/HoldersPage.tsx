@@ -7,7 +7,7 @@ export function HoldersPage() {
       <header className="feature-page-title">
         <span className="eyebrow">On-chain distribution</span>
         <h1>Top Token Holders</h1>
-        <p>Wallet balances and recent purchase activity from the existing holders feed.</p>
+        <p>Wallet balances and ranking data from the live holder snapshot.</p>
       </header>
       <HoldersPanel fullPage />
     </main>
