@@ -51,7 +51,7 @@
         rgba(var(--hero-accent-rgb), .24),
         transparent 48%),
       radial-gradient(ellipse at 90% 90%,
-        rgba(32, 201, 165, .14),
+        rgba(var(--hero-accent-2-rgb, 32, 201, 165), .14),
         transparent 46%),
       var(--panel-bg, #f8f7f2);
 
@@ -299,7 +299,7 @@
 
     background: linear-gradient(90deg,
         var(--hero-accent),
-        #24c9a5);
+        var(--hero-accent-2, #24c9a5));
 
     box-shadow:
       0 0 13px rgba(var(--hero-accent-rgb), .65);

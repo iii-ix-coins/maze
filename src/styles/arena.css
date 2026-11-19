@@ -14,6 +14,7 @@ html[data-theme="grass"] {
     --ar-accent: #b6ff2e;
     --ar-rgb: 182, 255, 46;
     --ar-accent-2: #22e5ff;
+    --ar-accent-2-rgb: 34, 229, 255;
     --ar-hot: #ff3d9a;
     --ar-on-accent: #061003;
     --ar-text: #eafff0;
@@ -37,6 +38,7 @@ html[data-theme="dark"] {
     --ar-accent: #22e5ff;
     --ar-rgb: 34, 229, 255;
     --ar-accent-2: #a78bfa;
+    --ar-accent-2-rgb: 167, 139, 250;
     --ar-hot: #ff4d8d;
     --ar-on-accent: #031014;
     --ar-text: #eef1ff;
@@ -59,6 +61,7 @@ html[data-theme="light"] {
     --ar-accent: #6a2cff;
     --ar-rgb: 106, 44, 255;
     --ar-accent-2: #00a58e;
+    --ar-accent-2-rgb: 0, 165, 142;
     --ar-hot: #ff2e7e;
     --ar-on-accent: #ffffff;
     --ar-text: #10131a;
@@ -100,6 +103,8 @@ html[data-theme] {
        Every Hero accent follows the active global theme. */
     --hero-accent: var(--ar-accent);
     --hero-accent-rgb: var(--ar-rgb);
+    --hero-accent-2: var(--ar-accent-2);
+    --hero-accent-2-rgb: var(--ar-accent-2-rgb);
     --hero-focus-color: var(--ar-accent);
     --hero-on-accent: var(--ar-on-accent);
 
