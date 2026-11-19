@@ -56,10 +56,9 @@ function TokenSummaryContent({ payload, error }: { payload: MarketPayload | null
 export function MarketSummary({ showTitle = true, compact = false }: MarketSummaryProps) {
   const { payload, loading, error } = useMarketData();
   return (
-    <section className={`feature-section market-feature${compact ? ' market-feature--compact' : ''}`} aria-labelledby="market-summary-heading">
+    <section className={`feature-section market-feature${compact ? ' market-feature--compact' : ''}`} aria-label="market summary">
       {showTitle ? (
-        <header className="feature-section-heading">
-          <div><span className="eyebrow">Live market</span><h2 id="market-summary-heading">Market overview</h2></div>
+        <header className="feature-section-heading feature-section-heading--status-only">
           <span className="feature-refresh-state" aria-live="polite">{loading && !payload ? 'Loading market…' : error && !payload ? 'Unavailable' : 'Auto-updating'}</span>
         </header>
       ) : null}

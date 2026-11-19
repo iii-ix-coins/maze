@@ -53,6 +53,10 @@
     padding-inline: 2px;
   }
 
+  .feature-section-heading--status-only {
+    justify-content: flex-end;
+  }
+
   .feature-section-heading>div {
     display: grid;
     gap: 5px;
@@ -262,6 +266,18 @@
 
   .holders-box--page .holders-list {
     max-height: min(72vh, 900px);
+  }
+
+  /* Home page — unified compact spacing */
+  .route-page--home>.site-home-content.feature-page-shell {
+    margin: 12px auto;
+    padding-top: 0;
+    gap: 12px;
+  }
+
+  /* Keep the Hero spacing owned by the Home page wrapper */
+  .route-page--home+#site-brand-header .home-hero-slider {
+    margin-top: 0;
   }
 
 }
