@@ -293,13 +293,9 @@
     isolation: isolate;
     overflow: hidden;
     background:
-        radial-gradient(ellipse at 10% 0%, rgba(var(--hero-accent-rgb), .17), transparent 54%),
-        radial-gradient(ellipse at 92% 100%, rgba(var(--hero-accent-2-rgb), .13), transparent 56%),
-        linear-gradient(112deg,
-            rgba(var(--hero-accent-rgb), .045),
-            rgba(var(--hero-accent-2-rgb), .035) 58%,
-            transparent 100%),
-        var(--panel-bg);
+        radial-gradient(ellipse at 90% 0%, rgba(var(--hero-accent-rgb), .17), transparent 54%),
+        radial-gradient(ellipse at 8% 100%, rgba(var(--hero-accent-2-rgb), .13), transparent 56%),
+        linear-gradient(248deg, rgba(var(--hero-accent-rgb), .045), rgba(var(--hero-accent-2-rgb), .035) 58%, transparent 100%), var(--panel-bg);
     border: 0 !important;
     border-radius: 0 !important;
     corner-shape: bevel;
