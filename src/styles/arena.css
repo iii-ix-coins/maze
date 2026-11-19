@@ -26,7 +26,6 @@ html[data-theme="grass"] {
     --stroke-divider: rgba(182, 255, 46, .14);
     --hero-footer-border: rgba(182, 255, 46, .18);
     --hero-dot-muted: rgba(127, 160, 140, .42);
-    --hero-focus-color: #a47bf8;
     --nav-wallet-connected-border: rgba(182, 255, 46, .53);
 }
 
@@ -49,7 +48,6 @@ html[data-theme="dark"] {
     --stroke-divider: rgba(120, 150, 255, .15);
     --hero-footer-border: rgba(120, 150, 255, .20);
     --hero-dot-muted: rgba(124, 134, 184, .42);
-    --hero-focus-color: #a47bf8;
     --nav-wallet-connected-border: rgba(45, 174, 255, .54);
 }
 
@@ -72,7 +70,6 @@ html[data-theme="light"] {
     --stroke-divider: rgba(16, 19, 26, .58);
     --hero-footer-border: rgba(16, 19, 26, .75);
     --hero-dot-muted: rgba(107, 114, 128, .42);
-    --hero-focus-color: #a47bf8;
     --nav-wallet-connected-border: rgba(75, 44, 145, .53);
 }
 
@@ -98,6 +95,13 @@ html[data-theme] {
     --stroke-hi: rgba(var(--ar-rgb), .6);
     --field-bg: rgba(0, 0, 0, .35);
     --panel-bg: linear-gradient(180deg, var(--ar-fill), var(--ar-fill-2));
+
+    /* Home Hero semantic color tokens.
+       Every Hero accent follows the active global theme. */
+    --hero-accent: var(--ar-accent);
+    --hero-accent-rgb: var(--ar-rgb);
+    --hero-focus-color: var(--ar-accent);
+    --hero-on-accent: var(--ar-on-accent);
 
     /* HUD tile: 4 corner brackets + dark glass fill, all in one background value */
     --tile-bg:
@@ -386,7 +390,6 @@ h3 {
     letter-spacing: -.035em;
 }
 
-
 @media (hover: hover) {
 
     /* Theme Switcher */
@@ -414,7 +417,6 @@ h3 {
             0 var(--cut));
 
     background: rgba(var(--ar-rgb), .06);
-
 }
 
 .nav-mobile-toggle:hover {
