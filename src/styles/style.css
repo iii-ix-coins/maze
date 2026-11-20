@@ -678,8 +678,9 @@
 
     /* —— 6.1 Tile recipe: glass tile + cursor spotlight ring ————————————
        Every "label / value" card on the site shares this surface.            */
-    :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
+    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot),
+    .market-feature:not(.market-feature--compact) .token-summary-item {
         position: relative;
         isolation: isolate;
         border-radius: var(--r-md);
@@ -690,8 +691,9 @@
         transition: transform var(--t-slow) var(--ease-out), border-color var(--t-base), box-shadow var(--t-base), background var(--t-base);
     }
 
-    :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::before {
+    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::before,
+    .market-feature:not(.market-feature--compact) .token-summary-item::before {
         content: "";
         position: absolute;
         inset: -1px;
@@ -712,8 +714,9 @@
 
     }
 
-    :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::after {
+    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::after,
+    .market-feature:not(.market-feature--compact) .token-summary-item::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -728,21 +731,25 @@
 
     @media (hover: hover) {
 
-        :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
             .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::before,
-        :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::after {
+        .market-feature:not(.market-feature--compact) .token-summary-item:hover::before,
+        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::after,
+        .market-feature:not(.market-feature--compact) .token-summary-item:hover::after {
             opacity: 1;
         }
 
-        :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .spot):hover {
+        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
+            .coin-period-card, .spot):hover,
+        .market-feature:not(.market-feature--compact) .token-summary-item:hover {
             transform: translateY(-3px);
         }
     }
 
     /* Shared label / value typography inside tiles */
-    :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>span {
+    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>span,
+    .market-feature:not(.market-feature--compact) .token-summary-item>span {
         display: block;
         font-size: var(--fs-xs);
         letter-spacing: 0.1em;
@@ -750,7 +757,8 @@
         color: var(--text-mute);
     }
 
-    :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>strong {
+    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>strong,
+    .market-feature:not(.market-feature--compact) .token-summary-item>strong {
         display: block;
         font-family: var(--font-display);
         letter-spacing: -0.015em;

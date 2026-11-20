@@ -106,19 +106,38 @@
     @keyframes dot-fill { to { --dot-p: 100%; } }
 
     /* ======================================================================
-       TOKEN SUMMARY · bento
+       MARKET OVERVIEW · Home compact variant
+       Shared component recipes live in style.css; this page layer owns only
+       the Home-specific layout, surfaces, typography and clipping.
        ====================================================================== */
+    .site-home-content .market-feature {
+        gap: 0;
+    }
+
     .site-home-content .market-feature--compact > .token-summary {
+        --market-cut: 18px;
+        --market-inner-cut: clamp(5px, .55vw, 7px);
         display: grid;
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
-        gap: clamp(7px, .7vw, 9px);
-        padding: clamp(10px, 1.05vw, 15px) clamp(13px, 1.5vw, 18px);
+        gap: clamp(5px, .65vw, 9px);
+        padding: clamp(6px, .85vw, 12px) clamp(8px, 1.15vw, 16px);
+        position: relative;
+        isolation: isolate;
         overflow: hidden;
+        background:
+            radial-gradient(ellipse at 90% 0%, rgba(var(--hero-accent-2-rgb), .09), transparent 54%),
+            radial-gradient(ellipse at 8% 100%, rgba(var(--hero-accent-rgb), .2), transparent 56%),
+            linear-gradient(112deg, rgba(var(--hero-accent-rgb), .045), rgba(var(--hero-accent-2-rgb), .035) 58%, transparent 100%),
+            var(--panel-bg);
         border: 0;
         border-radius: 0;
-        --market-cut: clamp(18px, 1.35vw, 18px);
+        corner-shape: bevel;
+        outline: 0;
+        box-shadow: none;
+        filter: none;
+        -webkit-filter: none;
         clip-path: polygon(
             var(--market-cut) 0,
             100% 0,
@@ -127,46 +146,171 @@
             0 100%,
             0 var(--market-cut)
         );
-        box-shadow: none;
-        filter: none;
-        -webkit-filter: none;
+        -webkit-clip-path: polygon(
+            var(--market-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-cut)),
+            calc(100% - var(--market-cut)) 100%,
+            0 100%,
+            0 var(--market-cut)
+        );
     }
-    .site-home-content .market-feature--compact > .token-summary::before {
+
+    .site-home-content .market-feature--compact > .token-summary::before,
+    .site-home-content .market-feature--compact > .token-summary::after {
         content: none;
         display: none;
     }
-    .site-home-content .market-feature .token-summary-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
-    .site-home-content .market-feature .token-summary-identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+    .site-home-content .market-feature .token-summary-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: clamp(5px, .8vw, 11px);
+    }
+
+    .site-home-content .market-feature .token-summary-identity {
+        display: flex;
+        align-items: center;
+        gap: clamp(6px, .75vw, 10px);
+        min-width: 0;
+    }
+
     .site-home-content .market-feature .token-summary-icon {
-        flex: none; width: clamp(34px, 3.1vw, 44px); height: clamp(34px, 3.1vw, 44px); object-fit: cover;
-        border-radius: 0; background: var(--ink-850);
+        flex: none;
+        width: clamp(28px, 3.05vw, 44px);
+        height: clamp(28px, 3.05vw, 44px);
+        object-fit: cover;
+        background: var(--ink-850);
         border: 0;
+        border-radius: 0;
+        outline: 0;
         box-shadow: none;
     }
-    .site-home-content .market-feature .token-summary-name { min-width: 0; display: grid; gap: clamp(4px, .7vw, 6px); }
-    .site-home-content .market-feature .token-summary-title { letter-spacing: -0.035em; font-size: clamp(13px, 1.35vw, 14px); line-height: 1.1; }
-    .site-home-content .market-feature .token-summary-symbol {font-size: .8rem; color: var(--mint); }
-    .site-home-content .market-feature .token-summary-link {
-        display: inline-flex; align-items: center; gap: 6px; min-height: 29px; padding: .38rem .8rem;
-        font-size: .67rem; font-weight: 650; letter-spacing: -.01em;
-        transition: transform 160ms ease, opacity 160ms ease;
-    }
-    .site-home-content .market-feature .token-summary-link span { display: inline-block; transition: transform 160ms ease; }
-    .site-home-content .market-feature .token-summary-link:hover { transform: translateY(-1px); }
-    .site-home-content .market-feature .token-summary-link:hover span { transform: translateX(3px); }
 
-    .site-home-content .market-feature .token-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(6px, .6vw, 8px); }
-    .site-home-content .market-feature .token-summary-item { display: grid; gap: 3px; align-content: center; min-width: 0; min-height: 43px; padding: 6px 10px; --dot: var(--mint); }
-    .site-home-content .market-feature .token-summary-item > span { font-size: .60rem; font-weight: 600; line-height: 1.12; letter-spacing: .075em; }
-    .site-home-content .market-feature .token-summary-item > span::before {
-        content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 7px; border-radius: 50%; vertical-align: 0.12em;
-        background: var(--dot); box-shadow: 0 0 5px var(--dot);
+    .site-home-content .market-feature .token-summary-name {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: baseline;
+        gap: clamp(5px, .6vw, 9px);
+        min-width: 0;
+        white-space: nowrap;
     }
+
+    .site-home-content .market-feature .token-summary-title {
+        min-width: 0;
+        font-size: clamp(12px, 1.35vw, 18px);
+        font-weight: 650;
+        line-height: 1.08;
+        letter-spacing: -.035em;
+    }
+
+    .site-home-content .market-feature .token-summary-symbol {
+        flex: none;
+        color: var(--mint);
+        font-size: clamp(9px, .82vw, 11px);
+        font-weight: 600;
+        line-height: 1.1;
+    }
+
+    .site-home-content .market-feature .token-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(4px, .55vw, 8px);
+        min-width: 0;
+    }
+
+    .site-home-content .market-feature .token-summary-item {
+        --dot: var(--mint);
+        display: grid;
+        align-content: center;
+        gap: clamp(2px, .25vw, 4px);
+        min-width: 0;
+        min-height: clamp(32px, 4.1vw, 46px);
+        padding: clamp(4px, .58vw, 8px) clamp(6px, .82vw, 11px);
+        background: linear-gradient(180deg, rgba(var(--ar-rgb), .035), rgba(var(--ar-rgb), .018));
+        border: 0;
+        border-radius: 0;
+        outline: 0;
+        box-shadow: none;
+        filter: none;
+    }
+
     .site-home-content .market-feature .token-summary-item:nth-child(2) { --dot: var(--azure); }
     .site-home-content .market-feature .token-summary-item:nth-child(3) { --dot: var(--violet); }
     .site-home-content .market-feature .token-summary-item:nth-child(4) { --dot: var(--gold); }
     .site-home-content .market-feature .token-summary-item:nth-child(6) { --dot: var(--azure); }
-    .site-home-content .market-feature .token-summary-item > strong { font-size: clamp(1.04rem, 1.25vw, 1.2rem); font-weight: 650; line-height: 1; letter-spacing: -.025em; }
+
+    .site-home-content .market-feature .token-summary-item > span {
+        display: block;
+        color: var(--text-mute);
+        font-size: clamp(8px, .86vw, 11.5px);
+        font-weight: 600;
+        line-height: 1.12;
+        letter-spacing: .055em;
+        text-transform: uppercase;
+    }
+
+    .site-home-content .market-feature .token-summary-item > span::before {
+        content: "";
+        display: inline-block;
+        width: clamp(4px, .4vw, 6px);
+        height: clamp(4px, .4vw, 6px);
+        margin-right: clamp(4px, .48vw, 7px);
+        border-radius: 50%;
+        vertical-align: .12em;
+        background: var(--dot);
+        box-shadow: none;
+    }
+
+    .site-home-content .market-feature .token-summary-item > strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: clamp(12px, 1.35vw, 18px);
+        font-weight: 650;
+        line-height: 1;
+        letter-spacing: -.025em;
+        font-variant-numeric: tabular-nums;
+        overflow-wrap: anywhere;
+    }
+
+    /* The icon and all six metric tiles share the same clipped corner geometry. */
+    .site-home-content .market-feature--compact .token-summary-icon,
+    .site-home-content .market-feature--compact .token-summary-item {
+        clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+        -webkit-clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+    }
+
+    .site-home-content .market-feature--compact .feature-status {
+        padding: clamp(6px, .7vw, 10px) clamp(8px, 1vw, 14px);
+        border: 0;
+        border-radius: 0;
+        background: rgba(var(--ar-rgb), .035);
+        box-shadow: none;
+        clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+    }
 
     /* ======================================================================
        HOW IT WORKS  (components/HowItWorks.js)
@@ -250,306 +394,53 @@
         .how-step { min-height: 0; }
         .maze-teaser { grid-template-columns: 1fr; }
         .maze-teaser-art { order: -1; width: min(100%, 380px); }
+        .site-home-content .market-feature .token-summary-title,
+        .site-home-content .market-feature .token-summary-item > strong { font-weight: 600; }
+        .site-home-content .market-feature .token-summary-item > span { font-weight: 550; }
     }
     @media (max-width: 600px) {
         .site-home-content .market-feature--compact > .token-summary {
-            --market-cut: 18px;
-            gap: 8px;
-            padding: 10px 12px;
+            gap: 6px;
+            padding: 6px 7px;
         }
-        .site-home-content .market-feature .token-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-        .site-home-content .market-feature .token-summary-item { min-height: 41px; padding: 6px 8px; }
-        .site-home-content .market-feature .token-summary-item > strong { font-size: clamp(.88rem, 3.8vw, 1.08rem); }
-        .site-home-content .market-feature .token-summary-title { font-size: clamp(.88rem, 4.2vw, 1.08rem); }
-        .site-home-content .market-feature .token-summary-icon { width: clamp(32px, 10vw, 40px); height: clamp(32px, 10vw, 40px); }
-        .site-home-content .market-feature .token-summary-header { gap: 8px; }
-        .site-home-content .market-feature .token-summary-link { min-height: 27px; padding: .34rem .65rem; }
+        .site-home-content .market-feature .token-summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 4px;
+        }
+        .site-home-content .market-feature .token-summary-item {
+            min-height: clamp(30px, 8vw, 38px);
+            padding: 5px 7px;
+        }
+        .site-home-content .market-feature .token-summary-item > span {
+            font-size: clamp(7.5px, 2.5vw, 9px);
+        }
+        .site-home-content .market-feature .token-summary-item > strong {
+            font-size: clamp(10.5px, 3.6vw, 14px);
+        }
+        .site-home-content .market-feature .token-summary-title {
+            font-size: clamp(10.5px, 3.5vw, 13.5px);
+        }
+        .site-home-content .market-feature .token-summary-symbol {
+            font-size: clamp(8px, 2.3vw, 9.5px);
+        }
+        .site-home-content .market-feature .token-summary-icon {
+            width: clamp(25px, 8vw, 34px);
+            height: clamp(25px, 8vw, 34px);
+        }
+        .site-home-content .market-feature .token-summary-name {
+            gap: 5px;
+        }
     }
 
     @media (max-width: 560px) {
         .slider-card { padding: 28px 52px 24px; }
         .slider-btn { width: 38px; height: 38px; }
-        .site-home-content .market-feature .token-summary-header { align-items: flex-start; }
-        .site-home-content .market-feature .token-summary-link { margin-left: auto; }
-    }
-}
-
-.site-home-content .market-feature {
-    gap: 0;
-}
-
-/* Home-only Market Overview: sharp, borderless surface with Hero-like fluid sizing.
-   Keep these rules unlayered so the shared component recipes cannot add a rim,
-   rounded corners, or a theme-specific shadow back to this Home instance. */
-.site-home-content .market-feature--compact > .token-summary {
-    --market-cut: clamp(18px, 1.3vw, 18px);
-    display: grid;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    gap: clamp(5px, .65vw, 9px);
-    padding: clamp(6px, .85vw, 12px) clamp(8px, 1.15vw, 16px);
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    background:
-        radial-gradient(ellipse at 90% 0%, rgba(var(--hero-accent-2-rgb), .09), transparent 54%),
-        radial-gradient(ellipse at 8% 100%, rgba(var(--hero-accent-rgb), .2), transparent 56%),
-        linear-gradient(112deg, rgba(var(--hero-accent-rgb), .045), rgba(var(--hero-accent-2-rgb), .035) 58%, transparent 100%), var(--panel-bg);
-    border: 0 !important;
-    border-radius: 0 !important;
-    corner-shape: bevel;
-    outline: 0 !important;
-    box-shadow: none !important;
-    filter: none !important;
-    -webkit-filter: none !important;
-    clip-path: polygon(
-        var(--market-cut) 0,
-        100% 0,
-        100% calc(100% - var(--market-cut)),
-        calc(100% - var(--market-cut)) 100%,
-        0 100%,
-        0 var(--market-cut)
-    );
-    -webkit-clip-path: polygon(
-        var(--market-cut) 0,
-        100% 0,
-        100% calc(100% - var(--market-cut)),
-        calc(100% - var(--market-cut)) 100%,
-        0 100%,
-        0 var(--market-cut)
-    );
-}
-
-.site-home-content .market-feature--compact > .token-summary::before,
-.site-home-content .market-feature--compact > .token-summary::after {
-    content: none !important;
-    display: none !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    filter: none !important;
-}
-
-.site-home-content .market-feature .token-summary-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(5px, .8vw, 11px);
-}
-
-.site-home-content .market-feature .token-summary-identity {
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, .75vw, 10px);
-    min-width: 0;
-}
-
-.site-home-content .market-feature .token-summary-icon {
-    flex: none;
-    width: clamp(28px, 3.05vw, 44px);
-    height: clamp(28px, 3.05vw, 44px);
-    border: 0;
-    border-radius: 0;
-    corner-shape: bevel;
-    outline: 0;
-    box-shadow: none;
-    object-fit: cover;
-}
-
-.site-home-content .market-feature .token-summary-title {
-    min-width: 0;
-    font-size: clamp(12px, 1.35vw, 18px);
-    font-weight: 650;
-    line-height: 1.08;
-    letter-spacing: -.035em;
-}
-
-.site-home-content .market-feature .token-summary-symbol {
-    font-size: clamp(9px, .82vw, 11px);
-    font-weight: 600;
-    line-height: 1.1;
-}
-
-.site-home-content .market-feature .token-summary-badge {
-    gap: 4px;
-    padding: clamp(2px, .25vw, 4px) clamp(5px, .65vw, 9px);
-    border: 0;
-    border-radius: 0;
-    font-size: clamp(8px, .78vw, 11px);
-    font-weight: 650;
-    line-height: 1.1;
-    letter-spacing: .035em;
-}
-
-.site-home-content .market-feature .token-summary-badge::before {
-    width: clamp(8px, .75vw, 11px);
-    height: clamp(8px, .75vw, 11px);
-}
-
-.site-home-content .market-feature .token-summary-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(4px, .45vw, 6px);
-    min-height: clamp(24px, 2.45vw, 34px);
-    padding: clamp(4px, .48vw, 7px) clamp(8px, 1vw, 14px);
-    border: 0;
-    border-radius: 0;
-    font-size: clamp(9px, .88vw, 12px);
-    font-weight: 650;
-    line-height: 1;
-    box-shadow: none;
-}
-
-.site-home-content .market-feature .token-summary-link:hover {
-    transform: translateY(-1px);
-    box-shadow: none;
-}
-
-.site-home-content .market-feature .token-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(4px, .55vw, 8px);
-    min-width: 0;
-}
-
-.site-home-content .market-feature .token-summary-item {
-    display: grid;
-    align-content: center;
-    gap: clamp(2px, .25vw, 4px);
-    min-width: 0;
-    min-height: clamp(32px, 4.1vw, 46px);
-    padding: clamp(4px, .58vw, 8px) clamp(6px, .82vw, 11px);
-    border: 0;
-    border-radius: 0;
-    corner-shape: bevel;
-    outline: 0;
-    box-shadow: none;
-    filter: none;
-    --market-item-cut: clamp(5px, .55vw, 7px);
-    clip-path: polygon(
-        var(--market-item-cut) 0,
-        100% 0,
-        100% calc(100% - var(--market-item-cut)),
-        calc(100% - var(--market-item-cut)) 100%,
-        0 100%,
-        0 var(--market-item-cut)
-    );
-    background: linear-gradient(180deg, rgba(var(--ar-rgb), .035), rgba(var(--ar-rgb), .018));
-}
-
-.site-home-content .market-feature .token-summary-item::before,
-.site-home-content .market-feature .token-summary-item::after {
-    content: none;
-    display: none;
-    border: 0;
-    box-shadow: none;
-    filter: none;
-}
-
-.site-home-content .market-feature .token-summary-item:hover {
-    transform: none;
-}
-
-.site-home-content .market-feature .token-summary-item > span {
-    font-size: clamp(8px, .86vw, 11.5px);
-    font-weight: 600;
-    line-height: 1.12;
-    letter-spacing: .055em;
-}
-
-.site-home-content .market-feature .token-summary-item > span::before {
-    width: clamp(4px, .4vw, 6px);
-    height: clamp(4px, .4vw, 6px);
-    margin-right: clamp(4px, .48vw, 7px);
-    box-shadow: none;
-}
-
-.site-home-content .market-feature .token-summary-item > strong {
-    font-size: clamp(12px, 1.35vw, 18px);
-    font-weight: 650;
-    line-height: 1;
-    letter-spacing: -.025em;
-}
-
-@media (max-width: 980px) {
-    .site-home-content .market-feature .token-summary-title,
-    .site-home-content .market-feature .token-summary-item > strong {
-        font-weight: 600;
     }
 
-    .site-home-content .market-feature .token-summary-item > span,
-    .site-home-content .market-feature .token-summary-link,
-    .site-home-content .market-feature .token-summary-badge {
-        font-weight: 550;
-    }
-}
-
-@media (max-width: 600px) {
-    .site-home-content .market-feature--compact > .token-summary {
-        --market-cut: 18px;
-        gap: 6px;
-        padding: 6px 7px;
-    }
-
-    .site-home-content .market-feature .token-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 4px;
-    }
-
-    .site-home-content .market-feature .token-summary-item {
-        min-height: clamp(30px, 8vw, 38px);
-        padding: 5px 7px;
-    }
-
-    .site-home-content .market-feature .token-summary-item > span {
-        font-size: clamp(7.5px, 2.5vw, 9px);
-    }
-
-    .site-home-content .market-feature .token-summary-item > strong {
-        font-size: clamp(10.5px, 3.6vw, 14px);
-    }
-
-    .site-home-content .market-feature .token-summary-title {
-        font-size: clamp(10.5px, 3.5vw, 13.5px);
-    }
-
-    .site-home-content .market-feature .token-summary-symbol {
-        font-size: clamp(8px, 2.3vw, 9.5px);
-    }
-
-    .site-home-content .market-feature .token-summary-icon {
-        width: clamp(25px, 8vw, 34px);
-        height: clamp(25px, 8vw, 34px);
-    }
-
-    .site-home-content .market-feature .token-summary-link {
-        min-height: 23px;
-        padding: 4px 7px;
-        font-size: clamp(8px, 2.35vw, 9.5px);
-    }
-
-    .site-home-content .market-feature .token-summary-badge {
-        font-size: clamp(7px, 2.1vw, 8.5px);
-    }
-}
-
-@media (max-width: 360px) {
-    .site-home-content .market-feature .token-summary-header {
-        gap: 4px;
-    }
-
-    .site-home-content .market-feature .token-summary-identity {
-        gap: 5px;
-    }
-
-    .site-home-content .market-feature .token-summary-link {
-        min-height: 21px;
-        padding: 3px 5px;
-    }
-
-    .site-home-content .market-feature .token-summary-item {
-        padding-inline: 5px;
+    @media (max-width: 360px) {
+        .site-home-content .market-feature .token-summary-header { gap: 4px; }
+        .site-home-content .market-feature .token-summary-identity { gap: 5px; }
+        .site-home-content .market-feature .token-summary-name { gap: 4px; }
+        .site-home-content .market-feature .token-summary-item { padding-inline: 5px; }
     }
 }
