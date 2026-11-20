@@ -89,29 +89,29 @@
   }
 
   .home-hero-copy h1 {
-    max-width: 650px;
+    max-width: 700px;
 
     margin: 0;
 
     color: var(--text, #172033);
     font-family: var(--font-display, Montserrat, sans-serif);
 
-    font-size: clamp(12px, 3.2vw, 44px);
-    font-weight: 650;
-    letter-spacing: -.055em;
+    font-size: clamp(35px, 3.2vw, 40px);
+    font-weight: 600;
+    letter-spacing: -.035em;
 
     text-wrap: balance;
   }
 
   .home-hero-copy p {
-    max-width: 640px;
+    max-width: 800px;
 
     margin: clamp(3px, 1.2vw, 15px) 0 0;
 
     color: var(--text-mute, #454c5a);
 
-    font-size: clamp(10px, 3.2vw, 18px);
-    letter-spacing: -.055em;
+    font-size: clamp(20px, 3.2vw, 25px);
+    letter-spacing: -.035em;
   }
 
   .home-hero-actions {
@@ -137,8 +137,8 @@
     border: 1px solid transparent;
     border-radius: clamp(7px, 1.1vw, 13px);
 
-    font-size: clamp(10px, 3.2vw, 18px);
-    letter-spacing: -.055em;
+    font-size: clamp(20px, 3.2vw, 25px);
+    letter-spacing: -.035em;
 
     text-decoration: none;
 
@@ -342,7 +342,7 @@
     width: 31px;
     height: 31px;
     border-radius: 10px;
-    font-size: clamp(10px, 3.2vw, 14px);
+    font-size: clamp(20px, 3.2vw, 25px);
     letter-spacing: -.055em;
   }
 
@@ -413,8 +413,8 @@
 
     font-family: var(--font-mono, monospace);
 
-    font-size: clamp(10px, 3.2vw, 14px);
-    letter-spacing: -.055em;
+    font-size: clamp(14px, 3.2vw, 16px);
+    letter-spacing: -.035em;
   }
 
   .home-hero-current {
@@ -502,7 +502,7 @@
     color: var(--text, #172033);
     background: var(--surface-glass, rgba(255, 255, 255, .90));
 
-    font-size: clamp(12px, 3.2vw, 14px);
+    font-size: clamp(14px, 3.2vw, 16px);
     letter-spacing: -.055em;
 
     cursor: pointer;
@@ -602,8 +602,8 @@
       gap: 5px;
       margin-bottom: 5px;
 
-      font-size: clamp(12px, 3.2vw, 44px);
-      letter-spacing: -.055em;
+      font-size: clamp(30px, 3.2vw, 35px);
+      letter-spacing: -.035em;
     }
 
     .home-hero-eyebrow i {
@@ -614,9 +614,9 @@
     .home-hero-copy h1 {
       max-width: 100%;
 
-      font-size: clamp(13px, 4.1vw, 14px);
+      font-size: clamp(20px, 4.1vw, 25px);
       line-height: 1.04;
-      letter-spacing: -.055em;
+      letter-spacing: -.035em;
     }
 
     .home-hero-copy p {
@@ -638,8 +638,8 @@
       padding-inline: 7px;
       gap: 5px;
 
-      font-size: clamp(10px, 3.2vw, 12px);
-      letter-spacing: -.055em;
+      font-size: clamp(14px, 3.2vw, 16px);
+      letter-spacing: -.035em;
       border-radius: 7px;
       white-space: nowrap;
     }
@@ -654,8 +654,8 @@
 
     .home-hero-pagination {
       gap: 5px;
-      font-size: clamp(10px, 3.2vw, 14px);
-      letter-spacing: -.055em;
+      font-size: clamp(14px, 3.2vw, 16px);
+      letter-spacing: -.035em;
     }
 
     .home-hero-pagination-line {
@@ -683,9 +683,8 @@
       width: 23px;
       height: 23px;
 
-      font-size: clamp(12px, 3.2vw, 14px);
-      font-weight: 650;
-      letter-spacing: -.055em;
+      font-size: clamp(14px, 3.2vw, 16px);
+      letter-spacing: -.035em;
       border-radius: 7px;
     }
   }
@@ -725,8 +724,8 @@
       gap: 5px;
       margin-bottom: 5px;
 
-      font-size: clamp(10px, 3.2vw, 16px);
-      letter-spacing: -.055em;
+      font-size: clamp(14px, 3.2vw, 16px);
+      letter-spacing: -.035em;
     }
 
     .home-hero-eyebrow i {
@@ -738,7 +737,7 @@
     .home-hero-copy h1 {
       max-width: 100%;
 
-      font-size: clamp(10px, 3.2vw, 18px);
+      font-size: clamp(20px, 3.2vw, 25px);
       letter-spacing: -.055em;
     }
 
@@ -859,8 +858,8 @@
 
     /* Heading */
     .home-hero-copy h1 {
-      font-size: clamp(10px, 3.2vw, 18px);
-      letter-spacing: -.055em;
+      font-size: clamp(20px, 3.2vw, 25px);
+      letter-spacing: -.035em;
 
       overflow-wrap: break-word;
     }
