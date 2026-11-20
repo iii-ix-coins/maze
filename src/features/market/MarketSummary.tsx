@@ -35,9 +35,7 @@ function TokenSummaryContent({ payload, error }: { payload: MarketPayload | null
             <div id="token-summary-name" className="token-summary-title">{token?.name || '--'}</div>
             <div id="token-summary-symbol" className="token-summary-symbol">{token?.symbol ? `$${token.symbol}` : '--'}</div>
           </div>
-          <span id="token-summary-verified" className="token-summary-badge" hidden={token?.isVerified !== true}>Verified</span>
         </div>
-        <a href={getSiteRoutePath('coin')} className="token-summary-link">Token details <span aria-hidden="true">→</span></a>
       </div>
 
       <div className="token-summary-grid">

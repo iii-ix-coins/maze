@@ -145,7 +145,7 @@ body.in-menu #site-header {
             "brand utilities"
             "secondary secondary";
         column-gap: 15px;
-        row-gap: 8px;
+        row-gap: 5px;
     }
 
     .nav-inner > .nav-content {
@@ -219,7 +219,7 @@ body.in-menu #site-header {
 @media (max-width: 600px) {
     .nav-inner {
         column-gap: 15px;
-        row-gap: 8px;
+        row-gap: 3px;
     }
 
     .nav-inner > .nav-utilities {
