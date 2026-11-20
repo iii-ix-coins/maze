@@ -104,13 +104,12 @@
   }
 
   .home-hero-copy p {
-    max-width: 800px;
 
     margin: clamp(3px, 1.2vw, 15px) 0 0;
 
     color: var(--text-mute, #454c5a);
 
-    font-size: clamp(20px, 3.2vw, 25px);
+    font-size: clamp(16px, 3.2vw, 20px);
     letter-spacing: -.035em;
   }
 
