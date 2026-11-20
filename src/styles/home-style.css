@@ -143,9 +143,9 @@
         border: 0;
         box-shadow: none;
     }
-    .site-home-content .market-feature .token-summary-name { min-width: 0; display: flex ;align-items: center; gap: clamp(4px, .7vw, 6px); }
-    .site-home-content .market-feature .token-summary-title { font-family: var(--font-display); font-weight: 650; letter-spacing: -0.035em; font-size: clamp(.9rem, 1.35vw, 1.18rem); line-height: 1.1; }
-    .site-home-content .market-feature .token-summary-symbol { font-family: var(--font-mono); font-weight: 600; font-size: .72rem; color: var(--mint); }
+    .site-home-content .market-feature .token-summary-name { min-width: 0; display: grid; gap: clamp(4px, .7vw, 6px); }
+    .site-home-content .market-feature .token-summary-title { letter-spacing: -0.035em; font-size: clamp(13px, 1.35vw, 14px); line-height: 1.1; }
+    .site-home-content .market-feature .token-summary-symbol {font-size: .8rem; color: var(--mint); }
     .site-home-content .market-feature .token-summary-link {
         display: inline-flex; align-items: center; gap: 6px; min-height: 29px; padding: .38rem .8rem;
         font-size: .67rem; font-weight: 650; letter-spacing: -.01em;
