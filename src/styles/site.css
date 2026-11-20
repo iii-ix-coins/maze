@@ -109,7 +109,7 @@ body.in-menu #site-header {
         grid-template-areas:
             "brand content utilities"
             "secondary secondary secondary";
-        column-gap: 12px;
+        column-gap: 15px;
         row-gap: 6px;
     }
 
@@ -144,7 +144,7 @@ body.in-menu #site-header {
         grid-template-areas:
             "brand utilities"
             "secondary secondary";
-        column-gap: 12px;
+        column-gap: 15px;
         row-gap: 8px;
     }
 
@@ -218,7 +218,7 @@ body.in-menu #site-header {
 
 @media (max-width: 600px) {
     .nav-inner {
-        column-gap: 12px;
+        column-gap: 15px;
         row-gap: 8px;
     }
 
@@ -227,7 +227,7 @@ body.in-menu #site-header {
     }
 
     .nav-inner .nav-brand-mark {
-        height: clamp(29px, 1vw, 30px);
+        height: clamp(26px, 1vw, 28px);
     }
 
     .nav-inner .nav-brand-logo {
