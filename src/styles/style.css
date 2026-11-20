@@ -2500,7 +2500,7 @@ html[data-theme="light"] .nav-brand-logo--black {
    owned by src/styles/site.css so this file contains no competing nav grid. */
 @media (max-width: 1023px) {
     .nav {
-        --nav-control-height: 32px;
+        --nav-control-height: 27px;
         --nav-fs: 15px;
     }
 
