@@ -241,7 +241,7 @@
         /* —— Layout —— */
         --page-max: 1240px;
         --gutter: clamp(14px, 3.4vw, 32px);
-        --section-gap: clamp(8px, 2vw, 16px);
+        --section-gap: clamp(6px, 2vw, 6px);
 
         /* —— Motion —— */
         --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
