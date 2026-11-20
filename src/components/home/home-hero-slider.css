@@ -109,7 +109,7 @@
 
     color: var(--text-mute, #454c5a);
 
-    font-size: clamp(16px, 3.2vw, 20px);
+    font-size: clamp(16px, 1.1vw, 18px);
     letter-spacing: -.035em;
   }
 
