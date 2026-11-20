@@ -107,9 +107,9 @@
 
     margin: clamp(3px, 1.2vw, 15px) 0 0;
 
-    color: var(--text-mute, #454c5a);
+    color: white;
 
-    font-size: clamp(16px, 1.1vw, 18px);
+    font-size: clamp(16px, 3.2vw, 18px);
     letter-spacing: -.035em;
   }
 
