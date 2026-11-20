@@ -228,7 +228,7 @@
     filter:
       drop-shadow(0 14px 32px rgba(var(--hero-accent-rgb), .22));
 
-    opacity: .99;
+    opacity: .8;
 
     mask-image: linear-gradient(to right,
         transparent 0%,
@@ -560,7 +560,7 @@
     .home-hero-slider {
       /* Height comes from content + min-height, never from a ratio. */
       aspect-ratio: auto;
-      min-height: clamp(200px, 54vw, 260px);
+      min-height: clamp(220px, 1vw, 280px);
 
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
@@ -571,13 +571,13 @@
     }
 
     .home-hero-art {
-      opacity: .39;
+      opacity: .75;
     }
   }
 
   @media (max-width: 420px) {
     .home-hero-art {
-      opacity: .33;
+      opacity: .70;
     }
   }
 
@@ -695,8 +695,8 @@
 
     /* Banner geometry */
     .home-hero-slider {
-      min-height: 180px;
-      max-height: 222px;
+      min-height: 220px;
+      max-height: 225px;
 
       height: auto;
 
@@ -708,7 +708,7 @@
 
     /* Background artwork */
     .home-hero-art {
-      opacity: .21;
+      opacity: .70;
     }
 
     /* Main content */
@@ -832,8 +832,8 @@
 
     /* Preserve usable banner height */
     .home-hero-slider {
-      min-height: 180px;
-      max-height: 222px;
+      min-height: 210px;
+      max-height: 215px;
 
       padding: 6px;
       gap: 2px;
@@ -841,7 +841,7 @@
 
     /* Background */
     .home-hero-art {
-      opacity: .15;
+      opacity: .70;
     }
 
     /* Eyebrow */

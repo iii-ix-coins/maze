@@ -114,11 +114,11 @@
         min-width: 0;
         box-sizing: border-box;
         gap: clamp(7px, .7vw, 9px);
-        padding: clamp(9px, 1.05vw, 14px) clamp(12px, 1.5vw, 18px);
+        padding: clamp(10px, 1.05vw, 15px) clamp(13px, 1.5vw, 18px);
         overflow: hidden;
         border: 0;
         border-radius: 0;
-        --market-cut: clamp(12px, 1.35vw, 18px);
+        --market-cut: clamp(18px, 1.35vw, 18px);
         clip-path: polygon(
             var(--market-cut) 0,
             100% 0,
@@ -253,9 +253,9 @@
     }
     @media (max-width: 600px) {
         .site-home-content .market-feature--compact > .token-summary {
-            --market-cut: 13px;
+            --market-cut: 18px;
             gap: 8px;
-            padding: 9px 10px;
+            padding: 10px 12px;
         }
         .site-home-content .market-feature .token-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
         .site-home-content .market-feature .token-summary-item { min-height: 41px; padding: 6px 8px; }
@@ -282,7 +282,7 @@
    Keep these rules unlayered so the shared component recipes cannot add a rim,
    rounded corners, or a theme-specific shadow back to this Home instance. */
 .site-home-content .market-feature--compact > .token-summary {
-    --market-cut: clamp(10px, 1.3vw, 18px);
+    --market-cut: clamp(18px, 1.3vw, 18px);
     display: grid;
     width: 100%;
     min-width: 0;
@@ -488,7 +488,7 @@
 
 @media (max-width: 600px) {
     .site-home-content .market-feature--compact > .token-summary {
-        --market-cut: 10px;
+        --market-cut: 18px;
         gap: 6px;
         padding: 6px 7px;
     }
