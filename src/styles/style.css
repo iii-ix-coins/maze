@@ -1971,7 +1971,7 @@
 /* —— 1 · LAYOUT TOKENS ———————————————————————————————————————————————— */
 .nav {
     /* Shared geometry and typography tokens; arena.css owns theme colours. */
-    --nav-control-height: clamp(26px, 1vw, 28px);
+    --nav-control-height: 26px;
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
 
     /* Theme-specific panel shadows remain local to the navigation surface. */

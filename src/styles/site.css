@@ -227,13 +227,12 @@ body.in-menu #site-header {
     }
 
     .nav-inner .nav-brand-mark {
-        height: clamp(26px, 1vw, 28px);
+        height: 26px;
     }
 
     .nav-inner .nav-brand-logo {
         height: 100%;
-        max-height: 32px;
-        max-width: clamp(70px, 22vw, 110px);
+        max-height: 26px;
     }
 
     .nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
