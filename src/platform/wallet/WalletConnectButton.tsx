@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getSiteRoutePath } from '../../app/routes';
 import type { ComponentType } from 'react';
+import { getSiteRoutePath } from '../../app/routes';
+import { useIdentity } from '../identity/IdentityProvider';
+import { UserAvatar } from '../../components/account/UserAvatar';
 import type {
+  WalletDisconnectFn,
   WalletOpenFn,
   WalletOpenOptions,
-  WalletDisconnectFn,
   WalletRuntimeProps,
+  WalletSignMessageFn,
   WalletSnapshot,
 } from './WalletConnectRuntime'; // type-only: does not pull the AppKit bundle
 
@@ -16,7 +19,7 @@ const isConfigured = String(import.meta.env.VITE_REOWN_PROJECT_ID ?? '').trim().
 const RECONNECT_GRACE_MS = 3000;
 /** Fallback delay where requestIdleCallback is missing (Safari). */
 const IDLE_FALLBACK_MS = 1500;
-/** localStorage prefixes AppKit / WalletConnect use for persisted sessions. */
+/** localStorage prefixes AppKit / WalletConnect use for persisted wallet sessions. */
 const SESSION_KEY_PREFIXES = ['@appkit/', 'wc@2:'];
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
@@ -27,6 +30,10 @@ const DISCONNECTED: WalletSnapshot = { address: undefined, isConnected: false, s
 function shortenAddress(address: string | undefined): string {
   if (!address) return 'Wallet Connected';
   return address.length <= 14 ? address : `${address.slice(0, 5)}…${address.slice(-5)}`;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
 function hasStoredWalletSession(): boolean {
@@ -51,6 +58,7 @@ function scheduleIdle(task: () => void): () => void {
 }
 
 export function WalletConnectButton() {
+  const { status: identityStatus, isAuthenticated, user, error: identityError, login, logout } = useIdentity();
   const [Runtime, setRuntime] = useState<{ Component: RuntimeComponent } | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('idle');
   const [snapshot, setSnapshot] = useState<WalletSnapshot>(DISCONNECTED);
@@ -59,15 +67,21 @@ export function WalletConnectButton() {
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [disconnectReady, setDisconnectReady] = useState(false);
   const [disconnectPending, setDisconnectPending] = useState(false);
-  const [disconnectError, setDisconnectError] = useState<string | null>(null);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [loginPending, setLoginPending] = useState(false);
+  const [signerReady, setSignerReady] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const walletRootRef = useRef<HTMLDivElement>(null);
   const walletButtonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<WalletOpenFn | null>(null);
   const disconnectRef = useRef<WalletDisconnectFn | null>(null);
+  const signMessageRef = useRef<WalletSignMessageFn | null>(null);
   const snapshotRef = useRef<WalletSnapshot>(DISCONNECTED);
   const loadingRef = useRef(false);
   const mountedRef = useRef(true);
+  const loginAfterConnectRef = useRef(false);
+  const loginAttemptRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -76,7 +90,7 @@ export function WalletConnectButton() {
     };
   }, []);
 
-  /** Loads the AppKit runtime once; a failed load (offline, stale chunk) can be retried. */
+  /** Loads the AppKit runtime once; a failed load can be retried. */
   const loadRuntime = useCallback(() => {
     if (!isConfigured || loadingRef.current) return;
     loadingRef.current = true;
@@ -93,18 +107,20 @@ export function WalletConnectButton() {
         if (!mountedRef.current) return;
         setLoadState('error');
         setPendingOpen(false);
+        loginAfterConnectRef.current = false;
       });
   }, []);
 
   const handleSnapshot = useCallback((next: WalletSnapshot) => {
-    const prev = snapshotRef.current;
-    if (prev.address === next.address && prev.isConnected === next.isConnected && prev.status === next.status) return;
+    const previous = snapshotRef.current;
+    if (previous.address === next.address && previous.isConnected === next.isConnected && previous.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
     if (!next.isConnected) {
       setWalletMenuOpen(false);
       setDisconnectPending(false);
-      setDisconnectError(null);
+      setActionError(null);
+      loginAttemptRef.current = false;
     }
   }, []);
 
@@ -118,25 +134,67 @@ export function WalletConnectButton() {
     setDisconnectReady(disconnect !== null);
   }, []);
 
+  const handleSignMessageReady = useCallback((signMessage: WalletSignMessageFn | null) => {
+    signMessageRef.current = signMessage;
+    setSignerReady(signMessage !== null);
+  }, []);
+
+  const performLogin = useCallback(async () => {
+    const address = snapshotRef.current.address;
+    const signMessage = signMessageRef.current;
+    if (!snapshotRef.current.isConnected || !address || !signMessage || loginAttemptRef.current) return;
+
+    loginAttemptRef.current = true;
+    setActionError(null);
+    setLoginPending(true);
+    try {
+      await login({ walletAddress: address, signMessage });
+      setWalletMenuOpen(false);
+      setActionError(null);
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'Wallet sign-in was not completed.'));
+      setWalletMenuOpen(true);
+      loginAttemptRef.current = false;
+    } finally {
+      setLoginPending(false);
+    }
+  }, [login]);
+
   const handleDisconnect = useCallback(async () => {
     const disconnect = disconnectRef.current;
     if (!disconnect || disconnectPending) return;
 
-    setDisconnectError(null);
+    setActionError(null);
     setDisconnectPending(true);
     try {
-      // Use Reown AppKit's own disconnect action, scoped to the connected Solana namespace.
+      // Disconnecting a wallet does not revoke the independent Maze account session.
       await Promise.resolve(disconnect());
       setWalletMenuOpen(false);
     } catch (error) {
       console.error('[wallet] failed to disconnect the Solana wallet', error);
-      setDisconnectError('Could not disconnect. Please try again.');
+      setActionError('Could not disconnect. Please try again.');
     } finally {
       setDisconnectPending(false);
     }
   }, [disconnectPending]);
 
-  // Returning users: boot on idle so the session is restored and the first click is instant.
+  const handleLogout = useCallback(async () => {
+    if (logoutPending) return;
+    setActionError(null);
+    setLogoutPending(true);
+    try {
+      // Logout revokes the server session but intentionally leaves the wallet transport connected.
+      await logout();
+      setWalletMenuOpen(false);
+      loginAttemptRef.current = false;
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'Could not sign out. Please try again.'));
+    } finally {
+      setLogoutPending(false);
+    }
+  }, [logout, logoutPending]);
+
+  // Returning users: restore the wallet session on idle; AppKit remains out of the initial bundle.
   useEffect(() => {
     if (!isConfigured || !hasStoredWalletSession()) return undefined;
     return scheduleIdle(loadRuntime);
@@ -146,9 +204,7 @@ export function WalletConnectButton() {
     if (!walletMenuOpen) return undefined;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!walletRootRef.current?.contains(event.target as Node)) {
-        setWalletMenuOpen(false);
-      }
+      if (!walletRootRef.current?.contains(event.target as Node)) setWalletMenuOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
@@ -164,7 +220,20 @@ export function WalletConnectButton() {
     };
   }, [walletMenuOpen]);
 
-  // A click that arrived before the runtime was ready (or while restoring a session) opens the modal here.
+  // A first-time explicit connect intent proceeds to the separate SIWS signature prompt.
+  useEffect(() => {
+    if (!loginAfterConnectRef.current || identityStatus === 'checking') return;
+    if (identityStatus === 'authenticated') {
+      loginAfterConnectRef.current = false;
+      return;
+    }
+    if (snapshot.isConnected && snapshot.address && signerReady && !loginAttemptRef.current) {
+      loginAfterConnectRef.current = false;
+      void performLogin();
+    }
+  }, [snapshot.isConnected, snapshot.address, signerReady, identityStatus, performLogin]);
+
+  // A click that arrived before the runtime was ready opens the official AppKit modal.
   useEffect(() => {
     if (!pendingOpen || !openReady) return undefined;
 
@@ -173,8 +242,7 @@ export function WalletConnectButton() {
       const options: WalletOpenOptions = snapshotRef.current.isConnected
         ? { view: 'Account' }
         : { view: 'Connect', namespace: 'solana' };
-      // Open on the next task: not inside the click dispatch nor React's effect flush,
-      // so the click can finish and AppKit's heavy first render does not block the commit.
+      // Defer the first AppKit render until after the click event has completed.
       window.setTimeout(() => {
         try {
           void Promise.resolve(openRef.current?.(options)).catch((error: unknown) => {
@@ -194,7 +262,7 @@ export function WalletConnectButton() {
     return () => window.clearTimeout(timer);
   }, [pendingOpen, openReady, snapshot.status]);
 
-  if (!isConfigured) {
+  if (!isConfigured && !isAuthenticated && !snapshot.isConnected) {
     return (
       <button
         className="nav-wallet-button"
@@ -212,39 +280,48 @@ export function WalletConnectButton() {
   const { address, isConnected, status } = snapshot;
   const isConnecting = status === 'connecting' || status === 'reconnecting';
   const isLoading = pendingOpen && !openReady && loadState !== 'error';
-  const isBusy = isConnecting || isLoading;
+  const isBusy = isConnecting || isLoading || loginPending;
+  const displayName = user?.username || shortenAddress(user?.walletAddress || address);
+  const accountSeed = user?.id || address || user?.walletAddress || 'maze-user';
+  const isMenuAvailable = isConnected || isAuthenticated;
 
   return (
     <>
       <div className="nav-wallet-wrap" ref={walletRootRef}>
         <button
           ref={walletButtonRef}
-          className={`nav-wallet-button${isConnected ? ' is-connected' : ''}`}
+          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${isAuthenticated ? ' is-authenticated' : ''}`}
           type="button"
           data-nav-action="connect-wallet"
           data-wallet-status={status ?? 'disconnected'}
           data-wallet-load={loadState}
+          data-identity-status={identityStatus}
           aria-busy={isBusy}
-          aria-haspopup={isConnected ? 'menu' : undefined}
-          aria-expanded={isConnected ? walletMenuOpen : undefined}
-          aria-controls={isConnected && walletMenuOpen ? 'nav-wallet-menu' : undefined}
-          aria-label={isConnected ? `Wallet ${address ?? ''}. Open profile and wallet menu` : 'Connect Solana wallet'}
+          aria-haspopup={isMenuAvailable ? 'menu' : undefined}
+          aria-expanded={isMenuAvailable ? walletMenuOpen : undefined}
+          aria-controls={isMenuAvailable && walletMenuOpen ? 'nav-wallet-menu' : undefined}
+          aria-label={isAuthenticated ? `Maze account ${displayName}. Open account menu` : isConnected ? `Wallet ${address ?? ''}. Open wallet menu` : 'Connect Solana wallet'}
           title={loadState === 'error' ? 'Wallet failed to load. Click to retry.' : undefined}
           onPointerEnter={loadRuntime}
           onFocus={loadRuntime}
           onTouchStart={loadRuntime}
           onClick={() => {
-            if (snapshot.isConnected) {
-              setDisconnectError(null);
+            if (isMenuAvailable) {
+              setActionError(null);
               setWalletMenuOpen((current) => !current);
               return;
             }
-            setWalletMenuOpen(false);
+            loginAfterConnectRef.current = true;
             setPendingOpen(true);
             loadRuntime();
           }}
         >
-          {isConnected ? (
+          {isAuthenticated && user ? (
+            <>
+              <UserAvatar seed={accountSeed} imageUrl={user.avatarUrl} />
+              <span className="nav-wallet-address">{displayName}</span>
+            </>
+          ) : isConnected ? (
             <>
               <span className="nav-wallet-indicator" aria-hidden="true" />
               <span className="nav-wallet-address">{shortenAddress(address)}</span>
@@ -254,26 +331,46 @@ export function WalletConnectButton() {
           )}
         </button>
 
-        {isConnected && walletMenuOpen ? (
-          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label="Wallet options" aria-busy={disconnectPending}>
-            <a
-              className="nav-wallet-menu-item"
-              href={getSiteRoutePath('profile')}
-              role="menuitem"
-              onClick={() => setWalletMenuOpen(false)}
-            >
-              <span className="nav-wallet-menu-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="3.2" />
-                  <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
-                </svg>
-              </span>
-              <span className="nav-wallet-menu-label">Profile</span>
-            </a>
+        {isMenuAvailable && walletMenuOpen ? (
+          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label={isAuthenticated ? 'Account options' : 'Wallet options'} aria-busy={disconnectPending || logoutPending || loginPending}>
+            {isAuthenticated ? (
+              <a
+                className="nav-wallet-menu-item"
+                href={getSiteRoutePath('profile')}
+                role="menuitem"
+                onClick={() => setWalletMenuOpen(false)}
+              >
+                <span className="nav-wallet-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="3.2" />
+                    <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+                  </svg>
+                </span>
+                <span className="nav-wallet-menu-label">Profile</span>
+              </a>
+            ) : (
+              <button
+                className="nav-wallet-menu-item"
+                type="button"
+                role="menuitem"
+                disabled={!signerReady || loginPending || identityStatus === 'checking'}
+                onClick={() => { void performLogin(); }}
+              >
+                <span className="nav-wallet-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3v12m-5-5 5 5 5-5" />
+                    <path d="M5 19h14" />
+                  </svg>
+                </span>
+                <span className="nav-wallet-menu-label">{loginPending ? 'Signing in…' : 'Sign in to Maze'}</span>
+              </button>
+            )}
+
             <button
               className="nav-wallet-menu-item"
               type="button"
               role="menuitem"
+              disabled={!isConfigured || (!openReady && loadState === 'loading')}
               onClick={() => {
                 setWalletMenuOpen(false);
                 setPendingOpen(true);
@@ -288,26 +385,57 @@ export function WalletConnectButton() {
               </span>
               <span className="nav-wallet-menu-label">Wallet</span>
             </button>
-            <button
-              className="nav-wallet-menu-item"
-              type="button"
-              role="menuitem"
-              disabled={!disconnectReady || disconnectPending}
-              onClick={() => { void handleDisconnect(); }}
-            >
-              <span className="nav-wallet-menu-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2.8v9.1" />
-                  <path d="M7.2 5.8a8 8 0 1 0 9.6 0" />
-                </svg>
-              </span>
-              <span className="nav-wallet-menu-label" aria-live="polite">{disconnectPending ? 'Disconnecting…' : 'Disconnect'}</span>
-            </button>
-            {disconnectError ? <span className="nav-wallet-menu-error" role="alert">{disconnectError}</span> : null}
+
+            {isConnected ? (
+              <button
+                className="nav-wallet-menu-item"
+                type="button"
+                role="menuitem"
+                disabled={!disconnectReady || disconnectPending}
+                onClick={() => { void handleDisconnect(); }}
+              >
+                <span className="nav-wallet-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2.8v9.1" />
+                    <path d="M7.2 5.8a8 8 0 1 0 9.6 0" />
+                  </svg>
+                </span>
+                <span className="nav-wallet-menu-label" aria-live="polite">{disconnectPending ? 'Disconnecting…' : 'Disconnect wallet'}</span>
+              </button>
+            ) : null}
+
+            {isAuthenticated ? (
+              <button
+                className="nav-wallet-menu-item"
+                type="button"
+                role="menuitem"
+                disabled={logoutPending}
+                onClick={() => { void handleLogout(); }}
+              >
+                <span className="nav-wallet-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
+                    <path d="M14 16l4-4-4-4m4 4H9" />
+                  </svg>
+                </span>
+                <span className="nav-wallet-menu-label">{logoutPending ? 'Signing out…' : 'Logout'}</span>
+              </button>
+            ) : null}
+
+            {actionError || identityError ? (
+              <span className="nav-wallet-menu-error" role="alert">{actionError || identityError}</span>
+            ) : null}
           </div>
         ) : null}
       </div>
-      {Runtime ? <Runtime.Component onSnapshot={handleSnapshot} onReady={handleReady} onDisconnectReady={handleDisconnectReady} /> : null}
+      {Runtime ? (
+        <Runtime.Component
+          onSnapshot={handleSnapshot}
+          onReady={handleReady}
+          onDisconnectReady={handleDisconnectReady}
+          onSignMessageReady={handleSignMessageReady}
+        />
+      ) : null}
     </>
   );
 }

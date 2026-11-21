@@ -114,6 +114,20 @@ const LEGACY_SITE_INDEX = path.join(__dirname, 'legacy', 'home.html');
 const LEGACY_MAZE_INDEX = path.join(__dirname, 'legacy', 'maze.html');
 const SITE_ROUTE_CONFIG = require('./shared/site-routes.json').routes;
 const API_PATHS = require('./shared/api-routes.json');
+const { createIdentityHandlers } = require('./shared/identity/identity-routes');
+const identityHandlers = createIdentityHandlers();
+
+if (String(process.env.TRUST_PROXY || '').toLowerCase() === 'true') {
+    // Enable only when the app is behind a trusted reverse proxy.
+    app.set('trust proxy', 1);
+}
+
+// Wallet authentication is isolated from game, room and market request paths.
+app.post(API_PATHS.authChallenge, identityHandlers.requireTrustedOrigin, identityHandlers.issueChallenge);
+app.post(API_PATHS.authVerify, identityHandlers.requireTrustedOrigin, identityHandlers.verifyChallenge);
+app.get(API_PATHS.authSession, identityHandlers.readSession);
+app.post(API_PATHS.authLogout, identityHandlers.requireTrustedOrigin, identityHandlers.logout);
+app.patch(API_PATHS.authProfile, ...identityHandlers.updateProfile);
 const SPA_ROUTE_PATHS = SITE_ROUTE_CONFIG
     .filter((route) => route.server === 'spa')
     .flatMap((route) => route.paths);
@@ -676,6 +690,15 @@ function shutdown(signal) {
 
     server.close(
         () => {
+            // Wait for in-flight HTTP handlers before closing the SQLite connection.
+            try {
+                identityHandlers.close();
+            } catch (error) {
+                console.warn(
+                    '[Web] Failed to close identity database:',
+                    error?.message || error
+                );
+            }
 
             console.log(
                 '[Web] HTTP server stopped.'

@@ -2238,6 +2238,53 @@ html[data-theme="light"] .nav-brand-logo--black {
     color: var(--nav-active-text);
 }
 
+/* Account avatar stays local and deterministic unless the user supplies a profile image. */
+.user-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    overflow: hidden;
+    border: 1px solid var(--nav-wallet-connected-border, rgba(92, 205, 170, .38));
+    border-radius: 50%;
+    background: var(--panel-bg, rgba(16, 28, 30, .9));
+    color: var(--mint, #78edc0);
+}
+
+.user-avatar--large {
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+    border-width: 2px;
+}
+
+.user-avatar img,
+.user-avatar svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.user-avatar img {
+    object-fit: cover;
+}
+
+.user-avatar svg {
+    padding: 18%;
+    fill: currentColor;
+}
+
+.nav-wallet-button.is-authenticated {
+    gap: 8px;
+}
+
+.nav-wallet-button.is-authenticated .nav-wallet-address {
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* —— 5 · WALLET ———————————————————————————————————————————————————————— */
 .nav-wallet-button {
     display: inline-flex;

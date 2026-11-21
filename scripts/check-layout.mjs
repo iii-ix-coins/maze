@@ -17,7 +17,10 @@ const required = [
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/components/navigation/GameViewSwitcher.tsx',
-  'src/platform/wallet/WalletConnectButton.tsx',
+  'src/platform/wallet/WalletConnectButton.tsx', 'src/platform/identity/IdentityProvider.tsx',
+  'src/platform/identity/identity-client.ts', 'src/platform/identity/identity-types.ts',
+  'src/components/account/UserAvatar.tsx', 'shared/identity/identity-store.js',
+  'shared/identity/identity-routes.js',
   'src/features/profile/ProfilePage.tsx', 'src/app/routes.ts', 'src/app/routes.test.ts',
   'src/features/interaction/InteractionBar.tsx',
   'src/features/theme/MazeBackground.tsx',
@@ -239,8 +242,38 @@ if (!secondaryRowMatch || !secondaryRowMatch[1].includes('<GameViewSwitcher />')
   console.error('[layout] GameViewSwitcher and ThemeSwitcher must share the independent nav-secondary-row.');
   process.exit(1);
 }
-if (!walletComponent.includes('if (snapshot.isConnected)') || !walletComponent.includes("view: 'Account'") || !walletComponent.includes("view: 'Connect'")) {
-  console.error('[layout] Wallet menu must preserve the existing direct-connect and Reown Account/Connect routing.');
+if (!walletComponent.includes('loginAfterConnectRef.current = true') || !walletComponent.includes("view: 'Account'") || !walletComponent.includes("view: 'Connect'") || !walletComponent.includes('onSignMessageReady={handleSignMessageReady}')) {
+  console.error('[layout] Wallet button must retain lazy Reown Account/Connect routing and expose only the explicit message-signing bridge to Identity.');
+  process.exit(1);
+}
+
+const identityProviderSource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
+const appProvidersSource = fs.readFileSync(path.join(root, 'src/app/providers/AppProviders.tsx'), 'utf8');
+const identityRoutesSource = fs.readFileSync(path.join(root, 'shared/identity/identity-routes.js'), 'utf8');
+const identityStoreSource = fs.readFileSync(path.join(root, 'shared/identity/identity-store.js'), 'utf8');
+if (
+  !appProvidersSource.includes('<IdentityProvider>') ||
+  !identityProviderSource.includes('getIdentitySession') ||
+  !identityProviderSource.includes("navigateTo(getSiteRoutePath('profile'))") ||
+  !identityRoutesSource.includes('verifyEd25519') ||
+  !identityRoutesSource.includes('requireTrustedOrigin') ||
+  !identityRoutesSource.includes('sessionCookie') ||
+  !identityStoreSource.includes('consumeChallengeAndCreateSession') ||
+  !identityStoreSource.includes('consumed_at IS NULL') ||
+  !identityProviderSource.includes('requestVersionRef') ||
+  !identityRoutesSource.includes('Chain ID: solana:mainnet')
+) {
+  console.error('[layout] Identity Core must restore server sessions, verify wallet signatures, consume challenges atomically and redirect after successful login.');
+  process.exit(1);
+}
+if (/localStorage\.(?:getItem|setItem).*?(?:session|token|identity)/i.test(identityProviderSource)) {
+  console.error('[layout] Identity sessions must not be persisted in browser LocalStorage.');
+  process.exit(1);
+}
+
+const packageManifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+if (packageManifest.scripts?.['test:identity'] !== 'node --test tests/identity/identity-routes.test.cjs') {
+  console.error('[layout] The SIWS/session integration tests must remain available through npm run test:identity.');
   process.exit(1);
 }
 
@@ -255,6 +288,12 @@ if (new Set(apiRouteValues).size !== apiRouteValues.length || apiRouteValues.som
 if (!sharedApiContractSource.includes("../../../shared/api-routes.json") || !apiServerManifestSource.includes("require('./shared/api-routes.json')")) {
   console.error('[layout] Browser API clients and Express must consume the same API route manifest.');
   process.exit(1);
+}
+for (const authPath of ['authChallenge', 'authVerify', 'authSession', 'authLogout', 'authProfile']) {
+  if (!apiRouteManifest[authPath] || !apiServerManifestSource.includes(`API_PATHS.${authPath}`)) {
+    console.error(`[layout] Identity API route is missing from the shared contract or Express: ${authPath}`);
+    process.exit(1);
+  }
 }
 if (/['"]\/api\//.test(sharedApiContractSource) || /['"]\/(?:health|api\/)/.test(apiServerManifestSource)) {
   console.error('[layout] API endpoint paths must not be duplicated as string literals in clients or Express.');

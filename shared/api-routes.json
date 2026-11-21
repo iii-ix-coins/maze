@@ -11,5 +11,10 @@
   "statsView": "/api/stats/view",
   "statsLike": "/api/stats/like",
   "statsShare": "/api/stats/share",
-  "holdersSummary": "/api/holders-summary"
+  "holdersSummary": "/api/holders-summary",
+  "authChallenge": "/api/auth/challenge",
+  "authVerify": "/api/auth/verify",
+  "authSession": "/api/auth/session",
+  "authLogout": "/api/auth/logout",
+  "authProfile": "/api/auth/profile"
 }
