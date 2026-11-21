@@ -1,11 +1,12 @@
 import { API_PATHS } from '../../services/api/contracts';
 import { apiRequest } from '../../services/api/http';
-import type { IdentitySessionResponse, IdentityUser, UpdateProfileInput } from './identity-types';
+import type { IdentitySessionResponse, IdentityUser, UpdateProfileInput, WalletSignInInput } from './identity-types';
 
-interface ChallengeResponse {
+export interface ChallengeResponse {
   nonce: string;
   message: string;
   expiresAt: string;
+  signInInput: WalletSignInInput;
 }
 
 interface VerifyResponse {
@@ -34,11 +35,25 @@ export function requestIdentityChallenge(walletAddress: string): Promise<Challen
   });
 }
 
-export function verifyIdentityChallenge(nonce: string, signature: string): Promise<VerifyResponse> {
+export function verifyIdentityChallenge(
+  nonce: string,
+  signature: string,
+  proof?: { address: string; signedMessage: Uint8Array; signatureType?: string },
+): Promise<VerifyResponse> {
+  const body = proof
+    ? {
+        nonce,
+        signature,
+        address: proof.address,
+        signedMessage: encodeSignatureBase64(proof.signedMessage),
+        ...(proof.signatureType ? { signatureType: proof.signatureType } : {}),
+      }
+    : { nonce, signature };
+
   return apiRequest<VerifyResponse>(API_PATHS.authVerify, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nonce, signature }),
+    body: JSON.stringify(body),
   });
 }
 

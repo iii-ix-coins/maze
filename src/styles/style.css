@@ -2075,6 +2075,40 @@ html[data-theme="light"] .nav-brand-logo--black {
     position: relative;
     display: flex;
     flex: 0 0 auto;
+    align-items: stretch;
+}
+
+.nav-wallet-options-button {
+    display: inline-grid;
+    place-items: center;
+    width: 27px;
+    min-height: var(--nav-control-height);
+    margin-left: 4px;
+    padding: 0;
+    border: 1px solid rgba(127, 127, 127, .28);
+    border-radius: 0;
+    background: var(--nav-panel);
+    color: var(--nav-text);
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.nav-wallet-options-button svg {
+    width: 15px;
+    height: 15px;
+}
+
+.nav-wallet-options-button:hover,
+.nav-wallet-options-button:focus-visible {
+    outline: none;
+    border-color: var(--nav-accent);
+    background: var(--nav-hover-bg);
+    color: var(--nav-active-text);
+}
+
+.nav-wallet-options-button:disabled {
+    cursor: wait;
+    opacity: .58;
 }
 
 .nav-wallet-menu {

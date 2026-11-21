@@ -246,6 +246,24 @@ h3 {
     opacity: .55;
 }
 
+.nav .nav-wallet-options-button {
+    width: 27px;
+    min-height: var(--nav-control-height);
+    border: 1px solid var(--ar-line);
+    border-radius: 0;
+    clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+    background: var(--ar-fill-2);
+    color: var(--ar-accent);
+}
+
+.nav .nav-wallet-options-button:hover,
+.nav .nav-wallet-options-button:focus-visible {
+    border-color: var(--ar-accent);
+    background: rgba(var(--ar-rgb), .16);
+    color: var(--ar-text);
+    box-shadow: inset 0 0 0 1px var(--ar-accent);
+}
+
 /* Wallet submenu follows the same chamfered HUD surface as the theme/game controls. */
 .nav .nav-wallet-menu {
     --wallet-menu-cut: 9px;
@@ -358,7 +376,7 @@ h3 {
             calc(100% - var(--switcher-cut)) 100%,
             0 100%,
             0 var(--switcher-cut));
-    background: var(--ar-accent);
+    background: var(--ar-fill-2);
 }
 
 .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option,
@@ -371,14 +389,14 @@ h3 {
             calc(100% - var(--option-cut)) 100%,
             0 100%,
             0 var(--option-cut));
-    background: rgba(var(--ar-accent), .063);
+    background: rgba(var(--ar-rgb), .063);
     color: var(--ar-soft);
     box-shadow: none;
 }
 
 .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active,
 .nav .game-view-toggle .theme-toggle__option.is-active {
-    background: var(--ar-accent-2);
+    background: var(--ar-accent);
     color: var(--ar-on-accent);
     box-shadow: none;
 }

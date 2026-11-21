@@ -19,9 +19,36 @@ export interface IdentitySessionResponse {
 
 export type WalletMessageSigner = (message: Uint8Array) => Promise<Uint8Array>;
 
+/** Server-issued SIWS fields passed unchanged to a Wallet Standard signIn feature. */
+export interface WalletSignInInput {
+  domain: string;
+  address: string;
+  statement: string;
+  uri: string;
+  version: '1';
+  chainId: 'solana:mainnet';
+  nonce: string;
+  issuedAt: string;
+  expirationTime: string;
+}
+
+/** The plain-message SIWS output supported by the current Maze verifier. */
+export interface WalletSignInOutput {
+  account: { address: string };
+  signedMessage: Uint8Array;
+  signature: Uint8Array;
+  signatureType?: string;
+  signedMessageFormat?: { kind: string; messageVersion?: number };
+}
+
+export type WalletSignIn = (input: WalletSignInInput) => Promise<WalletSignInOutput>;
+
 export interface LoginInput {
   walletAddress: string;
-  signMessage: WalletMessageSigner;
+  /** Preferred: one Wallet Standard solana:signIn request. */
+  signIn?: WalletSignIn;
+  /** Compatibility fallback for providers which only expose signMessage. */
+  signMessage?: WalletMessageSigner;
 }
 
 export interface UpdateProfileInput {

@@ -103,10 +103,12 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     };
   }, [commit]);
 
-  const login = useCallback(async ({ walletAddress, signMessage }: LoginInput) => {
+  const login = useCallback(async ({ walletAddress, signIn, signMessage }: LoginInput) => {
     if (loginInFlightRef.current) throw new Error('A sign-in request is already in progress.');
     if (!walletAddress) throw new Error('Connect a Solana wallet before signing in.');
-    if (typeof signMessage !== 'function') throw new Error('This wallet does not support message signing.');
+    if (typeof signIn !== 'function' && typeof signMessage !== 'function') {
+      throw new Error('This wallet does not support Sign In With Solana or message signing.');
+    }
 
     loginInFlightRef.current = true;
     const requestVersion = ++requestVersionRef.current;
@@ -115,16 +117,56 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
 
     try {
       const challenge = await requestIdentityChallenge(walletAddress);
-      const messageBytes = new TextEncoder().encode(challenge.message);
-      const signature = await signMessage(messageBytes);
-      if (!(signature instanceof Uint8Array) || signature.length !== 64) {
-        throw new Error('The wallet returned an invalid message signature.');
+      let result: Awaited<ReturnType<typeof verifyIdentityChallenge>>;
+
+      if (signIn) {
+        // Prefer the native Wallet Standard `solana:signIn` feature. This is one
+        // wallet request and returns the account, exact signed bytes and proof.
+        const output = await signIn(challenge.signInInput);
+        if (!output || output.account?.address !== walletAddress) {
+          throw new Error('The wallet signed in with a different Solana account.');
+        }
+        if (output.signedMessageFormat) {
+          throw new Error('This wallet returned an off-chain message envelope that the current server verifier does not support.');
+        }
+        if (output.signatureType && output.signatureType !== 'ed25519') {
+          throw new Error('The wallet returned an unsupported signature type.');
+        }
+        if (!(output.signature instanceof Uint8Array) || output.signature.length !== 64) {
+          throw new Error('The wallet returned an invalid Sign In signature.');
+        }
+        if (!(output.signedMessage instanceof Uint8Array)) {
+          throw new Error('The wallet did not return the signed SIWS message bytes.');
+        }
+
+        const expectedMessage = new TextEncoder().encode(challenge.message);
+        if (output.signedMessage.length !== expectedMessage.length
+          || !output.signedMessage.every((byte, index) => byte === expectedMessage[index])) {
+          throw new Error('The wallet signed a message that does not match the Maze sign-in challenge.');
+        }
+
+        result = await verifyIdentityChallenge(
+          challenge.nonce,
+          encodeSignatureBase64(output.signature),
+          {
+            address: output.account.address,
+            signedMessage: output.signedMessage,
+            signatureType: output.signatureType,
+          },
+        );
+      } else {
+        // Compatibility path for Reown providers / wallets that only expose signMessage.
+        const messageBytes = new TextEncoder().encode(challenge.message);
+        const signature = await signMessage!(messageBytes);
+        if (!(signature instanceof Uint8Array) || signature.length !== 64) {
+          throw new Error('The wallet returned an invalid message signature.');
+        }
+        result = await verifyIdentityChallenge(
+          challenge.nonce,
+          encodeSignatureBase64(signature),
+        );
       }
 
-      const result = await verifyIdentityChallenge(
-        challenge.nonce,
-        encodeSignatureBase64(signature),
-      );
       if (!result.authenticated || !result.user) {
         throw new Error('The server did not establish an authenticated session.');
       }

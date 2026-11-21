@@ -8,6 +8,7 @@ import type {
   WalletOpenFn,
   WalletOpenOptions,
   WalletRuntimeProps,
+  WalletSignInFn,
   WalletSignMessageFn,
   WalletSnapshot,
 } from './WalletConnectRuntime'; // type-only: does not pull the AppKit bundle
@@ -69,13 +70,15 @@ export function WalletConnectButton() {
   const [disconnectPending, setDisconnectPending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [loginPending, setLoginPending] = useState(false);
-  const [signerReady, setSignerReady] = useState(false);
+  const [signInReady, setSignInReady] = useState(false);
+  const [signMessageReady, setSignMessageReady] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const walletRootRef = useRef<HTMLDivElement>(null);
   const walletButtonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<WalletOpenFn | null>(null);
   const disconnectRef = useRef<WalletDisconnectFn | null>(null);
+  const signInRef = useRef<WalletSignInFn | null>(null);
   const signMessageRef = useRef<WalletSignMessageFn | null>(null);
   const snapshotRef = useRef<WalletSnapshot>(DISCONNECTED);
   const loadingRef = useRef(false);
@@ -117,6 +120,7 @@ export function WalletConnectButton() {
     snapshotRef.current = next;
     setSnapshot(next);
     if (!next.isConnected) {
+      if (previous.isConnected) loginAfterConnectRef.current = false;
       setWalletMenuOpen(false);
       setDisconnectPending(false);
       setActionError(null);
@@ -134,21 +138,28 @@ export function WalletConnectButton() {
     setDisconnectReady(disconnect !== null);
   }, []);
 
+  const handleSignInReady = useCallback((signIn: WalletSignInFn | null) => {
+    signInRef.current = signIn;
+    setSignInReady(signIn !== null);
+  }, []);
+
   const handleSignMessageReady = useCallback((signMessage: WalletSignMessageFn | null) => {
     signMessageRef.current = signMessage;
-    setSignerReady(signMessage !== null);
+    setSignMessageReady(signMessage !== null);
   }, []);
 
   const performLogin = useCallback(async () => {
     const address = snapshotRef.current.address;
+    const signIn = signInRef.current;
     const signMessage = signMessageRef.current;
-    if (!snapshotRef.current.isConnected || !address || !signMessage || loginAttemptRef.current) return;
+    if (!snapshotRef.current.isConnected || !address || (!signIn && !signMessage) || loginAttemptRef.current) return;
 
     loginAttemptRef.current = true;
+    setWalletMenuOpen(false);
     setActionError(null);
     setLoginPending(true);
     try {
-      await login({ walletAddress: address, signMessage });
+      await login({ walletAddress: address, signIn: signIn ?? undefined, signMessage: signIn ? undefined : signMessage ?? undefined });
       setWalletMenuOpen(false);
       setActionError(null);
     } catch (error) {
@@ -220,18 +231,20 @@ export function WalletConnectButton() {
     };
   }, [walletMenuOpen]);
 
-  // A first-time explicit connect intent proceeds to the separate SIWS signature prompt.
+  // Explicit connect intent continues straight into Maze authentication once the wallet is ready.
+  const authenticatorReady = signInReady || signMessageReady;
   useEffect(() => {
     if (!loginAfterConnectRef.current || identityStatus === 'checking') return;
     if (identityStatus === 'authenticated') {
       loginAfterConnectRef.current = false;
+      setWalletMenuOpen(true);
       return;
     }
-    if (snapshot.isConnected && snapshot.address && signerReady && !loginAttemptRef.current) {
+    if (snapshot.isConnected && snapshot.address && authenticatorReady && !loginAttemptRef.current) {
       loginAfterConnectRef.current = false;
       void performLogin();
     }
-  }, [snapshot.isConnected, snapshot.address, signerReady, identityStatus, performLogin]);
+  }, [snapshot.isConnected, snapshot.address, authenticatorReady, identityStatus, performLogin]);
 
   // A click that arrived before the runtime was ready opens the official AppKit modal.
   useEffect(() => {
@@ -297,21 +310,31 @@ export function WalletConnectButton() {
           data-wallet-load={loadState}
           data-identity-status={identityStatus}
           aria-busy={isBusy}
-          aria-haspopup={isMenuAvailable ? 'menu' : undefined}
-          aria-expanded={isMenuAvailable ? walletMenuOpen : undefined}
-          aria-controls={isMenuAvailable && walletMenuOpen ? 'nav-wallet-menu' : undefined}
-          aria-label={isAuthenticated ? `Maze account ${displayName}. Open account menu` : isConnected ? `Wallet ${address ?? ''}. Open wallet menu` : 'Connect Solana wallet'}
+          disabled={isBusy}
+          aria-haspopup={isAuthenticated ? 'menu' : undefined}
+          aria-expanded={isAuthenticated ? walletMenuOpen : undefined}
+          aria-controls={isAuthenticated && walletMenuOpen ? 'nav-wallet-menu' : undefined}
+          aria-label={isAuthenticated ? `Maze account ${displayName}. Open account menu` : isConnected ? `Sign in to Maze with ${address ?? 'connected wallet'}` : 'Connect Solana wallet'}
           title={loadState === 'error' ? 'Wallet failed to load. Click to retry.' : undefined}
           onPointerEnter={loadRuntime}
           onFocus={loadRuntime}
           onTouchStart={loadRuntime}
           onClick={() => {
-            if (isMenuAvailable) {
-              setActionError(null);
+            setActionError(null);
+            if (isAuthenticated) {
               setWalletMenuOpen((current) => !current);
               return;
             }
+            // If a wallet is already connected, the primary action is Maze sign-in,
+            // never opening a menu that asks the user to click a second sign-in button.
             loginAfterConnectRef.current = true;
+            if (isConnected) {
+              if (identityStatus !== 'checking' && authenticatorReady && !loginAttemptRef.current) {
+                loginAfterConnectRef.current = false;
+                void performLogin();
+              }
+              return;
+            }
             setPendingOpen(true);
             loadRuntime();
           }}
@@ -324,12 +347,32 @@ export function WalletConnectButton() {
           ) : isConnected ? (
             <>
               <span className="nav-wallet-indicator" aria-hidden="true" />
-              <span className="nav-wallet-address">{shortenAddress(address)}</span>
+              <span className="nav-wallet-address">{loginPending ? 'Signing in…' : shortenAddress(address)}</span>
             </>
           ) : (
             <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : 'Connect Wallet'}</span>
           )}
         </button>
+
+        {isConnected && !isAuthenticated ? (
+          <button
+            className="nav-wallet-options-button"
+            type="button"
+            aria-label="Open wallet options"
+            disabled={loginPending || disconnectPending}
+            aria-haspopup="menu"
+            aria-expanded={walletMenuOpen}
+            aria-controls={walletMenuOpen ? 'nav-wallet-menu' : undefined}
+            onClick={() => {
+              setActionError(null);
+              setWalletMenuOpen((current) => !current);
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        ) : null}
 
         {isMenuAvailable && walletMenuOpen ? (
           <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label={isAuthenticated ? 'Account options' : 'Wallet options'} aria-busy={disconnectPending || logoutPending || loginPending}>
@@ -348,23 +391,7 @@ export function WalletConnectButton() {
                 </span>
                 <span className="nav-wallet-menu-label">Profile</span>
               </a>
-            ) : (
-              <button
-                className="nav-wallet-menu-item"
-                type="button"
-                role="menuitem"
-                disabled={!signerReady || loginPending || identityStatus === 'checking'}
-                onClick={() => { void performLogin(); }}
-              >
-                <span className="nav-wallet-menu-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 3v12m-5-5 5 5 5-5" />
-                    <path d="M5 19h14" />
-                  </svg>
-                </span>
-                <span className="nav-wallet-menu-label">{loginPending ? 'Signing in…' : 'Sign in to Maze'}</span>
-              </button>
-            )}
+            ) : null}
 
             <button
               className="nav-wallet-menu-item"
@@ -391,7 +418,7 @@ export function WalletConnectButton() {
                 className="nav-wallet-menu-item"
                 type="button"
                 role="menuitem"
-                disabled={!disconnectReady || disconnectPending}
+                disabled={!disconnectReady || disconnectPending || loginPending}
                 onClick={() => { void handleDisconnect(); }}
               >
                 <span className="nav-wallet-menu-icon" aria-hidden="true">
@@ -433,6 +460,7 @@ export function WalletConnectButton() {
           onSnapshot={handleSnapshot}
           onReady={handleReady}
           onDisconnectReady={handleDisconnectReady}
+          onSignInReady={handleSignInReady}
           onSignMessageReady={handleSignMessageReady}
         />
       ) : null}

@@ -123,6 +123,54 @@ test('SIWS issues a one-time challenge, creates a durable session, updates profi
   assert.match(challengeResponse.body.message, /^maze\.example wants you to sign in with your Solana account:/);
   assert.match(challengeResponse.body.message, /Chain ID: solana:mainnet/);
   assert.match(challengeResponse.body.nonce, /^[a-f0-9]{32}$/);
+  assert.deepEqual(challengeResponse.body.signInInput, {
+    domain: 'maze.example',
+    address: wallet.address,
+    statement: 'Sign in to Maze. This request will not trigger a blockchain transaction or transfer assets.',
+    uri: 'https://maze.example',
+    version: '1',
+    chainId: 'solana:mainnet',
+    nonce: challengeResponse.body.nonce,
+    issuedAt: challengeResponse.body.signInInput.issuedAt,
+    expirationTime: challengeResponse.body.expiresAt,
+  });
+
+  // The structured Wallet Standard proof must be bound to the original
+  // challenge bytes, not to arbitrary text supplied by the browser.
+  const wrongMessage = `${challengeResponse.body.message}\nattacker-controlled`;
+  const wrongMessageResponse = createResponse();
+  invokeWithOrigin(
+    handlers.requireTrustedOrigin,
+    handlers.verifyChallenge,
+    createRequest({
+      body: {
+        nonce: challengeResponse.body.nonce,
+        address: wallet.address,
+        signedMessage: Buffer.from(wrongMessage, 'utf8').toString('base64'),
+        signature: signedMessage(wallet, wrongMessage),
+      },
+      ip: '127.0.0.10',
+    }),
+    wrongMessageResponse,
+  );
+  assert.equal(wrongMessageResponse.statusCode, 401);
+
+  const wrongAddressResponse = createResponse();
+  invokeWithOrigin(
+    handlers.requireTrustedOrigin,
+    handlers.verifyChallenge,
+    createRequest({
+      body: {
+        nonce: challengeResponse.body.nonce,
+        address: wrongWallet.address,
+        signedMessage: Buffer.from(challengeResponse.body.message, 'utf8').toString('base64'),
+        signature: signedMessage(wallet, challengeResponse.body.message),
+      },
+      ip: '127.0.0.10',
+    }),
+    wrongAddressResponse,
+  );
+  assert.equal(wrongAddressResponse.statusCode, 401);
 
   // A signature from another key is rejected and does not consume the nonce.
   const wrongSignatureRequest = createRequest({
@@ -139,7 +187,10 @@ test('SIWS issues a one-time challenge, creates a durable session, updates profi
   const verifyRequest = createRequest({
     body: {
       nonce: challengeResponse.body.nonce,
+      address: wallet.address,
+      signedMessage: Buffer.from(challengeResponse.body.message, 'utf8').toString('base64'),
       signature: signedMessage(wallet, challengeResponse.body.message),
+      signatureType: 'ed25519',
     },
     ip: '127.0.0.10',
   });
@@ -188,7 +239,10 @@ test('SIWS issues a one-time challenge, creates a durable session, updates profi
     createRequest({
       body: {
         nonce: challengeResponse.body.nonce,
+        address: wallet.address,
+        signedMessage: Buffer.from(challengeResponse.body.message, 'utf8').toString('base64'),
         signature: signedMessage(wallet, challengeResponse.body.message),
+        signatureType: 'ed25519',
       },
       ip: '127.0.0.12',
     }),

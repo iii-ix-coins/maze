@@ -242,8 +242,18 @@ if (!secondaryRowMatch || !secondaryRowMatch[1].includes('<GameViewSwitcher />')
   console.error('[layout] GameViewSwitcher and ThemeSwitcher must share the independent nav-secondary-row.');
   process.exit(1);
 }
-if (!walletComponent.includes('loginAfterConnectRef.current = true') || !walletComponent.includes("view: 'Account'") || !walletComponent.includes("view: 'Connect'") || !walletComponent.includes('onSignMessageReady={handleSignMessageReady}')) {
-  console.error('[layout] Wallet button must retain lazy Reown Account/Connect routing and expose only the explicit message-signing bridge to Identity.');
+if (
+  !walletComponent.includes('loginAfterConnectRef.current = true')
+  || !walletComponent.includes("view: 'Account'")
+  || !walletComponent.includes("view: 'Connect'")
+  || !walletComponent.includes('const authenticatorReady = signInReady || signMessageReady')
+  || !walletComponent.includes('snapshot.isConnected && snapshot.address && authenticatorReady')
+  || !walletComponent.includes('void performLogin()')
+  || !walletComponent.includes('onSignInReady={handleSignInReady}')
+  || !walletComponent.includes('onSignMessageReady={handleSignMessageReady}')
+  || walletComponent.includes('nav-wallet-menu-label\">Sign in to Maze')
+) {
+  console.error('[layout] Wallet button must keep lazy Reown routing, automatically authenticate after connection, and avoid a separate Maze sign-in menu action.');
   process.exit(1);
 }
 
@@ -261,7 +271,9 @@ if (
   !identityStoreSource.includes('consumeChallengeAndCreateSession') ||
   !identityStoreSource.includes('consumed_at IS NULL') ||
   !identityProviderSource.includes('requestVersionRef') ||
-  !identityRoutesSource.includes('Chain ID: solana:mainnet')
+  !identityRoutesSource.includes("chainId: 'solana:mainnet'")
+  || !identityRoutesSource.includes('decodeSignedMessage')
+  || !identityRoutesSource.includes('The wallet signed a different sign-in message.')
 ) {
   console.error('[layout] Identity Core must restore server sessions, verify wallet signatures, consume challenges atomically and redirect after successful login.');
   process.exit(1);

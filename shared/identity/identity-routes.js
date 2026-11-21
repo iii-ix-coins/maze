@@ -165,38 +165,62 @@ function clearSessionCookie(res) {
     res.setHeader('Set-Cookie', expiredSessionCookies());
 }
 
+function decodeBase64Bytes(value, maxLength) {
+    if (typeof value !== 'string' || value.length > maxLength || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) return null;
+    const bytes = Buffer.from(value, 'base64');
+    if (!bytes.length || bytes.toString('base64') !== value) return null;
+    return bytes;
+}
+
 function decodeSignature(value) {
-    if (typeof value !== 'string' || value.length > 256 || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) return null;
-    const signature = Buffer.from(value, 'base64');
-    if (signature.length !== 64 || signature.toString('base64') !== value) return null;
-    return signature;
+    const signature = decodeBase64Bytes(value, 256);
+    return signature?.length === 64 ? signature : null;
+}
+
+function decodeSignedMessage(value) {
+    const message = decodeBase64Bytes(value, 4096);
+    return message && message.length <= 2048 ? message : null;
 }
 
 function verifyWalletSignature(address, message, signature) {
+
     const rawPublicKey = new PublicKey(address).toBytes();
     const publicKey = createPublicKey({
         key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(rawPublicKey)]),
         format: 'der',
         type: 'spki'
     });
-    return verifyEd25519(null, Buffer.from(message, 'utf8'), publicKey, signature);
+    const messageBytes = Buffer.isBuffer(message) ? message : Buffer.from(message, 'utf8');
+    return verifyEd25519(null, messageBytes, publicKey, signature);
 }
 
-function createSiwsMessage({ origin, address, nonce, issuedAt, expirationTime }) {
-    const domain = new URL(origin).host;
-    const statement = 'Sign in to Maze. This request will not trigger a blockchain transaction or transfer assets.';
-    return [
-        `${domain} wants you to sign in with your Solana account:`,
+function createSiwsInput({ origin, address, nonce, issuedAt, expirationTime }) {
+    return {
+        domain: new URL(origin).host,
         address,
+        statement: 'Sign in to Maze. This request will not trigger a blockchain transaction or transfer assets.',
+        uri: origin,
+        version: '1',
+        chainId: 'solana:mainnet',
+        nonce,
+        issuedAt,
+        expirationTime
+    };
+}
+
+function createSiwsMessage(input) {
+    return [
+        `${input.domain} wants you to sign in with your Solana account:`,
+        input.address,
         '',
-        statement,
+        input.statement,
         '',
-        `URI: ${origin}`,
-        'Version: 1',
-        'Chain ID: solana:mainnet',
-        `Nonce: ${nonce}`,
-        `Issued At: ${issuedAt}`,
-        `Expiration Time: ${expirationTime}`
+        `URI: ${input.uri}`,
+        `Version: ${input.version}`,
+        `Chain ID: ${input.chainId}`,
+        `Nonce: ${input.nonce}`,
+        `Issued At: ${input.issuedAt}`,
+        `Expiration Time: ${input.expirationTime}`
     ].join('\n');
 }
 
@@ -263,13 +287,14 @@ function createIdentityHandlers({ store = new IdentityStore() } = {}) {
                 const issuedAt = new Date(now).toISOString();
                 const expiresAt = now + CHALLENGE_TTL_MS;
                 const expirationTime = new Date(expiresAt).toISOString();
-                const message = createSiwsMessage({
+                const signInInput = createSiwsInput({
                     origin: req.identityOrigin,
                     address,
                     nonce,
                     issuedAt,
                     expirationTime
                 });
+                const message = createSiwsMessage(signInInput);
 
                 store.createChallenge({
                     nonce,
@@ -283,6 +308,7 @@ function createIdentityHandlers({ store = new IdentityStore() } = {}) {
                 return res.json({
                     nonce,
                     message,
+                    signInInput,
                     expiresAt: expirationTime
                 });
             } catch (error) {
@@ -295,7 +321,18 @@ function createIdentityHandlers({ store = new IdentityStore() } = {}) {
             setNoStore(res);
             const nonce = typeof req.body?.nonce === 'string' ? req.body.nonce : '';
             const signature = decodeSignature(req.body?.signature);
-            if (!/^[a-f0-9]{32}$/.test(nonce) || !signature) {
+            const hasAddress = req.body?.address !== undefined;
+            const hasSignedMessage = req.body?.signedMessage !== undefined;
+            const suppliedAddress = hasAddress ? canonicalWalletAddress(req.body.address) : null;
+            const signedMessage = hasSignedMessage ? decodeSignedMessage(req.body.signedMessage) : null;
+            const hasCompleteStandardProof = hasAddress && hasSignedMessage;
+            if (
+                !/^[a-f0-9]{32}$/.test(nonce)
+                || !signature
+                || (hasAddress !== hasSignedMessage)
+                || (hasCompleteStandardProof && (!suppliedAddress || !signedMessage))
+                || (req.body?.signatureType !== undefined && req.body.signatureType !== 'ed25519')
+            ) {
                 return sendError(res, 400, 'The sign-in response is invalid.');
             }
             if (!rateLimit(req, res, 'verify-ip', '', 20)) return;
@@ -312,12 +349,25 @@ function createIdentityHandlers({ store = new IdentityStore() } = {}) {
                     return sendError(res, 400, 'The sign-in request has expired or is no longer valid.');
                 }
                 if (!rateLimit(req, res, 'verify-wallet', challenge.wallet_address, 8)) return;
+                if (hasCompleteStandardProof && suppliedAddress !== challenge.wallet_address) {
+                    return sendError(res, 401, 'The signed wallet does not match the sign-in challenge.');
+                }
+
+                // Wallet Standard returns the exact bytes it signed. Never trust a
+                // client-supplied message: require byte-for-byte equality with the
+                // server's stored challenge before checking the Ed25519 signature.
+                const messageBytes = hasCompleteStandardProof
+                    ? signedMessage
+                    : Buffer.from(challenge.message, 'utf8');
+                if (hasCompleteStandardProof && !messageBytes.equals(Buffer.from(challenge.message, 'utf8'))) {
+                    return sendError(res, 401, 'The wallet signed a different sign-in message.');
+                }
 
                 let signatureIsValid = false;
                 try {
                     signatureIsValid = verifyWalletSignature(
                         challenge.wallet_address,
-                        challenge.message,
+                        messageBytes,
                         signature
                     );
                 } catch {

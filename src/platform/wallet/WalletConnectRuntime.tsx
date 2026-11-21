@@ -1,14 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { useAppKit, useAppKitAccount, useAppKitProvider, useDisconnect } from '@reown/appkit/react';
 import './appkit'; // Initialize the single AppKit instance before using its hooks.
+import type { WalletSignIn, WalletSignInInput, WalletSignInOutput } from '../identity/identity-types';
 
 export type WalletOpenOptions = Parameters<ReturnType<typeof useAppKit>['open']>[0];
 export type WalletOpenFn = (options?: WalletOpenOptions) => unknown;
 export type WalletDisconnectFn = () => unknown;
 export type WalletSignMessageFn = (message: Uint8Array) => Promise<Uint8Array>;
+export type WalletSignInFn = WalletSignIn;
 
 type AppKitSolanaWalletProvider = {
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+  /** Present only when the active AppKit provider forwards Wallet Standard solana:signIn. */
+  signIn?: (input: WalletSignInInput) => Promise<WalletSignInOutput>;
 };
 
 export type WalletSnapshot = {
@@ -24,7 +28,9 @@ export type WalletRuntimeProps = {
   onReady: (open: WalletOpenFn | null) => void;
   /** Exposes Reown's namespace-scoped disconnect action to the lazy-loaded nav button. */
   onDisconnectReady: (disconnect: WalletDisconnectFn | null) => void;
-  /** Gives Identity Core a narrow message-signing capability without exposing AppKit. */
+  /** Gives Identity Core the preferred Wallet Standard one-request signIn capability. */
+  onSignInReady: (signIn: WalletSignInFn | null) => void;
+  /** Compatibility signing capability for providers without solana:signIn. */
   onSignMessageReady: (signMessage: WalletSignMessageFn | null) => void;
 };
 
@@ -33,7 +39,7 @@ export type WalletRuntimeProps = {
  * The button remains Maze-owned; the modal and its internal screens use the
  * unmodified, official Reown AppKit UI.
  */
-export function WalletRuntime({ onSnapshot, onReady, onDisconnectReady, onSignMessageReady }: WalletRuntimeProps) {
+export function WalletRuntime({ onSnapshot, onReady, onDisconnectReady, onSignInReady, onSignMessageReady }: WalletRuntimeProps) {
   const { open } = useAppKit();
   const { disconnect } = useDisconnect();
   const { address, isConnected, status } = useAppKitAccount({ namespace: 'solana' });
@@ -62,9 +68,25 @@ export function WalletRuntime({ onSnapshot, onReady, onDisconnectReady, onSignMe
   }, [onDisconnectReady]);
 
   useEffect(() => {
+    if (typeof walletProvider?.signIn !== 'function') {
+      onSignInReady(null);
+    } else {
+      const signIn: WalletSignInFn = async (input) => {
+        const provider = walletProviderRef.current;
+        if (!provider || typeof provider.signIn !== 'function') {
+          throw new Error('The connected wallet does not expose Sign In With Solana.');
+        }
+        return provider.signIn.call(provider, input);
+      };
+      onSignInReady(signIn);
+    }
+
     if (typeof walletProvider?.signMessage !== 'function') {
       onSignMessageReady(null);
-      return () => onSignMessageReady(null);
+      return () => {
+        onSignInReady(null);
+        onSignMessageReady(null);
+      };
     }
 
     const signMessage: WalletSignMessageFn = async (message) => {
@@ -80,8 +102,11 @@ export function WalletRuntime({ onSnapshot, onReady, onDisconnectReady, onSignMe
     };
 
     onSignMessageReady(signMessage);
-    return () => onSignMessageReady(null);
-  }, [walletProvider, onSignMessageReady]);
+    return () => {
+      onSignInReady(null);
+      onSignMessageReady(null);
+    };
+  }, [walletProvider, onSignInReady, onSignMessageReady]);
 
   useEffect(() => {
     onSnapshot({ address, isConnected, status });
