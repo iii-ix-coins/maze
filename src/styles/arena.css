@@ -255,6 +255,19 @@ h3 {
     }
 }
 
+.nav .nav-wallet-menu.is-closing {
+    pointer-events: none;
+    animation: maze-dropdown-out 150ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .nav .nav-wallet-menu,
+    .nav .nav-wallet-menu.is-closing {
+        animation-duration: 1ms;
+    }
+}
+
 .nav-wallet-button {
     background: var(--ar-accent);
     color: var(--ar-on-accent);
