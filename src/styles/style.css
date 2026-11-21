@@ -779,7 +779,7 @@
 
     /* Token Summary is variant-owned: the standalone Market page keeps the
        normal panel recipe, while the Home compact variant has no global rim. */
-    .market-feature:not(.market-feature--compact) > .token-summary {
+    .market-feature:not(.market-feature--compact)>.token-summary {
         position: relative;
         border-radius: var(--r-xl);
         corner-shape: var(--corner, round);
@@ -2124,6 +2124,11 @@ html[data-theme="light"] .nav-brand-logo--black {
     animation: maze-dropdown-in 150ms ease both;
 }
 
+.nav-wallet-menu.is-closing {
+    pointer-events: none;
+    animation: maze-dropdown-out 150ms ease both;
+}
+
 .nav-wallet-menu-item {
     display: flex;
     align-items: center;
@@ -2425,6 +2430,18 @@ html[data-theme="light"] .nav-brand-logo--black {
     to {
         opacity: 1;
         transform: translateX(0);
+    }
+}
+
+@keyframes maze-dropdown-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(12px);
     }
 }
 
