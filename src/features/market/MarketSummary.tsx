@@ -52,6 +52,17 @@ function TokenSummaryContent({
           decoding="async"
           onError={(event) => { event.currentTarget.src = '/css/images/hollld-logo.svg'; }}
         />
+        <div
+          className="token-summary-image-price"
+          data-direction={priceDirection}
+          data-stale={priceIsStale || Boolean(livePrice.error)}
+          title={priceTitle}
+          aria-label={`Token price ${price ? formatTokenPrice(price.priceUsd) : 'unavailable'}`}
+        >
+          <span className="token-summary-price-label">Price</span>
+          <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
+          <small className="token-summary-price-meta">{price ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h)) : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}</small>
+        </div>
       </div>
 
       <div className="token-summary-main">
@@ -65,11 +76,6 @@ function TokenSummaryContent({
         </div>
 
         <div className="token-summary-grid">
-          <div className="token-summary-item token-summary-item--price" data-direction={priceDirection} data-stale={priceIsStale || Boolean(livePrice.error)} title={priceTitle}>
-            <span>Price</span>
-            <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
-            <small className="token-summary-price-meta">{price ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h)) : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}</small>
-          </div>
           <div className="token-summary-item"><span>Market Cap</span><strong data-market="mcap">{token ? formatUsd(token.mcap) : '--'}</strong></div>
           <div className="token-summary-item"><span>Liquidity</span><strong data-market="liquidity">{token ? formatUsd(token.liquidity) : '--'}</strong></div>
           <div className="token-summary-item"><span>24h Volume</span><strong data-market="volume24h">{token ? formatUsd(volume24h) : '--'}</strong></div>
