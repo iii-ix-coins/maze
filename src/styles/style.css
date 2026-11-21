@@ -2418,13 +2418,13 @@ html[data-theme="light"] .nav-brand-logo--black {
 
 @keyframes maze-dropdown-in {
     from {
-        opacity: 0;
-        transform: translateY(-5px);
+        opacity: 0.3;
+        transform: translateX(-10px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
