@@ -170,6 +170,13 @@ body.in-menu #site-header {
         animation: maze-dropdown-in 160ms ease both;
     }
 
+    /* Keep the mobile panel mounted and visible while its exit animation runs. */
+    .nav-inner > .nav-content.is-mobile-closing {
+        display: flex;
+        pointer-events: none;
+        animation: maze-dropdown-out 150ms ease both;
+    }
+
     .nav-inner > .nav-content > .nav-links {
         display: flex;
         flex: none;

@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type AnimationEvent as ReactAnimationEvent, type KeyboardEvent } from 'react';
 import { GameViewSwitcher } from './GameViewSwitcher';
 import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { usePathname } from '../../app/navigation';
 import { getSiteRoutePath, getSiteRoutePathByNavKey, normalizePath, resolveSiteRoute } from '../../app/routes';
+
+const MOBILE_MENU_CLOSE_FALLBACK_MS = 250;
+const MOBILE_MENU_EXIT_ANIMATION = 'maze-dropdown-out';
 
 type NavItem = {
   label: string;
@@ -96,34 +99,105 @@ function CompeteMenu({ open, setOpen, onNavigate }: { open: boolean; setOpen: (o
 export function SiteNavigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileClosing, setMobileClosing] = useState(false);
   const [competeOpen, setCompeteOpen] = useState(false);
   const navContentRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
-  const closeMobile = () => setMobileOpen(false);
+  const mobileClosingRef = useRef(false);
+  const mobileOpenRef = useRef(false);
+  const mobileCloseTimerRef = useRef<number | null>(null);
 
-  useEffect(() => {
+  const clearMobileCloseTimer = useCallback(() => {
+    if (mobileCloseTimerRef.current === null) return;
+    window.clearTimeout(mobileCloseTimerRef.current);
+    mobileCloseTimerRef.current = null;
+  }, []);
+
+  const finishMobileClose = useCallback(() => {
+    if (!mobileClosingRef.current) return;
+
+    clearMobileCloseTimer();
+    mobileClosingRef.current = false;
+    mobileOpenRef.current = false;
+    setMobileClosing(false);
     setMobileOpen(false);
     setCompeteOpen(false);
-  }, [pathname]);
+  }, [clearMobileCloseTimer]);
+
+  const openMobile = useCallback(() => {
+    clearMobileCloseTimer();
+    mobileClosingRef.current = false;
+    mobileOpenRef.current = true;
+    setMobileClosing(false);
+    setCompeteOpen(false);
+    setMobileOpen(true);
+  }, [clearMobileCloseTimer]);
+
+  const closeMobile = useCallback(() => {
+    if (!mobileOpenRef.current || mobileClosingRef.current) return;
+
+    mobileClosingRef.current = true;
+    setMobileClosing(true);
+
+    // Safety net for interrupted CSS animations (for example, a viewport resize).
+    clearMobileCloseTimer();
+    mobileCloseTimerRef.current = window.setTimeout(
+      finishMobileClose,
+      MOBILE_MENU_CLOSE_FALLBACK_MS,
+    );
+  }, [clearMobileCloseTimer, finishMobileClose]);
+
+  const toggleMobile = useCallback(() => {
+    if (mobileClosingRef.current) {
+      openMobile();
+      return;
+    }
+    if (mobileOpen) {
+      closeMobile();
+    } else {
+      openMobile();
+    }
+  }, [mobileOpen, closeMobile, openMobile]);
+
+  const handleMobileMenuAnimationEnd = useCallback((event: ReactAnimationEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.animationName !== MOBILE_MENU_EXIT_ANIMATION) return;
+    finishMobileClose();
+  }, [finishMobileClose]);
 
   useEffect(() => {
-    if (!mobileOpen) return undefined;
+    if (mobileOpenRef.current) {
+      closeMobile();
+    } else {
+      setCompeteOpen(false);
+    }
+  }, [pathname, closeMobile]);
+
+  useEffect(() => () => clearMobileCloseTimer(), [clearMobileCloseTimer]);
+
+  useEffect(() => {
+    if (!mobileOpen || mobileClosing) return undefined;
 
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target as Node;
       if (navContentRef.current?.contains(target) || mobileToggleRef.current?.contains(target)) return;
-      setMobileOpen(false);
+      closeMobile();
     };
 
     document.addEventListener('pointerdown', closeOnOutsidePointer);
     return () => document.removeEventListener('pointerdown', closeOnOutsidePointer);
-  }, [mobileOpen]);
+  }, [mobileOpen, mobileClosing, closeMobile]);
 
   const handleNavigationKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key !== 'Escape') return;
-    if (competeOpen) setCompeteOpen(false);
-    if (mobileOpen) setMobileOpen(false);
-    mobileToggleRef.current?.focus();
+    if (competeOpen) {
+      setCompeteOpen(false);
+      return;
+    }
+    if (mobileOpen && !mobileClosing) {
+      closeMobile();
+      mobileToggleRef.current?.focus();
+    }
   };
 
   return (
@@ -138,7 +212,14 @@ export function SiteNavigation() {
             </span>
           </a>
 
-          <div ref={navContentRef} className={`nav-content${mobileOpen ? ' is-mobile-open' : ''}`} id="maze-nav-content">
+          <div
+            ref={navContentRef}
+            className={`nav-content${mobileOpen && !mobileClosing ? ' is-mobile-open' : ''}${mobileClosing ? ' is-mobile-closing' : ''}`}
+            id="maze-nav-content"
+            aria-hidden={mobileClosing || undefined}
+            inert={mobileClosing}
+            onAnimationEnd={handleMobileMenuAnimationEnd}
+          >
             <div className="nav-links">
               <CompeteMenu open={competeOpen} setOpen={setCompeteOpen} onNavigate={closeMobile} />
               {NAV_ITEMS.filter((item) => item.group !== 'compete').map((item) => (
@@ -156,10 +237,10 @@ export function SiteNavigation() {
               ref={mobileToggleRef}
               type="button"
               className="nav-mobile-toggle"
-              aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={mobileOpen}
+              aria-label={mobileOpen && !mobileClosing ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileOpen && !mobileClosing}
               aria-controls="maze-nav-content"
-              onClick={() => setMobileOpen((current) => !current)}
+              onClick={toggleMobile}
             >
               <span /><span /><span />
             </button>
