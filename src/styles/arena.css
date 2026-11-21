@@ -371,14 +371,14 @@ h3 {
             calc(100% - var(--option-cut)) 100%,
             0 100%,
             0 var(--option-cut));
-    background: rgba(var(--ar-rgb), .063);
+    background: rgba(var(--ar-accent), .063);
     color: var(--ar-soft);
     box-shadow: none;
 }
 
 .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active,
 .nav .game-view-toggle .theme-toggle__option.is-active {
-    background: var(--ar-accent);
+    background: var(--ar-accent-2);
     color: var(--ar-on-accent);
     box-shadow: none;
 }
