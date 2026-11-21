@@ -169,7 +169,6 @@ function CoinContent({ payload, loading, error }: { payload: MarketPayload | nul
   const totalFlow = buy + sell;
   const buyShare = totalFlow > 0 ? (buy / totalFlow) * 100 : 50;
   const lean = totalFlow <= 0 ? 'even' : buyShare >= 52 ? 'buy' : buyShare <= 48 ? 'sell' : 'even';
-  const icon = String(token?.icon ?? '').trim().replace(/^https?:\/\//i, (match) => match.toLowerCase());
   const socials = [
     ['Website', token?.website], ['X', token?.twitter], ['Telegram', token?.telegram],
   ].map(([label, value]) => ({ label: String(label), href: normalizeUrl(value) })).filter((item) => item.href);
@@ -185,7 +184,7 @@ function CoinContent({ payload, loading, error }: { payload: MarketPayload | nul
       <header className="feature-page-title"><span className="eyebrow">Token intelligence</span><h1>Token Market &amp; Details</h1><p>Market performance, on-chain activity and token security.</p></header>
       <section className="coin-hero">
         <div className="coin-identity">
-          <img id="coin-icon" className="coin-icon" src={icon || '/css/images/hollld-logo.svg'} alt="Coin" onError={(event) => { event.currentTarget.src = '/css/images/hollld-logo.svg'; }} />
+          <img id="coin-icon" className="coin-icon" src="/css/images/maze-logo.svg" alt="Coin" />
           <div className="coin-identity-text">
             <div className="coin-name-row"><h1 id="coin-name" className="coin-name">{token?.name || '--'}</h1><span id="coin-verified" className="coin-verified" hidden={token?.isVerified !== true}>Verified</span></div>
             <div id="coin-symbol" className="coin-symbol">{token?.symbol ? `$${token.symbol}` : '--'}</div>

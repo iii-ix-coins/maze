@@ -29,7 +29,6 @@ function TokenSummaryContent({
   const token = getMarketToken(payload);
   const stats24h = token?.stats24h;
   const volume24h = (Number(stats24h?.buyVolume) || 0) + (Number(stats24h?.sellVolume) || 0);
-  const icon = String(token?.icon ?? '').trim().replace(/^https?:\/\//i, (match) => match.toLowerCase());
   const livePrice = useLivePrice();
   const price = livePrice.snapshot;
   const priceDirection = price?.change24h === null || price?.change24h === undefined
@@ -46,26 +45,11 @@ function TokenSummaryContent({
         <img
           id="token-summary-icon"
           className="token-summary-icon"
-          src={icon || '/css/images/hollld-logo.svg'}
+          src="/css/images/maze-logo.svg"
           alt={`${token?.name || 'Token'} logo`}
           loading="lazy"
           decoding="async"
-          onError={(event) => { event.currentTarget.src = '/css/images/hollld-logo.svg'; }}
         />
-        <div
-          className="token-summary-item token-summary-item--price"
-          data-direction={priceDirection}
-          data-stale={priceIsStale || Boolean(livePrice.error)}
-          title={priceTitle}
-        >
-          <span>Price</span>
-          <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
-          <small className="token-summary-price-meta">
-            {price
-              ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h))
-              : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}
-          </small>
-        </div>
       </div>
 
       <div className="token-summary-main">
@@ -79,6 +63,11 @@ function TokenSummaryContent({
         </div>
 
         <div className="token-summary-grid">
+          <div className="token-summary-item token-summary-item--price" data-direction={priceDirection} data-stale={priceIsStale || Boolean(livePrice.error)} title={priceTitle}>
+            <span>Price</span>
+            <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
+            <small className="token-summary-price-meta">{price ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h)) : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}</small>
+          </div>
           <div className="token-summary-item"><span>Market Cap</span><strong data-market="mcap">{token ? formatUsd(token.mcap) : '--'}</strong></div>
           <div className="token-summary-item"><span>Liquidity</span><strong data-market="liquidity">{token ? formatUsd(token.liquidity) : '--'}</strong></div>
           <div className="token-summary-item"><span>24h Volume</span><strong data-market="volume24h">{token ? formatUsd(volume24h) : '--'}</strong></div>
