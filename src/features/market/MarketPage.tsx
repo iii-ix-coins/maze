@@ -10,7 +10,7 @@ export function MarketPage() {
         <p>Real-time token market metrics from the existing Jupiter market service.</p>
       </header>
       <MarketSummary showTitle={false} />
-      <p className="feature-page-footnote">Market data refreshes automatically every 30 seconds.</p>
+      <p className="feature-page-footnote">Market metrics refresh every 30 seconds; PCLQCH price refreshes every 5 seconds while this page is visible.</p>
     </main>
   );
 }

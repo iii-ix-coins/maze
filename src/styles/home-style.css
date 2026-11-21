@@ -118,18 +118,20 @@
         --market-cut: 18px;
         --market-inner-cut: clamp(5px, .55vw, 7px);
         display: grid;
+        grid-template-columns: clamp(170px, 13vw, 180px) minmax(0, 1fr);
+        align-items: stretch;
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
-        gap: clamp(5px, .65vw, 9px);
-        padding: clamp(6px, .85vw, 12px) clamp(8px, 1.15vw, 16px);
+        gap: 0;
+        padding: 0;
         position: relative;
         isolation: isolate;
         overflow: hidden;
         background:
-            radial-gradient(ellipse at 90% 0%, rgba(var(--hero-accent-2-rgb), .09), transparent 54%),
-            radial-gradient(ellipse at 8% 100%, rgba(var(--hero-accent-rgb), .2), transparent 56%),
-            linear-gradient(112deg, rgba(var(--hero-accent-rgb), .045), rgba(var(--hero-accent-2-rgb), .035) 58%, transparent 100%),
+            radial-gradient(ellipse at 90% 0%, rgba(var(--hero-accent-2-rgb), .075), transparent 54%),
+            radial-gradient(ellipse at 8% 100%, rgba(var(--hero-accent-rgb), .14), transparent 56%),
+            linear-gradient(112deg, rgba(var(--hero-accent-rgb), .035), rgba(var(--hero-accent-2-rgb), .025) 58%, transparent 100%),
             var(--panel-bg);
         border: 0;
         border-radius: 0;
@@ -162,46 +164,82 @@
         display: none;
     }
 
+    .site-home-content .market-feature .token-summary-visual {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        aspect-ratio: 1 / 1;
+        align-self: start;
+        overflow: hidden;
+        background: rgba(var(--ar-rgb), .055);
+        box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .12);
+        clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+        -webkit-clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+    }
+
+    .site-home-content .market-feature .token-summary-icon {
+        display: block;
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        background: var(--ink-850);
+    }
+
+    .site-home-content .market-feature .token-summary-main {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        align-content: stretch;
+        gap: clamp(5px, .55vw, 8px);
+        min-width: 0;
+        min-height: 0;
+        padding: clamp(9px, .9vw, 13px) clamp(10px, 1.2vw, 16px);
+    }
+
     .site-home-content .market-feature .token-summary-header {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
-        gap: clamp(5px, .8vw, 11px);
+        justify-content: flex-start;
+        min-width: 0;
+        min-height: 22px;
     }
 
     .site-home-content .market-feature .token-summary-identity {
         display: flex;
         align-items: center;
-        gap: clamp(6px, .75vw, 10px);
         min-width: 0;
-    }
-
-    .site-home-content .market-feature .token-summary-icon {
-        flex: none;
-        width: clamp(28px, 3.05vw, 44px);
-        height: clamp(28px, 3.05vw, 44px);
-        object-fit: cover;
-        background: var(--ink-850);
-        border: 0;
-        border-radius: 0;
-        outline: 0;
-        box-shadow: none;
     }
 
     .site-home-content .market-feature .token-summary-name {
         display: flex;
         flex-wrap: nowrap;
         align-items: baseline;
-        gap: clamp(5px, .6vw, 9px);
+        gap: clamp(7px, .8vw, 12px);
         min-width: 0;
         white-space: nowrap;
     }
 
     .site-home-content .market-feature .token-summary-title {
         min-width: 0;
-        font-size: clamp(12px, 1.35vw, 18px);
-        font-weight: 650;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: clamp(15px, 1.45vw, 20px);
+        font-weight: 700;
         line-height: 1.08;
         letter-spacing: -.035em;
     }
@@ -209,16 +247,38 @@
     .site-home-content .market-feature .token-summary-symbol {
         flex: none;
         color: var(--mint);
-        font-size: clamp(9px, .82vw, 11px);
-        font-weight: 600;
+        font-size: clamp(10px, .88vw, 12px);
+        font-weight: 700;
         line-height: 1.1;
     }
 
     .site-home-content .market-feature .token-summary-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-auto-rows: minmax(0, 1fr);
+        align-content: stretch;
         gap: clamp(4px, .55vw, 8px);
         min-width: 0;
+        min-height: 0;
+    }
+
+    .site-home-content .market-feature--compact .token-summary-item {
+        clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
+        -webkit-clip-path: polygon(
+            var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut)
+        );
     }
 
     .site-home-content .market-feature .token-summary-item {
@@ -227,20 +287,20 @@
         align-content: center;
         gap: clamp(2px, .25vw, 4px);
         min-width: 0;
-        min-height: clamp(32px, 4.1vw, 46px);
-        padding: clamp(4px, .58vw, 8px) clamp(6px, .82vw, 11px);
-        background: linear-gradient(180deg, rgba(var(--ar-rgb), .035), rgba(var(--ar-rgb), .018));
+        min-height: clamp(36px, 3.8vw, 48px);
+        padding: clamp(5px, .58vw, 8px) clamp(7px, .82vw, 11px);
+        background: linear-gradient(180deg, rgba(var(--ar-rgb), .022), rgba(var(--ar-rgb), .008));
         border: 0;
         border-radius: 0;
         outline: 0;
-        box-shadow: none;
+        box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .045);
         filter: none;
     }
 
-    .site-home-content .market-feature .token-summary-item:nth-child(2) { --dot: var(--azure); }
-    .site-home-content .market-feature .token-summary-item:nth-child(3) { --dot: var(--violet); }
-    .site-home-content .market-feature .token-summary-item:nth-child(4) { --dot: var(--gold); }
-    .site-home-content .market-feature .token-summary-item:nth-child(6) { --dot: var(--azure); }
+    .site-home-content .market-feature .token-summary-item:nth-child(3) { --dot: var(--azure); }
+    .site-home-content .market-feature .token-summary-item:nth-child(4) { --dot: var(--violet); }
+    .site-home-content .market-feature .token-summary-item:nth-child(5) { --dot: var(--gold); }
+    .site-home-content .market-feature .token-summary-item:nth-child(7) { --dot: var(--azure); }
 
     .site-home-content .market-feature .token-summary-item > span {
         display: block;
@@ -275,25 +335,35 @@
         overflow-wrap: anywhere;
     }
 
-    /* The icon and all six metric tiles share the same clipped corner geometry. */
-    .site-home-content .market-feature--compact .token-summary-icon,
-    .site-home-content .market-feature--compact .token-summary-item {
-        clip-path: polygon(
-            var(--market-inner-cut) 0,
-            100% 0,
-            100% calc(100% - var(--market-inner-cut)),
-            calc(100% - var(--market-inner-cut)) 100%,
-            0 100%,
-            0 var(--market-inner-cut)
-        );
-        -webkit-clip-path: polygon(
-            var(--market-inner-cut) 0,
-            100% 0,
-            100% calc(100% - var(--market-inner-cut)),
-            calc(100% - var(--market-inner-cut)) 100%,
-            0 100%,
-            0 var(--market-inner-cut)
-        );
+    .site-home-content .market-feature .token-summary-item--price {
+        --dot: var(--ar-accent-2);
+        background: linear-gradient(135deg, rgba(var(--ar-accent-2-rgb), .13), rgba(var(--ar-rgb), .035) 72%);
+        box-shadow: inset 0 0 0 1px rgba(var(--ar-accent-2-rgb), .23), inset 0 0 22px rgba(var(--ar-accent-2-rgb), .035);
+    }
+
+    .site-home-content .market-feature .token-summary-price-meta {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        color: var(--ar-accent-2);
+        font-size: clamp(8px, .72vw, 10px);
+        font-weight: 650;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .site-home-content .market-feature .token-summary-item--price[data-direction="positive"] .token-summary-price-meta {
+        color: var(--gain);
+    }
+
+    .site-home-content .market-feature .token-summary-item--price[data-direction="negative"] .token-summary-price-meta {
+        color: var(--loss);
+    }
+
+    .site-home-content .market-feature--compact > .token-summary > .feature-status {
+        grid-column: 1 / -1;
     }
 
     .site-home-content .market-feature--compact .feature-status {
@@ -398,17 +468,40 @@
         .site-home-content .market-feature .token-summary-item > strong { font-weight: 600; }
         .site-home-content .market-feature .token-summary-item > span { font-weight: 550; }
     }
+    @media (min-width: 601px) and (max-width: 900px) {
+        .site-home-content .market-feature--compact > .token-summary {
+            grid-template-columns: 196px minmax(0, 1fr);
+        }
+        .site-home-content .market-feature .token-summary-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .site-home-content .market-feature .token-summary-item {
+            min-height: 38px;
+            padding: 4px 7px;
+        }
+        .site-home-content .market-feature .token-summary-main {
+            padding-block: 8px;
+        }
+    }
+
     @media (max-width: 600px) {
         .site-home-content .market-feature--compact > .token-summary {
+            grid-template-columns: clamp(76px, 19vw, 88px) minmax(0, 1fr);
             gap: 6px;
             padding: 6px 7px;
+        }
+        .site-home-content .market-feature .token-summary-main {
+            gap: 5px;
+        }
+        .site-home-content .market-feature .token-summary-header {
+            min-height: 18px;
         }
         .site-home-content .market-feature .token-summary-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 4px;
         }
         .site-home-content .market-feature .token-summary-item {
-            min-height: clamp(30px, 8vw, 38px);
+            min-height: clamp(31px, 8vw, 38px);
             padding: 5px 7px;
         }
         .site-home-content .market-feature .token-summary-item > span {
@@ -417,18 +510,30 @@
         .site-home-content .market-feature .token-summary-item > strong {
             font-size: clamp(10.5px, 3.6vw, 14px);
         }
+        .site-home-content .market-feature .token-summary-price-meta {
+            font-size: 8px;
+        }
         .site-home-content .market-feature .token-summary-title {
-            font-size: clamp(10.5px, 3.5vw, 13.5px);
+            font-size: clamp(10px, 3vw, 13px);
         }
         .site-home-content .market-feature .token-summary-symbol {
             font-size: clamp(8px, 2.3vw, 9.5px);
         }
-        .site-home-content .market-feature .token-summary-icon {
-            width: clamp(25px, 8vw, 34px);
-            height: clamp(25px, 8vw, 34px);
-        }
         .site-home-content .market-feature .token-summary-name {
             gap: 5px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .site-home-content .market-feature--compact > .token-summary {
+            grid-template-columns: 68px minmax(0, 1fr);
+            gap: 5px;
+        }
+        .site-home-content .market-feature .token-summary-item {
+            padding-inline: 5px;
+        }
+        .site-home-content .market-feature .token-summary-item > span {
+            letter-spacing: .015em;
         }
     }
 

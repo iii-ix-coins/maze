@@ -236,6 +236,10 @@ app.get(
                 'Content-Type',
                 'application/json'
             );
+            res.setHeader(
+                'Cache-Control',
+                'no-store'
+            );
 
             return res.send(
                 jsonStr

@@ -30,6 +30,11 @@ const priceFormatter = new Intl.NumberFormat(locale, {
   style: 'currency', currency: 'USD', maximumFractionDigits: 2,
   minimumFractionDigits: 0, useGrouping: true,
 });
+const tokenPriceFormatter = new Intl.NumberFormat(locale, {
+  style: 'currency', currency: 'USD',
+  minimumSignificantDigits: 1, maximumSignificantDigits: 8,
+  useGrouping: true,
+});
 const regularAmountFormatter = new Intl.NumberFormat(locale, {
   maximumFractionDigits: 2, minimumFractionDigits: 0, useGrouping: false,
 });
@@ -56,4 +61,9 @@ export function formatInteger(value: unknown): string {
   return Number.isFinite(normalized)
     ? Math.trunc(normalized).toLocaleString(locale, { useGrouping: true, maximumFractionDigits: 0 })
     : '0';
+}
+
+/** High-precision display for individual token prices, including sub-cent values. */
+export function formatTokenPrice(value: unknown): string {
+  return tokenPriceFormatter.format(normalizeNumeric(value));
 }

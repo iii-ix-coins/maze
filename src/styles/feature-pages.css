@@ -8,6 +8,134 @@
     gap: clamp(20px, 3vw, 30px);
   }
 
+
+  /* Market summary (full Market route): square token visual + live metrics. */
+  .market-feature:not(.market-feature--compact) > .token-summary {
+    display: grid;
+    grid-template-columns: clamp(150px, 16vw, 190px) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+    padding: clamp(14px, 2vw, 20px);
+    border: 1px solid var(--stroke, #334047);
+    border-radius: var(--r-xl, 22px);
+    background: var(--panel-bg, rgba(16, 28, 30, .78));
+    box-shadow: var(--shadow-2, 0 16px 50px rgba(0, 0, 0, .18));
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-visual {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    align-self: start;
+    overflow: hidden;
+    background: var(--field-bg, rgba(0, 0, 0, .12));
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-main {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-header,
+  .market-feature:not(.market-feature--compact) .token-summary-identity,
+  .market-feature:not(.market-feature--compact) .token-summary-name {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-title {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 750;
+    letter-spacing: -.04em;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-symbol {
+    color: var(--mint, #78edc0);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(60px, 1fr);
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-price-meta {
+    color: var(--ar-accent-2, var(--azure));
+    font-size: 11px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-item {
+    display: grid;
+    align-content: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 60px;
+    padding: 12px;
+    background: rgba(var(--ar-rgb), .025);
+    box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .05);
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-item > span {
+    color: var(--text-mute, #9ba8aa);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-item > strong {
+    color: var(--text, #f5f7f8);
+    font-size: clamp(14px, 1.5vw, 19px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  .market-feature:not(.market-feature--compact) .token-summary-item--price {
+    background: linear-gradient(135deg, rgba(var(--ar-accent-2-rgb), .14), rgba(var(--ar-rgb), .035));
+    box-shadow: inset 0 0 0 1px rgba(var(--ar-accent-2-rgb), .22);
+  }
+
+  @media (max-width: 900px) {
+    .market-feature:not(.market-feature--compact) > .token-summary {
+      grid-template-columns: 140px minmax(0, 1fr);
+    }
+    .market-feature:not(.market-feature--compact) .token-summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(54px, auto);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .market-feature:not(.market-feature--compact) > .token-summary {
+      grid-template-columns: 1fr;
+    }
+    .market-feature:not(.market-feature--compact) .token-summary-visual {
+      width: clamp(76px, 20vw, 96px);
+    }
+    .market-feature:not(.market-feature--compact) .token-summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
   /* Token detail page */
   .coin-page {
     gap: clamp(16px, 2.2vw, 24px);
