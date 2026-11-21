@@ -189,19 +189,19 @@ h1,
 h2,
 h3 {
     text-transform: uppercase;
-    letter-spacing: -.055em;
-    font-weight: 700;
+    letter-spacing: -.015em;
+    font-weight: 600;
 }
 
 .home-hero-slider .home-hero-copy h1 {
-    font-weight: 700;
-    letter-spacing: -.055em;
+    font-weight: 600;
+    letter-spacing: -.015em;
 }
 
 [class*="eyebrow"],
 [class*="kicker"],
 [class*="label"] {
-    letter-spacing: .16em;
+    letter-spacing: -.015em;
 }
 
 /* —— 5 · NAV: chamfered HUD tabs ————————————————————————————————————— */
@@ -303,7 +303,7 @@ h3 {
     color: var(--ar-soft);
     font-size: clamp(15px, 3.2vw, 15px);
     font-weight: 650;
-    letter-spacing: -.035em;
+    letter-spacing: -.015em;
     text-align: center;
     text-transform: uppercase;
     text-decoration: none;
@@ -355,7 +355,7 @@ h3 {
     color: var(--ar-text);
     font-size: clamp(11px, 3.2vw, 13px);
     font-weight: 650;
-    letter-spacing: -.035em;
+    letter-spacing: -.015em;
     line-height: 1.35;
     text-align: center;
 }
@@ -410,7 +410,7 @@ h3 {
     text-transform: uppercase;
     font-size: clamp(12px, 3.2vw, 12px);
     font-weight: 650;
-    letter-spacing: -.035em;
+    letter-spacing: -.015em;
 }
 
 @media (hover: hover) {

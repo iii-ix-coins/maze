@@ -1,7 +1,14 @@
 CHANGED
 src/platform/wallet/WalletConnectButton.tsx
-src/platform/wallet/WalletConnectRuntime.tsx
+src/platform/identity/IdentityProvider.tsx
+src/platform/identity/identity-types.ts
+src/platform/identity/README.md
+src/platform/wallet/README.md
 src/styles/arena.css
+scripts/check-layout.mjs
+ONE-CLICK-IDENTITY-UPDATE-FA.md
 
-ADDED (documentation only)
-PATCH-NOTES-FA.md
+ADDED
+src/platform/wallet/wallet-session-teardown.ts
+src/platform/wallet/wallet-session-teardown.test.ts
+UNIFIED-SESSION-TEARDOWN-FA.md

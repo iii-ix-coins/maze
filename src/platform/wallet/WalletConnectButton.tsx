@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
 import { useIdentity } from '../identity/IdentityProvider';
 import { UserAvatar } from '../../components/account/UserAvatar';
+import { runWalletSessionTeardown, WalletSessionTeardownError } from './wallet-session-teardown';
 import type {
   WalletDisconnectFn,
   WalletOpenFn,
@@ -67,8 +68,7 @@ export function WalletConnectButton() {
   const [pendingOpen, setPendingOpen] = useState(false);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [disconnectReady, setDisconnectReady] = useState(false);
-  const [disconnectPending, setDisconnectPending] = useState(false);
-  const [logoutPending, setLogoutPending] = useState(false);
+  const [endSessionPending, setEndSessionPending] = useState(false);
   const [loginPending, setLoginPending] = useState(false);
   const [signInReady, setSignInReady] = useState(false);
   const [signMessageReady, setSignMessageReady] = useState(false);
@@ -85,6 +85,11 @@ export function WalletConnectButton() {
   const mountedRef = useRef(true);
   const loginAfterConnectRef = useRef(false);
   const loginAttemptRef = useRef(false);
+  const endSessionInFlightRef = useRef(false);
+  const walletSyncLogoutInFlightRef = useRef(false);
+  const endSessionHadAccountRef = useRef(false);
+  const observedConnectedWalletRef = useRef<string | null>(null);
+  const pendingWalletDisconnectRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -119,10 +124,20 @@ export function WalletConnectButton() {
     if (previous.address === next.address && previous.isConnected === next.isConnected && previous.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
+
+    // Record connection edges synchronously with the provider event. This avoids
+    // missing a fast connect/disconnect pair before React commits the next effect.
+    if (next.isConnected && next.address) {
+      observedConnectedWalletRef.current = next.address;
+      pendingWalletDisconnectRef.current = false;
+    } else if (previous.isConnected) {
+      observedConnectedWalletRef.current = null;
+      pendingWalletDisconnectRef.current = true;
+    }
+
     if (!next.isConnected) {
       if (previous.isConnected) loginAfterConnectRef.current = false;
       setWalletMenuOpen(false);
-      setDisconnectPending(false);
       setActionError(null);
       loginAttemptRef.current = false;
     }
@@ -159,7 +174,12 @@ export function WalletConnectButton() {
     setActionError(null);
     setLoginPending(true);
     try {
-      await login({ walletAddress: address, signIn: signIn ?? undefined, signMessage: signIn ? undefined : signMessage ?? undefined });
+      await login({
+        walletAddress: address,
+        signIn: signIn ?? undefined,
+        signMessage: signIn ? undefined : signMessage ?? undefined,
+        isWalletConnected: () => snapshotRef.current.isConnected && snapshotRef.current.address === address,
+      });
       setWalletMenuOpen(false);
       setActionError(null);
     } catch (error) {
@@ -171,45 +191,132 @@ export function WalletConnectButton() {
     }
   }, [login]);
 
-  const handleDisconnect = useCallback(async () => {
-    const disconnect = disconnectRef.current;
-    if (!disconnect || disconnectPending) return;
+  /**
+   * Ends the Maze account session and the active wallet connection as one user action.
+   * Revoke the server session first; if that fails, keep the wallet connected so the
+   * user is not left in an ambiguous half-signed-out state.
+   */
+  const handleEndSession = useCallback(async () => {
+    if (endSessionInFlightRef.current) return;
 
+    const shouldLogout = isAuthenticated;
+    const shouldDisconnect = snapshotRef.current.isConnected;
+    if (!shouldLogout && !shouldDisconnect) return;
+
+    endSessionInFlightRef.current = true;
+    endSessionHadAccountRef.current = shouldLogout;
+    setEndSessionPending(true);
     setActionError(null);
-    setDisconnectPending(true);
+
     try {
-      // Disconnecting a wallet does not revoke the independent Maze account session.
-      await Promise.resolve(disconnect());
+      await runWalletSessionTeardown({
+        hasAuthenticatedSession: shouldLogout,
+        isWalletConnected: () => shouldDisconnect && snapshotRef.current.isConnected,
+        logout,
+        disconnect: disconnectRef.current
+          ? () => disconnectRef.current?.()
+          : undefined,
+      });
+      if (shouldLogout) loginAttemptRef.current = false;
       setWalletMenuOpen(false);
-    } catch (error) {
-      console.error('[wallet] failed to disconnect the Solana wallet', error);
-      setActionError('Could not disconnect. Please try again.');
+      setActionError(null);
+    } catch (endError) {
+      console.error('[wallet] failed to complete the account disconnect action', endError);
+      if (endError instanceof WalletSessionTeardownError && endError.sessionRevoked) {
+        // The account is already safely signed out, even though transport cleanup failed.
+        // Clear the successful-login lock so a still-connected wallet can sign in again.
+        loginAttemptRef.current = false;
+        if (snapshotRef.current.isConnected) {
+          setActionError('You are signed out, but the wallet is still connected. Select “Disconnect wallet” to finish.');
+        } else {
+          // Some providers can report a disconnect error after emitting the disconnected
+          // state. In that case the desired final state has already been reached.
+          setActionError(null);
+          setWalletMenuOpen(false);
+        }
+      } else {
+        setActionError(getErrorMessage(endError, 'Could not finish signing out. Please try again.'));
+      }
     } finally {
-      setDisconnectPending(false);
+      endSessionInFlightRef.current = false;
+      setEndSessionPending(false);
     }
-  }, [disconnectPending]);
+  }, [isAuthenticated, logout]);
 
-  const handleLogout = useCallback(async () => {
-    if (logoutPending) return;
+  /**
+   * A disconnect made inside the Reown modal or in the wallet itself is also an
+   * explicit disconnect intent. Keep the Maze session in sync with that action.
+   */
+  const logoutAfterWalletChange = useCallback(async (reason: 'disconnected' | 'account-changed') => {
+    if (!isAuthenticated || endSessionInFlightRef.current || walletSyncLogoutInFlightRef.current) return;
+
+    walletSyncLogoutInFlightRef.current = true;
+    endSessionInFlightRef.current = true;
+    endSessionHadAccountRef.current = true;
+    setEndSessionPending(true);
     setActionError(null);
-    setLogoutPending(true);
+
     try {
-      // Logout revokes the server session but intentionally leaves the wallet transport connected.
       await logout();
-      setWalletMenuOpen(false);
       loginAttemptRef.current = false;
-    } catch (error) {
-      setActionError(getErrorMessage(error, 'Could not sign out. Please try again.'));
+      setWalletMenuOpen(false);
+    } catch (syncError) {
+      const detail = getErrorMessage(syncError, 'Please try signing out again.');
+      setActionError(reason === 'disconnected'
+        ? `The wallet is disconnected, but the Maze session could not be closed. ${detail}`
+        : `The active wallet changed, but the previous Maze session could not be closed. ${detail}`);
+      // Keep the account menu available so the user can retry the remaining Logout action.
+      setWalletMenuOpen(true);
     } finally {
-      setLogoutPending(false);
+      walletSyncLogoutInFlightRef.current = false;
+      endSessionInFlightRef.current = false;
+      setEndSessionPending(false);
     }
-  }, [logout, logoutPending]);
+  }, [isAuthenticated, logout]);
 
   // Returning users: restore the wallet session on idle; AppKit remains out of the initial bundle.
   useEffect(() => {
     if (!isConfigured || !hasStoredWalletSession()) return undefined;
     return scheduleIdle(loadRuntime);
   }, [loadRuntime]);
+
+  // Keep an authenticated Maze account bound to the wallet that proved ownership.
+  // A stable external disconnect or account switch revokes that account session.
+  // AppKit's reconnecting/connecting states are transient and must never log users out.
+  useEffect(() => {
+    if (snapshot.isConnected && snapshot.address) {
+      observedConnectedWalletRef.current = snapshot.address;
+      pendingWalletDisconnectRef.current = false;
+
+      if (isAuthenticated && user?.walletAddress && user.walletAddress !== snapshot.address) {
+        void logoutAfterWalletChange('account-changed');
+      }
+      return;
+    }
+
+    if (snapshot.status === 'connecting' || snapshot.status === 'reconnecting') return;
+
+    if (observedConnectedWalletRef.current) {
+      observedConnectedWalletRef.current = null;
+      pendingWalletDisconnectRef.current = true;
+    }
+
+    if (!pendingWalletDisconnectRef.current) return;
+    if (identityStatus === 'checking' || identityStatus === 'authenticating') return;
+
+    pendingWalletDisconnectRef.current = false;
+    if (isAuthenticated) {
+      void logoutAfterWalletChange('disconnected');
+    }
+  }, [
+    snapshot.isConnected,
+    snapshot.address,
+    snapshot.status,
+    identityStatus,
+    isAuthenticated,
+    user?.walletAddress,
+    logoutAfterWalletChange,
+  ]);
 
   useEffect(() => {
     if (!walletMenuOpen) return undefined;
@@ -293,7 +400,7 @@ export function WalletConnectButton() {
   const { address, isConnected, status } = snapshot;
   const isConnecting = status === 'connecting' || status === 'reconnecting';
   const isLoading = pendingOpen && !openReady && loadState !== 'error';
-  const isBusy = isConnecting || isLoading || loginPending;
+  const isBusy = isConnecting || isLoading || loginPending || endSessionPending;
   const displayName = user?.username || shortenAddress(user?.walletAddress || address);
   const accountSeed = user?.id || address || user?.walletAddress || 'maze-user';
   const isMenuAvailable = isConnected || isAuthenticated;
@@ -340,14 +447,18 @@ export function WalletConnectButton() {
           }}
         >
           {isAuthenticated && user ? (
-            <>
-              <UserAvatar seed={accountSeed} imageUrl={user.avatarUrl} />
-              <span className="nav-wallet-address">{displayName}</span>
-            </>
+            endSessionPending ? (
+              <span className="nav-wallet-address">Signing out…</span>
+            ) : (
+              <>
+                <UserAvatar seed={accountSeed} imageUrl={user.avatarUrl} />
+                <span className="nav-wallet-address">{displayName}</span>
+              </>
+            )
           ) : isConnected ? (
             <>
               <span className="nav-wallet-indicator" aria-hidden="true" />
-              <span className="nav-wallet-address">{loginPending ? 'Signing in…' : shortenAddress(address)}</span>
+              <span className="nav-wallet-address">{loginPending ? 'Signing in…' : endSessionPending ? 'Disconnecting…' : shortenAddress(address)}</span>
             </>
           ) : (
             <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : 'Connect Wallet'}</span>
@@ -359,7 +470,7 @@ export function WalletConnectButton() {
             className="nav-wallet-options-button"
             type="button"
             aria-label="Open wallet options"
-            disabled={loginPending || disconnectPending}
+            disabled={loginPending || endSessionPending}
             aria-haspopup="menu"
             aria-expanded={walletMenuOpen}
             aria-controls={walletMenuOpen ? 'nav-wallet-menu' : undefined}
@@ -375,7 +486,7 @@ export function WalletConnectButton() {
         ) : null}
 
         {isMenuAvailable && walletMenuOpen ? (
-          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label={isAuthenticated ? 'Account options' : 'Wallet options'} aria-busy={disconnectPending || logoutPending || loginPending}>
+          <div className="nav-wallet-menu" id="nav-wallet-menu" role="menu" aria-label={isAuthenticated ? 'Account options' : 'Wallet options'} aria-busy={endSessionPending || loginPending}>
             {isAuthenticated ? (
               <a
                 className="nav-wallet-menu-item"
@@ -413,39 +524,32 @@ export function WalletConnectButton() {
               <span className="nav-wallet-menu-label">Wallet</span>
             </button>
 
-            {isConnected ? (
+            {(isConnected || isAuthenticated) ? (
               <button
                 className="nav-wallet-menu-item"
                 type="button"
                 role="menuitem"
-                disabled={!disconnectReady || disconnectPending || loginPending}
-                onClick={() => { void handleDisconnect(); }}
+                disabled={endSessionPending || loginPending || (isConnected && !disconnectReady)}
+                onClick={() => { void handleEndSession(); }}
               >
                 <span className="nav-wallet-menu-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2.8v9.1" />
+                    <path d="M12 2.8v8.7" />
                     <path d="M7.2 5.8a8 8 0 1 0 9.6 0" />
+                    {isAuthenticated ? <path d="M15.5 15.5 19 19m0-3.5V19h-3.5" /> : null}
                   </svg>
                 </span>
-                <span className="nav-wallet-menu-label" aria-live="polite">{disconnectPending ? 'Disconnecting…' : 'Disconnect wallet'}</span>
-              </button>
-            ) : null}
-
-            {isAuthenticated ? (
-              <button
-                className="nav-wallet-menu-item"
-                type="button"
-                role="menuitem"
-                disabled={logoutPending}
-                onClick={() => { void handleLogout(); }}
-              >
-                <span className="nav-wallet-menu-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
-                    <path d="M14 16l4-4-4-4m4 4H9" />
-                  </svg>
+                <span className="nav-wallet-menu-label" aria-live="polite">
+                  {endSessionPending
+                    ? (endSessionHadAccountRef.current
+                      ? (snapshot.isConnected ? 'Disconnecting & signing out…' : 'Signing out…')
+                      : 'Disconnecting…')
+                    : isAuthenticated && isConnected
+                      ? 'Disconnect & log out'
+                      : isConnected
+                        ? 'Disconnect wallet'
+                        : 'Log out'}
                 </span>
-                <span className="nav-wallet-menu-label">{logoutPending ? 'Signing out…' : 'Logout'}</span>
               </button>
             ) : null}
 

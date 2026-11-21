@@ -103,11 +103,15 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     };
   }, [commit]);
 
-  const login = useCallback(async ({ walletAddress, signIn, signMessage }: LoginInput) => {
+  const login = useCallback(async ({ walletAddress, signIn, signMessage, isWalletConnected }: LoginInput) => {
     if (loginInFlightRef.current) throw new Error('A sign-in request is already in progress.');
     if (!walletAddress) throw new Error('Connect a Solana wallet before signing in.');
     if (typeof signIn !== 'function' && typeof signMessage !== 'function') {
       throw new Error('This wallet does not support Sign In With Solana or message signing.');
+    }
+
+    if (isWalletConnected && !isWalletConnected()) {
+      throw new Error('The wallet disconnected before sign-in could begin.');
     }
 
     loginInFlightRef.current = true;
@@ -117,6 +121,9 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
 
     try {
       const challenge = await requestIdentityChallenge(walletAddress);
+      if (isWalletConnected && !isWalletConnected()) {
+        throw new Error('The wallet disconnected before the sign-in request was signed.');
+      }
       let result: Awaited<ReturnType<typeof verifyIdentityChallenge>>;
 
       if (signIn) {
@@ -145,6 +152,9 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
           throw new Error('The wallet signed a message that does not match the Maze sign-in challenge.');
         }
 
+        if (isWalletConnected && !isWalletConnected()) {
+          throw new Error('The wallet disconnected before the signature could be verified.');
+        }
         result = await verifyIdentityChallenge(
           challenge.nonce,
           encodeSignatureBase64(output.signature),
@@ -161,6 +171,9 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         if (!(signature instanceof Uint8Array) || signature.length !== 64) {
           throw new Error('The wallet returned an invalid message signature.');
         }
+        if (isWalletConnected && !isWalletConnected()) {
+          throw new Error('The wallet disconnected before the signature could be verified.');
+        }
         result = await verifyIdentityChallenge(
           challenge.nonce,
           encodeSignatureBase64(signature),
@@ -170,8 +183,19 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       if (!result.authenticated || !result.user) {
         throw new Error('The server did not establish an authenticated session.');
       }
-      if (requestVersion !== requestVersionRef.current) {
-        throw new Error('This sign-in attempt was superseded by another account action.');
+
+      // Verification may finish after the user disconnects or another account action
+      // supersedes this attempt. Revoke the just-created cookie before rejecting it.
+      const walletStillConnected = !isWalletConnected || isWalletConnected();
+      if (requestVersion !== requestVersionRef.current || !walletStillConnected) {
+        try {
+          await revokeIdentitySession();
+        } catch (revokeError) {
+          console.error('[Identity] Could not revoke a superseded sign-in session:', revokeError);
+        }
+        throw new Error(walletStillConnected
+          ? 'This sign-in attempt was superseded by another account action.'
+          : 'The wallet disconnected before sign-in completed. Please connect again.');
       }
 
       commit('authenticated', result.user);

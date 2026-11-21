@@ -17,7 +17,8 @@ const required = [
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/components/navigation/GameViewSwitcher.tsx',
-  'src/platform/wallet/WalletConnectButton.tsx', 'src/platform/identity/IdentityProvider.tsx',
+  'src/platform/wallet/WalletConnectButton.tsx', 'src/platform/wallet/wallet-session-teardown.ts',
+  'src/platform/wallet/wallet-session-teardown.test.ts', 'src/platform/identity/IdentityProvider.tsx',
   'src/platform/identity/identity-client.ts', 'src/platform/identity/identity-types.ts',
   'src/components/account/UserAvatar.tsx', 'shared/identity/identity-store.js',
   'shared/identity/identity-routes.js',
@@ -32,6 +33,22 @@ const required = [
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
   console.error('[layout] missing required files:', missing.join(', '));
+  process.exit(1);
+}
+
+const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
+const walletTeardownSource = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.ts'), 'utf8');
+const walletTeardownTests = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.test.ts'), 'utf8');
+if (
+  !walletButtonSource.includes('Disconnect & log out') ||
+  !walletButtonSource.includes('logoutAfterWalletChange') ||
+  !walletButtonSource.includes('runWalletSessionTeardown') ||
+  /const handleDisconnect\s*=|const handleLogout\s*=|disconnectPending|logoutPending/.test(walletButtonSource) ||
+  !walletTeardownSource.includes('sessionRevoked') ||
+  !walletTeardownTests.includes('does not disconnect the wallet if server logout fails') ||
+  !walletTeardownTests.includes('reports partial completion if logout succeeds but wallet disconnect fails')
+) {
+  console.error('[layout] Wallet and Maze account teardown must use one ordered action with safe partial-failure handling and regression tests.');
   process.exit(1);
 }
 
@@ -418,7 +435,7 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   process.exit(1);
 }
 
-console.log('[layout] React routes, migrated Maze UI and legacy-controller retirement verified.');
+console.log('[layout] React routes, unified wallet/account teardown, migrated Maze UI and legacy-controller retirement verified.');
 
 // Retired transaction/verification engines and buyer feed must stay removed.
 for (const retiredPath of [

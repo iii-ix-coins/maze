@@ -49,6 +49,8 @@ export interface LoginInput {
   signIn?: WalletSignIn;
   /** Compatibility fallback for providers which only expose signMessage. */
   signMessage?: WalletMessageSigner;
+  /** Prevents a delayed signature response from authenticating after wallet disconnect/switch. */
+  isWalletConnected?: () => boolean;
 }
 
 export interface UpdateProfileInput {

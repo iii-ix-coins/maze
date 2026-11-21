@@ -35,9 +35,11 @@ The primary `Connect Wallet` action owns the whole sign-in intent: after AppKit 
 
 A signature is accepted only for its exact challenge, wallet address, configured origin and expiry. The mainnet SIWS message uses `Chain ID: solana:mainnet`, the identifier accepted by current Solana wallet sign-in flows. The nonce is consumed atomically. The server then issues a session cookie with `HttpOnly`, `SameSite=Lax`, and (in production) `Secure` attributes.
 
-## Disconnect and logout
+## Unified disconnect and logout
 
-Wallet disconnect closes the wallet transport only. It does not revoke the Maze account session. Logout revokes the server session and clears the account cookie; it intentionally does not force a wallet disconnect. This separation keeps account identity and wallet connection state independent.
+The Maze account menu exposes a single teardown action. When both the Maze session and Solana wallet are active, the action is labelled `Disconnect & log out`: it revokes the server session first and then closes the AppKit wallet connection. If server revocation fails, the wallet is deliberately left connected; if revocation succeeds but transport disconnect fails, the account stays signed out and the UI offers the remaining `Disconnect wallet` action. When only one state is active, the same action ends only that state (`Log out` for a disconnected wallet or `Disconnect wallet` for an anonymous connected wallet).
+
+A stable disconnect made through the Reown modal or directly in the wallet is synchronized by revoking the Maze session. Switching the active Solana account while authenticated also revokes the previous account session; the newly selected wallet must explicitly sign in. Transient `connecting` and `reconnecting` states are ignored. Initial page restoration is different: the app does not infer a deliberate disconnect merely because the wallet runtime has not restored yet, so a valid server account session can still be restored.
 
 ## Modal visibility signal
 
