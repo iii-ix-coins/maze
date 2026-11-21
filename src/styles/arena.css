@@ -231,13 +231,8 @@ h3 {
 }
 
 
-@media (prefers-reduced-motion: reduce) {
 
-    .nav .nav-wallet-menu,
-    .nav .nav-wallet-menu.is-closing {
-        animation-duration: 1ms;
-    }
-}
+
 
 .nav-wallet-button {
     background: var(--ar-accent);
@@ -255,23 +250,6 @@ h3 {
     opacity: .55;
 }
 
-.nav .nav-wallet-options-button {
-    width: 27px;
-    min-height: var(--nav-control-height);
-    border: 1px solid var(--ar-line);
-    border-radius: 0;
-    clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
-    background: var(--ar-fill-2);
-    color: var(--ar-accent);
-}
-
-.nav .nav-wallet-options-button:hover,
-.nav .nav-wallet-options-button:focus-visible {
-    border-color: var(--ar-accent);
-    background: rgba(var(--ar-rgb), .16);
-    color: var(--ar-text);
-    box-shadow: inset 0 0 0 1px var(--ar-accent);
-}
 
 /* Wallet submenu — responsive, content-friendly HUD surface */
 .nav .nav-wallet-menu {

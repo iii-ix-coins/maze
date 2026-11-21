@@ -2078,39 +2078,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     align-items: stretch;
 }
 
-.nav-wallet-options-button {
-    display: inline-grid;
-    place-items: center;
-    width: 27px;
-    min-height: var(--nav-control-height);
-    margin-left: 4px;
-    padding: 0;
-    border: 1px solid rgba(127, 127, 127, .28);
-    border-radius: 0;
-    background: var(--nav-panel);
-    color: var(--nav-text);
-    cursor: pointer;
-    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
-}
-
-.nav-wallet-options-button svg {
-    width: 15px;
-    height: 15px;
-}
-
-.nav-wallet-options-button:hover,
-.nav-wallet-options-button:focus-visible {
-    outline: none;
-    border-color: var(--nav-accent);
-    background: var(--nav-hover-bg);
-    color: var(--nav-active-text);
-}
-
-.nav-wallet-options-button:disabled {
-    cursor: wait;
-    opacity: .58;
-}
-
 .nav-wallet-menu {
     position: absolute;
     z-index: 1100;
@@ -2128,6 +2095,23 @@ html[data-theme="light"] .nav-brand-logo--black {
 .nav-wallet-menu.is-closing {
     pointer-events: none;
     animation: maze-dropdown-out 150ms ease both;
+}
+
+.nav-wallet-feedback {
+    position: absolute;
+    z-index: 1101;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(320px, calc(100vw - 24px));
+    padding: 8px 10px;
+    border: 1px solid var(--nav-border);
+    background: var(--nav-panel);
+    color: var(--nav-text);
+    box-shadow: 0 14px 24px var(--nav-shadow);
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .nav-wallet-menu-item {

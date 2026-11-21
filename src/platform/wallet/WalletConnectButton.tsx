@@ -14,6 +14,7 @@ import type {
   WalletRuntimeProps,
   WalletSignInFn,
   WalletSignMessageFn,
+  WalletSigningStatus,
   WalletSnapshot,
 } from './WalletConnectRuntime'; // type-only: does not pull the AppKit bundle
 
@@ -26,10 +27,13 @@ const RECONNECT_GRACE_MS = 3000;
 const IDLE_FALLBACK_MS = 1500;
 /** Safety fallback in case the browser does not dispatch animationend. */
 const WALLET_MENU_EXIT_FALLBACK_MS = 250;
+/** Give AppKit a short window to publish the active provider after connection. */
+const SIGNING_PROVIDER_TIMEOUT_MS = 5000;
 /** localStorage prefixes AppKit / WalletConnect use for persisted wallet sessions. */
 const SESSION_KEY_PREFIXES = ['@appkit/', 'wc@2:'];
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
+type PendingOpenIntent = 'connect-login' | 'wallet-menu';
 type RuntimeComponent = ComponentType<WalletRuntimeProps>;
 
 const DISCONNECTED: WalletSnapshot = { address: undefined, isConnected: false, status: undefined };
@@ -80,6 +84,7 @@ export function WalletConnectButton() {
   const [loginPending, setLoginPending] = useState(false);
   const [signInReady, setSignInReady] = useState(false);
   const [signMessageReady, setSignMessageReady] = useState(false);
+  const [signingStatus, setSigningStatus] = useState<WalletSigningStatus>('checking');
   const [actionError, setActionError] = useState<string | null>(null);
 
 
@@ -93,7 +98,13 @@ export function WalletConnectButton() {
   const snapshotRef = useRef<WalletSnapshot>(DISCONNECTED);
   const loadingRef = useRef(false);
   const mountedRef = useRef(true);
-  const loginAfterConnectRef = useRef(false);
+  const [loginRequested, setLoginRequested] = useState(false);
+  const [disconnectRecoveryRequired, setDisconnectRecoveryRequired] = useState(false);
+  const connectModalExpectedRef = useRef(false);
+  const connectModalOpenedRef = useRef(false);
+  const connectModalCancelTimerRef = useRef<number | null>(null);
+  const signerWaitTimerRef = useRef<number | null>(null);
+  const pendingOpenIntentRef = useRef<PendingOpenIntent | null>(null);
   const loginAttemptRef = useRef(false);
   const endSessionInFlightRef = useRef(false);
   const walletSyncLogoutInFlightRef = useRef(false);
@@ -175,6 +186,14 @@ export function WalletConnectButton() {
   useEffect(() => {
     return () => {
       clearWalletMenuCloseTimer();
+      if (connectModalCancelTimerRef.current !== null) {
+        window.clearTimeout(connectModalCancelTimerRef.current);
+        connectModalCancelTimerRef.current = null;
+      }
+      if (signerWaitTimerRef.current !== null) {
+        window.clearTimeout(signerWaitTimerRef.current);
+        signerWaitTimerRef.current = null;
+      }
     };
   }, [clearWalletMenuCloseTimer]);
 
@@ -195,7 +214,9 @@ export function WalletConnectButton() {
         if (!mountedRef.current) return;
         setLoadState('error');
         setPendingOpen(false);
-        loginAfterConnectRef.current = false;
+        pendingOpenIntentRef.current = null;
+        setLoginRequested(false);
+        setActionError(getErrorMessage(error, 'Wallet connection could not be loaded.'));
       });
   }, []);
 
@@ -210,13 +231,24 @@ export function WalletConnectButton() {
     if (next.isConnected && next.address) {
       observedConnectedWalletRef.current = next.address;
       pendingWalletDisconnectRef.current = false;
+      connectModalExpectedRef.current = false;
+      connectModalOpenedRef.current = false;
+      if (connectModalCancelTimerRef.current !== null) {
+        window.clearTimeout(connectModalCancelTimerRef.current);
+        connectModalCancelTimerRef.current = null;
+      }
     } else if (previous.isConnected) {
+      // A temporary disconnect edge can occur during AppKit reconnect/account
+      // restoration. Record it for reconciliation, but do not cancel an explicit
+      // login intent until the wallet reaches a stable disconnected state.
       observedConnectedWalletRef.current = null;
       pendingWalletDisconnectRef.current = true;
     }
 
-    if (!next.isConnected) {
-      if (previous.isConnected) loginAfterConnectRef.current = false;
+    const isTransientWalletState = next.status === 'connecting' || next.status === 'reconnecting';
+    if (!next.isConnected && !isTransientWalletState) {
+      setLoginRequested(false);
+      if (previous.isConnected) setDisconnectRecoveryRequired(false);
 
       closeWalletMenu();
 
@@ -228,6 +260,44 @@ export function WalletConnectButton() {
   const handleReady = useCallback((open: WalletOpenFn | null) => {
     openRef.current = open;
     setOpenReady(open !== null);
+  }, []);
+
+  /**
+   * A pending sign-in intent belongs to the Connect flow the user explicitly
+   * opened. If they dismiss that modal without connecting, cancel the intent
+   * so a later external wallet connection cannot trigger a surprise signature.
+   */
+  const handleModalOpenChange = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      // A quick reopen must supersede the cancellation grace timer from the
+      // previous modal close, otherwise that stale timer could cancel this login.
+      if (connectModalCancelTimerRef.current !== null) {
+        window.clearTimeout(connectModalCancelTimerRef.current);
+        connectModalCancelTimerRef.current = null;
+      }
+      if (connectModalExpectedRef.current) connectModalOpenedRef.current = true;
+      return;
+    }
+
+    if (!connectModalExpectedRef.current || !connectModalOpenedRef.current) return;
+
+    connectModalExpectedRef.current = false;
+    connectModalOpenedRef.current = false;
+
+    if (connectModalCancelTimerRef.current !== null) {
+      window.clearTimeout(connectModalCancelTimerRef.current);
+    }
+
+    // Give the account subscription a short turn to publish a just-completed
+    // connection before deciding that the user cancelled the Connect modal.
+    connectModalCancelTimerRef.current = window.setTimeout(() => {
+      connectModalCancelTimerRef.current = null;
+      const current = snapshotRef.current;
+      if (current.isConnected || current.status === 'connecting' || current.status === 'reconnecting') return;
+      setLoginRequested(false);
+      setPendingOpen(false);
+      pendingOpenIntentRef.current = null;
+    }, 120);
   }, []);
 
   const handleDisconnectReady = useCallback((disconnect: WalletDisconnectFn | null) => {
@@ -243,6 +313,10 @@ export function WalletConnectButton() {
   const handleSignMessageReady = useCallback((signMessage: WalletSignMessageFn | null) => {
     signMessageRef.current = signMessage;
     setSignMessageReady(signMessage !== null);
+  }, []);
+
+  const handleSigningStatusChange = useCallback((nextStatus: WalletSigningStatus) => {
+    setSigningStatus(nextStatus);
   }, []);
 
   const performLogin = useCallback(async () => {
@@ -266,12 +340,12 @@ export function WalletConnectButton() {
       setActionError(null);
     } catch (error) {
       setActionError(getErrorMessage(error, 'Wallet sign-in was not completed.'));
-      openWalletMenu();
+      setLoginRequested(false);
       loginAttemptRef.current = false;
     } finally {
       setLoginPending(false);
     }
-  }, [login, closeWalletMenu, openWalletMenu]);
+  }, [login, closeWalletMenu]);
 
   /**
    * Ends the Maze account session and the active wallet connection as one user action.
@@ -301,6 +375,7 @@ export function WalletConnectButton() {
           : undefined,
       });
       if (shouldLogout) loginAttemptRef.current = false;
+      setDisconnectRecoveryRequired(false);
       closeWalletMenu();
       setActionError(null);
     } catch (endError) {
@@ -310,12 +385,12 @@ export function WalletConnectButton() {
         loginAttemptRef.current = false;
 
         if (snapshotRef.current.isConnected) {
+          setDisconnectRecoveryRequired(true);
           setActionError(
-            'You are signed out, but the wallet is still connected. Select “Disconnect wallet” to finish.'
+            'Your Maze session is closed, but the wallet is still connected. Click the wallet button to retry disconnecting it.'
           );
-
-          openWalletMenu();
         } else {
+          setDisconnectRecoveryRequired(false);
           setActionError(null);
           closeWalletMenu();
         }
@@ -324,7 +399,7 @@ export function WalletConnectButton() {
           getErrorMessage(endError, 'Could not finish signing out. Please try again.')
         );
 
-        openWalletMenu();
+        if (isAuthenticated) openWalletMenu();
       }
     } finally {
       endSessionInFlightRef.current = false;
@@ -333,7 +408,7 @@ export function WalletConnectButton() {
   }, [isAuthenticated, logout, closeWalletMenu, openWalletMenu]);
 
   /**
-   * A disconnect made inside the Reown modal or in the wallet itself is also an
+   * A disconnect made the Reown modal or in the wallet itself is also an
    * explicit disconnect intent. Keep the Maze session in sync with that action.
    */
   const logoutAfterWalletChange = useCallback(async (reason: 'disconnected' | 'account-changed') => {
@@ -355,8 +430,14 @@ export function WalletConnectButton() {
       setActionError(reason === 'disconnected'
         ? `The wallet is disconnected, but the Maze session could not be closed. ${detail}`
         : `The active wallet changed, but the previous Maze session could not be closed. ${detail}`);
-      // Keep the account menu available so the user can retry the remaining Logout action.
-      openWalletMenu();
+      if (reason === 'account-changed') setLoginRequested(false);
+      // With no connected wallet, the authenticated account menu is the only
+      // place that can expose a retryable Log out action. For account mismatch,
+      // keep the feedback on the main button because the old account menu is
+      // intentionally hidden until the wallet identity is reconciled.
+      if (reason === 'disconnected' && !snapshotRef.current.isConnected) {
+        openWalletMenu();
+      }
     } finally {
       walletSyncLogoutInFlightRef.current = false;
       endSessionInFlightRef.current = false;
@@ -378,7 +459,7 @@ export function WalletConnectButton() {
       observedConnectedWalletRef.current = snapshot.address;
       pendingWalletDisconnectRef.current = false;
 
-      if (isAuthenticated && user?.walletAddress && user.walletAddress !== snapshot.address) {
+      if (isAuthenticated && user?.walletAddress !== snapshot.address) {
         void logoutAfterWalletChange('account-changed');
       }
       return;
@@ -439,20 +520,77 @@ export function WalletConnectButton() {
     closeWalletMenu,
   ]);
 
-  // Explicit connect intent continues straight into Maze authentication once the wallet is ready.
+  // Only an explicit user action can request a signature. Restoring a persisted
+  // AppKit wallet connection on page load never triggers a surprise SIWS prompt.
+  // After the user starts Connect, continue automatically once the same wallet is
+  // stably connected, Identity restoration is complete, and a signer is available.
   const authenticatorReady = signInReady || signMessageReady;
+
+  // A provider can appear a moment after the account snapshot. Wait briefly,
+  // but never leave the primary button locked forever for an unsupported wallet.
   useEffect(() => {
-    if (!loginAfterConnectRef.current || identityStatus === 'checking') return;
-    if (identityStatus === 'authenticated') {
-      loginAfterConnectRef.current = false;
-      openWalletMenu();
+    if (!loginRequested || !snapshot.isConnected || signingStatus !== 'checking') return undefined;
+    if (identityStatus === 'checking' || identityStatus === 'authenticating' || endSessionPending) return undefined;
+
+    if (signerWaitTimerRef.current !== null) {
+      window.clearTimeout(signerWaitTimerRef.current);
+    }
+    signerWaitTimerRef.current = window.setTimeout(() => {
+      signerWaitTimerRef.current = null;
+      if (!mountedRef.current || !snapshotRef.current.isConnected) return;
+      if (signInRef.current || signMessageRef.current) return;
+      setLoginRequested(false);
+      setSigningStatus('unsupported');
+      setActionError('The wallet signing provider is not ready. Reopen the wallet or choose a compatible Solana wallet.');
+    }, SIGNING_PROVIDER_TIMEOUT_MS);
+
+    return () => {
+      if (signerWaitTimerRef.current !== null) {
+        window.clearTimeout(signerWaitTimerRef.current);
+        signerWaitTimerRef.current = null;
+      }
+    };
+  }, [loginRequested, snapshot.isConnected, snapshot.address, signingStatus, identityStatus, endSessionPending]);
+
+  useEffect(() => {
+    if (!loginRequested) return;
+    if (!snapshot.isConnected || !snapshot.address) return;
+    if (snapshot.status === 'connecting' || snapshot.status === 'reconnecting') return;
+    if (identityStatus === 'checking' || identityStatus === 'authenticating') return;
+    if (endSessionPending || endSessionInFlightRef.current || loginAttemptRef.current) return;
+    if (signingStatus === 'checking') return;
+
+    if (isAuthenticated) {
+      // A restored session for this same wallet is already authenticated. If it
+      // belongs to another wallet, the reconciliation effect above revokes it;
+      // preserve this explicit intent and sign in after that logout completes.
+      if (user?.walletAddress === snapshot.address) setLoginRequested(false);
       return;
     }
-    if (snapshot.isConnected && snapshot.address && authenticatorReady && !loginAttemptRef.current) {
-      loginAfterConnectRef.current = false;
-      void performLogin();
+
+    if (signingStatus === 'unsupported' || !authenticatorReady) {
+      setLoginRequested(false);
+      setActionError('This wallet does not support a compatible Solana sign-in method. Reopen the wallet and choose another wallet.');
+      return;
     }
-  }, [snapshot.isConnected, snapshot.address, authenticatorReady, identityStatus, performLogin, openWalletMenu]);
+
+    if (identityStatus !== 'anonymous' && identityStatus !== 'error') return;
+
+    setLoginRequested(false);
+    void performLogin();
+  }, [
+    loginRequested,
+    snapshot.isConnected,
+    snapshot.address,
+    snapshot.status,
+    authenticatorReady,
+    signingStatus,
+    identityStatus,
+    endSessionPending,
+    isAuthenticated,
+    user?.walletAddress,
+    performLogin,
+  ]);
 
   // A click that arrived before the runtime was ready opens the official AppKit modal.
   useEffect(() => {
@@ -460,17 +598,49 @@ export function WalletConnectButton() {
 
     const fire = () => {
       setPendingOpen(false);
-      const options: WalletOpenOptions = snapshotRef.current.isConnected
-        ? { view: 'Account' }
-        : { view: 'Connect', namespace: 'solana' };
+      const intent = pendingOpenIntentRef.current;
+      pendingOpenIntentRef.current = null;
+      const isAlreadyConnected = snapshotRef.current.isConnected;
+
+      // If this was the primary Connect & sign-in action and AppKit restored
+      // the wallet while the modal was being prepared, skip the unnecessary
+      // Account modal. The explicit login intent effect will sign in directly.
+      if (intent === 'connect-login' && isAlreadyConnected) return;
+
+      const isConnectFlow = !isAlreadyConnected;
+      const options: WalletOpenOptions = isConnectFlow
+        ? { view: 'Connect', namespace: 'solana' }
+        : { view: 'Account' };
+      if (isConnectFlow) {
+        if (connectModalCancelTimerRef.current !== null) {
+          window.clearTimeout(connectModalCancelTimerRef.current);
+          connectModalCancelTimerRef.current = null;
+        }
+        connectModalExpectedRef.current = true;
+        connectModalOpenedRef.current = false;
+      }
       // Defer the first AppKit render until after the click event has completed.
       window.setTimeout(() => {
         try {
           void Promise.resolve(openRef.current?.(options)).catch((error: unknown) => {
             console.error('[wallet] failed to open the wallet modal', error);
+            if (isConnectFlow) {
+              connectModalExpectedRef.current = false;
+              connectModalOpenedRef.current = false;
+              pendingOpenIntentRef.current = null;
+              setLoginRequested(false);
+              setActionError(getErrorMessage(error, 'Wallet connection could not be opened.'));
+            }
           });
         } catch (error) {
           console.error('[wallet] failed to open the wallet modal', error);
+          if (isConnectFlow) {
+            connectModalExpectedRef.current = false;
+            connectModalOpenedRef.current = false;
+            pendingOpenIntentRef.current = null;
+            setLoginRequested(false);
+            setActionError(getErrorMessage(error, 'Wallet connection could not be opened.'));
+          }
         }
       }, 0);
     };
@@ -501,17 +671,18 @@ export function WalletConnectButton() {
   const { address, isConnected, status } = snapshot;
   const isConnecting = status === 'connecting' || status === 'reconnecting';
   const isLoading = pendingOpen && !openReady && loadState !== 'error';
-  const isBusy = isConnecting || isLoading || loginPending || endSessionPending;
+  const walletIdentityMismatch = Boolean(isAuthenticated && isConnected && user?.walletAddress !== address);
+  const showAuthenticatedAccount = isAuthenticated && !walletIdentityMismatch;
+  const isBusy = isConnecting || isLoading || loginRequested || loginPending || endSessionPending;
   const displayName = user?.username || shortenAddress(user?.walletAddress || address);
   const accountSeed = user?.id || address || user?.walletAddress || 'maze-user';
-  const isMenuAvailable = isConnected || isAuthenticated;
 
   return (
     <>
       <div className="nav-wallet-wrap" ref={walletRootRef}>
         <button
           ref={walletButtonRef}
-          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${isAuthenticated ? ' is-authenticated' : ''}`}
+          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${showAuthenticatedAccount ? ' is-authenticated' : ''}`}
           type="button"
           data-nav-action="connect-wallet"
           data-wallet-status={status ?? 'disconnected'}
@@ -519,35 +690,74 @@ export function WalletConnectButton() {
           data-identity-status={identityStatus}
           aria-busy={isBusy}
           disabled={isBusy}
-          aria-haspopup={isAuthenticated ? 'menu' : undefined}
-          aria-expanded={isAuthenticated ? walletMenuOpen && !walletMenuClosing : undefined}
-          aria-controls={isAuthenticated && (walletMenuOpen || walletMenuClosing) ? 'nav-wallet-menu' : undefined}
-          aria-label={isAuthenticated ? `Maze account ${displayName}. Open account menu` : isConnected ? `Sign in to Maze with ${address ?? 'connected wallet'}` : 'Connect Solana wallet'}
-          title={loadState === 'error' ? 'Wallet failed to load. Click to retry.' : undefined}
+          aria-haspopup={showAuthenticatedAccount ? 'menu' : undefined}
+          aria-expanded={showAuthenticatedAccount ? walletMenuOpen && !walletMenuClosing : undefined}
+          aria-controls={showAuthenticatedAccount && (walletMenuOpen || walletMenuClosing) ? 'nav-wallet-menu' : undefined}
+          aria-describedby={!showAuthenticatedAccount && actionError ? 'nav-wallet-feedback' : undefined}
+          aria-label={disconnectRecoveryRequired
+            ? 'Retry wallet disconnect'
+            : showAuthenticatedAccount
+              ? `Maze account ${displayName}. Open account menu`
+              : isConnected && signingStatus === 'unsupported'
+                ? 'Open wallet to choose a compatible signing provider'
+                : isConnected
+                  ? `Connected wallet ${address ?? ''}. Click to sign in to Maze`
+                : 'Connect Solana wallet'}
+          title={actionError || (disconnectRecoveryRequired
+            ? 'The Maze session is closed. Click to retry wallet disconnect.'
+            : loadState === 'error'
+              ? 'Wallet failed to load. Click to retry.'
+              : isConnected && !showAuthenticatedAccount && signingStatus === 'unsupported'
+                ? 'This wallet cannot sign in. Click to reopen the wallet panel.'
+                : isConnected && !showAuthenticatedAccount
+                  ? 'Wallet connected. Click to sign in to Maze.'
+                : undefined)}
           onPointerEnter={loadRuntime}
           onFocus={loadRuntime}
           onTouchStart={loadRuntime}
           onClick={() => {
             setActionError(null);
-            if (isAuthenticated) {
+
+            if (disconnectRecoveryRequired) {
+              void handleEndSession();
+              return;
+            }
+
+            if (showAuthenticatedAccount) {
               toggleWalletMenu();
               return;
             }
-            // If a wallet is already connected, the primary action is Maze sign-in,
-            // never opening a menu that asks the user to click a second sign-in button.
-            loginAfterConnectRef.current = true;
-            if (isConnected) {
-              if (identityStatus !== 'checking' && authenticatorReady && !loginAttemptRef.current) {
-                loginAfterConnectRef.current = false;
-                void performLogin();
-              }
+
+            // An account switch must revoke the old account session first. Keep
+            // the explicit login request armed so the new wallet signs in only
+            // after that server-side logout succeeds.
+            if (walletIdentityMismatch) {
+              setLoginRequested(true);
+              void logoutAfterWalletChange('account-changed');
               return;
             }
+
+            // If the connected wallet cannot sign, let the user reopen Reown's
+            // wallet panel to disconnect it and select a compatible provider.
+            if (isConnected && signingStatus === 'unsupported') {
+              pendingOpenIntentRef.current = 'wallet-menu';
+              setPendingOpen(true);
+              loadRuntime();
+              return;
+            }
+
+            // Already-connected wallets go straight to the single Maze sign-in
+            // request. A disconnected wallet opens Connect, then the effect above
+            // continues automatically once AppKit publishes the stable account.
+            setLoginRequested(true);
+            if (isConnected) return;
+
+            pendingOpenIntentRef.current = 'connect-login';
             setPendingOpen(true);
             loadRuntime();
           }}
         >
-          {isAuthenticated && user ? (
+          {showAuthenticatedAccount && user ? (
             endSessionPending ? (
               <span className="nav-wallet-address">Signing out…</span>
             ) : (
@@ -559,44 +769,33 @@ export function WalletConnectButton() {
           ) : isConnected ? (
             <>
               <span className="nav-wallet-indicator" aria-hidden="true" />
-              <span className="nav-wallet-address">{loginPending ? 'Signing in…' : endSessionPending ? 'Disconnecting…' : shortenAddress(address)}</span>
+              <span className="nav-wallet-address">
+                {loginPending ? 'Signing in…' : loginRequested ? 'Preparing sign-in…' : endSessionPending ? 'Signing out…' : disconnectRecoveryRequired ? 'Retry disconnect' : signingStatus === 'unsupported' ? 'Choose wallet' : shortenAddress(address)}
+              </span>
             </>
           ) : (
-            <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : 'Connect Wallet'}</span>
+            <span>{isConnecting ? 'Connecting…' : isLoading ? 'Loading wallet…' : loginRequested ? 'Waiting for wallet…' : 'Connect Wallet'}</span>
           )}
         </button>
 
-        {isConnected && !isAuthenticated ? (
-          <button
-            className="nav-wallet-options-button"
-            type="button"
-            aria-label="Open wallet options"
-            disabled={loginPending || endSessionPending}
-            aria-haspopup="menu"
-            aria-expanded={walletMenuOpen && !walletMenuClosing}
-            aria-controls={walletMenuOpen || walletMenuClosing ? 'nav-wallet-menu' : undefined}
-            onClick={() => {
-              setActionError(null);
-              toggleWalletMenu();
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
+        {!showAuthenticatedAccount && (actionError || identityError) ? (
+          <div id="nav-wallet-feedback" className="nav-wallet-feedback" role="alert">
+            {actionError || identityError}
+          </div>
         ) : null}
 
-        {((isMenuAvailable && walletMenuOpen) || walletMenuClosing) ? (
+        {((showAuthenticatedAccount && walletMenuOpen) || walletMenuClosing) ? (
           <div
             className={`nav-wallet-menu${walletMenuClosing ? ' is-closing' : ''}`}
             id="nav-wallet-menu"
             role="menu"
-            aria-label={isAuthenticated ? 'Account options' : 'Wallet options'}
+            aria-label="Account options"
             aria-busy={endSessionPending || loginPending}
             aria-hidden={walletMenuClosing ? true : undefined}
+            inert={walletMenuClosing}
             onAnimationEnd={handleWalletMenuAnimationEnd}
           >
-            {isAuthenticated ? (
+            {(isAuthenticated || walletMenuClosing) ? (
               <a
                 className="nav-wallet-menu-item"
                 href={getSiteRoutePath('profile')}
@@ -622,6 +821,7 @@ export function WalletConnectButton() {
               tabIndex={walletMenuClosing ? -1 : undefined}
               onClick={() => {
                 closeWalletMenu();
+                pendingOpenIntentRef.current = 'wallet-menu';
                 setPendingOpen(true);
                 loadRuntime();
               }}
@@ -635,7 +835,7 @@ export function WalletConnectButton() {
               <span className="nav-wallet-menu-label">Wallet</span>
             </button>
 
-            {(isConnected || isAuthenticated) ? (
+            {(isConnected || isAuthenticated || walletMenuClosing) ? (
               <button
                 className="nav-wallet-menu-item"
                 type="button"
@@ -675,9 +875,11 @@ export function WalletConnectButton() {
         <Runtime.Component
           onSnapshot={handleSnapshot}
           onReady={handleReady}
+          onModalOpenChange={handleModalOpenChange}
           onDisconnectReady={handleDisconnectReady}
           onSignInReady={handleSignInReady}
           onSignMessageReady={handleSignMessageReady}
+          onSigningStatusChange={handleSigningStatusChange}
         />
       ) : null}
     </>

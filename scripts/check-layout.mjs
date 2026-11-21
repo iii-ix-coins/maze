@@ -260,17 +260,33 @@ if (!secondaryRowMatch || !secondaryRowMatch[1].includes('<GameViewSwitcher />')
   process.exit(1);
 }
 if (
-  !walletComponent.includes('loginAfterConnectRef.current = true')
+  !walletComponent.includes("import('./WalletConnectRuntime')")
   || !walletComponent.includes("view: 'Account'")
   || !walletComponent.includes("view: 'Connect'")
   || !walletComponent.includes('const authenticatorReady = signInReady || signMessageReady')
-  || !walletComponent.includes('snapshot.isConnected && snapshot.address && authenticatorReady')
+  || !walletComponent.includes('const [loginRequested, setLoginRequested] = useState(false)')
+  || !walletComponent.includes('if (!loginRequested) return;')
+  || !walletComponent.includes("snapshot.status === 'reconnecting'")
   || !walletComponent.includes('void performLogin()')
   || !walletComponent.includes('onSignInReady={handleSignInReady}')
   || !walletComponent.includes('onSignMessageReady={handleSignMessageReady}')
-  || walletComponent.includes('nav-wallet-menu-label\">Sign in to Maze')
+  || !walletComponent.includes('onModalOpenChange={handleModalOpenChange}')
+  || !walletComponent.includes('onSigningStatusChange={handleSigningStatusChange}')
+  || !walletComponent.includes("signingStatus === 'unsupported'")
+  || !walletComponent.includes('connectModalExpectedRef.current')
+  || walletComponent.includes('loginAfterConnectRef')
+  || walletComponent.includes('nav-wallet-options-button')
+  || walletComponent.includes('nav-wallet-menu-label">Sign in to Maze')
 ) {
-  console.error('[layout] Wallet button must keep lazy Reown routing, automatically authenticate after connection, and avoid a separate Maze sign-in menu action.');
+  console.error('[layout] Wallet button must keep lazy Reown routing, require an explicit login intent, authenticate only after a stable connected account and signer are ready, and have no secondary wallet-options/sign-in button.');
+  process.exit(1);
+}
+const walletStyles = [
+  fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8'),
+  fs.readFileSync(path.join(root, 'src/styles/arena.css'), 'utf8'),
+].join('\n');
+if (walletStyles.includes('nav-wallet-options-button')) {
+  console.error('[layout] the obsolete secondary wallet-options button styles must be fully retired.');
   process.exit(1);
 }
 
