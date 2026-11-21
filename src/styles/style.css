@@ -2124,11 +2124,6 @@ html[data-theme="light"] .nav-brand-logo--black {
     animation: maze-dropdown-in 150ms ease both;
 }
 
-.nav-wallet-menu.is-closing {
-    pointer-events: none;
-    animation: maze-dropdown-out 150ms ease both;
-}
-
 .nav-wallet-menu-item {
     display: flex;
     align-items: center;
