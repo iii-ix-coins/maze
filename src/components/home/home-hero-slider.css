@@ -110,7 +110,7 @@
     color: white;
 
     font-size: clamp(16px, 3.2vw, 18px);
-    letter-spacing: -.035em;
+    letter-spacing: -.01em;
   }
 
   .home-hero-actions {

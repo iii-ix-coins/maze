@@ -4,7 +4,6 @@ import './home-hero-slider.css';
 
 type Slide = {
   title: string;
-  description: string;
   primary: { label: string; href: string };
   secondary: { label: string; href: string };
   visual: 'maze' | 'create' | 'rooms' | 'race';
@@ -15,7 +14,6 @@ type Slide = {
 const SLIDES: Slide[] = [
   {
     title: 'Your next challenge starts here.',
-    description: 'Create a maze room or jump into one that is already waiting. Find your route and make every move count.',
     primary: { label: 'Start playing', href: MAZE_VIEW_URLS.create },
     secondary: { label: 'Explore rooms', href: MAZE_VIEW_URLS.rooms },
     visual: 'maze',
@@ -24,7 +22,6 @@ const SLIDES: Slide[] = [
   },
   {
     title: 'Set up a challenge of your own.',
-    description: 'Choose the maze difficulty, player count and goals, then create a room for your next run.',
     primary: { label: 'Create a room', href: MAZE_VIEW_URLS.create },
     secondary: { label: 'Explore rooms', href: MAZE_VIEW_URLS.rooms },
     visual: 'create',
@@ -33,7 +30,6 @@ const SLIDES: Slide[] = [
   },
   {
     title: 'The next race could be one click away.',
-    description: 'Browse waiting rooms, find an open seat and join the maze action. You can also explore races already in progress.',
     primary: { label: 'Browse rooms', href: MAZE_VIEW_URLS.rooms },
     secondary: { label: 'Watch live races', href: MAZE_VIEW_URLS.live },
     visual: 'rooms',
@@ -42,7 +38,6 @@ const SLIDES: Slide[] = [
   },
   {
     title: 'Find the route. Reach the goals.',
-    description: 'Navigate a generated maze, keep your focus and race toward the goals. Your next run is ready when you are.',
     primary: { label: 'Play now', href: MAZE_VIEW_URLS.create },
     secondary: { label: 'See live races', href: MAZE_VIEW_URLS.live },
     visual: 'race',
@@ -99,7 +94,6 @@ export function HomeHeroSlider() {
       <div className="home-hero-glow" aria-hidden="true" />
       <div className="home-hero-copy" key={slide.index}>
         <h1>{slide.title}</h1>
-        <p>{slide.description}</p>
         <div className="home-hero-actions">
           <a className="home-hero-cta home-hero-cta--primary" href={slide.primary.href}>
           </a>
