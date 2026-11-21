@@ -251,7 +251,7 @@ h3 {
 
     to {
         opacity: 0;
-        transform: translateX(12px);
+        transform: translateX(-12px);
     }
 }
 

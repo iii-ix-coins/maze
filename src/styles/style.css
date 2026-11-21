@@ -2442,7 +2442,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 
     to {
         opacity: 0;
-        transform: translateX(12px);
+        transform: translateX(-12px);
     }
 }
 
