@@ -184,7 +184,7 @@ function CoinContent({ payload, loading, error }: { payload: MarketPayload | nul
       <header className="feature-page-title"><span className="eyebrow">Token intelligence</span><h1>Token Market &amp; Details</h1><p>Market performance, on-chain activity and token security.</p></header>
       <section className="coin-hero">
         <div className="coin-identity">
-          <img id="coin-icon" className="coin-icon" src="/css/images/maze-logo.svg" alt="Coin" />
+          <img id="coin-icon" className="coin-icon" src="/css/images/maze-coin-logo.svg" alt="Coin" />
           <div className="coin-identity-text">
             <div className="coin-name-row"><h1 id="coin-name" className="coin-name">{token?.name || '--'}</h1><span id="coin-verified" className="coin-verified" hidden={token?.isVerified !== true}>Verified</span></div>
             <div id="coin-symbol" className="coin-symbol">{token?.symbol ? `$${token.symbol}` : '--'}</div>

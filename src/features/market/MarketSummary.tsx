@@ -45,7 +45,7 @@ function TokenSummaryContent({
         <img
           id="token-summary-icon"
           className="token-summary-icon"
-          src="/css/images/maze-logo.svg"
+          src="/css/images/maze-coin-logo.svg"
           alt={`${token?.name || 'Token'} logo`}
           loading="lazy"
           decoding="async"
