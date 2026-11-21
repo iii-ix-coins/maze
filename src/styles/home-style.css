@@ -116,21 +116,18 @@
 
     .site-home-content .market-feature--compact > .token-summary {
         --market-cut: 18px;
-        --market-inner-cut: clamp(4px, .5vw, 7px);
-        --summary-image-size: clamp(76px, 18.5vw, 190px);
-        --summary-gap: clamp(5px, .7vw, 10px);
-        --summary-card-gap: clamp(3px, .5vw, 8px);
-        --summary-card-padding: clamp(4px, .55vw, 8px) clamp(5px, .72vw, 11px);
-        --summary-title-size: clamp(10px, 1.4vw, 20px);
-        --summary-label-size: clamp(7px, .72vw, 11.5px);
-        --summary-value-size: clamp(10px, 1.2vw, 18px);
+        --market-inner-cut: clamp(5px, .55vw, 7px);
+        --token-summary-size: clamp(84px, 16vw, 220px);
         display: grid;
-        grid-template-columns: var(--summary-image-size) minmax(0, 1fr);
+        grid-template-columns: var(--token-summary-size) minmax(0, 1fr);
+        grid-template-rows: var(--token-summary-size);
         align-items: stretch;
         width: 100%;
+        height: var(--token-summary-size);
+        min-height: var(--token-summary-size);
         min-width: 0;
         box-sizing: border-box;
-        gap: var(--summary-gap);
+        gap: 0;
         padding: 0;
         position: relative;
         isolation: isolate;
@@ -174,11 +171,10 @@
     .site-home-content .market-feature .token-summary-visual {
         position: relative;
         width: 100%;
-        height: auto;
+        height: 100%;
         min-width: 0;
         min-height: 0;
-        aspect-ratio: 1 / 1;
-        align-self: start;
+        align-self: stretch;
         overflow: hidden;
         background: rgba(var(--ar-rgb), .055);
         box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .12);
@@ -204,7 +200,6 @@
         display: block;
         width: 100%;
         height: 100%;
-        aspect-ratio: 1 / 1;
         object-fit: cover;
         background: var(--ink-850);
     }
@@ -213,10 +208,13 @@
         display: grid;
         grid-template-rows: auto minmax(0, 1fr);
         align-content: stretch;
-        gap: var(--summary-card-gap);
+        gap: clamp(3px, .45vw, 8px);
+        width: 100%;
+        height: 100%;
         min-width: 0;
         min-height: 0;
-        padding: clamp(5px, .72vw, 11px) clamp(6px, .9vw, 14px);
+        overflow: hidden;
+        padding: clamp(4px, .7vw, 13px) clamp(5px, 1.2vw, 16px);
     }
 
     .site-home-content .market-feature .token-summary-header {
@@ -224,7 +222,8 @@
         align-items: center;
         justify-content: flex-start;
         min-width: 0;
-        min-height: clamp(16px, 1.5vw, 22px);
+        min-height: 0;
+        overflow: hidden;
     }
 
     .site-home-content .market-feature .token-summary-identity {
@@ -237,8 +236,9 @@
         display: flex;
         flex-wrap: nowrap;
         align-items: baseline;
-        gap: clamp(4px, .65vw, 10px);
+        gap: clamp(4px, .6vw, 12px);
         min-width: 0;
+        max-width: 100%;
         white-space: nowrap;
     }
 
@@ -246,7 +246,7 @@
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: var(--summary-title-size);
+        font-size: clamp(9px, 1.45vw, 20px);
         font-weight: 700;
         line-height: 1.08;
         letter-spacing: -.035em;
@@ -255,7 +255,7 @@
     .site-home-content .market-feature .token-summary-symbol {
         flex: none;
         color: var(--mint);
-        font-size: clamp(7px, .8vw, 12px);
+        font-size: clamp(7px, .88vw, 12px);
         font-weight: 700;
         line-height: 1.1;
     }
@@ -263,9 +263,12 @@
     .site-home-content .market-feature .token-summary-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-auto-rows: minmax(clamp(28px, 3.2vw, 48px), auto);
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        grid-auto-flow: row;
         align-content: stretch;
-        gap: var(--summary-card-gap);
+        gap: clamp(3px, .55vw, 8px);
+        width: 100%;
+        height: 100%;
         min-width: 0;
         min-height: 0;
     }
@@ -293,10 +296,11 @@
         --dot: var(--mint);
         display: grid;
         align-content: center;
-        gap: clamp(2px, .22vw, 4px);
+        gap: clamp(1px, .2vw, 4px);
         min-width: 0;
-        min-height: clamp(28px, 3.2vw, 48px);
-        padding: var(--summary-card-padding);
+        min-height: 0;
+        overflow: hidden;
+        padding: clamp(2px, .45vw, 8px) clamp(3px, .65vw, 11px);
         background: linear-gradient(180deg, rgba(var(--ar-rgb), .022), rgba(var(--ar-rgb), .008));
         border: 0;
         border-radius: 0;
@@ -305,7 +309,6 @@
         filter: none;
     }
 
-    .site-home-content .market-feature .token-summary-item:nth-child(2) { --dot: var(--azure); }
     .site-home-content .market-feature .token-summary-item:nth-child(3) { --dot: var(--violet); }
     .site-home-content .market-feature .token-summary-item:nth-child(4) { --dot: var(--gold); }
     .site-home-content .market-feature .token-summary-item:nth-child(6) { --dot: var(--azure); }
@@ -313,7 +316,7 @@
     .site-home-content .market-feature .token-summary-item > span {
         display: block;
         color: var(--text-mute);
-        font-size: var(--summary-label-size);
+        font-size: clamp(6.5px, .86vw, 11.5px);
         font-weight: 600;
         line-height: 1.12;
         letter-spacing: .055em;
@@ -335,7 +338,7 @@
     .site-home-content .market-feature .token-summary-item > strong {
         display: block;
         font-family: var(--font-display);
-        font-size: var(--summary-value-size);
+        font-size: clamp(8px, 1.35vw, 18px);
         font-weight: 650;
         line-height: 1;
         letter-spacing: -.025em;
@@ -343,73 +346,71 @@
         overflow-wrap: anywhere;
     }
 
-    .site-home-content .market-feature .token-summary-image-price {
+    .site-home-content .market-feature .token-summary-item--price {
+        --dot: var(--ar-accent-2);
         position: absolute;
-        z-index: 2;
         left: 50%;
-        bottom: clamp(10px, 1.05vw, 15px);
-        transform: translateX(-50%);
+        bottom: clamp(8px, 1.05vw, 15px);
+        z-index: 2;
         display: grid;
-        justify-items: center;
-        gap: clamp(1px, .15vw, 2px);
+        gap: 1px;
         width: max-content;
         max-width: calc(100% - 8px);
-        min-width: 0;
-        padding: clamp(3px, .38vw, 6px) clamp(5px, .62vw, 9px);
+        padding: clamp(3px, .4vw, 6px) clamp(4px, .7vw, 10px);
+        transform: translateX(-50%);
         border: 1px solid rgba(var(--ar-accent-2-rgb), .36);
+        border-radius: 4px;
         background: rgba(3, 16, 13, .82);
         -webkit-backdrop-filter: blur(7px);
         backdrop-filter: blur(7px);
-        color: #eafff0;
-        text-align: center;
-        border-radius: clamp(4px, .45vw, 7px);
-        box-shadow: 0 3px 12px rgba(0, 0, 0, .28), inset 0 0 12px rgba(var(--ar-accent-2-rgb), .06);
-        font-variant-numeric: tabular-nums;
+        box-shadow: inset 0 0 16px rgba(var(--ar-accent-2-rgb), .07);
     }
 
-    .site-home-content .market-feature .token-summary-price-label {
-        display: block;
-        color: rgba(234, 255, 240, .76);
-        font-size: clamp(6px, .58vw, 8px);
-        line-height: 1;
-        font-weight: 700;
-        letter-spacing: .07em;
-        text-transform: uppercase;
+    .site-home-content .market-feature .token-summary-item--price > span {
+        font-size: clamp(6px, .56vw, 9px);
     }
 
-    .site-home-content .market-feature .token-summary-image-price > strong {
-        display: block;
-        max-width: 100%;
-        color: #eafff0;
-        font-size: clamp(7px, .88vw, 12px);
-        line-height: 1.05;
-        font-weight: 750;
-        letter-spacing: -.025em;
+    .site-home-content .market-feature .token-summary-item--price > strong {
+        overflow: hidden;
+        font-size: clamp(7px, .82vw, 12px);
+        text-overflow: clip;
         white-space: nowrap;
+    }
+
+    .site-home-content .market-feature .token-summary-item--price .token-summary-price-meta {
+        font-size: clamp(5px, .55vw, 8px);
+        max-width: 100%;
     }
 
     .site-home-content .market-feature .token-summary-price-meta {
         display: block;
-        max-width: 100%;
-        color: var(--ar-accent-2);
-        font-size: clamp(5.8px, .62vw, 8.5px);
-        font-weight: 650;
-        line-height: 1.05;
-        white-space: nowrap;
+        min-width: 0;
         overflow: hidden;
+        color: var(--ar-accent-2);
+        font-size: clamp(8px, .72vw, 10px);
+        font-weight: 650;
+        line-height: 1.1;
         text-overflow: ellipsis;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
     }
 
-    .site-home-content .market-feature .token-summary-image-price[data-direction="positive"] .token-summary-price-meta {
+    .site-home-content .market-feature .token-summary-item--price[data-direction="positive"] .token-summary-price-meta {
         color: var(--gain);
     }
 
-    .site-home-content .market-feature .token-summary-image-price[data-direction="negative"] .token-summary-price-meta {
+    .site-home-content .market-feature .token-summary-item--price[data-direction="negative"] .token-summary-price-meta {
         color: var(--loss);
     }
 
     .site-home-content .market-feature--compact > .token-summary > .feature-status {
+        position: absolute;
+        inset: auto 6px 4px;
+        z-index: 4;
+        margin: 0;
         grid-column: 1 / -1;
+        max-width: calc(100% - 12px);
+        font-size: clamp(7px, .7vw, 10px);
     }
 
     .site-home-content .market-feature--compact .feature-status {
@@ -514,6 +515,8 @@
         .site-home-content .market-feature .token-summary-item > strong { font-weight: 600; }
         .site-home-content .market-feature .token-summary-item > span { font-weight: 550; }
     }
+    /* Coin summary is fluid through clamp()/vw; its 3-column metrics grid
+       and image/card height remain unchanged at every viewport width. */
 
     @media (max-width: 560px) {
         .slider-card { padding: 28px 52px 24px; }

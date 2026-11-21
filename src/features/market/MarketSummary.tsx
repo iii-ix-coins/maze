@@ -53,15 +53,18 @@ function TokenSummaryContent({
           onError={(event) => { event.currentTarget.src = '/css/images/hollld-logo.svg'; }}
         />
         <div
-          className="token-summary-image-price"
+          className="token-summary-item token-summary-item--price"
           data-direction={priceDirection}
           data-stale={priceIsStale || Boolean(livePrice.error)}
           title={priceTitle}
-          aria-label={`Token price ${price ? formatTokenPrice(price.priceUsd) : 'unavailable'}`}
         >
-          <span className="token-summary-price-label">Price</span>
+          <span>Price</span>
           <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
-          <small className="token-summary-price-meta">{price ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h)) : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}</small>
+          <small className="token-summary-price-meta">
+            {price
+              ? (priceIsStale || livePrice.error ? 'PCLQCH · Last known price' : formatPercentChange(price.change24h))
+              : livePrice.loading ? 'PCLQCH · Loading' : 'PCLQCH · Unavailable'}
+          </small>
         </div>
       </div>
 
