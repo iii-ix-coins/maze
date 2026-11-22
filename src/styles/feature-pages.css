@@ -125,7 +125,7 @@
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    padding: clamp(2px, .8vw, 12px);
+    padding: clamp(2px, .45vw, 4px) clamp(3px, .65vw, 6px);
     background: rgba(var(--ar-rgb), .035);
   }
 
