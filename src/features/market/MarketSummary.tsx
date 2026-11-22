@@ -52,8 +52,7 @@ function TokenSummaryContent({
         />
 
         <div className="token-summary-item token-summary-item--price" data-direction={priceDirection} data-stale={priceIsStale || Boolean(livePrice.error)} title={priceTitle}>
-          <span>Price</span>
-          <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '--'}</strong>
+          <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '$0.0'}</strong>
         </div>
       </div>
 
