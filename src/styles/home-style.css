@@ -483,7 +483,7 @@
     .site-home-content .market-feature .token-summary-item--price {
         --dot: var(--ar-accent-2);
         position: absolute;
-        left: 50%;
+        left: 6px;
         bottom: clamp(3px, 1.05vw, 5px);
         z-index: 2;
         display: grid;
