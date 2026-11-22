@@ -414,12 +414,11 @@
         min-height: 0;
         overflow: hidden;
         padding: clamp(2px, .45vw, 4px) clamp(3px, .65vw, 6px);
-        background: linear-gradient(180deg, rgba(var(--ar-rgb), .052), rgba(var(--ar-rgb), .034));
+        background: linear-gradient(180deg, rgba(var(--ar-rgb), .18), rgba(var(--ar-rgb), .12));
         border: 0;
         border-radius: 0;
         outline: 0;
-        box-shadow: inset 0 0 0 2px rgba(var(--ar-rgb), .045);
-        box-shadow: 3px 3px 3px var(--ar-rgb), .075;
+        box-shadow: 2px 2px 3px var(--ar-accent-2);
         filter: none;
     }
 
