@@ -409,7 +409,7 @@
         grid-template-rows: repeat(2, minmax(0, 1fr));
         grid-auto-flow: row;
         align-content: stretch;
-        gap: clamp(3px, .55vw, 8px);
+        gap: clamp(6px, .55vw, 9px);
         width: 100%;
         height: 100%;
         min-width: 0;
@@ -422,7 +422,7 @@
         align-content: center;
         align-items: center;
         text-align: center;
-        gap: clamp(5px, .86vw, 8px);
+        gap: clamp(6px, .86vw, 9px);
         min-width: 0;
         min-height: 0;
         overflow: hidden;
@@ -448,7 +448,7 @@
     .site-home-content .market-feature .token-summary-item>span {
         display: block;
         color: var(--text-mute);
-        font-size: clamp(6.5px, .86vw, 11.5px);
+        font-size: clamp(8px, calc(2px + 1.6667vw), 13px);
         font-weight: 600;
         line-height: 1.12;
         letter-spacing: .055em;
@@ -470,7 +470,7 @@
     .site-home-content .market-feature .token-summary-item>strong {
         display: block;
         font-family: var(--font-display);
-        font-size: clamp(12px, calc(2px + 1.6667vw), 20px);
+        font-size: clamp(9px, calc(2px + 1.6667vw), 24px);
         font-weight: 650;
         line-height: 1;
         letter-spacing: -.025em;
@@ -496,21 +496,11 @@
         padding: 0;
         transform: translateX(-50%);
         border: none;
-        font-size: clamp(9px, calc(2px + 1.6667vw), 18px);
+        font-size: clamp(9px, calc(2px + 1.6667vw), 14px);
         background: transparent;
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
         box-shadow: none;
-    }
-
-    .site-home-content .market-feature .token-summary-item--price>span {
-        font-size: clamp(9px, .65vw, 10px);
-    }
-
-    .site-home-content .market-feature .token-summary-item--price>strong {
-        overflow: hidden;
-        text-overflow: clip;
-        white-space: nowrap;
     }
 
     .site-home-content .market-feature--compact>.token-summary>.feature-status {
