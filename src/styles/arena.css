@@ -544,7 +544,18 @@ h3 {
 /* —— 7 · SURFACES, BUTTONS, DOCK ————————————————————————————————————— */
 :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
     border-color: transparent;
-    border-radius: var(--r-md);
+    clip-path: polygon(var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut));
+    -webkit-clip-path: polygon(var(--market-inner-cut) 0,
+            100% 0,
+            100% calc(100% - var(--market-inner-cut)),
+            calc(100% - var(--market-inner-cut)) 100%,
+            0 100%,
+            0 var(--market-inner-cut));
 }
 
 .btn-link,
