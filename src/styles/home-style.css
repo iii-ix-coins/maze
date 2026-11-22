@@ -267,7 +267,7 @@
 
     .site-home-content .market-feature--compact>.token-summary {
         --market-cut: 18px;
-        --market-inner-cut: clamp(5px, .55vw, 7px);
+        --market-inner-cut: 13px;
         --token-summary-size: clamp(84px, 16vw, 220px);
         display: grid;
         grid-template-columns: var(--token-summary-size) minmax(0, 1fr);
@@ -402,7 +402,6 @@
         min-width: 0;
         min-height: 0;
     }
-
 
     .site-home-content .market-feature .token-summary-item {
         --dot: var(--mint);

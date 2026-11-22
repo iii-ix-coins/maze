@@ -544,6 +544,7 @@ h3 {
 /* —— 7 · SURFACES, BUTTONS, DOCK ————————————————————————————————————— */
 :is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
     border-color: transparent;
+    --market-inner-cut: 13px;
     clip-path: polygon(var(--market-inner-cut) 0,
             100% 0,
             100% calc(100% - var(--market-inner-cut)),
