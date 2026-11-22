@@ -407,16 +407,16 @@
         --dot: var(--mint);
         display: grid;
         align-content: center;
-        gap: clamp(1px, .2vw, 4px);
+        gap: clamp(2px, .2vw, 4px);
         min-width: 0;
         min-height: 0;
         overflow: hidden;
-        padding: clamp(2px, .45vw, 8px) clamp(3px, .65vw, 11px);
-        background: linear-gradient(180deg, rgba(var(--ar-rgb), .022), rgba(var(--ar-rgb), .008));
+        padding: clamp(2px, .45vw, 4px) clamp(3px, .65vw, 6px);
+        background: linear-gradient(180deg, rgba(var(--ar-rgb), .052), rgba(var(--ar-rgb), .034));
         border: 0;
         border-radius: 0;
         outline: 0;
-        box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .045);
+        box-shadow: 0 0 2px rgba(var(--ar-rgb), .054);
         filter: none;
     }
 
