@@ -324,19 +324,7 @@
         align-self: stretch;
         overflow: hidden;
         background: transparent;
-        box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .12);
-        clip-path: polygon(var(--market-inner-cut) 0,
-                100% 0,
-                100% calc(100% - var(--market-inner-cut)),
-                calc(100% - var(--market-inner-cut)) 100%,
-                0 100%,
-                0 var(--market-inner-cut));
-        -webkit-clip-path: polygon(var(--market-inner-cut) 0,
-                100% 0,
-                100% calc(100% - var(--market-inner-cut)),
-                calc(100% - var(--market-inner-cut)) 100%,
-                0 100%,
-                0 var(--market-inner-cut));
+        box-shadow: none;
     }
 
     .site-home-content .market-feature .token-summary-icon {
@@ -496,12 +484,12 @@
         --dot: var(--ar-accent-2);
         position: absolute;
         left: 50%;
-        bottom: clamp(5px, 1.05vw, 8px);
+        bottom: clamp(3px, 1.05vw, 5px);
         z-index: 2;
         display: grid;
         gap: 1px;
-        width: 75%;
-        max-width: 75%;
+        width: 98%;
+        max-width: 98%;
         justify-items: center;
         text-align: center;
         box-sizing: border-box;
@@ -520,7 +508,7 @@
 
     .site-home-content .market-feature .token-summary-item--price>strong {
         overflow: hidden;
-        font-size: clamp(12px, .82vw, 14px);
+        font-size: clamp(9px, .82vw, 10px);
         text-overflow: clip;
         white-space: nowrap;
     }
