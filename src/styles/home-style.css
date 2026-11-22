@@ -470,7 +470,7 @@
     .site-home-content .market-feature .token-summary-item>strong {
         display: block;
         font-family: var(--font-display);
-        font-size: clamp(12px, .86vw, 20px);
+        font-size: clamp(20px, .86vw, 12px);
         font-weight: 650;
         line-height: 1;
         letter-spacing: -.025em;
@@ -506,7 +506,7 @@
 
     .site-home-content .market-feature .token-summary-item--price>strong {
         overflow: hidden;
-        font-size: clamp(8px, .86vw, 13px);
+        font-size: clamp(13px, .86vw, 9px);
         text-overflow: clip;
         white-space: nowrap;
     }
