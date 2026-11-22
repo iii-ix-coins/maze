@@ -506,6 +506,7 @@
 
     .site-home-content .market-feature .token-summary-item--price>strong {
         overflow: hidden;
+        font-size: clamp(9px, 2.3vw, 17px);
         text-overflow: clip;
         white-space: nowrap;
     }
