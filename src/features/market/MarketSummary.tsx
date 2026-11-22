@@ -40,44 +40,116 @@ function TokenSummaryContent({
     : 'Live price provided by PCLQCH engine';
 
   return (
-    <section className="token-summary" aria-label="Token market summary">
-      <div className="token-summary-visual">
-        <img
-          id="token-summary-icon"
-          className="token-summary-icon"
-          src="/css/images/maze-coin-logo.svg"
-          alt={`${token?.name || 'Token'} logo`}
-          loading="lazy"
-          decoding="async"
-        />
+    <>
+      {/* TOKEN NAME + SYMBOL — OUTSIDE SUMMARY CARD */}
+      <div className="token-summary-header">
+        <div className="token-summary-identity">
+          <div className="token-summary-name">
+            <div
+              id="token-summary-name"
+              className="token-summary-title"
+            >
+              {token?.name || '--'}
+            </div>
 
-        <div className="token-summary-item token-summary-item--price" data-direction={priceDirection} data-stale={priceIsStale || Boolean(livePrice.error)} title={priceTitle}>
-          <strong data-market="price" aria-live="off">{price ? formatTokenPrice(price.priceUsd) : '$0.0'}</strong>
-        </div>
-      </div>
-
-      <div className="token-summary-main">
-        <div className="token-summary-header">
-          <div className="token-summary-identity">
-            <div className="token-summary-name">
-              <div id="token-summary-name" className="token-summary-title">{token?.name || '--'}</div>
-              <div id="token-summary-symbol" className="token-summary-symbol">{token?.symbol ? `$${token.symbol}` : '--'}</div>
+            <div
+              id="token-summary-symbol"
+              className="token-summary-symbol"
+            >
+              {token?.symbol ? `$${token.symbol}` : '--'}
             </div>
           </div>
         </div>
-
-        <div className="token-summary-grid">
-          <div className="token-summary-item"><span>Market Cap</span><strong data-market="mcap">{token ? formatUsd(token.mcap) : '--'}</strong></div>
-          <div className="token-summary-item"><span>Liquidity</span><strong data-market="liquidity">{token ? formatUsd(token.liquidity) : '--'}</strong></div>
-          <div className="token-summary-item"><span>24h Volume</span><strong data-market="volume24h">{token ? formatUsd(volume24h) : '--'}</strong></div>
-          <div className="token-summary-item"><span>Holders</span><strong data-market="holders">{token ? formatInteger(token.holderCount) : '--'}</strong></div>
-          <div className="token-summary-item"><span>Organic Score</span><strong data-market="organic">{token ? formatScore(token.organicScore) : '--'}</strong></div>
-          <div className="token-summary-item"><span>Net Buyers</span><strong data-market="netBuyers">{token ? formatInteger(stats24h?.numNetBuyers) : '--'}</strong></div>
-        </div>
       </div>
 
-      {error && !token ? <p className="feature-status feature-status--error" role="status">{error}</p> : null}
-    </section>
+      {/* MAIN SUMMARY CARD */}
+      <section
+        className="token-summary"
+        aria-label="Token market summary"
+      >
+        {/* TOKEN IMAGE + PRICE */}
+        <div className="token-summary-visual">
+          <img
+            id="token-summary-icon"
+            className="token-summary-icon"
+            src="/css/images/maze-coin-logo.svg"
+            alt={`${token?.name || 'Token'} logo`}
+            loading="lazy"
+            decoding="async"
+          />
+
+          <div
+            className="token-summary-item token-summary-item--price"
+            data-direction={priceDirection}
+            data-stale={priceIsStale || Boolean(livePrice.error)}
+            title={priceTitle}
+          >
+            <strong data-market="price" aria-live="off">
+              {price ? formatTokenPrice(price.priceUsd) : '$0.0'}
+            </strong>
+          </div>
+        </div>
+
+        {/* MARKET METRICS */}
+        <div className="token-summary-main">
+          <div className="token-summary-grid">
+
+            <div className="token-summary-item">
+              <span>Market Cap</span>
+              <strong data-market="mcap">
+                {token ? formatUsd(token.mcap) : '--'}
+              </strong>
+            </div>
+
+            <div className="token-summary-item">
+              <span>Liquidity</span>
+              <strong data-market="liquidity">
+                {token ? formatUsd(token.liquidity) : '--'}
+              </strong>
+            </div>
+
+            <div className="token-summary-item">
+              <span>24h Volume</span>
+              <strong data-market="volume24h">
+                {token ? formatUsd(volume24h) : '--'}
+              </strong>
+            </div>
+
+            <div className="token-summary-item">
+              <span>Holders</span>
+              <strong data-market="holders">
+                {token ? formatInteger(token.holderCount) : '--'}
+              </strong>
+            </div>
+
+            <div className="token-summary-item">
+              <span>Organic Score</span>
+              <strong data-market="organic">
+                {token ? formatScore(token.organicScore) : '--'}
+              </strong>
+            </div>
+
+            <div className="token-summary-item">
+              <span>Net Buyers</span>
+              <strong data-market="netBuyers">
+                {token ? formatInteger(stats24h?.numNetBuyers) : '--'}
+              </strong>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ERROR MESSAGE — OUTSIDE GRID */}
+      {error && !token ? (
+        <p
+          className="feature-status feature-status--error"
+          role="status"
+        >
+          {error}
+        </p>
+      ) : null}
+    </>
   );
 }
 

@@ -53,7 +53,7 @@
 
   .market-feature:not(.market-feature--compact) .token-summary-main {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: clamp(3px, .6vw, 10px);
     width: 100%;
     height: 100%;
@@ -72,6 +72,19 @@
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
+  }
+
+  .market-feature:not(.market-feature--compact)>.token-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+    min-width: 0;
+
+    margin-bottom: clamp(6px, .7vw, 10px);
+
+    overflow: visible;
   }
 
   .market-feature:not(.market-feature--compact) .token-summary-title {
