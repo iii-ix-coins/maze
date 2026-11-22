@@ -41,27 +41,6 @@ function TokenSummaryContent({
 
   return (
     <>
-      {/* TOKEN NAME + SYMBOL — OUTSIDE SUMMARY CARD */}
-      <div className="token-summary-header">
-        <div className="token-summary-identity">
-          <div className="token-summary-name">
-            <div
-              id="token-summary-name"
-              className="token-summary-title"
-            >
-              {token?.name || '--'}
-            </div>
-
-            <div
-              id="token-summary-symbol"
-              className="token-summary-symbol"
-            >
-              {token?.symbol ? `$${token.symbol}` : '--'}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* MAIN SUMMARY CARD */}
       <section
         className="token-summary"
