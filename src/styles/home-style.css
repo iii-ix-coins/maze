@@ -422,7 +422,7 @@
         align-content: center;
         align-items: center;
         text-align: center;
-        gap: clamp(2px, .2vw, 4px);
+        gap: clamp(5px, 1.9vw, 8px);
         min-width: 0;
         min-height: 0;
         overflow: hidden;
@@ -470,7 +470,7 @@
     .site-home-content .market-feature .token-summary-item>strong {
         display: block;
         font-family: var(--font-display);
-        font-size: clamp(10px, 2.3vw, 22px);
+        font-size: clamp(12px, .86vw, 20px);
         font-weight: 650;
         line-height: 1;
         letter-spacing: -.025em;
@@ -506,7 +506,7 @@
 
     .site-home-content .market-feature .token-summary-item--price>strong {
         overflow: hidden;
-        font-size: clamp(9px, 2.3vw, 17px);
+        font-size: clamp(10px, .86vw, 18px);
         text-overflow: clip;
         white-space: nowrap;
     }
