@@ -127,7 +127,6 @@
     overflow: hidden;
     padding: clamp(2px, .8vw, 12px);
     background: rgba(var(--ar-rgb), .035);
-    box-shadow: inset 0 0 0 1px rgba(var(--ar-rgb), .07);
   }
 
   .market-feature:not(.market-feature--compact) .token-summary-item>span {

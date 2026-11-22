@@ -431,7 +431,6 @@
         border: 0;
         border-radius: 0;
         outline: 0;
-        filter: none;
     }
 
     .site-home-content .market-feature .token-summary-item:nth-child(3) {
