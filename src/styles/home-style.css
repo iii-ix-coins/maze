@@ -422,7 +422,7 @@
         align-content: center;
         align-items: center;
         text-align: center;
-        gap: clamp(5px, 1.9vw, 8px);
+        gap: clamp(5px, .86vw, 8px);
         min-width: 0;
         min-height: 0;
         overflow: hidden;
