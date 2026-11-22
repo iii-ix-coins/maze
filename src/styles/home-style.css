@@ -403,20 +403,6 @@
         min-height: 0;
     }
 
-    .site-home-content .market-feature--compact .token-summary-item {
-        clip-path: polygon(var(--market-inner-cut) 0,
-                100% 0,
-                100% calc(100% - var(--market-inner-cut)),
-                calc(100% - var(--market-inner-cut)) 100%,
-                0 100%,
-                0 var(--market-inner-cut));
-        -webkit-clip-path: polygon(var(--market-inner-cut) 0,
-                100% 0,
-                100% calc(100% - var(--market-inner-cut)),
-                calc(100% - var(--market-inner-cut)) 100%,
-                0 100%,
-                0 var(--market-inner-cut));
-    }
 
     .site-home-content .market-feature .token-summary-item {
         --dot: var(--mint);
