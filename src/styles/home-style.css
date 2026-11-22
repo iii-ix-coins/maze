@@ -418,7 +418,6 @@
         border: 0;
         border-radius: 0;
         outline: 0;
-        box-shadow: 2px 2px 3px var(--ar-accent-2);
         filter: none;
     }
 
