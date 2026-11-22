@@ -496,7 +496,7 @@
         --dot: var(--ar-accent-2);
         position: absolute;
         left: 50%;
-        bottom: clamp(10px, 1.05vw, 15px);
+        bottom: clamp(5px, 1.05vw, 8px);
         z-index: 2;
         display: grid;
         gap: 1px;
@@ -515,7 +515,7 @@
     }
 
     .site-home-content .market-feature .token-summary-item--price>span {
-        font-size: clamp(10px, .56vw, 12px);
+        font-size: clamp(8px, .65vw, 9px);
     }
 
     .site-home-content .market-feature .token-summary-item--price>strong {
