@@ -470,12 +470,44 @@
     .site-home-content .market-feature .token-summary-item>strong {
         display: block;
         font-family: var(--font-display);
-        font-size: clamp(20px, .86vw, 12px);
         font-weight: 650;
         line-height: 1;
         letter-spacing: -.025em;
         font-variant-numeric: tabular-nums;
         overflow-wrap: anywhere;
+    }
+
+    /* Default: below 600px */
+    .site-home-content .market-feature .token-summary-item>strong {
+        font-size: 12px;
+    }
+
+    /* 600px and above */
+    @media (min-width: 600px) {
+        .site-home-content .market-feature .token-summary-item>strong {
+            font-size: 14px;
+        }
+    }
+
+    /* 800px and above */
+    @media (min-width: 800px) {
+        .site-home-content .market-feature .token-summary-item>strong {
+            font-size: 16px;
+        }
+    }
+
+    /* 1000px and above */
+    @media (min-width: 1000px) {
+        .site-home-content .market-feature .token-summary-item>strong {
+            font-size: 18px;
+        }
+    }
+
+    /* Above 1080px */
+    @media (min-width: 1080.01px) {
+        .site-home-content .market-feature .token-summary-item>strong {
+            font-size: 20px;
+        }
     }
 
     .site-home-content .market-feature .token-summary-item--price {
@@ -506,7 +538,6 @@
 
     .site-home-content .market-feature .token-summary-item--price>strong {
         overflow: hidden;
-        font-size: clamp(13px, .86vw, 9px);
         text-overflow: clip;
         white-space: nowrap;
     }
