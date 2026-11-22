@@ -431,9 +431,6 @@
         border: 0;
         border-radius: 0;
         outline: 0;
-        filter:
-            drop-shadow(3px 3px 3px rgba(var(--summary-depth-rgb), .66)) drop-shadow(3px 3px 3px rgba(var(--summary-shadow-rgb),
-                    var(--summary-shadow-opacity)));
     }
 
     .site-home-content .market-feature .token-summary-item:nth-child(3) {

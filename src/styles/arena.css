@@ -569,9 +569,6 @@ h3 {
             calc(100% - var(--market-inner-cut)) 100%,
             0 100%,
             0 var(--market-inner-cut));
-    filter:
-        drop-shadow(3px 3px 3px rgba(var(--summary-depth-rgb), .66)) drop-shadow(3px 3px 3px rgba(var(--summary-shadow-rgb),
-                var(--summary-shadow-opacity)));
 }
 
 .btn-link,
@@ -626,4 +623,17 @@ h3 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--ar-accent);
+}
+
+/* ==========================================================
+   MARKET SUMMARY — THEMED FLOATING DEPTH
+   Theme-aware shadows for metric cards
+   ========================================================== */
+
+.site-home-content .market-feature .token-summary-grid>.token-summary-item,
+.market-feature:not(.market-feature--compact) .token-summary-grid>.token-summary-item {
+
+    box-shadow:
+        drop-shadow(3px 3px 3px rgba(var(--summary-depth-rgb), .66)) drop-shadow(3px 3px 3px rgba(var(--summary-shadow-rgb),
+                var(--summary-shadow-opacity)));
 }
