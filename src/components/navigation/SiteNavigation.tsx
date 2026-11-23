@@ -1,28 +1,28 @@
-import { useCallback, useEffect, useRef, useState, type AnimationEvent as ReactAnimationEvent, type KeyboardEvent } from 'react';
-import { GameViewSwitcher } from './GameViewSwitcher';
-import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname } from '../../app/navigation';
-import { getSiteRoutePath, getSiteRoutePathByNavKey, normalizePath, resolveSiteRoute } from '../../app/routes';
+import {
+  getSiteRoutePath,
+  getSiteRoutePathByNavKey,
+  normalizePath,
+  resolveSiteRoute,
+} from '../../app/routes';
+import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
+import { useIdentity } from '../../platform/identity/IdentityProvider';
+import { UserAvatar } from '../account/UserAvatar';
 
-const MOBILE_MENU_CLOSE_FALLBACK_MS = 250;
-const MOBILE_MENU_EXIT_ANIMATION = 'maze-dropdown-out';
-
+type NavIconName = 'home' | 'market' | 'token' | 'holders' | 'profile' | 'more';
 type NavItem = {
   label: string;
   href: string;
   key: string;
+  icon?: NavIconName;
   disabled?: boolean;
   title?: string;
-  group?: 'compete';
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Competitions', href: './competitions.html', key: 'competitions', group: 'compete', disabled: true, title: 'Competitions are coming soon.' },
-  { label: 'Leaderboard', href: './leaderboard.html', key: 'leaderboard', group: 'compete', disabled: true, title: 'Leaderboard is coming soon.' },
-  { label: 'Market', href: getSiteRoutePathByNavKey('market'), key: 'market' },
-  { label: 'Token', href: getSiteRoutePathByNavKey('token'), key: 'token' },
-  { label: 'Holders', href: getSiteRoutePathByNavKey('holders'), key: 'holders' },
+  { label: 'Competitions', href: './competitions.html', key: 'competitions', disabled: true, title: 'Competitions are coming soon.' },
+  { label: 'Leaderboard', href: './leaderboard.html', key: 'leaderboard', disabled: true, title: 'Leaderboard is coming soon.' },
   { label: 'How to Play', href: './how-to-play.html', key: 'how-to-play', disabled: true, title: 'How to Play Maze' },
 ];
 
@@ -36,60 +36,103 @@ function getCurrentPageKey(): string | null {
   return null;
 }
 
-function NavItemLink({ item, onNavigate, dropdown = false }: { item: NavItem; onNavigate: () => void; dropdown?: boolean }) {
-  const className = [
-    'nav-link',
-    dropdown ? 'nav-dropdown-link' : '',
-    item.disabled ? 'nav-link-disabled' : '',
-    item.key === getCurrentPageKey() ? 'active' : '',
-  ].filter(Boolean).join(' ');
+function NavIcon({ name }: { name: NavIconName }) {
+  const common = {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true as const,
+    focusable: false as const,
+  };
 
-  if (item.disabled) {
-    return <button className={className} type="button" disabled aria-disabled="true" title={item.title ?? 'Coming soon'} data-nav-key={item.key}>{item.label}</button>;
+  switch (name) {
+    case 'home':
+      return <svg {...common}><path d="m3 10 9-7 9 7" /><path d="M5.5 9v11h13V9M9 20v-6h6v6" /></svg>;
+    case 'market':
+      return <svg {...common}><path d="M4 19.5h16" /><path d="M6.5 16V11M12 16V5M17.5 16V8" /><path d="m5 8 5-3 5 2 4-4" /></svg>;
+    case 'token':
+      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5c-.7-.7-1.8-1-3.2-1-1.8 0-3 .8-3 2s1 1.8 3 2.2 3.2 1 3.2 2.4-1.3 2.4-3.3 2.4c-1.4 0-2.7-.4-3.6-1.2M12 5.8v12.4" /></svg>;
+    case 'holders':
+      return <svg {...common}><circle cx="9" cy="8" r="3.2" /><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0" /><path d="M16 5.2a3.2 3.2 0 0 1 0 6.2M17.5 14.2a5.2 5.2 0 0 1 3.7 5" /></svg>;
+    case 'profile':
+      return <svg {...common}><circle cx="12" cy="8" r="3.4" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>;
+    case 'more':
+      return <svg {...common}><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></svg>;
   }
+}
 
+function DockLink({ item, avatar }: { item: NavItem; avatar?: ReactNode }) {
+  const active = item.key === getCurrentPageKey();
   return (
-    <a className={className} href={item.href} data-nav-key={item.key} aria-current={item.key === getCurrentPageKey() ? 'page' : undefined} onClick={onNavigate}>
-      {item.label}
+    <a
+      className={`nav-link nav-dock-link${active ? ' active' : ''}${item.key === 'profile' ? ' nav-dock-profile' : ''}`}
+      href={item.href}
+      data-nav-key={item.key}
+      aria-current={active ? 'page' : undefined}
+      aria-label={item.label}
+      title={item.label}
+    >
+      <span className="nav-dock-icon" aria-hidden="true">
+        {avatar ?? <NavIcon name={item.icon ?? 'home'} />}
+      </span>
+      <span className="nav-dock-label">{item.label}</span>
     </a>
   );
 }
 
-function CompeteMenu({ open, setOpen, onNavigate }: { open: boolean; setOpen: (open: boolean) => void; onNavigate: () => void }) {
+function MoreMenu({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const active = ['competitions', 'leaderboard'].includes(getCurrentPageKey() ?? '');
+  const active = NAV_ITEMS.some((item) => item.key === getCurrentPageKey());
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     const handlePointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        rootRef.current?.querySelector<HTMLButtonElement>('.nav-menu-trigger')?.focus();
+      }
+    };
     document.addEventListener('pointerdown', handlePointerDown);
-    return () => document.removeEventListener('pointerdown', handlePointerDown);
-  }, [open]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, setOpen]);
 
   return (
-    <div
-      ref={rootRef}
-      className={`nav-menu${open ? ' is-open' : ''}`}
-      data-nav-menu="compete"
-    >
+    <div ref={rootRef} className={`nav-menu nav-more-menu${open ? ' is-open' : ''}`}>
       <button
         type="button"
-        className={`nav-link nav-menu-trigger${active ? ' active' : ''}`}
-        data-menu-trigger="compete"
+        className={`nav-link nav-dock-link nav-menu-trigger${active ? ' active' : ''}`}
+        aria-label="More navigation"
+        aria-haspopup="menu"
         aria-expanded={open}
-        aria-controls="maze-compete-menu"
+        aria-controls="maze-more-menu"
         onClick={() => setOpen(!open)}
       >
-        <span>Mazes</span>
-        <svg className="nav-chevron" viewBox="0 -4 20 25" fill="none" aria-hidden="true">
-          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <span className="nav-dock-icon"><NavIcon name="more" /></span>
+        <span className="nav-dock-label">More</span>
       </button>
-      <div className="nav-dropdown" id="maze-compete-menu" hidden={!open} aria-label="Competition navigation">
-        {NAV_ITEMS.filter((item) => item.group === 'compete').map((item) => (
-          <NavItemLink key={item.key} item={item} dropdown onNavigate={() => { setOpen(false); onNavigate(); }} />
+      <div className="nav-dropdown nav-more-dropdown" id="maze-more-menu" role="menu" hidden={!open} aria-label="More navigation">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={`nav-link nav-dropdown-link${item.key === getCurrentPageKey() ? ' active' : ''} nav-link-disabled`}
+            data-nav-key={item.key}
+            role="menuitem"
+            disabled={item.disabled}
+            title={item.title}
+          >
+            {item.label}
+          </button>
         ))}
       </div>
     </div>
@@ -98,157 +141,37 @@ function CompeteMenu({ open, setOpen, onNavigate }: { open: boolean; setOpen: (o
 
 export function SiteNavigation() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileClosing, setMobileClosing] = useState(false);
-  const [competeOpen, setCompeteOpen] = useState(false);
-  const navContentRef = useRef<HTMLDivElement>(null);
-  const mobileToggleRef = useRef<HTMLButtonElement>(null);
-  const mobileClosingRef = useRef(false);
-  const mobileOpenRef = useRef(false);
-  const mobileCloseTimerRef = useRef<number | null>(null);
+  const { isAuthenticated, user } = useIdentity();
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  const clearMobileCloseTimer = useCallback(() => {
-    if (mobileCloseTimerRef.current === null) return;
-    window.clearTimeout(mobileCloseTimerRef.current);
-    mobileCloseTimerRef.current = null;
-  }, []);
+  useEffect(() => setMoreOpen(false), [pathname]);
 
-  const finishMobileClose = useCallback(() => {
-    if (!mobileClosingRef.current) return;
-
-    clearMobileCloseTimer();
-    mobileClosingRef.current = false;
-    mobileOpenRef.current = false;
-    setMobileClosing(false);
-    setMobileOpen(false);
-    setCompeteOpen(false);
-  }, [clearMobileCloseTimer]);
-
-  const openMobile = useCallback(() => {
-    clearMobileCloseTimer();
-    mobileClosingRef.current = false;
-    mobileOpenRef.current = true;
-    setMobileClosing(false);
-    setCompeteOpen(false);
-    setMobileOpen(true);
-  }, [clearMobileCloseTimer]);
-
-  const closeMobile = useCallback(() => {
-    if (!mobileOpenRef.current || mobileClosingRef.current) return;
-
-    mobileClosingRef.current = true;
-    setMobileClosing(true);
-
-    // Safety net for interrupted CSS animations (for example, a viewport resize).
-    clearMobileCloseTimer();
-    mobileCloseTimerRef.current = window.setTimeout(
-      finishMobileClose,
-      MOBILE_MENU_CLOSE_FALLBACK_MS,
-    );
-  }, [clearMobileCloseTimer, finishMobileClose]);
-
-  const toggleMobile = useCallback(() => {
-    if (mobileClosingRef.current) {
-      openMobile();
-      return;
-    }
-    if (mobileOpen) {
-      closeMobile();
-    } else {
-      openMobile();
-    }
-  }, [mobileOpen, closeMobile, openMobile]);
-
-  const handleMobileMenuAnimationEnd = useCallback((event: ReactAnimationEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return;
-    if (event.animationName !== MOBILE_MENU_EXIT_ANIMATION) return;
-    finishMobileClose();
-  }, [finishMobileClose]);
-
-  useEffect(() => {
-    if (mobileOpenRef.current) {
-      closeMobile();
-    } else {
-      setCompeteOpen(false);
-    }
-  }, [pathname, closeMobile]);
-
-  useEffect(() => () => clearMobileCloseTimer(), [clearMobileCloseTimer]);
-
-  useEffect(() => {
-    if (!mobileOpen || mobileClosing) return undefined;
-
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (navContentRef.current?.contains(target) || mobileToggleRef.current?.contains(target)) return;
-      closeMobile();
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsidePointer);
-    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer);
-  }, [mobileOpen, mobileClosing, closeMobile]);
-
-  const handleNavigationKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== 'Escape') return;
-    if (competeOpen) {
-      setCompeteOpen(false);
-      return;
-    }
-    if (mobileOpen && !mobileClosing) {
-      closeMobile();
-      mobileToggleRef.current?.focus();
-    }
-  };
+  const profileAvatar = isAuthenticated && user
+    ? <UserAvatar seed={user.id} imageUrl={user.avatarUrl} label="Profile" />
+    : undefined;
 
   return (
     <header className="header">
-      <nav className="nav" aria-label="Main navigation" onKeyDown={handleNavigationKeyDown}>
+      <nav className="nav site-bottom-nav" aria-label="Main navigation">
         <div className="nav-inner">
-          <a href={getSiteRoutePath('home')} className="nav-brand" aria-label="Maze home">
-            <span className="nav-brand-mark" aria-hidden="true">
-              <img className="nav-brand-logo nav-brand-logo--white" src="/css/images/maze-logo-white.svg" alt="" decoding="async" />
-              <img className="nav-brand-logo nav-brand-logo--black" src="/css/images/maze-logo-black.svg" alt="" decoding="async" />
-              <img className="nav-brand-logo nav-brand-logo--green" src="/css/images/maze-logo-green.svg" alt="" decoding="async" />
-            </span>
-          </a>
-
-          <div
-            ref={navContentRef}
-            className={`nav-content${mobileOpen && !mobileClosing ? ' is-mobile-open' : ''}${mobileClosing ? ' is-mobile-closing' : ''}`}
-            id="maze-nav-content"
-            aria-hidden={mobileClosing || undefined}
-            inert={mobileClosing}
-            onAnimationEnd={handleMobileMenuAnimationEnd}
-          >
-            <div className="nav-links">
-              <CompeteMenu open={competeOpen} setOpen={setCompeteOpen} onNavigate={closeMobile} />
-              {NAV_ITEMS.filter((item) => item.group !== 'compete').map((item) => (
-                <NavItemLink key={item.key} item={item} onNavigate={closeMobile} />
-              ))}
-            </div>
-          </div>
-
-          <div className="nav-utilities">
-            <div className="nav-actions">
-              <WalletConnectButton />
-            </div>
-
-            <button
-              ref={mobileToggleRef}
-              type="button"
-              className="nav-mobile-toggle"
-              aria-label={mobileOpen && !mobileClosing ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={mobileOpen && !mobileClosing}
-              aria-controls="maze-nav-content"
-              onClick={toggleMobile}
+          <div className="nav-links">
+            <DockLink item={{ label: 'Home', href: getSiteRoutePath('home'), key: 'index', icon: 'home' }} />
+            <DockLink item={{ label: 'Market', href: getSiteRoutePathByNavKey('market'), key: 'market', icon: 'market' }} />
+            <DockLink item={{ label: 'Token', href: getSiteRoutePathByNavKey('token'), key: 'token', icon: 'token' }} />
+            <a
+              className={`nav-link nav-dock-link nav-dock-create${getCurrentPageKey() === 'maze' ? ' active' : ''}`}
+              href={MAZE_VIEW_URLS.create}
+              data-nav-key="maze"
+              aria-current={getCurrentPageKey() === 'maze' ? 'page' : undefined}
+              aria-label="Create a Maze"
+              title="Create a Maze"
             >
-              <span /><span /><span />
-            </button>
-          </div>
-
-          <div className="nav-secondary-row">
-            <GameViewSwitcher />
-            <ThemeSwitcher />
+              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><span /></span>
+              <span className="nav-dock-label">Create</span>
+            </a>
+            <DockLink item={{ label: 'Holders', href: getSiteRoutePathByNavKey('holders'), key: 'holders', icon: 'holders' }} />
+            <MoreMenu open={moreOpen} setOpen={setMoreOpen} />
+            <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />
           </div>
         </div>
       </nav>

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { UserAvatar } from '../../components/account/UserAvatar';
+import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import '../../styles/feature-pages.css';
 import './profile-page.css';
@@ -73,11 +74,19 @@ export function ProfilePage() {
       ) : null}
 
       {status === 'anonymous' ? (
-        <section className="profile-state-card" aria-labelledby="profile-sign-in-title">
-          <span className="profile-state-mark" aria-hidden="true">◎</span>
-          <div>
-            <h2 id="profile-sign-in-title">Sign in to create your profile</h2>
-            <p>Connect your Solana wallet from the navigation bar, then approve the separate Maze sign-in message. No blockchain transaction is requested.</p>
+        <section className="profile-connect-stage" aria-labelledby="profile-sign-in-title">
+          <div className="profile-connect-prompt">
+            <svg className="profile-connect-mark" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+              <circle cx="48" cy="31" r="18" stroke="currentColor" strokeWidth="4" />
+              <path d="M12 84c5-20 18-30 36-30s31 10 36 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+            <div className="profile-connect-copy">
+              <h2 id="profile-sign-in-title">Connect your wallet</h2>
+              <p>Sign in to Maze to create your profile and manage your account. A separate sign-in approval is required; no blockchain transaction is requested.</p>
+            </div>
+            <div className="profile-connect-action">
+              <WalletConnectButton />
+            </div>
           </div>
         </section>
       ) : null}

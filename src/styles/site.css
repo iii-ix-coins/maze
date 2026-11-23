@@ -6,28 +6,105 @@
 @import "./home-shared.css";
 @import "./arena.css";
 
-/* Keep the Maze navigation above the game surface. */
+/* Keep Maze's persistent chrome clear of the game surface. */
 body.in-menu #site-header {
     z-index: 1000;
 }
 
-/*
- * SINGLE NAVIGATION DOCK LAYOUT OWNER
- *
- * style.css owns navigation controls and arena.css owns theme colours. This
- * file owns the dock position, responsive rows and bottom-dock menu direction.
- * Maze routes keep their existing top navigation position.
- */
+/* Independent brand: never consumes a slot in the bottom navigation. */
+body>#root>#site-brand {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    left: max(16px, env(safe-area-inset-left));
+    z-index: 1002;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 4px;
+    text-decoration: none;
+    pointer-events: auto;
+}
+
+#site-brand .nav-brand-mark {
+    height: 34px;
+}
+
+#site-brand .nav-brand-logo {
+    max-height: 34px;
+}
+
+/* Game-view and theme controls remain available without occupying dock space. */
+body>#root>#site-controls {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    width: max-content;
+    max-width: calc(100vw - 112px);
+    min-width: 0;
+    margin: 0;
+    padding: 5px;
+    pointer-events: auto;
+}
+
+#site-controls .game-view-toggle {
+    --gvt-icon-size: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 29px);
+    align-items: center;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 3px;
+    gap: 2px;
+}
+
+#site-controls .game-view-toggle .theme-toggle__option {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+}
+
+#site-controls .game-view-toggle .theme-toggle__icon {
+    display: block;
+    width: var(--gvt-icon-size);
+    height: var(--gvt-icon-size);
+}
+
+#site-controls .game-view-toggle__label {
+    display: none;
+}
+
+#site-controls .theme-toggle:not(.game-view-toggle) {
+    --tt-size: 27px;
+    --tt-icon-size: 15px;
+    --tt-pad: 3px;
+    height: 36px;
+    min-height: 36px;
+}
+
+/* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
 #site-header {
     position: fixed;
     top: auto;
     left: 50%;
     right: auto;
-    bottom: calc(18px + env(safe-area-inset-bottom));
+    bottom: calc(16px + env(safe-area-inset-bottom));
     z-index: 1000;
     display: flex;
     justify-content: center;
-    width: min(100% - 2 * var(--gutter), var(--page-max));
+    width: min(100% - 2 * var(--gutter), 900px);
     margin: 0;
     transform: translateX(-50%);
     pointer-events: none;
@@ -44,8 +121,275 @@ body.in-menu #site-header {
     top: 7px;
     bottom: auto;
     left: auto;
+    width: min(100% - 2 * var(--gutter), var(--page-max));
+    margin-inline: auto;
     transform: none;
     z-index: 60;
+}
+
+.nav.site-bottom-nav {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border-radius: 20px;
+    overflow: visible;
+}
+
+.site-bottom-nav .nav-inner {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 5px 7px;
+}
+
+.site-bottom-nav .nav-links {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+    min-width: 0;
+}
+
+.site-bottom-nav .nav-link,
+.site-bottom-nav .nav-menu-trigger {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    min-height: 57px;
+    height: 57px;
+    padding: 5px 2px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    clip-path: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--nav-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.1;
+    text-align: center;
+    text-transform: none;
+    white-space: nowrap;
+    text-shadow: none;
+    cursor: pointer;
+    transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.site-bottom-nav .nav-link:hover:not(.nav-link-disabled):not(:disabled),
+.site-bottom-nav .nav-link:focus-visible {
+    color: var(--nav-text);
+    background: var(--nav-hover-bg);
+    border-color: var(--nav-border);
+    outline: none;
+}
+
+.site-bottom-nav .nav-link.active {
+    color: var(--nav-active-text);
+    background: var(--nav-active-bg);
+    border-color: transparent;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.site-bottom-nav .nav-link.active::before {
+    display: none;
+}
+
+.nav-dock-icon {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    color: currentColor;
+}
+
+.nav-dock-icon > svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+}
+
+.nav-dock-label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.site-bottom-nav .nav-dock-create {
+    gap: 2px;
+    color: var(--nav-text);
+    background: transparent;
+}
+
+.site-bottom-nav .nav-dock-create:hover,
+.site-bottom-nav .nav-dock-create:focus-visible,
+.site-bottom-nav .nav-dock-create.active {
+    background: transparent;
+}
+
+.nav-dock-create-icon {
+    width: 43px;
+    height: 39px;
+    flex-basis: 39px;
+    border: 1px solid var(--ar-accent);
+    border-radius: 12px;
+    background: var(--ar-accent);
+    color: var(--ar-on-accent);
+    box-shadow: 0 0 0 3px var(--ar-line), 0 5px 18px var(--nav-shadow-soft, rgba(0, 0, 0, .2));
+    transform: translateY(-5px);
+}
+
+.nav-dock-create-icon span {
+    position: relative;
+    display: block;
+    width: 19px;
+    height: 19px;
+}
+
+.nav-dock-create-icon span::before,
+.nav-dock-create-icon span::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    width: 19px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    content: "";
+    transform: translate(-50%, -50%);
+}
+
+.nav-dock-create-icon span::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.site-bottom-nav .nav-dock-profile .user-avatar {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
+}
+
+.nav-more-menu {
+    position: relative;
+    min-width: 0;
+}
+
+.site-bottom-nav .nav-more-menu > .nav-dropdown {
+    top: auto;
+    right: 50%;
+    bottom: calc(100% + 12px);
+    left: auto;
+    min-width: 190px;
+    transform: translateX(50%);
+}
+
+.site-bottom-nav .nav-more-menu .nav-dropdown-link {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 42px;
+    height: 42px;
+    padding-inline: 12px;
+    border-radius: 8px;
+    clip-path: none;
+    font-size: 12px;
+    text-align: left;
+}
+
+.site-bottom-nav .nav-more-menu .nav-dropdown-link:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+    #site-header {
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: none;
+        transform: none;
+    }
+
+    #site-header > .header {
+        width: 100%;
+    }
+
+    .nav.site-bottom-nav {
+        min-height: calc(66px + env(safe-area-inset-bottom));
+        padding: 3px 5px calc(3px + env(safe-area-inset-bottom));
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 17px 17px 0 0;
+    }
+
+    .site-bottom-nav .nav-inner {
+        padding: 2px 4px;
+    }
+
+    .site-bottom-nav .nav-links {
+        gap: 1px;
+    }
+
+    .site-bottom-nav .nav-link,
+    .site-bottom-nav .nav-menu-trigger {
+        min-height: 56px;
+        height: 56px;
+        padding-inline: 1px;
+        font-size: 9px;
+    }
+
+    .nav-dock-icon {
+        width: 24px;
+        height: 24px;
+        flex-basis: 24px;
+    }
+
+    .nav-dock-icon > svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .nav-dock-create-icon {
+        width: 41px;
+        height: 38px;
+        flex-basis: 38px;
+    }
+
+    #site-controls {
+        gap: 4px;
+        padding: 4px;
+    }
+}
+
+@media (max-width: 370px) {
+    #site-controls .game-view-toggle {
+        grid-template-columns: repeat(3, 25px);
+    }
+
+    #site-controls .theme-toggle:not(.game-view-toggle) {
+        --tt-size: 24px;
+        --tt-icon-size: 13px;
+    }
+
+    .site-bottom-nav .nav-link,
+    .site-bottom-nav .nav-menu-trigger {
+        font-size: 8px;
+    }
 }
 
 @media (max-width: 720px) {
@@ -54,297 +398,15 @@ body.in-menu #site-header {
         top: auto;
         left: auto;
         bottom: auto;
+        width: min(100% - 2 * var(--gutter), var(--page-max));
+        margin-inline: auto;
         transform: none;
     }
 }
 
-#site-header:not([data-maze-page="true"]) .nav-inner > .nav-content {
-    top: auto;
-    bottom: calc(100% + 9px);
-}
-
-#site-header:not([data-maze-page="true"]) .nav-menu .nav-dropdown,
-#site-header:not([data-maze-page="true"]) .nav-wallet-menu,
-#site-header:not([data-maze-page="true"]) .nav-wallet-feedback {
-    top: auto;
-    bottom: calc(100% + 8px);
-}
-.nav-inner {
-    display: grid;
-    align-items: center;
-    min-width: 0;
-    padding: 7px 10px;
-}
-
-.nav-inner > .nav-brand {
-    grid-area: brand;
-    min-width: 0;
-    justify-self: start;
-}
-
-.nav-inner > .nav-content {
-    grid-area: content;
-    min-width: 0;
-}
-
-.nav-inner > .nav-utilities {
-    grid-area: utilities;
-    display: flex;
-    flex: 0 0 auto;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-self: end;
-    justify-content: flex-end;
-    gap: 8px;
-    min-width: 0;
-    width: max-content;
-    max-width: 100%;
-    white-space: nowrap;
-}
-
-.nav-inner > .nav-utilities > .nav-actions {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: flex-end;
-    width: auto;
-    min-width: 0;
-    margin: 0;
-}
-
-.nav-inner .nav-wallet-wrap {
-    position: relative;
-    display: flex;
-    flex: 0 0 auto;
-    min-width: 0;
-}
-
-.nav-inner .nav-wallet-button {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: 0;
-    white-space: nowrap;
-}
-
-.nav-inner > .nav-utilities > .nav-mobile-toggle {
-    display: none;
-}
-
-/* The game and theme controls form one independent second-row layout. */
-.nav-secondary-row {
-    grid-area: secondary;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    min-width: 0;
-}
-
-.nav-secondary-row > .game-view-toggle {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    margin: 0;
-}
-
-.nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
-    flex: 0 0 auto;
-    justify-self: end;
-    margin: 0;
-}
-
-@media (min-width: 1024px) {
-    .nav-inner {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        grid-template-areas:
-            "brand content utilities"
-            "secondary secondary secondary";
-        column-gap: 15px;
-        row-gap: 6px;
-    }
-
-    .nav-inner > .nav-content {
-        position: static;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        width: 100%;
-        min-width: 0;
-        padding: 0;
-        background: transparent;
-        box-shadow: none;
-    }
-
-    .nav-inner > .nav-content > .nav-links {
-        display: flex;
-        flex: 1 1 auto;
-        align-items: center;
-        min-width: 0;
-        gap: 9px;
-    }
-
-    .nav-inner > .nav-utilities {
-        gap: 8px;
-    }
-}
-
-@media (max-width: 1023px) {
-    .nav-inner {
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas:
-            "brand utilities"
-            "secondary secondary";
-        column-gap: 15px;
-        row-gap: 5px;
-    }
-
-    .nav-inner > .nav-content {
-        position: absolute;
-        z-index: 1001;
-        top: calc(100% + 9px);
-        left: 0;
-        right: 0;
-        display: none;
-        align-items: stretch;
-        flex-direction: column;
-        gap: 9px;
-        min-width: 0;
-        padding: 9px;
-        border-radius: var(--r-lg);
-        background: var(--nav-panel);
-        box-shadow: 0 18px 35px var(--nav-shadow-soft, rgba(0, 0, 0, .16));
-    }
-
-    .nav-inner > .nav-content.is-mobile-open {
-        display: flex;
-        animation: maze-dropdown-in 160ms ease both;
-    }
-
-    .nav-inner > .nav-content.is-mobile-closing {
-        display: flex;
-        pointer-events: none;
-        animation: maze-dropdown-out 150ms ease both;
-    }
-
-    .nav-inner > .nav-content > .nav-links {
-        display: flex;
-        flex: none;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        width: 100%;
-        min-width: 0;
-    }
-
-    .nav-inner > .nav-utilities {
-        gap: 8px;
-    }
-
-    .nav-inner > .nav-utilities > .nav-actions {
-        width: auto;
-        margin: 0;
-    }
-
-    .nav-inner > .nav-utilities > .nav-mobile-toggle {
-        display: flex;
-        flex: 0 0 auto;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        margin: 0;
-        padding: 7px;
-        gap: 4px;
-    }
-
-    .nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
-        height: 32px;
-        min-height: 32px;
-        --tt-size: 25px;
-        --tt-icon-size: 15px;
-        --tt-pad: 2px;
-    }
-
-    .nav-inner .nav-wallet-button {
-        height: 32px;
-        min-height: 32px;
-        padding-inline: 9px;
-    }
-}
-
-@media (max-width: 600px) {
-    .nav-inner {
-        column-gap: 15px;
-        row-gap: 3px;
-    }
-
-    .nav-inner > .nav-utilities {
-        gap: clamp(4px, 1.2vw, 7px);
-    }
-
-    .nav-inner .nav-brand-mark {
-        height: 26px;
-    }
-
-    .nav-inner .nav-brand-logo {
-        height: 100%;
-        max-height: 26px;
-    }
-
-    .nav-secondary-row > .theme-toggle:not(.game-view-toggle) {
-        height: 30px;
-        min-height: 30px;
-        --tt-size: 24px;
-        --tt-icon-size: 14px;
-        --tt-pad: 2px;
-    }
-
-    .nav-secondary-row > .game-view-toggle {
-        --gvt-icon-size: 12px;
-    }
-
-    .nav-inner .game-view-toggle__label {
-        font-size: clamp(10px, 3vw, 12px);
-        letter-spacing: .06em;
-    }
-
-    .nav-inner > .nav-utilities > .nav-mobile-toggle {
-        width: 30px;
-        height: 30px;
-        padding: 6px;
-        gap: 4px;
-    }
-
-    .nav-inner .nav-wallet-button {
-        height: 30px;
-        min-height: 30px;
-        padding-inline: 7px;
-    }
-}
-
-@media (max-width: 360px) {
-    .nav-secondary-row > .game-view-toggle {
-        padding: 2px;
-        gap: 1px;
-    }
-
-    .nav-secondary-row > .game-view-toggle .theme-toggle__option {
-        padding-inline: 2px;
-        gap: 3px;
-    }
-
-    .nav-inner .game-view-toggle__label {
-        font-size: 9px;
-        letter-spacing: 0;
-    }
-}
-
-
 @media (prefers-reduced-motion: reduce) {
-    .nav-inner > .nav-content.is-mobile-open,
-    .nav-inner > .nav-content.is-mobile-closing {
-        animation-duration: 1ms;
+    .site-bottom-nav .nav-link,
+    .site-bottom-nav .nav-menu-trigger {
+        transition-duration: .01ms !important;
     }
 }

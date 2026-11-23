@@ -560,6 +560,14 @@
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 0ms backwards;
     }
 
+    body.page-loaded:not(.maze-site-brand-entered) #site-brand {
+        animation: maze-unified-enter 800ms var(--maze-enter-easing) 60ms backwards;
+    }
+
+    body.page-loaded:not(.maze-controls-entered) #site-controls {
+        animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
+    }
+
     body.page-loaded:not(.maze-brand-entered) #site-brand-header {
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
     }
@@ -575,6 +583,8 @@
     @media (prefers-reduced-motion: reduce) {
 
         body.page-loaded #site-header,
+        body.page-loaded #site-brand,
+        body.page-loaded #site-controls,
         body.page-loaded #site-brand-header,
         body.page-loaded .route-page {
             animation: none !important;

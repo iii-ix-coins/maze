@@ -6,6 +6,7 @@ import {
   isMazeDocumentPath,
   normalizePath,
   resolveSiteRoute,
+  getSiteRoutePathByNavKey,
 } from './routes';
 
 describe('shared site route manifest', () => {
@@ -22,6 +23,8 @@ describe('shared site route manifest', () => {
     expect(resolveSiteRoute('/holders')?.id).toBe('holders');
     expect(resolveSiteRoute('/market.html')?.id).toBe('market');
     expect(resolveSiteRoute('/market')?.id).toBe('market');
+    expect(resolveSiteRoute('/profile')?.navKey).toBe('profile');
+    expect(getSiteRoutePathByNavKey('profile')).toBe('/profile');
   });
 
   it('keeps maze navigation as a document navigation, not a soft navigation', () => {

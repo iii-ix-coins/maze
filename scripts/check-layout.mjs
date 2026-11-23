@@ -280,16 +280,33 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
 }
 
 const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
+const chromeComponent = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
+const profileComponent = fs.readFileSync(path.join(root, 'src/features/profile/ProfilePage.tsx'), 'utf8');
 const walletComponent = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
-const utilitiesPosition = navigationComponent.indexOf('className="nav-utilities"');
-const walletPosition = navigationComponent.indexOf('<WalletConnectButton />');
-if (utilitiesPosition < 0 || walletPosition < utilitiesPosition) {
-  console.error('[layout] WalletConnectButton must remain in the header utilities row, outside the mobile links panel.');
+if (
+  navigationComponent.includes('<WalletConnectButton />') ||
+  !navigationComponent.includes("getSiteRoutePath('profile')") ||
+  !navigationComponent.includes("label: 'Profile'") ||
+  !navigationComponent.includes('site-bottom-nav')
+) {
+  console.error('[layout] Bottom navigation must expose a Profile destination and must not own the wallet connection button.');
   process.exit(1);
 }
-const secondaryRowMatch = navigationComponent.match(/<div className="nav-secondary-row">([\s\S]*?)<\/div>/);
-if (!secondaryRowMatch || !secondaryRowMatch[1].includes('<GameViewSwitcher />') || !secondaryRowMatch[1].includes('<ThemeSwitcher />')) {
-  console.error('[layout] GameViewSwitcher and ThemeSwitcher must share the independent nav-secondary-row.');
+if (
+  !chromeComponent.includes('id="site-brand"') ||
+  !chromeComponent.includes('id="site-controls"') ||
+  !chromeComponent.includes('<GameViewSwitcher />') ||
+  !chromeComponent.includes('<ThemeSwitcher />')
+) {
+  console.error('[layout] Brand and utility controls must remain outside the bottom navigation dock.');
+  process.exit(1);
+}
+if (
+  !profileComponent.includes("status === 'anonymous'") ||
+  !profileComponent.includes('<WalletConnectButton />') ||
+  !profileComponent.includes('profile-connect-stage')
+) {
+  console.error('[layout] Wallet connection must be presented in the centered Profile prompt only for anonymous sessions.');
   process.exit(1);
 }
 if (
@@ -396,8 +413,8 @@ for (const routeId of ['home', 'maze', 'coin', 'holders', 'market', 'profile']) 
   }
 }
 const profileRoute = routeManifest.routes.find((route) => route.id === 'profile');
-if (!profileRoute?.paths.includes('/profile') || profileRoute.server !== 'spa' || !profileRoute.soft) {
-  console.error('[layout] Profile must be registered once for the React router, soft navigation and server refresh.');
+if (!profileRoute?.paths.includes('/profile') || profileRoute.server !== 'spa' || !profileRoute.soft || profileRoute.navKey !== 'profile') {
+  console.error('[layout] Profile must be registered for React routing, soft navigation, server refresh and the bottom dock.');
   process.exit(1);
 }
 const profileRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
@@ -421,12 +438,12 @@ if ((appTitleSource.match(/document\.title\s*=/g) || []).length !== 1 || !appTit
 const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 if (
-  !sharedSiteStyles.includes('grid-template-areas:\n            "brand content utilities"\n            "secondary secondary secondary"') ||
-  !sharedSiteStyles.includes('grid-template-areas:\n            "brand utilities"\n            "secondary secondary"') ||
-  !sharedSiteStyles.includes('.nav-secondary-row') ||
-  !sharedSiteStyles.includes('gap: 6px;')
+  !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
+  !sharedSiteStyles.includes('grid-template-columns: repeat(7, minmax(0, 1fr))') ||
+  !sharedSiteStyles.includes('#site-brand') ||
+  !sharedSiteStyles.includes('#site-controls')
 ) {
-  console.error('[layout] site.css must be the single owner of the responsive header grid and six-pixel switcher gap.');
+  console.error('[layout] site.css must own the responsive bottom dock and independent top brand/control positions.');
   process.exit(1);
 }
 if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*grid/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*flex/s.test(globalStyles)) {
