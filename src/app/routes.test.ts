@@ -23,8 +23,9 @@ describe('shared site route manifest', () => {
     expect(getSiteRoutePathByNavKey('explore')).toBe('/explore');
     expect(resolveSiteRoute('/coin.html')).toBeUndefined();
     expect(resolveSiteRoute('/token')).toBeUndefined();
-    expect(resolveSiteRoute('/holders.html')?.id).toBe('holders');
-    expect(resolveSiteRoute('/holders')?.id).toBe('holders');
+    expect(resolveSiteRoute('/holders.html')).toBeUndefined();
+    expect(resolveSiteRoute('/holders')).toBeUndefined();
+    expect(CLIENT_ROUTE_PATHS.has('/holders')).toBe(false);
     expect(resolveSiteRoute('/market.html')).toBeUndefined();
     expect(resolveSiteRoute('/market')).toBeUndefined();
     expect(resolveSiteRoute('/profile')?.navKey).toBe('profile');

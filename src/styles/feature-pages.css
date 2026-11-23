@@ -1,4 +1,4 @@
-/* Shared feature-page shell and responsive Holders layout. */
+/* Shared feature-page shell and responsive profile layout. */
 @layer pages {
   .feature-page-shell:not(.site-home-content) {
     width: min(1180px, calc(100% - 40px));
@@ -13,23 +13,6 @@
       margin-top: 20px;
     }
 
-    .holders-columns,
-    .holders-row {
-      grid-template-columns: 34px minmax(110px, 1fr) minmax(76px, .8fr);
-      gap: 8px;
-    }
-
-    .holders-columns {
-      padding: 11px 8px;
-      font-size: clamp(10px, 3.2vw, 11px);
-      letter-spacing: -.035em;
-    }
-
-    .holder-row {
-      padding: 8px;
-      font-size: clamp(10px, 3.2vw, 11px);
-      letter-spacing: -.035em;
-    }
   }
 }
 

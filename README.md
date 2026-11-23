@@ -27,11 +27,11 @@ Production URLs: `http://localhost:5000/` and `http://localhost:5000/maze.html`.
 
 ## Current architecture
 
-- `index.html`, `holders.html`, `vite.config.mts`, `package.json`: the single Vite SPA document and frontend toolchain.
+- `index.html`, `vite.config.mts`, `package.json`: the single Vite SPA document and frontend toolchain.
 - `src/main.tsx`, `src/app`: one React root, route dispatch, providers and error boundary.
 - `src/features/home/HomePage.tsx`: React-owned Home shell with the compact Market Summary.
-- `src/components/navigation`: React bottom navigation, Theme Switcher and More menu. The dock keeps Home, Explore, Create, Holders, More and Profile; the top-right Game View Switcher has been removed.
-- `src/features/explore`, `src/features/market`, `src/features/holders`: Explore links to Maze Live and Rooms; the compact Home market snapshot and Holders (`/holders.html`) remain available. Holder snapshots use the dedicated `/api/holders/top` endpoint.
+- `src/components/navigation`: React bottom navigation with Home, Explore, Notifications, a vertical Theme Switcher, Create and Profile. The former Holders and More destinations have been retired.
+- `src/features/explore`, `src/features/market`: Explore links to Maze Live and Rooms; the compact Home market snapshot remains available. The dedicated Holders page, API and background engine have been retired.
 - `src/features/maze/MazePage.tsx` and `MazeMarkup.tsx`: React owns the Maze page structure and static DOM tree. The full set of original IDs, classes, canvases and control hooks is retained.
 - `src/features/maze/engine`, `canvas`, `input`, `net`, `shared/maze`: the independent TypeScript simulation, renderer, input system, and multiplayer client/protocol. These modules are Vite-managed but not React state, intentionally avoiding high-frequency game-loop renders. The animated site background's SVG structure is React-owned by `src/features/theme/MazeBackground.tsx`; only its camera transform is updated imperatively per frame.
 - `engines/*`, `shared/state`, `server.js`, `start.js`: Node.js backend, workers, state and SQLite integration. The unused Interaction Engine and its dedicated stats API were retired with the interaction dock; other services and API contracts remain active.
@@ -41,7 +41,7 @@ Production URLs: `http://localhost:5000/` and `http://localhost:5000/maze.html`.
 
 ## Migration status — Phase 4
 
-The Home shell and compact market snapshot, Explore, Holders and Profile are React-owned. Explore is the only site-level entry for Maze Live and Rooms; the former top-right Create/Rooms/Live switcher and standalone Token/Coin and Market pages have been retired. The Maze lobby and in-race UI remain React-owned while the game engine stays independent.
+The Home shell and compact market snapshot, Explore and Profile are React-owned. Explore is the only site-level entry for Maze Live and Rooms; the former top-right Create/Rooms/Live switcher and standalone Token/Coin and Market pages have been retired. The Maze lobby and in-race UI remain React-owned while the game engine stays independent.
 
 The legacy browser controllers, their duplicate source copies, the old compiled Maze UI bundle, and the imperative Maze background bootstrap have been deleted. Active pages load only the shared React entry. Minimal synchronous inline pre-paint snippets remain solely to restore the saved theme before CSS paints and, on the shared `/maze.html` entry, to apply the existing `body.in-menu` styling hook before React mounts; they do not create UI or run application controllers. The two Express fallback documents are static notices with no scripts. A fully automated visual parity pass and production build still need to be run in an environment with project dependencies installed.
 

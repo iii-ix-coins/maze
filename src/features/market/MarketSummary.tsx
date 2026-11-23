@@ -94,12 +94,6 @@ function TokenSummaryContent({
               </strong>
             </div>
 
-            <div className="token-summary-item">
-              <span>Holders</span>
-              <strong data-market="holders">
-                {token ? formatInteger(token.holderCount) : '--'}
-              </strong>
-            </div>
 
             <div className="token-summary-item">
               <span>Organic Score</span>

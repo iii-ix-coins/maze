@@ -6,8 +6,6 @@
   "jupiterMarket": "/api/jupiter-market",
   "jupiterMarketRaw": "/api/jupiter-market/raw",
   "jupiterMarketHistory": "/api/jupiter-market/history",
-  "holdersTop": "/api/holders/top",
-  "holdersSummary": "/api/holders-summary",
   "authChallenge": "/api/auth/challenge",
   "authVerify": "/api/auth/verify",
   "authSession": "/api/auth/session",

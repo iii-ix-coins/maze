@@ -564,9 +564,6 @@
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 60ms backwards;
     }
 
-    body.page-loaded:not(.maze-controls-entered) #site-controls {
-        animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
-    }
 
     body.page-loaded:not(.maze-brand-entered) #site-brand-header {
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
@@ -584,7 +581,6 @@
 
         body.page-loaded #site-header,
         body.page-loaded #site-brand,
-        body.page-loaded #site-controls,
         body.page-loaded #site-brand-header,
         body.page-loaded .route-page {
             animation: none !important;
@@ -717,7 +713,7 @@
     }
 
     /* Panel recipe (large surfaces) */
-    :is(.slider-card, .holders-box) {
+    .slider-card {
         position: relative;
         border-radius: var(--r-xl);
         corner-shape: var(--corner, round);
@@ -1858,74 +1854,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 
-.nav-link-disabled::before,
-.nav-dropdown-link::before {
-    display: none;
-}
-
-.nav-link-disabled,
-.nav-link:disabled {
-    color: var(--nav-disabled);
-    cursor: not-allowed;
-}
-
-.nav-link-disabled:hover {
-    color: var(--nav-disabled);
-    background: transparent;
-}
-
-
-/* —— 4 · COMPETE DROPDOWN —————————————————————————————————————————————— */
-.nav-menu {
-    position: relative;
-}
-
-.nav-menu-trigger {
-    appearance: none;
-}
-
-.nav-chevron {
-    width: 1.1em;
-    height: 1.1em;
-    transition: transform 200ms ease-in-out;
-}
-
-.nav-menu.is-open .nav-chevron {
-    transform: rotate(-180deg);
-}
-
-.nav-dropdown {
-    position: absolute;
-    top: calc(100% + 12px);
-    left: 0;
-
-    min-width: 220px;
-    padding: 7px;
-
-    border: 1px solid var(--nav-border);
-    background: var(--nav-panel);
-    box-shadow: 0 16px 45px var(--nav-shadow);
-
-    animation: maze-dropdown-in 160ms ease both;
-}
-
-.nav-dropdown[hidden] {
-    display: none;
-}
-
-/* .nav-dropdown prefix = specificity that no .nav-link media rule can undercut */
-.nav-dropdown .nav-dropdown-link {
-    display: flex;
-    width: 100%;
-    justify-content: flex-start;
-    min-height: 44px;
-    padding-inline: 13px;
-}
-
-.nav-dropdown .nav-dropdown-link.active {
-    color: var(--nav-active-text);
-}
-
 /* Account avatar stays local and deterministic unless the user supplies a profile image. */
 .user-avatar {
     display: inline-grid;
@@ -2209,32 +2137,6 @@ html[data-theme="light"] .nav-brand-logo--black {
         margin: 3px 0;
     }
 
-    .nav-menu {
-        position: relative;
-        width: 100%;
-    }
-
-    .nav-menu-trigger {
-        justify-content: space-between;
-    }
-
-    .nav-dropdown {
-        position: static;
-        min-width: 0;
-        margin-top: 5px;
-        padding: 5px;
-        border: 0;
-        border-radius: 10px;
-        background: var(--nav-sub-bg);
-        box-shadow: none;
-        animation: none;
-    }
-
-    .nav-dropdown .nav-dropdown-link {
-        min-height: 46px;
-        padding-left: 25px;
-        padding-right: 14px;
-    }
 }
 
 /* Reduced motion */
@@ -2266,9 +2168,6 @@ html[data-theme="light"] .nav-brand-logo--black {
         height: 32px;
     }
 
-    .nav-dropdown .nav-dropdown-link {
-        min-height: 34px;
-    }
 }
 
 

@@ -19,11 +19,6 @@ const ExplorePage = lazy(() =>
   }))
 );
 
-const HoldersPage = lazy(() =>
-  import('../features/holders/HoldersPage').then((module) => ({
-    default: module.HoldersPage
-  }))
-);
 
 const ProfilePage = lazy(() =>
   import('../features/profile/ProfilePage').then((module) => ({
@@ -40,7 +35,6 @@ const PAGE_COMPONENTS = {
   home: HomePage,
   maze: MazeRouteShell,
   explore: ExplorePage,
-  holders: HoldersPage,
   profile: ProfilePage,
 };
 

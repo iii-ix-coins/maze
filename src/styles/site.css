@@ -36,31 +36,7 @@ body>#root>#site-brand {
     max-height: 34px;
 }
 
-/* Theme control remains available without occupying dock space. */
-body>#root>#site-controls {
-    position: fixed;
-    top: calc(12px + env(safe-area-inset-top));
-    right: max(14px, env(safe-area-inset-right));
-    z-index: 1002;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    width: max-content;
-    max-width: calc(100vw - 112px);
-    min-width: 0;
-    margin: 0;
-    padding: 5px;
-    pointer-events: auto;
-}
-
-#site-controls .theme-toggle {
-    --tt-size: 27px;
-    --tt-icon-size: 15px;
-    --tt-pad: 3px;
-    height: 36px;
-    min-height: 36px;
-}
+/* Theme selection is embedded vertically between Notifications and Create in the dock. */
 
 /* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
 #site-header {
@@ -123,7 +99,7 @@ body>#root>#site-controls {
 }
 
 .site-bottom-nav .nav-link,
-.site-bottom-nav .nav-menu-trigger {
+.site-bottom-nav .nav-notifications-trigger {
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
@@ -153,7 +129,7 @@ body>#root>#site-controls {
     transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
 }
 
-.site-bottom-nav .nav-link:hover:not(.nav-link-disabled):not(:disabled),
+.site-bottom-nav .nav-link:hover:not(:disabled),
 .site-bottom-nav .nav-link:focus-visible {
     color: var(--nav-text);
     background: var(--nav-hover-bg);
@@ -250,38 +226,109 @@ body>#root>#site-controls {
     flex-basis: 25px;
 }
 
-.nav-more-menu {
+
+.nav-notifications-menu {
     position: relative;
     min-width: 0;
 }
 
-.site-bottom-nav .nav-more-menu > .nav-dropdown {
-    top: auto;
+.site-bottom-nav .nav-notifications-panel {
+    position: absolute;
+    z-index: 1200;
     right: 50%;
     bottom: calc(100% + 12px);
-    left: auto;
-    min-width: 190px;
+    width: min(300px, calc(100vw - 24px));
+    padding: 16px;
+    border: 1px solid var(--ar-line, rgba(255, 255, 255, .16));
+    border-radius: 16px;
+    background: var(--nav-panel, var(--ar-fill-2, rgba(10, 16, 20, .96)));
+    color: var(--nav-text, var(--ar-text, #f5f7f8));
+    box-shadow: var(--ar-glow, 0 18px 48px rgba(0, 0, 0, .34));
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
     transform: translateX(50%);
 }
 
-.site-bottom-nav .nav-more-menu .nav-dropdown-link {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    width: 100%;
-    min-height: 42px;
-    height: 42px;
-    padding-inline: 12px;
-    border-radius: 8px;
-    clip-path: none;
-    font-size: 12px;
-    text-align: left;
+.site-bottom-nav .nav-notifications-trigger .nav-dock-label {
+    font-size: 8px;
+    letter-spacing: -.035em;
 }
 
-.site-bottom-nav .nav-more-menu .nav-dropdown-link:disabled {
-    opacity: .5;
-    cursor: not-allowed;
+.site-bottom-nav .nav-notifications-heading {
+    padding-bottom: 11px;
+    border-bottom: 1px solid var(--ar-line, rgba(255, 255, 255, .12));
+    font-size: 13px;
+    font-weight: 750;
 }
+
+.site-bottom-nav .nav-notifications-empty {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    padding: 20px 6px 10px;
+    text-align: center;
+}
+
+.site-bottom-nav .nav-notifications-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    margin-bottom: 3px;
+    border: 1px solid var(--ar-line, rgba(255, 255, 255, .14));
+    border-radius: 50%;
+    color: var(--nav-muted, var(--ar-soft, #a5afb5));
+}
+
+.site-bottom-nav .nav-notifications-empty-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.site-bottom-nav .nav-notifications-empty strong {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.site-bottom-nav .nav-notifications-empty p {
+    max-width: 230px;
+    margin: 0;
+    color: var(--nav-muted, var(--ar-soft, #a5afb5));
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.site-bottom-nav .nav-dock-theme-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 57px;
+    height: 57px;
+}
+
+.site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
+    --tt-size: 14px;
+    --tt-icon-size: 11px;
+    --tt-pad: 2px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    width: 29px;
+    height: 51px;
+    min-height: 51px;
+    padding: 2px;
+    gap: 1px;
+    border: 1px solid var(--ar-line, rgba(255, 255, 255, .16));
+    border-radius: 11px;
+    background: var(--ar-fill-2, rgba(255, 255, 255, .06));
+}
+
+.site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+}
+
 
 @media (max-width: 720px) {
     #site-header {
@@ -314,7 +361,7 @@ body>#root>#site-controls {
     }
 
     .site-bottom-nav .nav-link,
-    .site-bottom-nav .nav-menu-trigger {
+    .site-bottom-nav .nav-notifications-trigger {
         min-height: 56px;
         height: 56px;
         padding-inline: 1px;
@@ -338,21 +385,18 @@ body>#root>#site-controls {
         flex-basis: 38px;
     }
 
-    #site-controls {
-        gap: 4px;
-        padding: 4px;
-    }
 }
 
 @media (max-width: 370px) {
-    #site-controls .theme-toggle {
-        --tt-size: 24px;
-        --tt-icon-size: 13px;
-    }
 
     .site-bottom-nav .nav-link,
-    .site-bottom-nav .nav-menu-trigger {
+    .site-bottom-nav .nav-notifications-trigger {
         font-size: 8px;
+    }
+
+    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
+        width: 27px;
+        height: 49px;
     }
 }
 
@@ -370,7 +414,7 @@ body>#root>#site-controls {
 
 @media (prefers-reduced-motion: reduce) {
     .site-bottom-nav .nav-link,
-    .site-bottom-nav .nav-menu-trigger {
+    .site-bottom-nav .nav-notifications-trigger {
         transition-duration: .01ms !important;
     }
 }

@@ -230,7 +230,7 @@ h3 {
     letter-spacing: -.015em;
 }
 
-.nav-link:hover:not(.nav-link-disabled):not(:disabled) {
+.nav-link:hover:not(:disabled) {
     transform: none;
     color: var(--ar-text);
     background: rgba(var(--ar-rgb), .16);
@@ -395,10 +395,6 @@ h3 {
     text-align: center;
 }
 
-.nav-dropdown {
-    border-radius: var(--r-md);
-    border-color: var(--ar-line);
-}
 
 /* —— 5a · THEME CONTROL ———————————————————————————————— */
 .nav .theme-toggle {

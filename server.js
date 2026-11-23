@@ -8,9 +8,6 @@ const zlib = require('zlib');
 require('dotenv').config();
 
 
-const {
-    getHolderState
-} = require('./shared/state/holderState');
 
 const {
     getPriceStateJson
@@ -45,19 +42,10 @@ function sanitizeJupiterMarketState(state) {
     return result;
 }
 
-const {
-    getTopHolders,
-    close: closeHoldersSnapshotService
-} = require('./shared/services/HoldersSnapshotService');
 
 const app =
     express();
 
-// Small shared cache window reduces duplicate polling bursts without hiding fresh holder snapshots.
-function shortApiCache(req, res, next) {
-    res.setHeader('Cache-Control', 'public, max-age=2, stale-while-revalidate=10');
-    next();
-}
 
 
 const PORT =
@@ -392,79 +380,6 @@ app.get(
     }
 );
 
-/*
- * --------------------------------------------------
- * Top Holders API
- * --------------------------------------------------
- */
-
-app.get(
-    API_PATHS.holdersTop,
-    shortApiCache,
-    (req, res) => {
-
-        try {
-
-            const data =
-                getTopHolders({
-                    limit: req.query.limit
-                });
-
-            if (!data) {
-                return res.status(503).json({
-                    error:
-                        'Holder engine is warming up.'
-                });
-            }
-
-            return res.json(
-                data
-            );
-
-        } catch (error) {
-
-            console.error(
-                '[Web] Top holders request failed:',
-                error?.message || error
-            );
-
-            return res.status(503).json({
-                error:
-                    'Top holders snapshot is temporarily unavailable.'
-            });
-        }
-    }
-);
-/*
- * --------------------------------------------------
- * Holder API
- * --------------------------------------------------
- */
-
-app.get(
-    API_PATHS.holdersSummary,
-    shortApiCache,
-    (req, res) => {
-
-        const state =
-            getHolderState();
-
-        if (
-            state &&
-            state.data
-        ) {
-
-            return res.json(
-                state.data
-            );
-        }
-
-        return res.status(503).json({
-            error:
-                'Scanning blockchain for holders. Please wait...'
-        });
-    }
-);
 
 
 /*
@@ -575,14 +490,6 @@ function shutdown(signal) {
         );
     }
 
-    try {
-        closeHoldersSnapshotService();
-    } catch (error) {
-        console.warn(
-            '[Web] Failed to close holders snapshot database:',
-            error?.message || error
-        );
-    }
 
     server.close(
         () => {

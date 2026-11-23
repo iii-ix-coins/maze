@@ -35,18 +35,6 @@
       "navKey": "maze"
     },
     {
-      "id": "holders",
-      "paths": [
-        "/holders.html",
-        "/holders"
-      ],
-      "title": "Top Holders · Hollld",
-      "page": "holders",
-      "soft": true,
-      "server": "spa",
-      "navKey": "holders"
-    },
-    {
       "id": "profile",
       "paths": [
         "/profile"

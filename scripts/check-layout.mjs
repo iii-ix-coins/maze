@@ -4,9 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
-  'index.html', 'holders.html', 'vite.config.mts', 'package.json',
+  'index.html', 'vite.config.mts', 'package.json',
   'src/app', 'src/components', 'src/features/home', 'src/features/market', 'src/features/explore',
-  'src/features/holders',
   'src/features/theme', 'src/features/maze/lobby',
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
@@ -27,7 +26,7 @@ const required = [
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
   'src/features/maze/engine/frame.ts', 'src/features/maze/canvas/index.ts',
   'shared/maze/src/index.ts', 'shared/site-routes.json', 'engines/maze-server/src/server.ts',
-  'server.js', 'start.js', 'shared/services/HoldersSnapshotService.js', 'src/features/holders/useHolders.ts', 'src/styles/site.css', 'scripts/check-css-duplicates.mjs', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
+  'server.js', 'start.js', 'src/styles/site.css', 'scripts/check-css-duplicates.mjs', 'postcss.config.mjs', '.browserslistrc', 'public/maze-assets/assets/images/check.svg'
 ];
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
@@ -177,8 +176,6 @@ const activeFrontend = [
   'src/components/navigation/SiteNavigation.tsx',
   'src/features/market/MarketSummary.tsx',
   'src/features/explore/ExplorePage.tsx',
-  'src/features/holders/HoldersPanel.tsx',
-  'src/features/holders/HoldersPage.tsx',
 ];
 for (const file of activeFrontend) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
@@ -279,6 +276,7 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
 }
 
 const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
+const themeSwitcherComponent = fs.readFileSync(path.join(root, 'src/components/navigation/ThemeSwitcher.tsx'), 'utf8');
 const exploreComponent = fs.readFileSync(path.join(root, 'src/features/explore/ExplorePage.tsx'), 'utf8');
 const chromeComponent = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
 const profileComponent = fs.readFileSync(path.join(root, 'src/features/profile/ProfilePage.tsx'), 'utf8');
@@ -303,13 +301,24 @@ if (
   console.error('[layout] Bottom navigation must expose a Profile destination and must not own the wallet connection button.');
   process.exit(1);
 }
+const notificationsIndex = navigationComponent.indexOf('<NotificationsMenu');
+const themeIndex = navigationComponent.indexOf('<ThemeSwitcher />');
+const createIndex = navigationComponent.indexOf('nav-dock-create');
 if (
   !chromeComponent.includes('id="site-brand"') ||
-  !chromeComponent.includes('id="site-controls"') ||
+  chromeComponent.includes('id="site-controls"') ||
   chromeComponent.includes('GameViewSwitcher') ||
-  !chromeComponent.includes('<ThemeSwitcher />')
+  chromeComponent.includes('<ThemeSwitcher />') ||
+  !navigationComponent.includes('<ThemeSwitcher />') ||
+  !themeSwitcherComponent.includes('theme-toggle--vertical') ||
+  notificationsIndex < 0 ||
+  themeIndex <= notificationsIndex ||
+  createIndex <= themeIndex ||
+  !navigationComponent.includes('No notifications yet') ||
+  navigationComponent.includes('MoreMenu') ||
+  navigationComponent.includes('Holders')
 ) {
-  console.error('[layout] Brand and utility controls must remain outside the bottom navigation dock.');
+  console.error('[layout] Brand must remain outside the dock; vertical theme selection and Notifications must be inside it, with no Holders/More entries.');
   process.exit(1);
 }
 if (
@@ -417,11 +426,15 @@ if (!mazeRoute?.paths.includes('/maze.html') || !mazeRoute.paths.includes('/play
   console.error('[layout] Maze document aliases must be declared once in the shared route manifest and remain hard navigations.');
   process.exit(1);
 }
-for (const routeId of ['home', 'maze', 'explore', 'holders', 'profile']) {
+for (const routeId of ['home', 'maze', 'explore', 'profile']) {
   if (!routeManifest.routes.some((route) => route.id === routeId)) {
     console.error(`[layout] shared route manifest is missing route: ${routeId}`);
     process.exit(1);
   }
+}
+if (routeManifest.routes.some((route) => route.id === 'holders' || route.paths.some((routePath) => routePath === '/holders' || routePath === '/holders.html'))) {
+  console.error('[layout] the Holders page and aliases must be absent from the shared route manifest.');
+  process.exit(1);
 }
 const exploreRoute = routeManifest.routes.find((route) => route.id === 'explore');
 if (!exploreRoute?.paths.includes('/explore') || exploreRoute.server !== 'spa' || !exploreRoute.soft || exploreRoute.navKey !== 'explore') {
@@ -466,9 +479,11 @@ if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
   !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr))') ||
   !sharedSiteStyles.includes('#site-brand') ||
-  !sharedSiteStyles.includes('#site-controls')
+  !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
+  !sharedSiteStyles.includes('.nav-notifications-panel') ||
+  sharedSiteStyles.includes('#site-controls')
 ) {
-  console.error('[layout] site.css must own the responsive bottom dock and independent top brand/control positions.');
+  console.error('[layout] site.css must own the bottom dock, vertical theme selector and Notifications panel; no top utility host may remain.');
   process.exit(1);
 }
 if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*grid/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*flex/s.test(globalStyles)) {
@@ -491,7 +506,6 @@ for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.
 
 const apiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
 for (const apiConsumer of [
-  'src/features/holders/useHolders.ts',
   'src/features/market/useMarketData.ts',
 ]) {
   const source = fs.readFileSync(path.join(root, apiConsumer), 'utf8');
@@ -520,7 +534,7 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   process.exit(1);
 }
 
-console.log('[layout] React routes, unified wallet/account teardown, migrated Maze UI and legacy-controller retirement verified.');
+console.log('[layout] React routes, notification/theme dock, Holders retirement, unified wallet teardown and migrated Maze UI verified.');
 
 // Retired transaction/verification engines and buyer feed must stay removed.
 for (const retiredPath of [
@@ -534,69 +548,68 @@ for (const retiredPath of [
     process.exit(1);
   }
 }
-// The Home Live Feed feature is retired; Holders now owns its dedicated snapshot API.
+// The Home Live Feed and dedicated Holders features are retired.
 for (const retiredPath of [
   'src/features/live-feed',
   'shared/services/LiveFeedService.js',
+  'holders.html',
+  'holders-api.json',
+  'src/features/holders',
+  'shared/services/HoldersSnapshotService.js',
+  'shared/state/holderState.js',
+  'shared/state/holder-state.json',
+  'engines/holder-engine',
 ]) {
   if (fs.existsSync(path.join(root, retiredPath))) {
-    console.error(`[layout] retired Live Feed artifact remains: ${retiredPath}`);
+    console.error(`[layout] retired feature artifact remains: ${retiredPath}`);
     process.exit(1);
   }
 }
 const apiManifest = JSON.parse(fs.readFileSync(path.join(root, 'shared/api-routes.json'), 'utf8'));
-if (apiManifest.liveFeedHolders || apiManifest.holdersTop !== '/api/holders/top') {
-  console.error('[layout] API manifest must expose holdersTop and must not expose the retired Live Feed endpoint.');
+if (apiManifest.liveFeedHolders || apiManifest.holdersTop || apiManifest.holdersSummary) {
+  console.error('[layout] the shared API contract must not expose retired Holders or Live Feed endpoints.');
   process.exit(1);
 }
-const holdersHook = fs.readFileSync(path.join(root, 'src/features/holders/useHolders.ts'), 'utf8');
-const homePage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
-const holdersPage = fs.readFileSync(path.join(root, 'src/features/holders/HoldersPage.tsx'), 'utf8');
-const holdersService = fs.readFileSync(path.join(root, 'shared/services/HoldersSnapshotService.js'), 'utf8');
 const serverSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+const startSource = fs.readFileSync(path.join(root, 'start.js'), 'utf8');
+const homePage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
+const marketSummary = fs.readFileSync(path.join(root, 'src/features/market/MarketSummary.tsx'), 'utf8');
 if (
-  !holdersHook.includes('API_PATHS.holdersTop') ||
   !/<MarketSummary\b[^>]*\bshowTitle=\{false\}/.test(homePage) ||
-  homePage.includes('<HoldersPanel') ||
-  homePage.includes('LiveFeedPanel') ||
-  !holdersPage.includes('<HoldersPanel fullPage />')
+  homePage.includes('HoldersPanel') ||
+  marketSummary.includes('data-market="holders"') ||
+  /HoldersSnapshotService|holdersTop|holdersSummary|getHolderState/.test(serverSource) ||
+  /Holder Engine|holder-engine/.test(startSource)
 ) {
-  console.error('[layout] Home must show MarketSummary without Holders/Live Feed; the dedicated Holders page must retain HoldersPanel.');
+  console.error('[layout] Holders page/service/engine must be retired while Home keeps its compact market summary.');
   process.exit(1);
 }
-if (!holdersService.includes('function getTopHolders') || !serverSource.includes('API_PATHS.holdersTop') || !serverSource.includes('HoldersSnapshotService')) {
-  console.error('[layout] HoldersSnapshotService and /api/holders/top must be connected through the shared API contract.');
-  process.exit(1);
-}
-for (const [file, source] of [['server.js', serverSource], ['useHolders.ts', holdersHook], ['HomePage.tsx', homePage], ['HoldersSnapshotService.js', holdersService]]) {
+for (const [file, source] of [['server.js', serverSource], ['HomePage.tsx', homePage], ['MarketSummary.tsx', marketSummary]]) {
   if (/LiveFeed|liveFeed|live-feed|\/api\/live-feed\/holders|live-feed-rail-scroll/i.test(source)) {
     console.error(`[layout] retired Live Feed runtime reference remains in ${file}.`);
     process.exit(1);
   }
 }
-const activeCssSources = ['src/styles/home-style.css', 'src/styles/style.css', 'src/styles/arena.css']
+const activeCssSources = ['src/styles/home-style.css', 'src/styles/home-shared.css', 'src/styles/feature-pages.css', 'src/styles/site.css', 'src/styles/style.css', 'src/styles/arena.css']
   .map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
 for (const [file, source] of activeCssSources) {
   if (/\.live-(?:bar|bar-menu|menu-btn|feed-panel|feed-rail-scroll|feed-state|card)(?:[\s:#.\[]|$)|\.holder-live-card-vote|@keyframes\s+ping-dot/.test(source)) {
     console.error(`[layout] retired Live Feed CSS remains in ${file}.`);
     process.exit(1);
   }
-}
-
-const retiredSources = [
-  'start.js', 'server.js', 'shared/services/HoldersSnapshotService.js',
-  'src/features/holders/HoldersPanel.tsx',
-  'src/features/holders/useHolders.ts', 'shared/api-routes.json',
-].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
-for (const [file, source] of retiredSources) {
-  if (/tx-engine|verify-engine|Transaction Engine|Verify Engine|Last 100 Purchases|liveFeedBuyers|latestBuyers|txState|lastPurchaseBlockTime|holder-purchases-value|holder-last-Purchases-value/i.test(source)) {
-    console.error(`[layout] removed transaction/purchase feature is still referenced: ${file}`);
+  if (/\.holders-(?:box|header|title|count|content|columns|list|status)|\.holder-row|\.nav-more-menu|\.nav-more-dropdown/.test(source)) {
+    console.error(`[layout] retired Holders/More CSS remains in ${file}.`);
     process.exit(1);
   }
 }
-const holderDbSource = fs.readFileSync(path.join(root, 'engines/holder-engine/lib/db.js'), 'utf8');
-if (!/static SCHEMA_VERSION = 8/.test(holderDbSource) || !/DROP TABLE IF EXISTS holder_purchase_stats/.test(holderDbSource) || !/DROP TABLE IF EXISTS holder_verification/.test(holderDbSource)) {
-  console.error('[layout] Holder DB must migrate existing volumes away from retired purchase/verification tables.');
-  process.exit(1);
+
+const retiredSources = [
+  'start.js', 'server.js', 'shared/api-routes.json',
+].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
+for (const [file, source] of retiredSources) {
+  if (/tx-engine|verify-engine|Transaction Engine|Verify Engine|Last 100 Purchases|liveFeedBuyers|latestBuyers|txState|lastPurchaseBlockTime|holder-purchases-value|holder-last-Purchases-value|HoldersSnapshotService|holdersTop|holdersSummary|Holder Engine|holder-engine/i.test(source)) {
+    console.error(`[layout] removed transaction/purchase/Holders feature is still referenced: ${file}`);
+    process.exit(1);
+  }
 }
 

@@ -44,9 +44,9 @@ export function ThemeSwitcher() {
   return (
     <div
       ref={rootRef}
-      className="theme-toggle"
+      className="theme-toggle theme-toggle--vertical"
       role="radiogroup"
-      aria-label="Background theme"
+      aria-label="Choose background theme"
       data-theme={theme}
       style={{ '--theme-index': SITE_THEMES.indexOf(theme) } as CSSProperties}
       onKeyDown={handleKeyDown}

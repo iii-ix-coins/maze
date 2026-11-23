@@ -90,16 +90,6 @@ const SERVICES = [
                 process.env.JUPITER_MARKET_DATA_ENABLED,
                 false
             )
-    },
-    {
-        name: 'Holder Engine',
-        script: path.join(
-            ROOT_DIR,
-            'engines',
-            'holder-engine',
-            'index.js'
-        ),
-        restart: true
     }
 ];
 

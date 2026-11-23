@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
 import { SiteNavigation } from '../navigation/SiteNavigation';
-import { ThemeSwitcher } from '../navigation/ThemeSwitcher';
 
-/** Persistent chrome: brand and utility controls stay above the page; navigation stays docked below. */
+/** Persistent chrome: brand stays independent; notifications, theme and routes live in the bottom dock. */
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
   useEffect(() => {
     const markChromeEntered = (event: Event) => {
@@ -17,11 +16,9 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
         ? 'maze-header-entered'
         : target.id === 'site-brand'
           ? 'maze-site-brand-entered'
-          : target.id === 'site-controls'
-            ? 'maze-controls-entered'
-            : target.id === 'site-brand-header'
-              ? 'maze-brand-entered'
-              : undefined;
+          : target.id === 'site-brand-header'
+            ? 'maze-brand-entered'
+            : undefined;
 
       if (enteredClass) document.body.classList.add(enteredClass);
     };
@@ -40,9 +37,6 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
         </span>
       </a>
 
-      <div id="site-controls" className="nav site-top-controls" aria-label="Appearance controls">
-        <ThemeSwitcher />
-      </div>
 
       <div id="site-header" data-maze-page={mazePage ? 'true' : undefined}>
         <SiteNavigation />
