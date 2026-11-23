@@ -26,11 +26,11 @@ function isCreateViewActive(): boolean {
 }
 
 const NAV_ICON_SOURCES: Record<NavIconName, string> = {
-  home: '/css/images/nav-home.svg',
-  explore: '/css/images/nav-explore.svg',
-  create: '/css/images/nav-create.svg',
-  notifications: '/css/images/nav-notifications.svg',
-  profile: '/css/images/nav-profile.svg',
+  home: '/css/images/nav/nav-home.svg',
+  explore: '/css/images/nav/nav-explore.svg',
+  create: '/css/images/nav/nav-create.svg',
+  notifications: '/css/nav/images/nav-notifications.svg',
+  profile: '/css/images/nav/nav-profile.svg',
 };
 
 function NavIconFallback({ name }: { name: NavIconName }) {

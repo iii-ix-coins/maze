@@ -79,7 +79,7 @@ body>#root>#site-brand {
 
 /* Paint the clipped dock surface on a pseudo-element so popovers can extend outside it. */
 .nav.site-bottom-nav::before {
-    --dock-cut: 12px;
+    --dock-cut: 24px;
     content: "";
     position: absolute;
     z-index: 0;
@@ -130,7 +130,7 @@ body>#root>#site-brand {
 
 .site-bottom-nav .nav-link,
 .site-bottom-nav .nav-notifications-trigger {
-    --dock-item-cut: 7px;
+    --dock-item-cut: 24px;
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
@@ -214,7 +214,7 @@ body>#root>#site-brand {
 }
 
 .nav-dock-create-icon {
-    --dock-item-cut: 7px;
+    --dock-item-cut: 24px;
     width: 42px;
     height: 42px;
     flex-basis: 42px;
@@ -326,8 +326,8 @@ body>#root>#site-brand {
     grid-template-columns: 18px;
     grid-template-rows: repeat(3, 18px);
     width: 18px;
-    height: 56px;
-    min-height: 56px;
+    height: 54px;
+    min-height: 54px;
     padding: 0;
     gap: 1px;
     border: 0;
@@ -338,7 +338,7 @@ body>#root>#site-brand {
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
-    --option-cut: 4px;
+    --option-cut: 6px;
     width: 18px;
     min-width: 18px;
     min-height: 18px;
@@ -398,9 +398,13 @@ body>#root>#site-brand {
 
     .site-bottom-nav .nav-link,
     .site-bottom-nav .nav-notifications-trigger {
-        min-height: 56px;
-        height: 56px;
+        Flex-basis: 54px;
+        width: 54px;
+        min-width: 54px;
+        min-height: 54px;
+        height: 54px;
         padding-inline: 1px;
+        justify-self: center;
     }
 
     .nav-dock-icon {
