@@ -58,7 +58,7 @@
 @media not (((min-width: 560px) and (min-aspect-ratio: 5/4)) or ((min-width: 420px) and (max-width: 559px) and (orientation: landscape))) {
     #mazeApp.in-menu .cg { --frame-split: calc(var(--frame-pad) * 2 + var(--frame-gap) - var(--cg-row)); }
     #mazeApp.in-menu .cg-rail { margin-top: var(--frame-split); }
-    #mazeApp.in-menu .cg-nav { background: linear-gradient(180deg, transparent, var(--frame-nav-fade, rgba(10,17,28,.92)) 38%); }
+    #mazeApp.in-menu .cg-nav { background: var(--surface-solid, #000000); }
     #mazeApp.in-menu[data-theme="light"] .cg-nav { --frame-nav-fade: rgba(255,255,255,.92); }
 }
 
