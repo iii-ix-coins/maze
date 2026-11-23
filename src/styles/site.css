@@ -36,7 +36,7 @@ body>#root>#site-brand {
     max-height: 30px;
 }
 
-/* Theme selection is a compact, borderless vertical control at the right edge of the dock. */
+/* Theme selection is a compact vertical stack of three square, chamfer-cut controls. */
 
 /* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
 #site-header {
@@ -65,12 +65,52 @@ body>#root>#site-brand {
     display: block;
     width: 100%;
     min-width: 0;
+    position: relative;
+    isolation: isolate;
     padding: 0;
-    border-radius: 0px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     overflow: visible;
 }
 
+/* Paint the clipped dock surface on a pseudo-element so popovers can extend outside it. */
+.nav.site-bottom-nav::before {
+    --dock-cut: 12px;
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border: 1px solid var(--ar-line);
+    background: var(--ar-fill-2);
+    box-shadow: var(--ar-glow);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    clip-path: polygon(
+        var(--dock-cut) 0,
+        100% 0,
+        100% calc(100% - var(--dock-cut)),
+        calc(100% - var(--dock-cut)) 100%,
+        0 100%,
+        0 var(--dock-cut)
+    );
+    -webkit-clip-path: polygon(
+        var(--dock-cut) 0,
+        100% 0,
+        100% calc(100% - var(--dock-cut)),
+        calc(100% - var(--dock-cut)) 100%,
+        0 100%,
+        0 var(--dock-cut)
+    );
+    pointer-events: none;
+}
+
 .site-bottom-nav .nav-inner {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     min-width: 0;
@@ -90,41 +130,52 @@ body>#root>#site-brand {
 
 .site-bottom-nav .nav-link,
 .site-bottom-nav .nav-notifications-trigger {
+    --dock-item-cut: 7px;
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 0;
     width: 100%;
     min-width: 0;
     min-height: 54px;
     height: 54px;
-    padding: 3px 0px;
-    border: 1px solid transparent;
-    border-radius: 0px;
-    clip-path: none;
+    padding: 3px 0;
+    border: 0;
+    border-radius: 0;
     background: transparent;
     box-shadow: none;
     color: var(--nav-muted);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0;
-    line-height: 1.1;
+    font-size: 0;
+    line-height: 0;
     text-align: center;
-    text-transform: none;
     white-space: nowrap;
     text-shadow: none;
     cursor: pointer;
-    transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+    transition: color 160ms ease;
+    clip-path: polygon(
+        var(--dock-item-cut) 0,
+        100% 0,
+        100% calc(100% - var(--dock-item-cut)),
+        calc(100% - var(--dock-item-cut)) 100%,
+        0 100%,
+        0 var(--dock-item-cut)
+    );
+    -webkit-clip-path: polygon(
+        var(--dock-item-cut) 0,
+        100% 0,
+        100% calc(100% - var(--dock-item-cut)),
+        calc(100% - var(--dock-item-cut)) 100%,
+        0 100%,
+        0 var(--dock-item-cut)
+    );
 }
 
-.site-bottom-nav .nav-link:hover:not(:disabled),
-.site-bottom-nav .nav-link:focus-visible {
-    color: var(--nav-text);
-    background: var(--nav-hover-bg);
-    border-color: var(--nav-border);
-    outline: none;
+.site-bottom-nav .nav-link:focus-visible,
+.site-bottom-nav .nav-notifications-trigger:focus-visible {
+    outline: 2px solid var(--nav-accent);
+    outline-offset: -3px;
 }
 
 .site-bottom-nav .nav-link.active {
@@ -142,72 +193,45 @@ body>#root>#site-brand {
 .nav-dock-icon {
     display: grid;
     place-items: center;
-    width: 25px;
-    height: 25px;
-    flex: 0 0 25px;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
     color: currentColor;
 }
 
-.nav-dock-icon > svg {
+.nav-dock-icon > svg,
+.nav-dock-image {
     display: block;
     width: 23px;
     height: 23px;
-}
-
-.nav-dock-label {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    object-fit: contain;
 }
 
 .site-bottom-nav .nav-dock-create {
-    gap: 2px;
+    gap: 0;
     color: var(--nav-text);
     background: transparent;
 }
 
-.site-bottom-nav .nav-dock-create:hover,
-.site-bottom-nav .nav-dock-create:focus-visible,
-.site-bottom-nav .nav-dock-create.active {
-    background: transparent;
-}
-
 .nav-dock-create-icon {
-    width: 43px;
-    height: 39px;
-    flex-basis: 39px;
-    border: 1px solid var(--ar-accent);
-    border-radius: 12px;
+    --dock-item-cut: 7px;
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border: 0;
+    border-radius: 0;
     background: var(--ar-accent);
     color: var(--ar-on-accent);
-    box-shadow: 0 0 0 3px var(--ar-line), 0 5px 18px var(--nav-shadow-soft, rgba(0, 0, 0, .2));
-    transform: translateY(-5px);
+    box-shadow: none;
+    transform: none;
+    clip-path: polygon(var(--dock-item-cut) 0, 100% 0, 100% calc(100% - var(--dock-item-cut)), calc(100% - var(--dock-item-cut)) 100%, 0 100%, 0 var(--dock-item-cut));
+    -webkit-clip-path: polygon(var(--dock-item-cut) 0, 100% 0, 100% calc(100% - var(--dock-item-cut)), calc(100% - var(--dock-item-cut)) 100%, 0 100%, 0 var(--dock-item-cut));
 }
 
-.nav-dock-create-icon span {
-    position: relative;
-    display: block;
-    width: 19px;
-    height: 19px;
-}
-
-.nav-dock-create-icon span::before,
-.nav-dock-create-icon span::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    display: block;
-    width: 19px;
-    height: 2px;
-    border-radius: 2px;
-    background: currentColor;
-    content: "";
-    transform: translate(-50%, -50%);
-}
-
-.nav-dock-create-icon span::after {
-    transform: translate(-50%, -50%) rotate(90deg);
+.nav-dock-create-icon .nav-dock-image,
+.nav-dock-create-icon > svg {
+    width: 23px;
+    height: 23px;
 }
 
 .site-bottom-nav .nav-dock-profile .user-avatar {
@@ -237,11 +261,6 @@ body>#root>#site-brand {
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
     transform: translateX(50%);
-}
-
-.site-bottom-nav .nav-notifications-trigger .nav-dock-label {
-    font-size: 8px;
-    letter-spacing: -.035em;
 }
 
 .site-bottom-nav .nav-notifications-heading {
@@ -301,14 +320,14 @@ body>#root>#site-brand {
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
-    --tt-size: 14px;
+    --tt-size: 18px;
     --tt-icon-size: 11px;
     --tt-pad: 0px;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-    width: 29px;
-    height: 51px;
-    min-height: 51px;
+    grid-template-columns: 18px;
+    grid-template-rows: repeat(3, 18px);
+    width: 18px;
+    height: 56px;
+    min-height: 56px;
     padding: 0;
     gap: 1px;
     border: 0;
@@ -319,15 +338,20 @@ body>#root>#site-brand {
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
-    --option-cut: 7px;
-    width: 100%;
-    min-height: 0;
-    height: 100%;
+    --option-cut: 4px;
+    width: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    height: 18px;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 0;
     border-radius: 0;
-    clip-path: polygon(var(--option-cut) 0, 100% 0, 100% calc(100% - var(--option-cut)), calc(100% - var(--option-cut)) 100%, 0 100%, 0 var(--option-cut));
     background: rgba(var(--ar-rgb), .063);
     color: var(--ar-soft);
     box-shadow: none;
+    clip-path: polygon(var(--option-cut) 0, 100% 0, 100% calc(100% - var(--option-cut)), calc(100% - var(--option-cut)) 100%, 0 100%, 0 var(--option-cut));
+    -webkit-clip-path: polygon(var(--option-cut) 0, 100% 0, 100% calc(100% - var(--option-cut)), calc(100% - var(--option-cut)) 100%, 0 100%, 0 var(--option-cut));
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option.is-active {
@@ -340,12 +364,6 @@ body>#root>#site-brand {
     filter: grayscale(1) brightness(.12);
 }
 
-@media (hover: hover) {
-    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option:not(.is-active):hover {
-        background: rgba(var(--ar-rgb), .16);
-        color: var(--ar-text);
-    }
-}
 
 
 @media (max-width: 720px) {
@@ -367,7 +385,7 @@ body>#root>#site-brand {
         border-right: 0;
         border-bottom: 0;
         border-left: 0;
-        border-radius: 17px 17px 0 0;
+        border-radius: 0;
     }
 
     .site-bottom-nav .nav-inner {
@@ -383,7 +401,6 @@ body>#root>#site-brand {
         min-height: 56px;
         height: 56px;
         padding-inline: 1px;
-        font-size: 9px;
     }
 
     .nav-dock-icon {
@@ -392,13 +409,14 @@ body>#root>#site-brand {
         flex-basis: 24px;
     }
 
-    .nav-dock-icon > svg {
+    .nav-dock-icon > svg,
+    .nav-dock-image {
         width: 22px;
         height: 22px;
     }
 
     .nav-dock-create-icon {
-        width: 41px;
+        width: 38px;
         height: 38px;
         flex-basis: 38px;
     }
@@ -407,14 +425,21 @@ body>#root>#site-brand {
 
 @media (max-width: 370px) {
 
-    .site-bottom-nav .nav-link,
-    .site-bottom-nav .nav-notifications-trigger {
-        font-size: 8px;
+    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
+        --tt-size: 16px;
+        --tt-icon-size: 10px;
+        grid-template-columns: 16px;
+        grid-template-rows: repeat(3, 16px);
+        width: 16px;
+        height: 50px;
+        min-height: 50px;
     }
 
-    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
-        width: 27px;
-        height: 49px;
+    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
+        width: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        height: 16px;
     }
 }
 

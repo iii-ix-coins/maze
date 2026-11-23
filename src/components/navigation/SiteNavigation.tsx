@@ -6,7 +6,7 @@ import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
-type NavIconName = 'home' | 'explore' | 'profile' | 'notifications';
+type NavIconName = 'home' | 'explore' | 'create' | 'profile' | 'notifications';
 type NavItem = {
   label: string;
   href: string;
@@ -25,7 +25,15 @@ function isCreateViewActive(): boolean {
   return view === null || view === 'create';
 }
 
-function NavIcon({ name }: { name: NavIconName }) {
+const NAV_ICON_SOURCES: Record<NavIconName, string> = {
+  home: '/css/images/nav-home.svg',
+  explore: '/css/images/nav-explore.svg',
+  create: '/css/images/nav-create.svg',
+  notifications: '/css/images/nav-notifications.svg',
+  profile: '/css/images/nav-profile.svg',
+};
+
+function NavIconFallback({ name }: { name: NavIconName }) {
   const common = {
     viewBox: '0 0 24 24',
     fill: 'none',
@@ -42,11 +50,30 @@ function NavIcon({ name }: { name: NavIconName }) {
       return <svg {...common}><path d="m3 10 9-7 9 7" /><path d="M5.5 9v11h13V9M9 20v-6h6v6" /></svg>;
     case 'explore':
       return <svg {...common}><circle cx="11" cy="11" r="7.2" /><path d="m16.4 16.4 4.1 4.1" /><path d="m8.8 13.2 1.5-4.4 4.4-1.5-1.5 4.4-4.4 1.5Z" /></svg>;
+    case 'create':
+      return <svg {...common}><path d="M12 5v14M5 12h14" /></svg>;
     case 'notifications':
       return <svg {...common}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" /><path d="M10 21h4" /></svg>;
     case 'profile':
       return <svg {...common}><circle cx="12" cy="8" r="3.4" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>;
   }
+}
+
+function NavIcon({ name }: { name: NavIconName }) {
+  const [imageUnavailable, setImageUnavailable] = useState(false);
+
+  if (imageUnavailable) return <NavIconFallback name={name} />;
+
+  return (
+    <img
+      className="nav-dock-image"
+      src={NAV_ICON_SOURCES[name]}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      onError={() => setImageUnavailable(true)}
+    />
+  );
 }
 
 function DockLink({ item, avatar }: { item: NavItem; avatar?: ReactNode }) {
@@ -58,12 +85,10 @@ function DockLink({ item, avatar }: { item: NavItem; avatar?: ReactNode }) {
       data-nav-key={item.key}
       aria-current={active ? 'page' : undefined}
       aria-label={item.label}
-      title={item.label}
     >
       <span className="nav-dock-icon" aria-hidden="true">
         {avatar ?? <NavIcon name={item.icon} />}
       </span>
-      <span className="nav-dock-label">{item.label}</span>
     </a>
   );
 }
@@ -104,7 +129,6 @@ function NotificationsMenu({ open, setOpen }: { open: boolean; setOpen: (open: b
         onClick={() => setOpen(!open)}
       >
         <span className="nav-dock-icon"><NavIcon name="notifications" /></span>
-        <span className="nav-dock-label">Notifications</span>
       </button>
       <section
         className="nav-notifications-panel"
@@ -148,14 +172,12 @@ export function SiteNavigation() {
               data-nav-key="maze"
               aria-current={isCreateViewActive() ? 'page' : undefined}
               aria-label="Create a Maze"
-              title="Create a Maze"
             >
-              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><span /></span>
-              <span className="nav-dock-label">Create</span>
+              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><NavIcon name="create" /></span>
             </a>
             <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
             <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />
-            <div className="nav-dock-theme-slot" role="group" aria-label="Theme selection" title="Choose theme">
+            <div className="nav-dock-theme-slot" role="group" aria-label="Theme selection">
               <ThemeSwitcher />
             </div>
           </div>

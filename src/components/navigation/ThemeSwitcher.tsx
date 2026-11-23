@@ -62,7 +62,6 @@ export function ThemeSwitcher() {
             role="radio"
             aria-checked={active}
             aria-label={`${THEME_LABELS[item]} theme`}
-            title={THEME_LABELS[item]}
             data-select-theme={item}
             tabIndex={active ? 0 : -1}
             onClick={() => selectTheme(item)}

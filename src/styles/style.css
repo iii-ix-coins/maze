@@ -1593,12 +1593,6 @@ html[data-theme="light"] .nav-brand-logo--black {
         border-color 180ms ease;
 }
 
-.nav-link:not(:disabled):hover {
-    color: var(--nav-text);
-    background: var(--nav-hover-bg);
-    border-color: var(--nav-border);
-}
-
 .nav-link:active {
     transform: scale(.96);
 }

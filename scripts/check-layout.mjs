@@ -332,8 +332,14 @@ if (
   notificationsIndex <= createIndex ||
   themeIndex <= notificationsIndex ||
   !navigationComponent.includes('No notifications yet') ||
+  navigationComponent.includes('nav-dock-label') ||
   navigationComponent.includes('MoreMenu') ||
-  navigationComponent.includes('Holders')
+  navigationComponent.includes('Holders') ||
+  !navigationComponent.includes("'/css/images/nav-home.svg'") ||
+  !navigationComponent.includes("'/css/images/nav-explore.svg'") ||
+  !navigationComponent.includes("'/css/images/nav-create.svg'") ||
+  !navigationComponent.includes("'/css/images/nav-notifications.svg'") ||
+  !navigationComponent.includes("'/css/images/nav-profile.svg'")
 ) {
   console.error('[layout] Brand must remain outside the dock; vertical theme selection and Notifications must be inside it, with no Holders/More entries.');
   process.exit(1);
@@ -493,15 +499,24 @@ if ((appTitleSource.match(/document\.title\s*=/g) || []).length !== 1 || !appTit
 const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 const themeSlotRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical\s*\{([^}]*)\}/s)?.[1] ?? '';
+const themeOptionRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical \.theme-toggle__option\s*\{([^}]*)\}/s)?.[1] ?? '';
 const themeSlotHostRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
+  !sharedSiteStyles.includes('.nav.site-bottom-nav::before') ||
   !sharedSiteStyles.includes('grid-template-columns: repeat(5, minmax(0, 1fr)) auto') ||
   !sharedSiteStyles.includes('#site-brand') ||
   !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
   !themeSlotHostRule.includes('width: max-content;') ||
-  !themeSlotRule.includes('border: 0;') ||
-  !themeSlotRule.includes('background: transparent;') ||
+  !themeSlotRule.includes('grid-template-columns: 18px;') ||
+  !themeSlotRule.includes('grid-template-rows: repeat(3, 18px);') ||
+  !themeOptionRule.includes('width: 18px;') ||
+  !themeOptionRule.includes('height: 18px;') ||
+  !themeOptionRule.includes('aspect-ratio: 1 / 1;') ||
+  !sharedSiteStyles.includes('clip-path: polygon(') ||
+  !sharedSiteStyles.includes('-webkit-clip-path: polygon(') ||
+  sharedSiteStyles.includes('.site-bottom-nav .nav-link:hover') ||
+  globalStyles.includes('.nav-link:not(:disabled):hover') ||
   !sharedSiteStyles.includes('.nav-notifications-panel') ||
   sharedSiteStyles.includes('#site-controls')
 ) {
