@@ -140,12 +140,13 @@ body.in-menu {
 body.in-menu #site-header {
     position: relative;
     top: auto;
+    bottom: auto;
+    left: auto;
+    transform: none;
     flex: 0 0 auto;
 }
 
-body.in-menu #site-brand-header,
-body.in-menu #site-interaction-bar,
-body.in-menu #site-share-modal {
+body.in-menu #site-brand-header {
     display: none !important;
 }
 

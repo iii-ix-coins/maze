@@ -424,9 +424,6 @@
         & .footer-pulse { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); animation: maze-signal 2s ease-in-out infinite; }
     }
 
-    /* while a game is on, the like/share dock sits in its normal slot instead of floating over the board */
-    body:not(.in-menu):has(#site-maze-app) .site-interaction-bar-host { position: static; }
-
     /* ——— keyframes (maze-prefixed so merged code can't clash) ——— */
     @keyframes maze-signal { 0%, 100% { opacity: 0.65; transform: scale(0.88); } 50% { opacity: 1; transform: scale(1.14); } }
     @keyframes maze-orbit { to { transform: rotate(360deg); } }

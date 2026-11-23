@@ -7,7 +7,7 @@ const required = [
   'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.mts', 'package.json',
   'src/app', 'src/components', 'src/features/home', 'src/features/market',
   'src/features/holders', 'src/features/coin',
-  'src/features/interaction', 'src/features/theme', 'src/features/maze/lobby',
+  'src/features/theme', 'src/features/maze/lobby',
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
   'src/services', 'src/hooks', 'src/types', 'src/styles',
@@ -23,7 +23,6 @@ const required = [
   'src/components/account/UserAvatar.tsx', 'shared/identity/identity-store.js',
   'shared/identity/identity-routes.js',
   'src/features/profile/ProfilePage.tsx', 'src/app/routes.ts', 'src/app/routes.test.ts',
-  'src/features/interaction/InteractionBar.tsx',
   'src/features/theme/MazeBackground.tsx',
   'src/features/maze/MazePage.tsx', 'src/features/maze/MazeMarkup.tsx', 'src/features/maze/engine-entry.ts',
   'src/features/maze/engine/frame.ts', 'src/features/maze/canvas/index.ts',
@@ -36,6 +35,41 @@ if (missing.length) {
   process.exit(1);
 }
 
+const retiredInteractionPaths = [
+  'src/features/interaction',
+  'engines/interaction-engine',
+  'shared/interactionClient.js',
+  'shared/state/interactionState.js',
+  'shared/state/interaction-state.json',
+];
+for (const retiredPath of retiredInteractionPaths) {
+  if (fs.existsSync(path.join(root, retiredPath))) {
+    console.error(`[layout] retired Interaction Bar code remains: ${retiredPath}`);
+    process.exit(1);
+  }
+}
+const interactionFreeSources = [
+  'src/components/layout/SiteChromeHosts.tsx',
+  'src/app/router.tsx',
+  'src/styles/site.css',
+  'src/styles/style.css',
+  'src/features/maze/styles/maze-unify.css',
+  'server.js',
+  'start.js',
+  'shared/api-routes.json',
+];
+for (const file of interactionFreeSources) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  if (/InteractionBar|site-interaction-bar|site-share-modal|\/api\/stats|interaction-engine|interactionClient|INTERACTION_HOST/.test(source)) {
+    console.error(`[layout] retired Interaction Bar references remain in ${file}.`);
+    process.exit(1);
+  }
+}
+const chromeSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
+if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<InteractionBar')) {
+  console.error('[layout] SiteChromeHosts must mount only the shared SiteNavigation chrome.');
+  process.exit(1);
+}
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
 const walletTeardownSource = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.ts'), 'utf8');
 const walletTeardownTests = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.test.ts'), 'utf8');
@@ -141,7 +175,6 @@ const activeFrontend = [
   'src/features/maze/MazePage.tsx',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
-  'src/features/interaction/InteractionBar.tsx',
   'src/features/market/MarketSummary.tsx',
   'src/features/market/MarketPage.tsx',
   'src/features/coin/CoinPage.tsx',
@@ -420,7 +453,6 @@ for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.
 
 const apiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
 for (const apiConsumer of [
-  'src/features/interaction/InteractionBar.tsx',
   'src/features/holders/useHolders.ts',
   'src/features/coin/CoinPage.tsx',
   'src/features/market/useMarketData.ts',

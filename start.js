@@ -100,16 +100,6 @@ const SERVICES = [
             'index.js'
         ),
         restart: true
-    },
-    {
-        name: 'Interaction Engine',
-        script: path.join(
-            ROOT_DIR,
-            'engines',
-            'interaction-engine',
-            'index.js'
-        ),
-        restart: true
     }
 ];
 

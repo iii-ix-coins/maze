@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { SiteNavigation } from '../navigation/SiteNavigation';
-import { InteractionBar } from '../../features/interaction/InteractionBar';
 
 /**
  * Persistent site chrome.
  * HomeHeroSlider is mounted by AppRouter after HomePage content.
- * Existing IDs and animation hooks are preserved.
+ * The site navigation is the only persistent site chrome host.
  */
 export function SiteChromeHosts({
   mazePage = false
@@ -30,10 +29,6 @@ export function SiteChromeHosts({
         case 'site-brand-header':
           enteredClass = 'maze-brand-entered';
           break;
-
-        case 'site-interaction-bar':
-          enteredClass = 'maze-interaction-entered';
-          break;
       }
 
       if (enteredClass) {
@@ -50,11 +45,9 @@ export function SiteChromeHosts({
 
   return (
     <>
-      <div id="site-header">
+      <div id="site-header" data-maze-page={mazePage ? 'true' : undefined}>
         <SiteNavigation />
       </div>
-
-      {!mazePage && <InteractionBar />}
     </>
   );
 }

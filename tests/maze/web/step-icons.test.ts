@@ -69,19 +69,17 @@ test('the active React wizard drives every panel from the selected step state', 
     }
     assert.match(reactMenu, /state\.step === step \? ' is-active'/);
 });
-test('Maze route omits the generic Home brand headline and interaction dock', () => {
+test('Maze route keeps Navigation in its top-page position while standard routes use the bottom dock', () => {
     assert.match(router, /mazePage=\{route\.id === 'maze'\}/,
         'Router must derive Maze chrome state from the shared route manifest');
     assert.equal(siteRoutes.routes.find((route) => route.id === 'maze')?.page, 'maze',
         'Maze must have a dedicated route shell rather than being dispatched as HomePage');
 
     assert.match(siteChrome, /<SiteNavigation \/>/);
-
-    assert.match(
-        siteChrome,
-        /\{!mazePage && \([\s\S]*?<InteractionBar \/>[\s\S]*?\)\}/,
-        'Brand headline and InteractionBar must be hidden on the Maze route'
-    );
+    assert.match(siteChrome, /data-maze-page=\{mazePage \? 'true' : undefined\}/,
+        'The shared chrome host must expose the route-specific navigation placement');
+    assert.doesNotMatch(siteChrome, /InteractionBar|interaction-bar/,
+        'The retired interaction dock must not be mounted');
 
     assert.doesNotMatch(homePage, /<SiteChromeHosts/,
         'HomePage must not own the shared site chrome');

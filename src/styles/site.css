@@ -6,22 +6,74 @@
 @import "./home-shared.css";
 @import "./arena.css";
 
-/* The shared header must stay above the Maze page surface on Maze routes. */
+/* Keep the Maze navigation above the game surface. */
 body.in-menu #site-header {
     z-index: 1000;
 }
 
 /*
- * SINGLE HEADER LAYOUT OWNER
+ * SINGLE NAVIGATION DOCK LAYOUT OWNER
  *
- * style.css owns navigation component appearance and arena.css owns theme
- * colours. This file alone owns header placement, responsive rows and menu
- * positioning. Keep the JSX row grouping in SiteNavigation.tsx in sync.
+ * style.css owns navigation controls and arena.css owns theme colours. This
+ * file owns the dock position, responsive rows and bottom-dock menu direction.
+ * Maze routes keep their existing top navigation position.
  */
+#site-header {
+    position: fixed;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    width: min(100% - 2 * var(--gutter), var(--page-max));
+    margin: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+#site-header > .header {
+    width: 100%;
+    min-width: 0;
+    pointer-events: auto;
+}
+
+#site-header[data-maze-page="true"] {
+    position: sticky;
+    top: 7px;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    z-index: 60;
+}
+
+@media (max-width: 720px) {
+    #site-header[data-maze-page="true"] {
+        position: static;
+        top: auto;
+        left: auto;
+        bottom: auto;
+        transform: none;
+    }
+}
+
+#site-header:not([data-maze-page="true"]) .nav-inner > .nav-content {
+    top: auto;
+    bottom: calc(100% + 9px);
+}
+
+#site-header:not([data-maze-page="true"]) .nav-menu .nav-dropdown,
+#site-header:not([data-maze-page="true"]) .nav-wallet-menu,
+#site-header:not([data-maze-page="true"]) .nav-wallet-feedback {
+    top: auto;
+    bottom: calc(100% + 8px);
+}
 .nav-inner {
     display: grid;
     align-items: center;
     min-width: 0;
+    padding: 7px 10px;
 }
 
 .nav-inner > .nav-brand {

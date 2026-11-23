@@ -9,14 +9,6 @@ require('dotenv').config();
 
 
 const {
-    sendInteraction
-} = require('./shared/interactionClient');
-
-const {
-    getInteractionState
-} = require('./shared/state/interactionState');
-
-const {
     getHolderState
 } = require('./shared/state/holderState');
 
@@ -443,106 +435,6 @@ app.get(
         }
     }
 );
-/*
- * --------------------------------------------------
- * Interaction API
- * --------------------------------------------------
- */
-
-app.get(
-    API_PATHS.stats,
-    shortApiCache,
-    (req, res) => {
-
-        const state =
-            getInteractionState();
-
-        if (
-            state &&
-            state.stats
-        ) {
-
-            return res.json(
-                state.stats
-            );
-        }
-
-        return res.status(503).json({
-            error:
-                'Interaction engine is warming up.'
-        });
-    }
-);
-
-async function handleInteraction(
-    action,
-    req,
-    res
-) {
-    try {
-
-        const result =
-            await sendInteraction(
-                action
-            );
-
-        return res.status(200).json({
-            accepted: true,
-
-            action,
-
-            stats:
-                result?.stats ||
-                null
-        });
-
-    } catch (error) {
-
-        console.warn(
-            `[Web] Interaction "${action}" failed:`,
-            error?.message ||
-            error
-        );
-
-        return res.status(503).json({
-            accepted: false,
-
-            error:
-                'Interaction engine is temporarily unavailable.'
-        });
-    }
-}
-
-app.post(
-    API_PATHS.statsView,
-    (req, res) =>
-        handleInteraction(
-            'view',
-            req,
-            res
-        )
-);
-
-app.post(
-    API_PATHS.statsLike,
-    (req, res) =>
-        handleInteraction(
-            'like',
-            req,
-            res
-        )
-);
-
-app.post(
-    API_PATHS.statsShare,
-    (req, res) =>
-        handleInteraction(
-            'share',
-            req,
-            res
-        )
-);
-
 /*
  * --------------------------------------------------
  * Holder API

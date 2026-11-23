@@ -554,7 +554,7 @@ h3 {
 }
 
 /* —— 7 · SURFACES, BUTTONS, DOCK ————————————————————————————————————— */
-:is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .interact-btn, .spot) {
+:is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .spot) {
     border-color: transparent;
     --market-inner-cut: 13px;
     clip-path: polygon(var(--market-inner-cut) 0,
@@ -590,15 +590,6 @@ h3 {
 .token-summary-link:hover {
     background: var(--ar-text) !important;
     color: var(--ar-bg) !important;
-}
-
-.interaction-bar {
-    border-radius: var(--r-lg);
-    border: 1px solid var(--ar-line);
-    background: var(--ar-fill-2);
-    box-shadow: var(--ar-glow);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
 }
 
 :focus-visible {

@@ -1,5 +1,13 @@
 # برنامه و وضعیت مهاجرت به Vite + React
 
+## اصلاح ساختار Navigation و حذف کامل Interaction Bar — 2026-11-23
+
+1. کامپوننت `InteractionBar` و تمام دکمه‌ها و رفتارهای آن (Tips، ثبت Views، Like، Share، کپی لینک و Share Modal) از React حذف شدند.
+2. endpointهای اختصاصی `/api/stats*`، کلاینت داخلی، snapshot آمار و `Interaction Engine` بازنشسته شدند؛ این سرویس هیچ مصرف‌کنندهٔ دیگری در پروژه نداشت.
+3. `SiteNavigation` در صفحات عادی به جایگاه dock پایین صفحه منتقل شد و پوسته و دکمه‌های Navigation ظاهر شیشه‌ای و دکمه‌ای dock قبلی را گرفتند. در صفحات Maze، Navigation در موقعیت بالایی قبلی باقی ماند.
+4. Wallet Connect، احراز هویت، Theme Switcher، Game View Switcher، APIهای Market و Holders، موتور بازی و ارتباط WebSocket در این تغییر حفظ شدند.
+
+
 ## معماری مقصد
 
 - تمام رابط کاربری سایت و بازی: React Components
@@ -17,12 +25,12 @@ React مسئول UI، دسترس‌پذیری و چرخه عمر کامپونن�
 1. یک Vite root و یک React root برای مسیرهای Frontend حفظ شده است.
 2. Home shell به React منتقل شده است.
 3. Navigation، منوی بازشونده، حالت موبایل، Theme Switcher و Create/Rooms/Live selector به React Components تبدیل شده‌اند.
-4. Brand Header، Interaction Bar، شمارنده‌های Views/Likes/Shares، دکمه‌های Like/Share، Share Modal و Tips action به React منتقل شده‌اند.
-5. مسیرهای فعلی API تعاملات (`/api/stats`, `/api/stats/view`, `/api/stats/like`, `/api/stats/share`) بدون تغییر نگه داشته شده‌اند.
+4. Brand Header به React منتقل شد؛ Interaction Bar و امکانات آن در پاک‌سازی مورخ 2026-11-23 به‌طور کامل بازنشسته شدند.
+5. مسیرهای API تعاملات در پاک‌سازی مورخ 2026-11-23 حذف شدند؛ این مسیرها دیگر بخشی از قرارداد فعلی نیستند.
 6. ساختار ثابت Maze از HTML string به JSX تبدیل شده است؛ ۸۳ شناسه اصلی در JSX حفظ شده‌اند تا موتور فعلی همان عناصر مورد انتظارش را پیدا کند.
 7. `MazePage` lifecycle و بارگذاری موتور را کنترل می‌کند؛ موتور TypeScript پس از Commit شدن رابط React اجرا می‌شود.
 8. اسکریپت‌های قدیمی Home از مسیر فعال حذف شده‌اند؛ صفحات فعال فقط ورودی مشترک React را بارگذاری می‌کنند.
-9. فایل‌های Backend و قراردادهای API/WebSocket در این فاز تغییر داده نشده‌اند.
+9. فایل‌های Backend و قراردادهای API/WebSocket در آن فاز تغییر داده نشدند؛ حذف صریح سرویس تعاملات در پاک‌سازی مورخ 2026-11-23 استثنای بعدی این قاعده است.
 
 ### انجام‌شده در فاز دوم — رابط بازی React
 

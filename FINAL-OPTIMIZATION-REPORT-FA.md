@@ -10,10 +10,10 @@
 - AppKit و Solana adapter فقط با اولین درخواست کاربر برای اتصال کیف پول بارگذاری می‌شوند.
 - پاسخ‌های JSON متنی بزرگ با gzip بومی Node فشرده می‌شوند؛ برای این کار dependency جدید اضافه نشده است.
 - فایل‌های public در production با cache هفت‌روزه و فایل‌های hashدار build با cache یک‌ساله و immutable سرو می‌شوند.
-- پاسخ‌های feed و stats هدر کوتاه `max-age=2, stale-while-revalidate=10` می‌گیرند.
+- پاسخ‌های feed هدر کوتاه `max-age=2, stale-while-revalidate=10` می‌گیرند؛ endpointهای آماری Interaction در پاک‌سازی بعدی حذف شدند.
 - خواندن snapshotهای JSON با cache مبتنی بر `mtime` و اندازه فایل انجام می‌شود.
 - خروجی Top Holders برای سه ثانیه cache می‌شود تا SQLite همگام برای هر درخواست دوباره query نشود.
-- polling آمار، Holder و Market در تب مخفی متوقف و هنگام بازگشت تب دوباره اجرا می‌شود.
+- polling Holder و Market در تب مخفی متوقف و هنگام بازگشت تب دوباره اجرا می‌شود؛ polling آمار Interaction بعداً به‌طور کامل حذف شد.
 - حلقه RAF بازی در تب مخفی متوقف می‌شود و با بازگشت تب دوباره شروع می‌شود.
 - محاسبه heat هولدرها از O(n²) به O(n) تبدیل شده؛ ردیف‌ها memo شده‌اند و `aria-live` از لیست ۱۰۰تایی برداشته شده است.
 - تغییر تم از View Transitions استفاده می‌کند، transition طولانی background حذف شده و همگام‌سازی دو کلید تم بین تب‌ها اصلاح شده است.

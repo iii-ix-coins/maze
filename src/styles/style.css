@@ -384,7 +384,6 @@
     /* Brand glyphs are navy-on-black SVGs: lift them so they read on the dark canvas */
     .brand-logo-img,
     .banner-logo,
-    .popup-img,
     .token-summary-icon {
         image-rendering: auto;
     }
@@ -554,8 +553,8 @@
         }
     }
 
-    /* Persistent chrome: each region animates only on its first appearance.
-       SiteChromeHosts marks each region as entered after its animation ends. */
+    /* Persistent chrome animates only on its first appearance.
+       SiteChromeHosts marks the navigation and brand region after entrance. */
 
     body.page-loaded:not(.maze-header-entered) #site-header {
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 0ms backwards;
@@ -563,10 +562,6 @@
 
     body.page-loaded:not(.maze-brand-entered) #site-brand-header {
         animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
-    }
-
-    body.page-loaded:not(.maze-interaction-entered) #site-interaction-bar {
-        animation: maze-unified-enter 800ms var(--maze-enter-easing) 140ms backwards;
     }
 
     /* Route content: a fresh keyed .route-page enters on every soft navigation. */
@@ -581,7 +576,6 @@
 
         body.page-loaded #site-header,
         body.page-loaded #site-brand-header,
-        body.page-loaded #site-interaction-bar,
         body.page-loaded .route-page {
             animation: none !important;
             translate: none !important;
@@ -619,56 +613,16 @@
         display: flex;
         flex-direction: column;
         gap: var(--section-gap);
-        padding-block: 9px calc(80px + env(safe-area-inset-bottom));
+        padding-block: 9px calc(108px + env(safe-area-inset-bottom));
     }
 
     /* every mounted block is a centred column */
-    body>#root>[id^="site-"]:not(#site-share-modal) {
+    body>#root>[id^="site-"] {
         width: min(100% - 2 * var(--gutter), var(--page-max));
         margin-inline: auto;
     }
 
-    .site-share-modal-host {
-        display: contents;
-    }
 
-    /* Header host sticks; compaction is toggled by fx.js via html[data-scrolled] */
-    #site-header {
-        position: sticky;
-        top: 7px;
-        z-index: 60;
-    }
-
-    /* Interaction dock: floats at the bottom of the viewport until its natural slot */
-    .site-interaction-bar-host {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: calc(18px + env(safe-area-inset-bottom));
-        z-index: 80;
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        column-gap: 8px;
-        pointer-events: none;
-    }
-
-    .site-interaction-bar-host>.interaction-bar {
-        grid-column: 2;
-    }
-
-
-    .site-interaction-bar-host>* {
-        pointer-events: auto;
-    }
-
-
-    @media (max-width: 720px) {
-
-        #site-header {
-            position: static;
-        }
-    }
 }
 
 /* ==========================================================================
@@ -679,7 +633,7 @@
     /* —— 6.1 Tile recipe: glass tile + cursor spotlight ring ————————————
        Every "label / value" card on the site shares this surface.            */
     :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot),
+        .coin-period-card, .bar-box, .change-box, .spot),
     .market-feature:not(.market-feature--compact) .token-summary-item {
         position: relative;
         isolation: isolate;
@@ -692,7 +646,7 @@
     }
 
     :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::before,
+        .coin-period-card, .bar-box, .change-box, .spot)::before,
     .market-feature:not(.market-feature--compact) .token-summary-item::before {
         content: "";
         position: absolute;
@@ -715,7 +669,7 @@
     }
 
     :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .interact-btn, .spot)::after,
+        .coin-period-card, .bar-box, .change-box, .spot)::after,
     .market-feature:not(.market-feature--compact) .token-summary-item::after {
         content: "";
         position: absolute;
@@ -732,10 +686,10 @@
     @media (hover: hover) {
 
         :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::before,
+            .coin-period-card, .bar-box, .change-box, .spot):hover::before,
         .market-feature:not(.market-feature--compact) .token-summary-item:hover::before,
         :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .bar-box, .change-box, .interact-btn, .spot):hover::after,
+            .coin-period-card, .bar-box, .change-box, .spot):hover::after,
         .market-feature:not(.market-feature--compact) .token-summary-item:hover::after {
             opacity: 1;
         }
@@ -768,7 +722,7 @@
 
     /* Panel recipe (large surfaces) */
     :is(.slider-card, .coin-hero, .coin-address-card, .coin-section,
-        .holders-box, .modal-box, .interaction-bar) {
+        .holders-box) {
         position: relative;
         border-radius: var(--r-xl);
         corner-shape: var(--corner, round);
@@ -916,16 +870,6 @@
         transform: rotate(12deg) scale(1.1);
     }
 
-    .site-interaction-bar-host>.nav-icon {
-        width: 44px;
-        height: 44px;
-        background: oklch(0.17 0.03 262 / 0.78);
-        border-color: var(--stroke-hi);
-        -webkit-backdrop-filter: blur(20px) saturate(1.6);
-        backdrop-filter: blur(20px) saturate(1.6);
-        box-shadow: var(--shadow-2), 0 0 0 1px oklch(0 0 0 / 0.35);
-    }
-
     .nav-icon {
         flex: none;
         display: grid;
@@ -1051,8 +995,7 @@
         color: var(--text-soft);
     }
 
-    .mint-copy-btn,
-    .share-copy-btn {
+    .mint-copy-btn {
         flex: none;
         display: grid;
         place-items: center;
@@ -1064,35 +1007,30 @@
         transition: background var(--t-base), transform var(--t-base) var(--ease-spring), box-shadow var(--t-base);
     }
 
-    .mint-copy-btn:hover,
-    .share-copy-btn:hover {
+    .mint-copy-btn:hover {
         background: oklch(1 0 0 / 0.1);
         transform: scale(1.08);
     }
 
-    .mint-copy-btn:active,
-    .share-copy-btn:active {
+    .mint-copy-btn:active {
         transform: scale(0.9);
     }
 
-    .mint-copy-btn img,
-    .share-copy-btn img {
+    .mint-copy-btn img {
         width: 15px;
         height: 15px;
         object-fit: contain;
         filter: brightness(2.8) saturate(1.2);
     }
 
-    .mint-copy-btn.is-copied,
-    .share-copy-btn.is-copied {
+    .mint-copy-btn.is-copied {
         background: var(--mint);
         border-color: transparent;
         box-shadow: var(--glow-mint);
         animation: pop-in 0.5s var(--ease-spring);
     }
 
-    .mint-copy-btn.is-copied img,
-    .share-copy-btn.is-copied img {
+    .mint-copy-btn.is-copied img {
         filter: brightness(0.25);
     }
 
@@ -1286,140 +1224,6 @@
 
     }
 
-    /* —— 6.4 INTERACTION BAR ————————————————————————————————————— */
-    .interaction-bar {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 6px;
-        border-radius: var(--r-pill);
-        background: var(--page-max);
-        box-shadow: var(--shadow-3);
-    }
-
-    .interact-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        padding: 9px 17px 9px 14px;
-        border-radius: var(--r-pill);
-        box-shadow: none;
-        background: transparent;
-        border-color: transparent;
-        color: var(--text-soft);
-        font-family: var(--font-mono);
-        font-size: 0.9rem;
-        font-weight: 500;
-        font-variant-numeric: tabular-nums;
-        transition: background var(--t-base), color var(--t-base), transform var(--t-base) var(--ease-spring);
-    }
-
-    .interact-btn img {
-        width: 20px;
-        height: 18px;
-        object-fit: contain;
-        filter: brightness(2.9) saturate(1.3);
-        transition: transform var(--t-base) var(--ease-spring), filter var(--t-base);
-    }
-
-    button.interact-btn:hover {
-        background: var(--veil);
-        color: var(--text);
-    }
-
-    button.interact-btn:active {
-        transform: scale(0.92);
-    }
-
-    .interact-btn.view-only {
-        cursor: default;
-    }
-
-    /* Tips button: use the supplied SVG without recoloring the logo itself. */
-    .interact-btn.ttips {
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .interact-btn.ttips img {
-        width: 20px;
-        height: 20px;
-        filter: none;
-    }
-
-    .interact-btn.ttips:hover {
-        color: var(--mint);
-        background: oklch(0.87 0.17 170 / 0.30);
-    }
-
-    .slider-card.tips-target-highlight {
-        animation: tips-target-pulse 1.35s ease-out;
-    }
-
-    @keyframes tips-target-pulse {
-
-        0%,
-        100% {
-            box-shadow: var(--shadow-2);
-        }
-
-        35% {
-            box-shadow: 0 0 0 2px var(--mint), 0 0 34px oklch(0.87 0.17 170 / 0.42);
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .slider-card.tips-target-highlight {
-            animation: none;
-            outline: 2px solid var(--mint);
-        }
-    }
-
-
-    /* → coral */
-
-
-    .tlike.beat-anim img {
-        animation: heartbeat 0.1s var(--ease-out);
-    }
-
-    .tlike.beat-anim {
-        color: var(--coral);
-    }
-
-    @keyframes heartbeat {
-        0% {
-            transform: scale(1);
-        }
-
-
-        65% {
-            transform: scale(0.9);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    /* spotlight off for the dock buttons (the dock itself is the surface) */
-    .interact-btn::before,
-    .interact-btn::after {
-        display: none;
-    }
-
-    @media (max-width: 400px) {
-        .interaction-bar {
-            gap: 2px;
-            padding: 4px;
-        }
-
-        .interact-btn {
-            gap: 6px;
-            padding: 8px 10px;
-        }
-    }
-
     /* —— 6.5 BRAND HEADER = site footer hero ————————————————————————— */
     .brand-header {
         isolation: isolate;
@@ -1600,113 +1404,6 @@
     }
 
 
-    /* —— 6.6 SHARE MODAL ————————————————————————————————————————————— */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 400;
-        display: grid;
-        place-items: center;
-        padding: 20px;
-        background: oklch(0.07 0.02 262 / 0.68);
-        opacity: 0;
-        visibility: hidden;
-        -webkit-backdrop-filter: blur(0px);
-        backdrop-filter: blur(0px);
-        transition: opacity var(--t-base), visibility 0s var(--t-base), backdrop-filter var(--t-slow), -webkit-backdrop-filter var(--t-slow);
-    }
-
-    .modal-overlay.active {
-        opacity: 1;
-        visibility: visible;
-        -webkit-backdrop-filter: blur(16px) saturate(1.3);
-        backdrop-filter: blur(16px) saturate(1.3);
-        transition-delay: 0s;
-    }
-
-    .modal-box {
-        width: min(100%, 440px);
-        padding: 34px 28px 28px;
-        text-align: center;
-        overflow: hidden;
-        background: linear-gradient(160deg, oklch(0.27 0.045 260 / 0.95), oklch(0.17 0.03 262 / 0.97));
-        border-color: var(--stroke-hi);
-        transform: translateY(28px) scale(0.92);
-        opacity: 0;
-        transition: transform var(--t-slow) var(--ease-spring), opacity var(--t-base);
-    }
-
-    .modal-box::before {
-        content: "";
-        position: absolute;
-        inset: 0 12% auto;
-        height: 1px;
-        pointer-events: none;
-        background: linear-gradient(90deg, transparent, oklch(0.87 0.17 170 / 0.9), transparent);
-    }
-
-    .modal-overlay.active .modal-box {
-        transform: none;
-        opacity: 1;
-    }
-
-    .popup-img {
-        width: 78px;
-        height: auto;
-        margin: 0 auto 16px;
-        filter: brightness(2.7) saturate(1.35) drop-shadow(0 0 26px oklch(0.75 0.12 250 / 0.6));
-    }
-
-    .modal-box h3 {
-        font-size: var(--fs-xl);
-    }
-
-    .modal-box p {
-        margin: 6px 0 22px;
-        color: var(--text-mute);
-    }
-
-    .copy-box {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 5px 5px 16px;
-        border-radius: var(--r-pill);
-        background: var(--field-bg);
-        border: 1px solid var(--stroke);
-    }
-
-    .copy-box input {
-        flex: 1;
-        min-width: 0;
-        border: 0;
-        outline: 0;
-        background: transparent;
-        font-family: var(--font-mono);
-        font-size: 0.82rem;
-        color: var(--text-soft);
-        text-overflow: ellipsis;
-    }
-
-    .close-modal {
-        margin-top: 20px;
-        padding: 0.72rem 1.8rem;
-        border-radius: var(--r-pill);
-        font-size: var(--fs-sm);
-        color: var(--text-soft);
-        border: 1px solid var(--stroke-hi);
-        background: var(--veil);
-        transition: background var(--t-base), color var(--t-base), transform var(--t-base) var(--ease-spring);
-    }
-
-    .close-modal:hover {
-        background: oklch(1 0 0 / 0.12);
-        color: var(--text);
-    }
-
-    .close-modal:active {
-        transform: scale(0.95);
-    }
 }
 
 /* ==========================================================================
@@ -1870,8 +1567,7 @@
 
     .backdrop,
     .scroll-progress,
-    .nav,
-    .interaction-bar {
+    .nav {
         display: none !important;
     }
 
@@ -2009,12 +1705,13 @@ html[data-theme="grass"] .nav {
     min-width: 0;
     color: var(--nav-text);
 
-    /* Invisible bar: the links sit directly on the page. */
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    /* Navigation occupies the former interaction dock position. */
+    background: var(--ar-fill-2);
+    border: 1px solid var(--ar-line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--ar-glow);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
 }
 
 .nav *,
@@ -2027,7 +1724,6 @@ html[data-theme="grass"] .nav {
     width: min(1440px, 100%);
     min-height: 0;
     margin-inline: auto;
-    padding: 0;
 }
 
 /* Brand */
@@ -2166,10 +1862,15 @@ html[data-theme="light"] .nav-brand-logo--black {
     justify-content: center;
     min-height: var(--nav-control-height);
     height: var(--nav-control-height);
-    padding-inline: 12px;
+    padding-inline: 13px;
+    border: 1px solid transparent;
+    border-radius: var(--r-pill);
+    background: transparent;
     color: var(--nav-muted);
+    font-family: inherit;
+    font-size: var(--nav-fs);
+    font-weight: 600;
     white-space: nowrap;
-
 
     cursor: pointer;
 
@@ -2179,6 +1880,12 @@ html[data-theme="light"] .nav-brand-logo--black {
         border-color 180ms ease;
 }
 
+.nav-link:not(:disabled):hover {
+    color: var(--nav-text);
+    background: var(--nav-hover-bg);
+    border-color: var(--nav-border);
+}
+
 .nav-link:active {
     transform: scale(.96);
 }
@@ -2186,6 +1893,7 @@ html[data-theme="light"] .nav-brand-logo--black {
 .nav-link.active {
     color: var(--nav-active-text);
     background: var(--nav-active-bg);
+    border-color: var(--nav-border);
 }
 
 .nav-link.active::before {

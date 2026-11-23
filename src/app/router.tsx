@@ -68,7 +68,7 @@ export function AppRouter() {
 
   return (
     <>
-      {/* Persistent site navigation and interaction dock */}
+      {/* Persistent site navigation */}
       <SiteChromeHosts
         mazePage={route.id === 'maze'}
       />
