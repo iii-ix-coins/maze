@@ -1,7 +1,5 @@
-/* Shared feature primitives used on Home and feature routes.
-   Loaded with the site shell so Home is styled on direct entry and refresh.
-   Feature-specific page rules remain in the lazy feature-pages.css chunk. */
-/* Shared Home and feature-page primitives. */
+/* Shared page-shell and feature primitives. Loaded with the site shell so
+   direct entry and client-side navigation use the same page geometry. */
 @layer pages {
   .feature-page-shell {
     width: min(1180px, calc(100% - 40px));
@@ -12,6 +10,21 @@
 
   .site-home-content {
     padding-top: 26px;
+  }
+
+  /* Non-home feature routes use a tighter top offset than the Home shell. */
+  .feature-page-shell:not(.site-home-content) {
+    width: min(1180px, calc(100% - 40px));
+    margin: clamp(8px, 1.5vw, 16px) auto 96px;
+    display: grid;
+    gap: clamp(20px, 3vw, 30px);
+  }
+
+  @media (max-width: 650px) {
+    .feature-page-shell:not(.site-home-content) {
+      width: min(100% - 24px, 1180px);
+      margin-top: 20px;
+    }
   }
 
   .feature-page-title {

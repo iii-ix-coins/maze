@@ -1,3 +1,13 @@
+/* Home-only registration and animation for the decorative rotating rings. */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes spin-angle {
+  to { --angle: 360deg; }
+}
+
 /* ==========================================================================
    home-style.css  —  index.html
    banner (hero) · slider · token summary (bento) · live bar & ticket cards
@@ -431,6 +441,8 @@
         border: 0;
         border-radius: 0;
         outline: 0;
+        clip-path: polygon(var(--market-inner-cut) 0, 100% 0, 100% calc(100% - var(--market-inner-cut)), calc(100% - var(--market-inner-cut)) 100%, 0 100%, 0 var(--market-inner-cut));
+        -webkit-clip-path: polygon(var(--market-inner-cut) 0, 100% 0, 100% calc(100% - var(--market-inner-cut)), calc(100% - var(--market-inner-cut)) 100%, 0 100%, 0 var(--market-inner-cut));
     }
 
     .site-home-content .market-feature .token-summary-item:nth-child(3) {

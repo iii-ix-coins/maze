@@ -1,5 +1,4 @@
 import { MAZE_VIEW_URLS } from '../maze/maze-routes';
-import '../../styles/feature-pages.css';
 import './explore-page.css';
 
 function ExploreIcon({ type }: { type: 'live' | 'rooms' }) {

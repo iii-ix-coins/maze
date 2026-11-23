@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { UserAvatar } from '../../components/account/UserAvatar';
 import { WalletConnectButton } from '../../platform/wallet/WalletConnectButton';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
-import '../../styles/feature-pages.css';
 import './profile-page.css';
 
 function shortenAddress(address: string): string {

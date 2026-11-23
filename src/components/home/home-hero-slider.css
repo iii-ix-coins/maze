@@ -953,3 +953,8 @@
     }
   }
 }
+
+/* Home hero title treatment; do not style headings in unrelated features globally. */
+.home-hero-slider .home-hero-copy h1 {
+  letter-spacing: -.015em;
+}

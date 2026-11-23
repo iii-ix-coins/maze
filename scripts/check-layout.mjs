@@ -11,7 +11,7 @@ const required = [
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
   'src/services', 'src/hooks', 'src/types', 'src/styles',
   'public/css', 'public/css/images', 'public/css/font', 'engines', 'shared', 'tests',
-  'src/main.tsx', 'src/app/App.tsx', 'src/features/home/HomePage.tsx',
+  'src/main.tsx', 'src/app/App.tsx', 'src/features/home/HomePage.tsx', 'src/styles/theme-tokens.css',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
@@ -31,6 +31,23 @@ const required = [
 const missing = required.filter(file => !fs.existsSync(path.join(root, file)));
 if (missing.length) {
   console.error('[layout] missing required files:', missing.join(', '));
+  process.exit(1);
+}
+const retiredCssArchitecture = [
+  'src/styles/arena.css',
+  'src/styles/feature-pages.css',
+  'src/features/maze/ui/react/maze-menu.css',
+  'public/css/maze-style.css',
+];
+for (const retiredPath of retiredCssArchitecture) {
+  if (fs.existsSync(path.join(root, retiredPath))) {
+    console.error(`[layout] retired CSS architecture file remains: ${retiredPath}`);
+    process.exit(1);
+  }
+}
+const siteCssEntry = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
+if (!siteCssEntry.includes('@import "./theme-tokens.css";') || /@import\s+["']\.\/arena\.css["']/.test(siteCssEntry)) {
+  console.error('[layout] site.css must load the dedicated theme token owner and must not load arena.css.');
   process.exit(1);
 }
 
@@ -116,7 +133,7 @@ if (remainingClientScripts.length) {
   process.exit(1);
 }
 
-for (const retiredCss of ['style.css', 'header-scroll-scrim.css', 'maze-camera.css', 'home-style.css', 'feature-pages.css']) {
+for (const retiredCss of ['style.css', 'header-scroll-scrim.css', 'maze-camera.css', 'home-style.css', 'feature-pages.css', 'theme-tokens.css', 'arena.css']) {
   if (fs.existsSync(path.join(root, 'public', 'css', retiredCss))) {
     console.error(`[layout] active stylesheet must be sourced from src/styles, not public/css: ${retiredCss}`);
     process.exit(1);
@@ -353,7 +370,7 @@ if (
 }
 const walletStyles = [
   fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8'),
-  fs.readFileSync(path.join(root, 'src/styles/arena.css'), 'utf8'),
+  fs.readFileSync(path.join(root, 'src/styles/theme-tokens.css'), 'utf8'),
 ].join('\n');
 if (walletStyles.includes('nav-wallet-options-button')) {
   console.error('[layout] the obsolete secondary wallet-options button styles must be fully retired.');
@@ -502,7 +519,7 @@ if ((mazePageSource.match(/\.\/styles\/index\.css/g) || []).length !== 1 || /\.\
   console.error('[layout] MazePage must load its feature styles through one canonical CSS entry.');
   process.exit(1);
 }
-for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.css', 'create-game.css', 'lobby.css', 'maze-menu.css']) {
+for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.css', 'create-game.css', 'lobby.css']) {
   if (!mazeStyleEntry.includes(requiredMazeStyle)) {
     console.error(`[layout] Maze CSS entry is missing ${requiredMazeStyle}.`);
     process.exit(1);
@@ -595,8 +612,14 @@ for (const [file, source] of [['server.js', serverSource], ['HomePage.tsx', home
     process.exit(1);
   }
 }
-const activeCssSources = ['src/styles/home-style.css', 'src/styles/home-shared.css', 'src/styles/feature-pages.css', 'src/styles/site.css', 'src/styles/style.css', 'src/styles/arena.css']
-  .map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
+const activeCssSources = [
+  'src/styles/theme-tokens.css', 'src/styles/home-style.css', 'src/styles/home-shared.css',
+  'src/styles/site.css', 'src/styles/style.css', 'src/components/home/home-hero-slider.css',
+  'src/features/explore/explore-page.css', 'src/features/profile/profile-page.css',
+  'src/features/maze/styles/maze-site.css', 'src/features/maze/styles/maze-unify.css',
+  'src/features/maze/styles/maze-theme.css', 'src/features/maze/styles/create-game.css',
+  'src/features/maze/styles/lobby.css',
+].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
 for (const [file, source] of activeCssSources) {
   if (/\.live-(?:bar|bar-menu|menu-btn|feed-panel|feed-rail-scroll|feed-state|card)(?:[\s:#.\[]|$)|\.holder-live-card-vote|@keyframes\s+ping-dot/.test(source)) {
     console.error(`[layout] retired Live Feed CSS remains in ${file}.`);

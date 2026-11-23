@@ -1,10 +1,10 @@
 @import "./style.css";
 @import "./header-scroll-scrim.css";
 @import "./maze-camera.css";
+@import "./theme-tokens.css";
 @import "./page-loader.css";
 @import "./page-transition.css";
 @import "./home-shared.css";
-@import "./arena.css";
 
 /* Keep Maze's persistent chrome clear of the game surface. */
 body.in-menu #site-header {
@@ -329,9 +329,32 @@ body>#root>#site-brand {
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
+    --option-cut: 7px;
     width: 100%;
     min-height: 0;
     height: 100%;
+    border-radius: 0;
+    clip-path: polygon(var(--option-cut) 0, 100% 0, 100% calc(100% - var(--option-cut)), calc(100% - var(--option-cut)) 100%, 0 100%, 0 var(--option-cut));
+    background: rgba(var(--ar-rgb), .063);
+    color: var(--ar-soft);
+    box-shadow: none;
+}
+
+.site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option.is-active {
+    background: var(--ar-accent);
+    color: var(--ar-on-accent);
+    box-shadow: none;
+}
+
+.site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option.is-active img {
+    filter: grayscale(1) brightness(.12);
+}
+
+@media (hover: hover) {
+    .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option:not(.is-active):hover {
+        background: rgba(var(--ar-rgb), .16);
+        color: var(--ar-text);
+    }
 }
 
 

@@ -10,8 +10,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const entryPoints = [
   'src/styles/site.css',
   'src/styles/home-style.css',
-  'src/styles/feature-pages.css',
   'src/components/home/home-hero-slider.css',
+  'src/features/explore/explore-page.css',
+  'src/features/profile/profile-page.css',
   'src/features/maze/styles/index.css',
 ];
 const visited = new Set();

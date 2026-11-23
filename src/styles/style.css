@@ -74,12 +74,6 @@
     initial-value: -600px;
 }
 
-@property --angle {
-    syntax: "<angle>";
-    inherits: false;
-    initial-value: 0deg;
-}
-
 @property --pct {
     syntax: "<number>";
     inherits: true;
@@ -262,29 +256,10 @@
    ========================================= */
 
     /* DARK */
-    html[data-theme="dark"] {
-        --brand-header-shadow:
-            0 16px 35px rgba(0, 0, 0, .68),
-            0 0 0 1px rgba(0, 232, 181, .25),
-            0 0 28px 5px rgba(0, 232, 181, .20),
-            inset 0 1px 0 rgba(255, 255, 255, .08);
-    }
 
     /* LIGHT */
-    html[data-theme="light"] {
-        --brand-header-shadow:
-            0 18px 38px rgba(17, 24, 39, .25),
-            0 5px 14px rgba(17, 24, 39, .11);
-    }
 
     /* GRASS */
-    html[data-theme="grass"] {
-        --brand-header-shadow:
-            0 16px 35px rgba(0, 15, 5, .70),
-            0 0 0 1px rgba(112, 224, 0, .28),
-            0 0 30px 6px rgba(112, 224, 0, .25),
-            inset 0 1px 0 rgba(204, 255, 51, .12);
-    }
 
     /* LIGHT THEME */
     html[data-theme="light"] {
@@ -331,7 +306,7 @@
         scroll-behavior: smooth;
         scroll-padding-top: 7.5rem;
         scrollbar-width: thin;
-        scrollbar-color: var(--ink-600) transparent;
+        scrollbar-color: var(--ar-accent, var(--ink-600)) var(--ar-bg, transparent);
     }
 
     body {
@@ -345,6 +320,7 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         overflow-x: clip;
+        font-variant-numeric: tabular-nums;
     }
 
     h1,
@@ -368,12 +344,12 @@
     }
 
     ::selection {
-        background: var(--mint);
-        color: var(--ink-1000);
+        background: var(--ar-accent, var(--mint));
+        color: var(--ar-on-accent, var(--ink-1000));
     }
 
     :focus-visible {
-        outline: 2px solid var(--mint);
+        outline: 2px solid var(--ar-accent, var(--mint));
         outline-offset: 3px;
     }
 
@@ -394,12 +370,38 @@
             min-height: 100dvh;
         }
     }
+
+    h1, h2, h3{
+        text-transform: uppercase;
+    }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ar-bg, var(--page-background)); }
+::-webkit-scrollbar-thumb { background: var(--ar-line, var(--stroke)); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--ar-accent, var(--mint)); }
 }
 
 /* ==========================================================================
    4 · FX — backdrop, scroll progress, loader, entrance
    ========================================================================== */
 @layer fx {
+/* Theme grid floor and vignette. Palette values are provided by theme-tokens.css. */
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(var(--ar-rgb, 182, 255, 46), .14), transparent 55%),
+    radial-gradient(90% 70% at 50% 120%, rgba(0, 0, 0, .55), transparent 60%),
+    linear-gradient(rgba(var(--ar-rgb, 182, 255, 46), .06) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(var(--ar-rgb, 182, 255, 46), .06) 1px, transparent 1px) 0 0 / 56px 56px;
+}
+html[data-theme="light"]::after {
+  background:
+    linear-gradient(rgba(16, 19, 26, .06) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(16, 19, 26, .06) 1px, transparent 1px) 0 0 / 40px 40px;
+}
 
     /* —— 4.1 Backdrop: aurora + living maze + grain + vignette ——————————— */
     .backdrop {
@@ -722,14 +724,6 @@
         box-shadow: var(--shadow-2);
     }
 
-    .brand-header {
-        position: relative;
-        border-radius: var(--r-lg);
-        background: var(--panel-bg);
-        box-shadow: var(--brand-header-shadow);
-        margin-top: 10px;
-    }
-
     /* —— 6.2 Skeleton for "--" placeholders (fx.js sets data-empty) ———— */
     [data-empty="true"] {
         color: transparent !important;
@@ -822,56 +816,6 @@
 
     /* Navigation (.nav, .nav-links, .nav-link, dropdown, wallet, theme toggle):
        all styling lives in ONE unlayered block, "HEADER NAVIGATION", at the end of this file. */
-
-    .nav-index-link {
-        padding: 0.3rem 0.7rem 0.3rem 0.5rem;
-        margin-right: 4px;
-    }
-
-    .nav-index-link::after {
-        content: "";
-        position: absolute;
-        right: -3px;
-        top: 22%;
-        bottom: 22%;
-        width: 1px;
-        background: var(--stroke-hi);
-    }
-
-    .nav .brand-logo-img {
-        height: 28px;
-        width: 28px;
-        object-fit: contain;
-        filter: brightness(2.7) saturate(1.35) drop-shadow(0 0 10px oklch(0.75 0.10 250 / 0.55));
-        transition: transform var(--t-slow) var(--ease-spring), filter var(--t-base);
-    }
-
-    .nav-index-link:hover .brand-logo-img {
-        transform: rotate(12deg) scale(1.1);
-    }
-
-    .nav-icon {
-        flex: none;
-        display: grid;
-        place-items: center;
-        width: 42px;
-        height: 42px;
-        border-radius: var(--r-pill);
-        background: var(--field-bg);
-        border: 1px solid var(--stroke);
-        transition: background var(--t-base), transform var(--t-base) var(--ease-spring);
-    }
-
-    .nav-icon:hover {
-        background: var(--veil);
-        transform: rotate(-8deg) scale(1.06);
-    }
-
-    .nav-icon img {
-        width: 20px;
-        height: auto;
-        filter: brightness(2.8) saturate(1.3);
-    }
 
     /* Price / ticker row */
     .price-metrics-row {
@@ -1062,16 +1006,6 @@
             backdrop-filter: none;
         }
 
-        .nav-index-link {
-            flex: 0 0 auto;
-            padding: 0.4rem 0.6rem;
-            margin: 0;
-        }
-
-        .nav-index-link::after {
-            display: none;
-        }
-
         /* Price and metrics */
         .price-metrics-row {
             display: grid;
@@ -1205,105 +1139,6 @@
     }
 
     /* —— 6.5 BRAND HEADER = site footer hero ————————————————————————— */
-    .brand-header {
-        isolation: isolate;
-        overflow: hidden;
-        display: grid;
-        justify-items: center;
-        gap: clamp(16px, 2.4vw, 26px);
-        text-align: center;
-        padding: clamp(5px, 0.5vw, 5px) clamp(3px, 0.8vw, 5px);
-        scroll-margin-top: 6rem;
-    }
-
-    .brand-header::before {
-        content: "";
-        position: absolute;
-        inset: -50%;
-        z-index: -2;
-        pointer-events: none;
-        background: conic-gradient(from var(--angle) at 50% 50%, transparent 0 18%, oklch(0.87 0.17 170 / 0.20) 28%, transparent 40% 58%, oklch(0.71 0.17 292 / 0.20) 72%, transparent 88%);
-        animation: spin-angle 22s linear infinite;
-    }
-
-    .brand-header::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        border-radius: inherit;
-        background:
-            linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px) 0 0 / 44px 44px,
-            linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px) 0 0 / 44px 44px;
-        -webkit-mask-image: radial-gradient(70% 80% at 50% 45%, #000, transparent 100%);
-        mask-image: radial-gradient(70% 80% at 50% 45%, #000, transparent 100%);
-    }
-
-    @keyframes spin-angle {
-        to {
-            --angle: 360deg;
-        }
-    }
-
-    .brand-header .brand-logo-img {
-        width: clamp(72px, 9vw, 112px);
-        height: auto;
-        filter: brightness(2.2) saturate(1.65) drop-shadow(0 0 6px oklch(53.499% 0.17648 143.461 / 0.329));
-        animation: float 7s ease-in-out infinite;
-    }
-
-    @keyframes float {
-        50% {
-            translate: 0 -10px;
-            rotate: 4deg;
-        }
-    }
-
-    .brand-description {
-        min-width: 100%;
-        font-stretch: 100%;
-        letter-spacing: -0.01em;
-        font-size: clamp(0.9rem, 0.9rem + 2vw, 0.7rem);
-    }
-
-    .brand-description span {
-        display: block;
-        font-weight: 500;
-        font-size: clamp(1.25rem, 1.15rem + 0.35vw, 1.4rem);
-    }
-
-    .brand-footer {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-        gap: 8px 22px;
-        margin-top: 8px;
-        padding-top: 22px;
-        width: min(100%, 640px);
-        border-top: 1px solid var(--stroke);
-        font-size: var(--fs-sm);
-        color: var(--text-mute);
-    }
-
-    .brand-footer a {
-        padding: 4px 2px;
-        border-radius: 6px;
-        transition: color var(--t-fast);
-    }
-
-    .brand-footer a:hover {
-        color: var(--mint);
-    }
-
-    .brand-footer small {
-        flex-basis: 100%;
-        font-size: var(--fs-xs);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--text-dim);
-    }
 
     /* ======================================================================
        BUTTONS (shared by every page)
@@ -1615,8 +1450,8 @@
    --------------------------------------------------------------------------
    • Intentionally UNLAYERED: it has to out-rank maze-camera.css (.nav-actions)
      and any other sheet that ships outside the cascade layers.
-   • arena.css is the sole owner of theme colour tokens; this file owns
-     navigation component geometry, typography and non-colour presentation.
+   • theme-tokens.css is the sole owner of theme colour tokens; this file owns
+     navigation geometry, typography and non-colour presentation.
    • Typography is driven by ONE token (--nav-fs). Padding, badges, logo and
      wallet size are derived from it, so a single edit rescales the whole bar.
    • Backgrounds measured from the theme SVGs:
@@ -1626,7 +1461,7 @@
 
 /* —— 1 · LAYOUT TOKENS ———————————————————————————————————————————————— */
 .nav {
-    /* Shared geometry and typography tokens; arena.css owns theme colours. */
+    /* Shared geometry and typography tokens; theme-tokens.css owns theme colours. */
     --nav-control-height: 26px;
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
 
@@ -1955,41 +1790,6 @@ html[data-theme="light"] .nav-brand-logo--black {
 }
 
 /* —— 6 · MOBILE MENU BUTTON ———————————————————————————————————————————— */
-.nav-mobile-toggle {
-    display: none;
-    width: 36px;
-    height: 36px;
-    padding: 9px;
-
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-
-    border: 1px solid var(--nav-border);
-
-    cursor: pointer;
-}
-
-.nav-mobile-toggle span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    border-radius: 2px;
-    transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.nav-mobile-toggle[aria-expanded="true"] span:first-child {
-    transform: translateY(7px) rotate(45deg);
-}
-
-.nav-mobile-toggle[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-}
-
-.nav-mobile-toggle[aria-expanded="true"] span:last-child {
-    transform: translateY(-7px) rotate(-45deg);
-}
 
 /* Keyboard accessibility */
 .nav a:focus-visible,

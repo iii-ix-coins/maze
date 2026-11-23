@@ -963,6 +963,15 @@
 .lb-btn {
     font-size: .86rem;
     transition: transform .25s var(--ease), background .25s ease, box-shadow .3s ease, opacity .3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--glass);
+    color: var(--haze);
+    font-weight: 600;
 }
 
 .lb-btn > span:first-child:not(:last-child) {
@@ -971,6 +980,9 @@
 
 .lb-btn.is-primary {
     box-shadow: 0 10px 30px rgba(139, 224, 164, .16);
+    border-color: transparent;
+    background: var(--haze);
+    color: #0a1a12;
 }
 
 .lb-btn:active {
@@ -996,6 +1008,15 @@
 
 .lb-room-screen {
     justify-items: center;
+    display: grid;
+    grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: clamp(20px, 5vw, 64px);
+    width: 100%;
+    max-width: 1040px;
+    margin: auto;
+    padding: 26px clamp(16px, 4vw, 44px) 42px;
+    box-sizing: border-box;
 }
 
 .lb-bloom-xl {
@@ -1019,6 +1040,11 @@
 .lb-big-count {
     display: inline-flex;
     text-shadow: 0 2px 22px rgba(8, 19, 15, .9);
+    color: var(--haze);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
 }
 
 /* Big flowers have no empty middle: the count moves to a pill under it. */
@@ -1039,22 +1065,33 @@
     gap: 12px;
     width: 100%;
     max-width: 480px;
+    min-width: 0;
 }
 
 .lb-eyebrow {
     margin: 0;
+    color: var(--moss);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
 }
 
 .lb-room-title {
     outline: 0;
     font-weight: 700;
     letter-spacing: -.03em;
+    margin: 6px 0 8px;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    line-height: 1.08;
 }
 
 .lb-room-text {
     min-height: 2.9em;
     margin: 0;
     font-size: .9rem;
+    color: var(--fog);
+    line-height: 1.55;
 }
 
 .lb-room-live {
@@ -1066,16 +1103,31 @@
 .lb-code-box small {
     letter-spacing: .1em;
     text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+    color: var(--fog);
+    font-size: .68rem;
 }
 
 .lb-code-big {
     display: block;
+    font: 700 1.5rem ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .2em;
+    color: var(--lantern);
 }
 
 .lb-copy {
     border: 1px solid var(--line);
     font-weight: 600;
     transition: background .25s ease, color .25s ease, transform .25s var(--ease);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: rgba(228,246,234,.1);
+    color: var(--haze);
+    font-size: .78rem;
 }
 
 .lb-copy > span:first-child {
@@ -1088,6 +1140,7 @@
 
 .lb-copy.is-done {
     border-color: rgba(139, 224, 164, .5);
+    color: var(--moss);
 }
 
 .lb-chips-static li {
@@ -1097,6 +1150,9 @@
     background: var(--glass);
     color: var(--fog);
     font-size: .76rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .lb-chips-static li.lb-badge {
@@ -1106,11 +1162,16 @@
 }
 
 .lb-members {
-    flex-direction: column;
     max-height: min(32vh, 280px);
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(228, 246, 234, .2) transparent;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin: 16px 0;
+    padding: 0;
+    list-style: none;
 }
 
 .lb-members:empty {
@@ -1140,6 +1201,11 @@
     border-radius: 999px;
     font-weight: 700;
     letter-spacing: .06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--fog);
+    font-size: .62rem;
 }
 
 .lb-tag .lb-ic {
@@ -1149,15 +1215,20 @@
 
 .lb-tag.is-host {
     background: rgba(255, 215, 154, .16);
+    color: var(--lantern);
 }
 
 .lb-tag.is-you {
     background: rgba(255, 155, 138, .16);
+    color: var(--moss);
 }
 
 .lb-room-note {
     min-height: 2.8em;
     margin: 0;
+    color: var(--fog);
+    font-size: .82rem;
+    line-height: 1.5;
 }
 
 #lbRoom[data-mode="joining"] .lb-code-box,
@@ -1197,20 +1268,32 @@
     animation: lbSpin .9s linear infinite;
 }
 
+.lb-room-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(100%, 360px);
+    aspect-ratio: 1;
+    margin: auto;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,224,164,.08), rgba(228,246,234,.02) 65%, transparent 72%);
+}
+
 @media (min-width: 820px) and (min-aspect-ratio: 5/4) {
     .lb-room-screen {
-        grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
-        gap: clamp(24px, 5vw, 72px);
-    }
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+    gap: clamp(24px, 5vw, 72px);
+}
 
     .lb-room-stage {
-        width: min(100%, 62vh, 470px);
-        justify-self: center;
-    }
+    width: min(100%, 62vh, 470px);
+    justify-self: center;
+}
 
     .lb-room-panel {
-        justify-self: start;
-    }
+    justify-self: start;
+}
 
     #lbRoom[data-mode="notice"] .lb-room-screen {
         grid-template-columns: minmax(0, 1fr);
@@ -1221,13 +1304,30 @@
     }
 
     @supports (height: 100dvh) {
-  .lb-room-stage { width: min(100%, 62dvh, 470px); } }
+  .lb-room-stage {
+    width: min(100%, 62dvh, 470px);
+} }
 }
 
 /* ── Toast ── */
 .lb-toast {
     width: min(92vw, 470px);
     pointer-events: none;
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    display: none;
+    align-items: center;
+    gap: 14px;
+    max-width: min(90vw, 560px);
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(8,19,15,.94);
+    color: var(--haze);
+    box-shadow: 0 16px 45px rgba(0,0,0,.32);
+    transform: translateX(-50%);
 }
 
 .lb-toast-pill {
@@ -1392,17 +1492,17 @@
     }
 
     .lb-room-screen {
-        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-        gap: 20px;
-        align-items: start;
-    }
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: 20px;
+    align-items: start;
+}
 
     /* The panel is taller than the screen here; the flower stays in view while it scrolls. */
     .lb-room-stage {
-        position: sticky;
-        top: 8px;
-        width: min(100%, 64vh);
-    }
+    position: sticky;
+    top: 8px;
+    width: min(100%, 64vh);
+}
 
     .lb-room-text,
     .lb-room-note {
@@ -1410,12 +1510,16 @@
     }
 
     .lb-members {
-        max-height: 26vh;
-    }
+    max-height: 26vh;
+}
 
     @supports (height: 100dvh) {
-  .lb-room-stage { width: min(100%, 64dvh); }
-  .lb-members { max-height: 26dvh; } }
+  .lb-room-stage {
+    width: min(100%, 64dvh);
+}
+  .lb-members {
+    max-height: 26dvh;
+} }
 }
 
 /* ── Keyframes ── */
@@ -1466,4 +1570,155 @@
 }
 
 @supports (height: 100dvh) {
- .lb-members { max-height: min(32dvh, 280px); } }
+ .lb-members {
+    max-height: min(32dvh, 280px);
+} }
+
+.lb-seat-bloom {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,224,164,.12), transparent 72%);
+}
+
+.lb-seat-bloom i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--seat-size, 7px);
+    height: var(--seat-size, 7px);
+    border-radius: 50%;
+    background: var(--seat-color);
+    box-shadow: 0 0 9px var(--seat-color);
+    transform: translate(-50%, -50%);
+}
+
+.lb-seat-stage {
+    position: absolute;
+    inset: 8%;
+    border: 1px solid rgba(228,246,234,.12);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,224,164,.11), transparent 70%);
+}
+
+.lb-seat-stage i {
+    position: absolute;
+    width: var(--seat-radius, 10px);
+    height: var(--seat-radius, 10px);
+    border-radius: 50%;
+    background: var(--seat-color);
+    box-shadow: 0 0 12px var(--seat-color);
+    transform: translate(-50%, -50%);
+}
+
+.lb-seat-stage i.is-you {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.lb-room-stage .lb-stage-center {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(228,246,234,.12);
+    border-radius: 50%;
+    background: rgba(8,19,15,.78);
+}
+
+.lb-big-of {
+    margin-top: 7px;
+    color: var(--fog);
+    font-size: .72rem;
+}
+
+.lb-code-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    margin: 20px 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--glass);
+}
+
+.lb-chips-static {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin: 16px 0;
+    padding: 0;
+    list-style: none;
+    color: var(--fog);
+    font-size: .76rem;
+}
+
+.lb-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--glass);
+    font-size: .82rem;
+}
+
+.lb-member-badges {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.lb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.lb-btn:disabled {
+    opacity: .42;
+    cursor: default;
+}
+
+.lb-notice-stage {
+    min-height: 220px;
+}
+
+.lb-toast.is-visible {
+    display: flex;
+}
+
+.lb-toast.is-warn {
+    border-color: rgba(255,155,138,.45);
+}
+
+.lb-toast button {
+    color: var(--moss);
+    font-weight: 700;
+}
+
+.lb-chip.is-selected {
+    border-color: rgba(139,224,164,.5);
+    color: var(--haze);
+}
+
+@media (max-width: 720px) {
+  .lb-room-screen {
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+  .lb-room-stage {
+    width: min(76vw, 280px);
+}
+  .lb-room-panel {
+}
+}
