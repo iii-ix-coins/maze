@@ -102,7 +102,7 @@ body>#root>#site-brand {
     height: 57px;
     padding: 5px 2px;
     border: 1px solid transparent;
-    border-radius: 13px;
+    border-radius: 0px;
     clip-path: none;
     background: transparent;
     box-shadow: none;
