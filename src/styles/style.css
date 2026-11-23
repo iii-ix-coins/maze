@@ -1381,7 +1381,7 @@
    • Typography is driven by ONE token (--nav-fs). Padding, badges, logo and
      wallet size are derived from it, so a single edit rescales the whole bar.
    • Backgrounds measured from the theme SVGs:
-       grass #008000 / #005e27  →  light text      light #ffffff / #ededed → dark text
+       grass #006400 canvas / supplied fern-lime foreground palette
        dark  #000000 / #080808  →  light text
    ========================================================================== */
 
@@ -1402,8 +1402,8 @@ html[data-theme="light"] .nav {
 }
 
 html[data-theme="grass"] .nav {
-    --nav-shadow: rgba(0, 25, 5, .45);
-    --nav-shadow-soft: rgba(0, 25, 5, .225);
+    --nav-shadow: none;
+    --nav-shadow-soft: none;
 }
 
 /* —— 2 · STRUCTURE ————————————————————————————————————————————————————— */
@@ -1915,7 +1915,7 @@ html[data-theme="light"] .nav-brand-logo--black {
               the cursor-follow spotlight ring on the price / change boxes is
               the "6.1 Tile recipe" ::before, coloured by --hdr-spot-ring(-2);
            3. ink is picked per canvas:
-                grass  #008000 / #005e27  →  light ink (+ soft dark halo)
+                grass  #006400 canvas / supplied fern-lime foreground palette
                 light  #ffffff / #ededed  →  dark ink (dark blue/green/red)
                 dark   #000000 / #080808  →  light ink (mint / coral)
    ========================================================================== */
@@ -1992,37 +1992,37 @@ html[data-theme="light"] .header {
     --hdr-brand-jup: #0a7389;
 }
 
-/* palette · GRASS — light ink on green; every accent is lighter than the canvas */
+/* palette · GRASS — exact supplied green palette on a deep-green canvas */
 html[data-theme="grass"] .header {
-    --hdr-text: #70e000;
-    --hdr-text-soft: #9ef01a;
-    --hdr-label: #9ef01a;
-    --hdr-dim: #ccff33;
+    --hdr-text: var(--radioactive-grass);
+    --hdr-text-soft: var(--slime-lime);
+    --hdr-label: var(--radioactive-grass);
+    --hdr-dim: var(--radioactive-grass);
 
-    --hdr-lift: 0 10px 24px -12px rgba(0, 30, 5, 0.6);
-    --hdr-focus: #ffffff;
+    --hdr-lift: none;
+    --hdr-focus: var(--chartreuse);
 
-    --hdr-border: rgba(255, 255, 255, 0.45);
-    --hdr-border-hover: rgba(255, 255, 255, 0.9);
+    --hdr-border: var(--radioactive-grass);
+    --hdr-border-hover: var(--radioactive-grass);
 
-    --hdr-gain: #dfff85;
-    --hdr-loss: #ffe4df;
+    --hdr-gain: var(--radioactive-grass);
+    --hdr-loss: var(--chartreuse);
 
-    --hdr-spot-ring: rgba(255, 255, 255, 0.95);
-    --hdr-spot-ring-2: rgba(223, 255, 133, 0.45);
-    --hdr-spot-glow: rgba(255, 255, 255, 0.10);
+    --hdr-spot-ring: var(--slime-lime);
+    --hdr-spot-ring-2: var(--bright-fern);
+    --hdr-spot-glow: none;
 
-    --hdr-skel-lo: rgba(255, 255, 255, 0.12);
-    --hdr-skel-hi: rgba(255, 255, 255, 0.30);
+    --hdr-skel-lo: rgba(56, 176, 0, 0.14);
+    --hdr-skel-hi: rgba(112, 224, 0, 0.24);
 
-    --hdr-icon-filter: brightness(0) invert(1);
-    --hdr-copied-bg: #ffffff;
+    --hdr-icon-filter: none;
+    --hdr-copied-bg: var(--chartreuse);
     --hdr-copied-icon: brightness(0.25);
-    --hdr-copied-glow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 8px 20px -8px rgba(0, 30, 5, 0.6);
+    --hdr-copied-glow: none;
 
-    --hdr-brand-sol: #c4ffee;
-    --hdr-brand-pump: #e3ffd2;
-    --hdr-brand-jup: #d2f6ff;
+    --hdr-brand-sol: var(--chartreuse);
+    --hdr-brand-pump: var(--radioactive-grass);
+    --hdr-brand-jup: var(--slime-lime);
 }
 
 /* —— 2 · INK  (text colour follows the theme) ————————————————————————— */

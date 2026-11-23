@@ -3,7 +3,7 @@
 export const WALL_PX = 2.5;
 export const PLAYER_COLOR = '#ff0000';
 export const EXIT_COLOR = '#0400ff';
-export const MAZE_THEMES = { grass: { wall: '#063b14', board: '#168b2b' }, light: { wall: '#080b09', board: '#f5f7f4' }, dark: { wall: '#f4f7f4', board: '#050706' } };
+export const MAZE_THEMES = { grass: { wall: '#70e000', board: '#006400' }, light: { wall: '#080b09', board: '#f5f7f4' }, dark: { wall: '#f4f7f4', board: '#050706' } };
 export const PLAYER_R = 0.32;
 export const EXIT_R = 0.40;
 export const ZOOM_MIN = 1, ZOOM_MAX = 5, ZOOM_STEP = 1.25;

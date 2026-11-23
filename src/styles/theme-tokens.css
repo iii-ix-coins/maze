@@ -1,4 +1,4 @@
-/* Global monochrome theme contract. Components consume semantic tokens only. */
+/* Global theme contract. Components consume semantic tokens only. */
 @layer tokens {
   :root {
     --surface-solid: #000000;
@@ -94,40 +94,76 @@
   }
 
   html[data-theme="grass"] {
-    color-scheme: light;
-    --ar-bg: #91b99a;
-    --ar-fill: #91b99a;
-    --ar-fill-2: #91b99a;
-    --surface-solid: #91b99a;
-    --surface-glass: #91b99a;
-    --panel-bg: #91b99a;
-    --tile-bg: #91b99a;
-    --field-bg: #91b99a;
-    --veil: #a5c9ac;
-    --ar-text: #24452d;
-    --ar-soft: #315c3b;
-    --ar-mute: #426d4b;
-    --ar-line: #426d4b;
-    --ar-accent: #315c3b;
-    --ar-rgb: 49, 92, 59;
-    --ar-accent-2: #426d4b;
-    --ar-accent-2-rgb: 66, 109, 75;
-    --ar-hot: #315c3b;
-    --ar-on-accent: #ffffff;
-    --stroke: #426d4b;
-    --stroke-hi: #24452d;
-    --text: #24452d;
-    --text-soft: #315c3b;
-    --text-mute: #426d4b;
-    --text-dim: #426d4b;
-    --mint: #315c3b; --mint-deep: #24452d; --azure: #426d4b;
-    --violet: #315c3b; --gold: #426d4b; --coral: #315c3b;
-    --gain: #315c3b; --loss: #426d4b;
-    --page-background: #91b99a;
-    --shadow-1: none; --shadow-2: none; --shadow-3: none; --ar-glow: none;
-    --nav-text: #24452d; --nav-muted: #315c3b; --nav-accent: #24452d;
-    --nav-active-text: #24452d; --nav-disabled: #426d4b; --nav-panel: #91b99a;
-    --nav-border: #426d4b; --nav-hover-bg: #a5c9ac; --nav-active-bg: #a5c9ac; --nav-sub-bg: #9bbfa3;
+    color-scheme: dark;
+
+    /* Exact Grass palette supplied for the site theme. */
+    --dark-spruce: #004b23ff;
+    --green: #006400ff;
+    --green-2: #007200ff;
+    --green-3: #008000ff;
+    --bright-fern: #38b000ff;
+    --radioactive-grass: #70e000ff;
+    --slime-lime: #9ef01aff;
+    --chartreuse: #ccff33ff;
+
+    /* The page canvas is always the requested deep green. */
+    --ar-bg: var(--green);
+    --page-background: var(--green);
+    --maze-canvas: var(--green);
+
+    /* Solid same-hue surfaces; no gradients or translucent colour washes. */
+    --ar-fill: var(--green-2);
+    --ar-fill-2: var(--dark-spruce);
+    --surface-solid: var(--dark-spruce);
+    --surface-glass: var(--dark-spruce);
+    --panel-bg: var(--dark-spruce);
+    --tile-bg: var(--green-2);
+    --field-bg: var(--dark-spruce);
+    --veil: var(--green-2);
+
+    /* Foreground, borders and accents use only the four bright palette greens. */
+    --ar-text: var(--slime-lime);
+    --ar-soft: var(--radioactive-grass);
+    --ar-mute: var(--radioactive-grass);
+    --ar-line: var(--radioactive-grass);
+    --ar-accent: var(--radioactive-grass);
+    --ar-rgb: 112, 224, 0;
+    --ar-accent-2: var(--slime-lime);
+    --ar-accent-2-rgb: 158, 240, 26;
+    --ar-hot: var(--chartreuse);
+    --ar-on-accent: var(--dark-spruce);
+
+    --stroke: var(--radioactive-grass);
+    --stroke-hi: var(--slime-lime);
+    --text: var(--slime-lime);
+    --text-soft: var(--radioactive-grass);
+    --text-mute: var(--radioactive-grass);
+    --text-dim: var(--radioactive-grass);
+
+    --mint: var(--radioactive-grass);
+    --mint-deep: var(--bright-fern);
+    --azure: var(--slime-lime);
+    --violet: var(--radioactive-grass);
+    --gold: var(--chartreuse);
+    --coral: var(--chartreuse);
+    --gain: var(--radioactive-grass);
+    --loss: var(--bright-fern);
+
+    --shadow-1: none;
+    --shadow-2: none;
+    --shadow-3: none;
+    --ar-glow: none;
+
+    --nav-text: var(--slime-lime);
+    --nav-muted: var(--radioactive-grass);
+    --nav-accent: var(--chartreuse);
+    --nav-active-text: var(--chartreuse);
+    --nav-disabled: var(--bright-fern);
+    --nav-panel: var(--dark-spruce);
+    --nav-border: var(--radioactive-grass);
+    --nav-hover-bg: var(--green-2);
+    --nav-active-bg: var(--green-3);
+    --nav-sub-bg: var(--dark-spruce);
   }
 
   html[data-theme] {
@@ -152,7 +188,7 @@
   }
 }
 
-/* Monochrome component contract: theme changes only hue/lightness, never accent hue. */
+/* Theme component contract: each theme supplies its own semantic palette. */
 @layer components {
   html[data-theme] body {
     color: var(--ar-text);

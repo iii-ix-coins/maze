@@ -3,9 +3,9 @@ import { PLAYER_COLOR } from './constants';
 import { getGrid, DEFAULT_SIZE, MAX_GOALS } from '@maze/shared';
 /** Every reassigned module-level `let` of the legacy file, declared in the original order. */
 export const S = (() => {
-let WALL_COLOR = '#063b14';
+let WALL_COLOR = '#70e000';
 let playerColor = PLAYER_COLOR;
-let BOARD_COLOR = '#168b2b';
+let BOARD_COLOR = '#006400';
 let activeTheme = 'grass';
 // The board size is chosen per game in "Create Your Game" (21 / 33 / 45), so everything that depends
 // on it is re-pointed by applyMazeSize() whenever a new game or a saved game is loaded.

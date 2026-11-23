@@ -5,7 +5,8 @@
 /* —— OPTIONAL · SCROLL SCRIM ———————————————————————————————————————————— */
 html[data-theme="dark"]  #site-header { --hdr-scrim: rgba(0, 0, 0, 0.62); }
 html[data-theme="light"] #site-header { --hdr-scrim: rgba(255, 255, 255, 0.74); }
-html[data-theme="grass"] #site-header { --hdr-scrim: rgba(0, 70, 20, 0.5); }
+html[data-theme="grass"] #site-header { --hdr-scrim: var(--green); }
+html[data-theme="grass"] #site-header::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
 @supports (animation-timeline: scroll()) {
     @media (min-width: 721px) {

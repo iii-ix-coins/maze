@@ -924,7 +924,7 @@
 
     /* Grass Theme */
     .maze-app[data-maze-theme="grass"] {
-        --board-surround: #063b14;
+        --board-surround: #006400;
     }
 
     /* Light Theme */
@@ -938,8 +938,8 @@
     }
 
     .maze-app .swatch-grass {
-        --swatch-floor: #168b2b;
-        --swatch-wall: #063b14;
+        --swatch-floor: #006400;
+        --swatch-wall: #70e000;
     }
 
     .maze-app .swatch-light {
@@ -4154,18 +4154,30 @@
 
     /* MAZE TEXT THEME BRIDGE */
 
-    /* Grass */
+    /* Grass — semantic values come from the global palette in theme-tokens.css. */
     .maze-app[data-theme="grass"] {
-        --haze: #70e000;
-        --fog: #9ef01a;
-        --moss: #38b000;
+        --ground: var(--green);
+        --ground-2: var(--green);
+        --haze: var(--ar-text);
+        --fog: var(--ar-soft);
+        --line: var(--ar-line);
+        --glass: var(--surface-solid);
+        --moss: var(--bright-fern);
         --moss-rgb: 56, 176, 0;
-        --moss-highlight: #92D473;
-        --moss-depth: #1D5C00;
-        --lantern: #ccff33;
-        --lantern-rgb: 204, 255, 51;
-        --lantern-highlight: #E3FF8F;
-        --lantern-depth: #6A851B;
+        --moss-highlight: var(--radioactive-grass);
+        --moss-depth: var(--dark-spruce);
+        --lantern: var(--slime-lime);
+        --lantern-rgb: 158, 240, 26;
+        --lantern-highlight: var(--chartreuse);
+        --lantern-depth: var(--green-2);
+        --sky: var(--radioactive-grass);
+        --sky-rgb: 112, 224, 0;
+        --sky-highlight: var(--slime-lime);
+        --sky-depth: var(--dark-spruce);
+        --coral: var(--chartreuse);
+        --coral-rgb: 204, 255, 51;
+        --coral-highlight: var(--slime-lime);
+        --coral-depth: var(--green-2);
     }
 
     /* Light */
@@ -4183,16 +4195,16 @@
     }
 
     .maze-app[data-theme="grass"] .cg {
-        --ground: rgba(5, 30, 22, .84);
-        --ground-2: rgba(10, 47, 34, .9);
-        --moss: #38b000;
+        --ground: var(--green);
+        --ground-2: var(--green);
+        --moss: var(--bright-fern);
         --moss-rgb: 56, 176, 0;
-        --lantern: #ccff33;
-        --lantern-rgb: 204, 255, 51;
-        --haze: #70e000;
-        --fog: #9ef01a;
-        --line: var(--stroke, rgba(255, 255, 255, .14));
-        --glass: var(--veil, rgba(255, 255, 255, .05));
+        --lantern: var(--slime-lime);
+        --lantern-rgb: 158, 240, 26;
+        --haze: var(--ar-text);
+        --fog: var(--ar-soft);
+        --line: var(--ar-line);
+        --glass: var(--surface-solid);
     }
 
     .maze-app[data-theme="dark"] .cg {
