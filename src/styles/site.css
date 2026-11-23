@@ -36,7 +36,7 @@ body>#root>#site-brand {
     max-height: 34px;
 }
 
-/* Theme selection is embedded vertically between Notifications and Create in the dock. */
+/* Theme selection is a compact, borderless vertical control at the right edge of the dock. */
 
 /* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
 #site-header {
@@ -91,7 +91,7 @@ body>#root>#site-brand {
 
 .site-bottom-nav .nav-links {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
     align-items: center;
     gap: 3px;
     width: 100%;
@@ -302,25 +302,30 @@ body>#root>#site-brand {
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-self: end;
+    width: max-content;
     min-width: 0;
     min-height: 57px;
     height: 57px;
+    padding: 0;
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
     --tt-size: 14px;
     --tt-icon-size: 11px;
-    --tt-pad: 2px;
+    --tt-pad: 0px;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: repeat(3, minmax(0, 1fr));
     width: 29px;
     height: 51px;
     min-height: 51px;
-    padding: 2px;
+    padding: 0;
     gap: 1px;
-    border: 1px solid var(--ar-line, rgba(255, 255, 255, .16));
-    border-radius: 11px;
-    background: var(--ar-fill-2, rgba(255, 255, 255, .06));
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    clip-path: none;
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {

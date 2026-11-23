@@ -12,3 +12,11 @@ ADDED
 src/platform/wallet/wallet-session-teardown.ts
 src/platform/wallet/wallet-session-teardown.test.ts
 UNIFIED-SESSION-TEARDOWN-FA.md
+
+DOCK POLISH (2026-11-23)
+CHANGED
+src/components/navigation/SiteNavigation.tsx
+src/styles/site.css
+scripts/check-layout.mjs
+src/components/navigation/README.md
+NOTIFICATIONS-THEME-DOCK-UPDATE-FA.md

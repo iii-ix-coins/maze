@@ -311,9 +311,9 @@ if (
   chromeComponent.includes('<ThemeSwitcher />') ||
   !navigationComponent.includes('<ThemeSwitcher />') ||
   !themeSwitcherComponent.includes('theme-toggle--vertical') ||
-  notificationsIndex < 0 ||
+  createIndex < 0 ||
+  notificationsIndex <= createIndex ||
   themeIndex <= notificationsIndex ||
-  createIndex <= themeIndex ||
   !navigationComponent.includes('No notifications yet') ||
   navigationComponent.includes('MoreMenu') ||
   navigationComponent.includes('Holders')
@@ -475,11 +475,16 @@ if ((appTitleSource.match(/document\.title\s*=/g) || []).length !== 1 || !appTit
 
 const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+const themeSlotRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical\s*\{([^}]*)\}/s)?.[1] ?? '';
+const themeSlotHostRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
-  !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr))') ||
+  !sharedSiteStyles.includes('grid-template-columns: repeat(5, minmax(0, 1fr)) auto') ||
   !sharedSiteStyles.includes('#site-brand') ||
   !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
+  !themeSlotHostRule.includes('width: max-content;') ||
+  !themeSlotRule.includes('border: 0;') ||
+  !themeSlotRule.includes('background: transparent;') ||
   !sharedSiteStyles.includes('.nav-notifications-panel') ||
   sharedSiteStyles.includes('#site-controls')
 ) {

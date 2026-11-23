@@ -142,10 +142,6 @@ export function SiteNavigation() {
           <div className="nav-links">
             <DockLink item={{ label: 'Home', href: getSiteRoutePath('home'), key: 'index', icon: 'home' }} />
             <DockLink item={{ label: 'Explore', href: getSiteRoutePath('explore'), key: 'explore', icon: 'explore' }} />
-            <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
-            <div className="nav-dock-theme-slot" role="group" aria-label="Theme selection" title="Choose theme">
-              <ThemeSwitcher />
-            </div>
             <a
               className={`nav-link nav-dock-link nav-dock-create${isCreateViewActive() ? ' active' : ''}`}
               href={MAZE_VIEW_URLS.create}
@@ -157,7 +153,11 @@ export function SiteNavigation() {
               <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><span /></span>
               <span className="nav-dock-label">Create</span>
             </a>
+            <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
             <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />
+            <div className="nav-dock-theme-slot" role="group" aria-label="Theme selection" title="Choose theme">
+              <ThemeSwitcher />
+            </div>
           </div>
         </div>
       </nav>

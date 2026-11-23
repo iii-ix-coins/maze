@@ -36,3 +36,11 @@
 - `node --check server.js`, `node --check start.js` و `node --check scripts/check-layout.mjs`: موفق.
 - Typecheck کامل اجرا نشد؛ type definitionهای `node` و `vite/client` در محیط ZIP نصب نبودند.
 - Production Build و تست مرورگر اجرا نشدند؛ `node_modules` در ZIP وجود ندارد.
+
+
+## اصلاح تکمیلی Dock
+
+- جای Create و Notifications جابه‌جا شد؛ Create اکنون در مرکز ردیف اصلی دکمه‌ها قرار دارد.
+- انتخاب‌گر عمودی تم به انتهای سمت راست Dock منتقل شد و فقط عرض ذاتی خود را اشغال می‌کند.
+- قاب بیرونی انتخاب‌گر تم (border/background frame) حذف شد؛ سه گزینه و عملکرد تغییر تم حفظ شده‌اند.
+- آزمون Layout برای ترتیب جدید Create، Notifications و Theme به‌روزرسانی شد.
