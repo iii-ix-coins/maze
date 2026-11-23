@@ -10,7 +10,7 @@ import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
 
-type NavIconName = 'home' | 'market' | 'token' | 'holders' | 'profile' | 'more';
+type NavIconName = 'home' | 'explore' | 'holders' | 'profile' | 'more';
 type NavItem = {
   label: string;
   href: string;
@@ -36,6 +36,12 @@ function getCurrentPageKey(): string | null {
   return null;
 }
 
+function isCreateViewActive(): boolean {
+  if (getCurrentPageKey() !== 'maze') return false;
+  const view = new URLSearchParams(window.location.search).get('view');
+  return view === null || view === 'create';
+}
+
 function NavIcon({ name }: { name: NavIconName }) {
   const common = {
     viewBox: '0 0 24 24',
@@ -51,10 +57,8 @@ function NavIcon({ name }: { name: NavIconName }) {
   switch (name) {
     case 'home':
       return <svg {...common}><path d="m3 10 9-7 9 7" /><path d="M5.5 9v11h13V9M9 20v-6h6v6" /></svg>;
-    case 'market':
-      return <svg {...common}><path d="M4 19.5h16" /><path d="M6.5 16V11M12 16V5M17.5 16V8" /><path d="m5 8 5-3 5 2 4-4" /></svg>;
-    case 'token':
-      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5c-.7-.7-1.8-1-3.2-1-1.8 0-3 .8-3 2s1 1.8 3 2.2 3.2 1 3.2 2.4-1.3 2.4-3.3 2.4c-1.4 0-2.7-.4-3.6-1.2M12 5.8v12.4" /></svg>;
+    case 'explore':
+      return <svg {...common}><circle cx="11" cy="11" r="7.2" /><path d="m16.4 16.4 4.1 4.1" /><path d="m8.8 13.2 1.5-4.4 4.4-1.5-1.5 4.4-4.4 1.5Z" /></svg>;
     case 'holders':
       return <svg {...common}><circle cx="9" cy="8" r="3.2" /><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0" /><path d="M16 5.2a3.2 3.2 0 0 1 0 6.2M17.5 14.2a5.2 5.2 0 0 1 3.7 5" /></svg>;
     case 'profile':
@@ -156,13 +160,12 @@ export function SiteNavigation() {
         <div className="nav-inner">
           <div className="nav-links">
             <DockLink item={{ label: 'Home', href: getSiteRoutePath('home'), key: 'index', icon: 'home' }} />
-            <DockLink item={{ label: 'Market', href: getSiteRoutePathByNavKey('market'), key: 'market', icon: 'market' }} />
-            <DockLink item={{ label: 'Token', href: getSiteRoutePathByNavKey('token'), key: 'token', icon: 'token' }} />
+            <DockLink item={{ label: 'Explore', href: getSiteRoutePath('explore'), key: 'explore', icon: 'explore' }} />
             <a
-              className={`nav-link nav-dock-link nav-dock-create${getCurrentPageKey() === 'maze' ? ' active' : ''}`}
+              className={`nav-link nav-dock-link nav-dock-create${isCreateViewActive() ? ' active' : ''}`}
               href={MAZE_VIEW_URLS.create}
               data-nav-key="maze"
-              aria-current={getCurrentPageKey() === 'maze' ? 'page' : undefined}
+              aria-current={isCreateViewActive() ? 'page' : undefined}
               aria-label="Create a Maze"
               title="Create a Maze"
             >

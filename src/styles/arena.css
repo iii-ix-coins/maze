@@ -400,9 +400,8 @@ h3 {
     border-color: var(--ar-line);
 }
 
-/* —— 5a · MATCHED THREE-STATE CONTROLS ———————————————— */
-.nav .theme-toggle:not(.game-view-toggle),
-.nav .game-view-toggle {
+/* —— 5a · THEME CONTROL ———————————————————————————————— */
+.nav .theme-toggle {
     --switcher-cut: 9px;
     border-radius: 0;
     clip-path: polygon(var(--switcher-cut) 0,
@@ -414,8 +413,7 @@ h3 {
     background: var(--ar-fill-2);
 }
 
-.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option,
-.nav .game-view-toggle .theme-toggle__option {
+.nav .theme-toggle .theme-toggle__option {
     --option-cut: 7px;
     border-radius: 0;
     clip-path: polygon(var(--option-cut) 0,
@@ -429,35 +427,18 @@ h3 {
     box-shadow: none;
 }
 
-.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active,
-.nav .game-view-toggle .theme-toggle__option.is-active {
+.nav .theme-toggle .theme-toggle__option.is-active {
     background: var(--ar-accent);
     color: var(--ar-on-accent);
     box-shadow: none;
 }
 
-.nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active img,
-.nav .game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon {
+.nav .theme-toggle .theme-toggle__option.is-active img {
     filter: grayscale(1) brightness(.12);
 }
 
-.nav .game-view-toggle__label {
-    text-transform: uppercase;
-    font-size: clamp(12px, 3.2vw, 12px);
-    font-weight: 650;
-    letter-spacing: -.015em;
-}
-
 @media (hover: hover) {
-
-    /* Theme Switcher */
-    .nav .theme-toggle:not(.game-view-toggle) .theme-toggle__option:not(.is-active):hover {
-        background: rgba(var(--ar-rgb), .16);
-        color: var(--ar-text);
-    }
-
-    /* Game View Switcher */
-    .nav .game-view-toggle .theme-toggle__option:not(.is-active):hover {
+    .nav .theme-toggle .theme-toggle__option:not(.is-active):hover {
         background: rgba(var(--ar-rgb), .16);
         color: var(--ar-text);
     }
@@ -554,7 +535,7 @@ h3 {
 }
 
 /* —— 7 · SURFACES, BUTTONS, DOCK ————————————————————————————————————— */
-:is(.token-summary-item, .coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item, .coin-period-card, .bar-box, .change-box, .spot) {
+:is(.token-summary-item, .bar-box, .change-box, .spot) {
     border-color: transparent;
     --market-inner-cut: 13px;
     clip-path: polygon(var(--market-inner-cut) 0,

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
-import { GameViewSwitcher } from '../navigation/GameViewSwitcher';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { ThemeSwitcher } from '../navigation/ThemeSwitcher';
 
@@ -41,8 +40,7 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
         </span>
       </a>
 
-      <div id="site-controls" className="nav site-top-controls" aria-label="Game sections and appearance">
-        <GameViewSwitcher />
+      <div id="site-controls" className="nav site-top-controls" aria-label="Appearance controls">
         <ThemeSwitcher />
       </div>
 

@@ -12,6 +12,17 @@
       "navKey": "index"
     },
     {
+      "id": "explore",
+      "paths": [
+        "/explore"
+      ],
+      "title": "Explore · Hollld",
+      "page": "explore",
+      "soft": true,
+      "server": "spa",
+      "navKey": "explore"
+    },
+    {
       "id": "maze",
       "paths": [
         "/maze.html",
@@ -24,18 +35,6 @@
       "navKey": "maze"
     },
     {
-      "id": "coin",
-      "paths": [
-        "/coin.html",
-        "/token"
-      ],
-      "title": "Token Market · Hollld",
-      "page": "coin",
-      "soft": true,
-      "server": "spa",
-      "navKey": "token"
-    },
-    {
       "id": "holders",
       "paths": [
         "/holders.html",
@@ -46,18 +45,6 @@
       "soft": true,
       "server": "spa",
       "navKey": "holders"
-    },
-    {
-      "id": "market",
-      "paths": [
-        "/market.html",
-        "/market"
-      ],
-      "title": "Market · Hollld",
-      "page": "market",
-      "soft": true,
-      "server": "spa",
-      "navKey": "market"
     },
     {
       "id": "profile",

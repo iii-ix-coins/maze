@@ -642,9 +642,7 @@
 
     /* —— 6.1 Tile recipe: glass tile + cursor spotlight ring ————————————
        Every "label / value" card on the site shares this surface.            */
-    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .spot),
-    .market-feature:not(.market-feature--compact) .token-summary-item {
+    :is(.bar-box, .change-box, .spot) {
         position: relative;
         isolation: isolate;
         border-radius: var(--r-md);
@@ -655,9 +653,7 @@
         transition: transform var(--t-slow) var(--ease-out), border-color var(--t-base), box-shadow var(--t-base), background var(--t-base);
     }
 
-    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .spot)::before,
-    .market-feature:not(.market-feature--compact) .token-summary-item::before {
+    :is(.bar-box, .change-box, .spot)::before {
         content: "";
         position: absolute;
         inset: -1px;
@@ -678,9 +674,7 @@
 
     }
 
-    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-        .coin-period-card, .bar-box, .change-box, .spot)::after,
-    .market-feature:not(.market-feature--compact) .token-summary-item::after {
+    :is(.bar-box, .change-box, .spot)::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -695,25 +689,18 @@
 
     @media (hover: hover) {
 
-        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .bar-box, .change-box, .spot):hover::before,
-        .market-feature:not(.market-feature--compact) .token-summary-item:hover::before,
-        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .bar-box, .change-box, .spot):hover::after,
-        .market-feature:not(.market-feature--compact) .token-summary-item:hover::after {
+        :is(.bar-box, .change-box, .spot):hover::before,
+        :is(.bar-box, .change-box, .spot):hover::after {
             opacity: 1;
         }
 
-        :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item,
-            .coin-period-card, .spot):hover,
-        .market-feature:not(.market-feature--compact) .token-summary-item:hover {
+        :is(.bar-box, .change-box, .spot):hover {
             transform: translateY(-3px);
         }
     }
 
     /* Shared label / value typography inside tiles */
-    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>span,
-    .market-feature:not(.market-feature--compact) .token-summary-item>span {
+    :is(.bar-box, .change-box, .spot)>span {
         display: block;
         font-size: var(--fs-xs);
         letter-spacing: 0.1em;
@@ -721,8 +708,7 @@
         color: var(--text-mute);
     }
 
-    :is(.coin-metric, .coin-flow-card, .coin-audit-item, .coin-project-item)>strong,
-    .market-feature:not(.market-feature--compact) .token-summary-item>strong {
+    :is(.bar-box, .change-box, .spot)>strong {
         display: block;
         font-family: var(--font-display);
         letter-spacing: -0.015em;
@@ -731,19 +717,7 @@
     }
 
     /* Panel recipe (large surfaces) */
-    :is(.slider-card, .coin-hero, .coin-address-card, .coin-section,
-        .holders-box) {
-        position: relative;
-        border-radius: var(--r-xl);
-        corner-shape: var(--corner, round);
-        background: var(--panel-bg);
-        border: 1px solid var(--stroke);
-        box-shadow: var(--shadow-2);
-    }
-
-    /* Token Summary is variant-owned: the standalone Market page keeps the
-       normal panel recipe, while the Home compact variant has no global rim. */
-    .market-feature:not(.market-feature--compact)>.token-summary {
+    :is(.slider-card, .holders-box) {
         position: relative;
         border-radius: var(--r-xl);
         corner-shape: var(--corner, round);
@@ -1333,34 +1307,6 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--text-dim);
-    }
-
-    /* —— 6.5b BADGE (verified) ———————————————————————————————————————— */
-    .token-summary-badge,
-    .coin-verified {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 12px 5px 9px;
-        border-radius: var(--r-pill);
-        font-size: var(--fs-xs);
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        white-space: nowrap;
-        color: var(--mint);
-        background: oklch(0.87 0.17 170 / 0.12);
-        border: 1px solid oklch(0.87 0.17 170 / 0.32);
-    }
-
-    .token-summary-badge::before,
-    .coin-verified::before {
-        content: "";
-        width: 14px;
-        height: 14px;
-        background: currentColor;
-        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 2 3.3-.2 1.2 3.1 2.8 1.8-.9 3.2.9 3.2-2.8 1.8-1.2 3.1-3.3-.2-2.6 2-2.6-2-3.3.2-1.2-3.1-2.8-1.8.9-3.2-.9-3.2 2.8-1.8 1.2-3.1 3.3.2z'/%3E%3Cpath d='M8 12.2l2.6 2.6L16 9.4' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 2 3.3-.2 1.2 3.1 2.8 1.8-.9 3.2.9 3.2-2.8 1.8-1.2 3.1-3.3-.2-2.6 2-2.6-2-3.3.2-1.2-3.1-2.8-1.8.9-3.2-.9-3.2 2.8-1.8 1.2-3.1 3.3.2z'/%3E%3C/svg%3E") center / contain no-repeat;
     }
 
     /* ======================================================================
@@ -2148,11 +2094,10 @@ html[data-theme="light"] .nav-brand-logo--black {
     }
 }
 
-/* —— 7 · SHARED THREE-STATE SWITCHERS — theme + game section ———————— */
+/* —— 7 · THEME SWITCHER ——————————————————————————————————————————————— */
 
-/* Both controls share the same geometry. Their different content (icons only
-   vs. icon + label) is the only intentional visual distinction. */
-.theme-toggle:not(.game-view-toggle) {
+/* Theme control uses a three-option icon-only switcher. */
+.theme-toggle {
     --tt-size: 28px;
     --tt-icon-size: 16px;
     --tt-pad: 3px;
@@ -2178,13 +2123,12 @@ html[data-theme="light"] .nav-brand-logo--black {
         background-color 250ms ease;
 }
 
-/* The selected state is painted directly on the selected option in both
-   switchers; the old sliding thumb is no longer part of the visual model. */
+/* The selected state is painted directly on the active theme option. */
 .theme-toggle__thumb {
     display: none;
 }
 
-.theme-toggle:not(.game-view-toggle) .theme-toggle__option {
+.theme-toggle .theme-toggle__option {
     position: relative;
     z-index: 1;
     display: grid;
@@ -2205,7 +2149,7 @@ html[data-theme="light"] .nav-brand-logo--black {
         filter 220ms ease;
 }
 
-.theme-toggle:not(.game-view-toggle) .theme-toggle__option img {
+.theme-toggle .theme-toggle__option img {
     display: block;
     width: var(--tt-icon-size);
     height: var(--tt-icon-size);
@@ -2218,82 +2162,13 @@ html[data-theme="light"] .nav-brand-logo--black {
         filter 220ms ease;
 }
 
-.theme-toggle:not(.game-view-toggle) .theme-toggle__option.is-active img {
+.theme-toggle .theme-toggle__option.is-active img {
     transform: rotate(360deg);
 }
 
-.theme-toggle:not(.game-view-toggle) .theme-toggle__option:focus-visible {
+.theme-toggle .theme-toggle__option:focus-visible {
     outline: 2px solid var(--nav-accent);
     outline-offset: -2px;
-}
-
-/* Game section selector: same frame, height, option treatment and active
-   surface as ThemeSwitcher. Its wider cells simply accommodate text labels. */
-.nav .game-view-toggle {
-    --gvt-icon-size: 14px;
-
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: center;
-
-    height: 36px;
-    min-height: 36px;
-    max-height: 36px;
-    padding: 3px;
-    gap: 3px;
-}
-
-.nav .game-view-toggle .theme-toggle__option {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    min-height: 0;
-    padding: 0 5px;
-    gap: 5px;
-
-}
-
-.nav .game-view-toggle .theme-toggle__icon {
-    display: block;
-    width: var(--gvt-icon-size);
-    height: var(--gvt-icon-size);
-    flex: 0 0 var(--gvt-icon-size);
-    pointer-events: none;
-    user-select: none;
-    transform: rotate(0deg);
-    transition:
-        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
-        filter 220ms ease;
-}
-
-.nav .game-view-toggle .theme-toggle__option.is-active .theme-toggle__icon {
-    transform: rotate(360deg);
-}
-
-.game-view-toggle__label {
-    display: inline;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.nav .game-view-toggle .theme-toggle__option:focus-visible {
-    outline: 2px solid var(--nav-accent);
-    outline-offset: -2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    .theme-toggle:not(.game-view-toggle),
-    .theme-toggle:not(.game-view-toggle) *,
-    .nav .game-view-toggle,
-    .nav .game-view-toggle * {
-        transition-duration: .01ms !important;
-        animation-duration: .01ms !important;
-    }
 }
 
 /* —— 8 · RESPONSIVE ———————————————————————————————————————————————————— */

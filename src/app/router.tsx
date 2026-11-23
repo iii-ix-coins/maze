@@ -13,21 +13,15 @@ const HomePage = lazy(() =>
   }))
 );
 
-const CoinPage = lazy(() =>
-  import('../features/coin/CoinPage').then((module) => ({
-    default: module.CoinPage
+const ExplorePage = lazy(() =>
+  import('../features/explore/ExplorePage').then((module) => ({
+    default: module.ExplorePage
   }))
 );
 
 const HoldersPage = lazy(() =>
   import('../features/holders/HoldersPage').then((module) => ({
     default: module.HoldersPage
-  }))
-);
-
-const MarketPage = lazy(() =>
-  import('../features/market/MarketPage').then((module) => ({
-    default: module.MarketPage
   }))
 );
 
@@ -45,9 +39,8 @@ function MazeRouteShell() {
 const PAGE_COMPONENTS = {
   home: HomePage,
   maze: MazeRouteShell,
-  coin: CoinPage,
+  explore: ExplorePage,
   holders: HoldersPage,
-  market: MarketPage,
   profile: ProfilePage,
 };
 

@@ -1,5 +1,3 @@
-# Market feature — React
+# Home market snapshot
 
-`MarketSummary` and `MarketPage` now own the market UI. The shared `useMarketData` hook preserves the existing `GET /api/jupiter-market` request, `cache: no-store`, `Accept: application/json` header, and 30-second refresh cadence. Payload unwrapping and number formatting mirror the legacy implementation.
-
-The live coin price is read from the existing `GET /api/live-price` endpoint, which exposes the latest PCLQCH engine snapshot. Price refresh is visibility-aware and runs every 5 seconds while the summary is mounted; the Jupiter market request remains on its existing 30-second cadence. The feature does not start another pricing engine, call upstream price providers from the browser, or persist backend state.
+`MarketSummary` and `useMarketData` are retained only for the compact market snapshot currently embedded in Home. The standalone Market route has been retired. The shared `GET /api/jupiter-market` request, `cache: no-store`, `Accept: application/json` header, 30-second refresh cadence, payload unwrapping and number formatting remain unchanged because Home still consumes this feature.

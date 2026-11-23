@@ -17,12 +17,16 @@ describe('shared site route manifest', () => {
   });
 
   it('resolves aliases to the same page definition', () => {
-    expect(resolveSiteRoute('/coin.html')?.id).toBe('coin');
-    expect(resolveSiteRoute('/token')?.id).toBe('coin');
+    expect(resolveSiteRoute('/explore')?.id).toBe('explore');
+    expect(resolveSiteRoute('/explore')?.navKey).toBe('explore');
+    expect(SOFT_NAVIGATION_PATHS.has('/explore')).toBe(true);
+    expect(getSiteRoutePathByNavKey('explore')).toBe('/explore');
+    expect(resolveSiteRoute('/coin.html')).toBeUndefined();
+    expect(resolveSiteRoute('/token')).toBeUndefined();
     expect(resolveSiteRoute('/holders.html')?.id).toBe('holders');
     expect(resolveSiteRoute('/holders')?.id).toBe('holders');
-    expect(resolveSiteRoute('/market.html')?.id).toBe('market');
-    expect(resolveSiteRoute('/market')?.id).toBe('market');
+    expect(resolveSiteRoute('/market.html')).toBeUndefined();
+    expect(resolveSiteRoute('/market')).toBeUndefined();
     expect(resolveSiteRoute('/profile')?.navKey).toBe('profile');
     expect(getSiteRoutePathByNavKey('profile')).toBe('/profile');
   });

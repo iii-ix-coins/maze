@@ -1,7 +1,7 @@
 /* Shared feature primitives used on Home and feature routes.
    Loaded with the site shell so Home is styled on direct entry and refresh.
    Feature-specific page rules remain in the lazy feature-pages.css chunk. */
-/* React-owned Token, Market and Holders page presentation. */
+/* Shared Home and feature-page primitives. */
 @layer pages {
   .feature-page-shell {
     width: min(1180px, calc(100% - 40px));

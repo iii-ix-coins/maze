@@ -36,7 +36,7 @@ body>#root>#site-brand {
     max-height: 34px;
 }
 
-/* Game-view and theme controls remain available without occupying dock space. */
+/* Theme control remains available without occupying dock space. */
 body>#root>#site-controls {
     position: fixed;
     top: calc(12px + env(safe-area-inset-top));
@@ -54,39 +54,7 @@ body>#root>#site-controls {
     pointer-events: auto;
 }
 
-#site-controls .game-view-toggle {
-    --gvt-icon-size: 15px;
-    display: grid;
-    grid-template-columns: repeat(3, 29px);
-    align-items: center;
-    height: 36px;
-    min-height: 36px;
-    max-height: 36px;
-    padding: 3px;
-    gap: 2px;
-}
-
-#site-controls .game-view-toggle .theme-toggle__option {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    min-height: 0;
-    padding: 0;
-}
-
-#site-controls .game-view-toggle .theme-toggle__icon {
-    display: block;
-    width: var(--gvt-icon-size);
-    height: var(--gvt-icon-size);
-}
-
-#site-controls .game-view-toggle__label {
-    display: none;
-}
-
-#site-controls .theme-toggle:not(.game-view-toggle) {
+#site-controls .theme-toggle {
     --tt-size: 27px;
     --tt-icon-size: 15px;
     --tt-pad: 3px;
@@ -147,7 +115,7 @@ body>#root>#site-controls {
 
 .site-bottom-nav .nav-links {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     align-items: center;
     gap: 3px;
     width: 100%;
@@ -377,11 +345,7 @@ body>#root>#site-controls {
 }
 
 @media (max-width: 370px) {
-    #site-controls .game-view-toggle {
-        grid-template-columns: repeat(3, 25px);
-    }
-
-    #site-controls .theme-toggle:not(.game-view-toggle) {
+    #site-controls .theme-toggle {
         --tt-size: 24px;
         --tt-icon-size: 13px;
     }

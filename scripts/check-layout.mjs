@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
-  'index.html', 'coin.html', 'holders.html', 'market.html', 'vite.config.mts', 'package.json',
-  'src/app', 'src/components', 'src/features/home', 'src/features/market',
-  'src/features/holders', 'src/features/coin',
+  'index.html', 'holders.html', 'vite.config.mts', 'package.json',
+  'src/app', 'src/components', 'src/features/home', 'src/features/market', 'src/features/explore',
+  'src/features/holders',
   'src/features/theme', 'src/features/maze/lobby',
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
@@ -16,7 +16,7 @@ const required = [
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
-  'src/components/navigation/GameViewSwitcher.tsx',
+  'src/features/explore/ExplorePage.tsx',
   'src/platform/wallet/WalletConnectButton.tsx', 'src/platform/wallet/wallet-session-teardown.ts',
   'src/platform/wallet/wallet-session-teardown.test.ts', 'src/platform/identity/IdentityProvider.tsx',
   'src/platform/identity/identity-client.ts', 'src/platform/identity/identity-types.ts',
@@ -176,8 +176,7 @@ const activeFrontend = [
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
   'src/features/market/MarketSummary.tsx',
-  'src/features/market/MarketPage.tsx',
-  'src/features/coin/CoinPage.tsx',
+  'src/features/explore/ExplorePage.tsx',
   'src/features/holders/HoldersPanel.tsx',
   'src/features/holders/HoldersPage.tsx',
 ];
@@ -280,9 +279,21 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
 }
 
 const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
+const exploreComponent = fs.readFileSync(path.join(root, 'src/features/explore/ExplorePage.tsx'), 'utf8');
 const chromeComponent = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
 const profileComponent = fs.readFileSync(path.join(root, 'src/features/profile/ProfilePage.tsx'), 'utf8');
 const walletComponent = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
+if (
+  !navigationComponent.includes("label: 'Explore'") ||
+  navigationComponent.includes("label: 'Market'") ||
+  navigationComponent.includes("label: 'Token'") ||
+  !navigationComponent.includes('href={MAZE_VIEW_URLS.create}') ||
+  !exploreComponent.includes('MAZE_VIEW_URLS.live') ||
+  !exploreComponent.includes('MAZE_VIEW_URLS.rooms')
+) {
+  console.error('[layout] Dock must keep Create, replace Market/Token with Explore, and Explore must link to the existing Maze Live and Rooms views.');
+  process.exit(1);
+}
 if (
   navigationComponent.includes('<WalletConnectButton />') ||
   !navigationComponent.includes("getSiteRoutePath('profile')") ||
@@ -295,7 +306,7 @@ if (
 if (
   !chromeComponent.includes('id="site-brand"') ||
   !chromeComponent.includes('id="site-controls"') ||
-  !chromeComponent.includes('<GameViewSwitcher />') ||
+  chromeComponent.includes('GameViewSwitcher') ||
   !chromeComponent.includes('<ThemeSwitcher />')
 ) {
   console.error('[layout] Brand and utility controls must remain outside the bottom navigation dock.');
@@ -406,11 +417,25 @@ if (!mazeRoute?.paths.includes('/maze.html') || !mazeRoute.paths.includes('/play
   console.error('[layout] Maze document aliases must be declared once in the shared route manifest and remain hard navigations.');
   process.exit(1);
 }
-for (const routeId of ['home', 'maze', 'coin', 'holders', 'market', 'profile']) {
+for (const routeId of ['home', 'maze', 'explore', 'holders', 'profile']) {
   if (!routeManifest.routes.some((route) => route.id === routeId)) {
     console.error(`[layout] shared route manifest is missing route: ${routeId}`);
     process.exit(1);
   }
+}
+const exploreRoute = routeManifest.routes.find((route) => route.id === 'explore');
+if (!exploreRoute?.paths.includes('/explore') || exploreRoute.server !== 'spa' || !exploreRoute.soft || exploreRoute.navKey !== 'explore') {
+  console.error('[layout] Explore must be registered as a soft SPA route and navigation destination.');
+  process.exit(1);
+}
+if (routeManifest.routes.some((route) => ['coin', 'market'].includes(route.id))) {
+  console.error('[layout] retired standalone Token/Coin and Market routes must not remain in the shared route manifest.');
+  process.exit(1);
+}
+const retiredPagePaths = ['coin.html', 'market.html', 'src/features/coin', 'src/features/market/MarketPage.tsx', 'src/components/navigation/GameViewSwitcher.tsx'];
+if (retiredPagePaths.some((file) => fs.existsSync(path.join(root, file)))) {
+  console.error('[layout] removed Token/Coin, standalone Market or top-right game switcher files must not remain.');
+  process.exit(1);
 }
 const profileRoute = routeManifest.routes.find((route) => route.id === 'profile');
 if (!profileRoute?.paths.includes('/profile') || profileRoute.server !== 'spa' || !profileRoute.soft || profileRoute.navKey !== 'profile') {
@@ -439,7 +464,7 @@ const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'),
 const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
-  !sharedSiteStyles.includes('grid-template-columns: repeat(7, minmax(0, 1fr))') ||
+  !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr))') ||
   !sharedSiteStyles.includes('#site-brand') ||
   !sharedSiteStyles.includes('#site-controls')
 ) {
@@ -448,10 +473,6 @@ if (
 }
 if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*grid/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*flex/s.test(globalStyles)) {
   console.error('[layout] style.css must not define a second nav-inner layout.');
-  process.exit(1);
-}
-if (/\.nav\s+\.game-view-toggle\s*\{[^}]*margin-top\s*:/s.test(globalStyles)) {
-  console.error('[layout] GameViewSwitcher must not add a separate top margin outside nav-secondary-row.');
   process.exit(1);
 }
 
@@ -471,7 +492,6 @@ for (const requiredMazeStyle of ['maze-site.css', 'maze-unify.css', 'maze-theme.
 const apiContractSource = fs.readFileSync(path.join(root, 'src/services/api/contracts.ts'), 'utf8');
 for (const apiConsumer of [
   'src/features/holders/useHolders.ts',
-  'src/features/coin/CoinPage.tsx',
   'src/features/market/useMarketData.ts',
 ]) {
   const source = fs.readFileSync(path.join(root, apiConsumer), 'utf8');
