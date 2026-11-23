@@ -418,18 +418,6 @@ body>#root>#site-brand {
     }
 }
 
-@media (max-width: 720px) {
-    #site-header[data-maze-page="true"] {
-        position: static;
-        top: auto;
-        left: auto;
-        bottom: auto;
-        width: min(100% - 2 * var(--gutter), var(--page-max));
-        margin-inline: auto;
-        transform: none;
-    }
-
-}
 
 @media (prefers-reduced-motion: reduce) {
     .site-bottom-nav .nav-link,
