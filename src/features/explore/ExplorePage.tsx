@@ -4,7 +4,7 @@ import './explore-page.css';
 function ExploreIcon({ type }: { type: 'live' | 'rooms' }) {
   if (type === 'live') {
     return (
-      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <svg className="theme-svg-inline" viewBox="0 0 48 48" fill="none" aria-hidden="true">
         <circle cx="24" cy="24" r="18" />
         <path d="m21 15 12 9-12 9V15Z" />
         <path d="M8 8 12 12M40 8 36 12" />
@@ -13,7 +13,7 @@ function ExploreIcon({ type }: { type: 'live' | 'rooms' }) {
   }
 
   return (
-    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg className="theme-svg-inline" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <path d="M7 13.5 24 5l17 8.5v21L24 43 7 34.5v-21Z" />
       <path d="m7.5 14 16.5 9 16.5-9M24 23v19" />
       <path d="m16 9 17 9" />

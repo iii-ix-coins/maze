@@ -1,6 +1,7 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
 import { applySiteTheme, SITE_THEMES, type SiteTheme } from '../../features/theme/theme';
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 const THEME_LABELS: Record<SiteTheme, string> = {
   grass: 'Grass',
@@ -66,7 +67,7 @@ export function ThemeSwitcher() {
             tabIndex={active ? 0 : -1}
             onClick={() => selectTheme(item)}
           >
-            <img className="theme-toggle__icon" src={THEME_ICONS[item]} alt="" aria-hidden="true" draggable="false" />
+            <ThemedSvgIcon className="theme-toggle__icon" src={THEME_ICONS[item]} />
           </button>
         );
       })}

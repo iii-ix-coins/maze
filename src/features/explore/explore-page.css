@@ -44,8 +44,7 @@
     height: 66px;
     border: 1px solid var(--stroke, #334047);
     border-radius: 18px;
-    color: var(--mint, #78edc0);
-    background: rgba(120, 237, 192, .07);
+    background: rgba(var(--ar-rgb), .07);
   }
 
   .explore-destination-icon svg {

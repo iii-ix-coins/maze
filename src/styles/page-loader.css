@@ -28,26 +28,23 @@
     .page-loader__logo {
         display: block;
         width: 88px;
-        height: auto;
-        object-fit: contain;
+        height: 69px;
 
         transform: none;
         animation: maze-logo-pulse 1.8s ease-in-out infinite;
 
-        will-change: opacity, filter;
+        will-change: opacity;
     }
 
     @keyframes maze-logo-pulse {
 
         0%,
         100% {
-            opacity: 0.48;
-            filter: brightness(0.82) saturate(0.9);
+            opacity: 0.55;
         }
 
         50% {
             opacity: 1;
-            filter: brightness(1.18) saturate(1.12);
         }
     }
 
@@ -61,7 +58,6 @@
         .page-loader__logo {
             animation: none;
             opacity: 0.85;
-            filter: none;
         }
     }
 }

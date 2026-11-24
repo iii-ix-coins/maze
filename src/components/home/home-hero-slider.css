@@ -205,31 +205,11 @@
 
     aspect-ratio: 1;
 
-    object-fit: contain;
-    object-position: right center;
-
-    /* Straight image — controlled zoom only */
+    /* The SVG geometry is a mask; its pigment comes from the global theme tokens. */
     transform: scale(1.04);
     transform-origin: right center;
-
-    mix-blend-mode: screen;
-
-    filter:
-      drop-shadow(0 14px 32px rgba(var(--hero-accent-rgb), .22));
-
+    filter: drop-shadow(0 14px 32px rgba(var(--hero-accent-rgb), .22));
     opacity: .8;
-
-    mask-image: linear-gradient(to right,
-        transparent 0%,
-        rgba(0, 0, 0, .35) 16%,
-        #000 34%,
-        #000 100%);
-
-    -webkit-mask-image: linear-gradient(to right,
-        transparent 0%,
-        rgba(0, 0, 0, .35) 16%,
-        #000 34%,
-        #000 100%);
   }
 
   .hero-maze-board {

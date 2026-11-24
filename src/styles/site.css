@@ -368,10 +368,6 @@ body>#root>#site-brand {
     box-shadow: none;
 }
 
-.site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option.is-active img {
-    filter: grayscale(1) brightness(.12);
-}
-
 
 
 @media (max-width: 720px) {

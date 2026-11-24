@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
 import { SiteNavigation } from '../navigation/SiteNavigation';
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 /** Persistent chrome: brand stays independent; notifications, theme and routes live in the bottom dock. */
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
@@ -31,9 +32,7 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
     <>
       <a id="site-brand" className="site-brand" href={getSiteRoutePath('home')} aria-label="Maze home">
         <span className="nav-brand-mark" aria-hidden="true">
-          <img className="nav-brand-logo nav-brand-logo--white" src="/css/images/maze-logo-white.svg" alt="" decoding="async" />
-          <img className="nav-brand-logo nav-brand-logo--black" src="/css/images/maze-logo-black.svg" alt="" decoding="async" />
-          <img className="nav-brand-logo nav-brand-logo--green" src="/css/images/maze-logo-green.svg" alt="" decoding="async" />
+          <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo-white.svg" />
         </span>
       </a>
 

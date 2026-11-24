@@ -2,6 +2,7 @@ import { getMarketToken, type MarketPayload } from './market-types';
 import { useMarketData } from './useMarketData';
 import { useLivePrice } from './useLivePrice';
 import { formatInteger, formatTokenPrice, formatUsd } from '../../services/formatters';
+import { ThemedSvgIcon } from '../../components/media/ThemedSvgIcon';
 
 interface MarketSummaryProps {
   showTitle?: boolean;
@@ -48,13 +49,10 @@ function TokenSummaryContent({
       >
         {/* TOKEN IMAGE + PRICE */}
         <div className="token-summary-visual">
-          <img
-            id="token-summary-icon"
+          <ThemedSvgIcon
             className="token-summary-icon"
             src="/css/images/maze-coin-logo.svg"
-            alt={`${token?.name || 'Token'} logo`}
-            loading="lazy"
-            decoding="async"
+            label={`${token?.name || 'Token'} logo`}
           />
 
           <div

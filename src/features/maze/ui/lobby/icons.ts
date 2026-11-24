@@ -1,5 +1,5 @@
 /** Inline SVG icons (stroke = currentColor) for the lobby. Static strings only; safe for `html:`. */
-const svg = body => `<svg class="lb-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+const svg = body => `<svg class="lb-ic theme-svg-inline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export const ICONS = {
     grid: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h8V8h8M12 12v8"/>'),

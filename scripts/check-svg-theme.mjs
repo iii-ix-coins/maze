@@ -1,0 +1,131 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const errors = [];
+const warnings = [];
+
+const read = (relativePath) => {
+  const absolutePath = path.join(root, relativePath);
+  if (!fs.existsSync(absolutePath)) {
+    errors.push(`Missing required source: ${relativePath}`);
+    return '';
+  }
+  return fs.readFileSync(absolutePath, 'utf8');
+};
+
+const checkPublicSvg = (url, owner) => {
+  if (!url.startsWith('/')) {
+    errors.push(`${owner}: SVG source must be an absolute same-origin public URL: ${url}`);
+    return;
+  }
+  const assetPath = path.join(root, 'public', url.replace(/^\/+/, ''));
+  if (!fs.existsSync(assetPath)) errors.push(`${owner}: referenced SVG is missing: ${url}`);
+};
+
+const themeTokens = read('src/styles/theme-tokens.css');
+const themedIconCss = read('src/styles/style.css');
+const themedIconComponent = read('src/components/media/ThemedSvgIcon.tsx');
+const navigation = read('src/components/navigation/SiteNavigation.tsx');
+const themeSwitcher = read('src/components/navigation/ThemeSwitcher.tsx');
+const brand = read('src/components/layout/SiteChromeHosts.tsx');
+const loader = read('src/components/layout/PageLoader.tsx');
+const hero = read('src/components/home/HomeHeroSlider.tsx');
+const market = read('src/features/market/MarketSummary.tsx');
+const gameIcons = read('src/features/maze/ui/create-game/icons.ts');
+const avatar = read('src/components/account/UserAvatar.tsx');
+const lobbyIcons = read('src/features/maze/ui/lobby/icons.ts');
+const walletUi = read('src/platform/wallet/WalletConnectButton.tsx');
+const explorePage = read('src/features/explore/ExplorePage.tsx');
+const profilePage = read('src/features/profile/ProfilePage.tsx');
+const mazeSiteCss = read('src/features/maze/styles/maze-site.css');
+const createGameCss = read('src/features/maze/styles/create-game.css');
+
+for (const theme of ['light', 'dark', 'grass']) {
+  const block = themeTokens.match(new RegExp(`html\\[data-theme=["']${theme}["']\\]\\s*\\{([\\s\\S]*?)\\n\\s*\\}`, 'm'))?.[1] ?? '';
+  for (const token of ['--svg-icon-primary', '--svg-icon-secondary', '--svg-icon-accent', '--svg-icon-on-accent']) {
+    if (!block.includes(token)) errors.push(`Theme ${theme} does not define ${token}.`);
+  }
+}
+
+if (!themedIconCss.includes('.themed-svg-icon') || !themedIconCss.includes('mask-image: var(--themed-svg-source)') || !themedIconCss.includes('background-color: currentColor')) {
+  errors.push('ThemedSvgIcon CSS must render source SVG geometry as a mask tinted by the root theme token.');
+}
+if (!themedIconComponent.includes('--themed-svg-source') || !themedIconComponent.includes('ThemedSvgIcon')) {
+  errors.push('ThemedSvgIcon component is missing its central SVG source contract.');
+}
+if (!hero.includes('<ThemedSvgIcon') || /<img[\s\S]{0,240}slide\.visualSrc/.test(hero)) {
+  errors.push('Home hero SVG artwork must use ThemedSvgIcon rather than an untinted external img.');
+}
+if (!market.includes('<ThemedSvgIcon') || /<img[^>]+src="\/css\/images\/maze-coin-logo\.svg"/.test(market)) {
+  errors.push('Maze coin mark must use the root-level ThemedSvgIcon contract.');
+}
+
+const sourceMaps = [
+  ['SiteNavigation', navigation.match(/const NAV_ICON_SOURCES[\s\S]*?=\s*\{([\s\S]*?)\};/)?.[1] ?? ''],
+  ['ThemeSwitcher', themeSwitcher.match(/const THEME_ICONS[\s\S]*?=\s*\{([\s\S]*?)\};/)?.[1] ?? ''],
+];
+for (const [owner, block] of sourceMaps) {
+  const urls = [...block.matchAll(/:\s*'([^']+\.svg)'/g)].map((match) => match[1]);
+  if (!urls.length) errors.push(`${owner} has no registered SVG icon sources.`);
+  for (const url of urls) checkPublicSvg(url, owner);
+}
+
+for (const [owner, source] of [
+  ['SiteChromeHosts', brand],
+  ['PageLoader', loader],
+  ['HomeHeroSlider', hero],
+  ['MarketSummary', market],
+]) {
+  for (const match of source.matchAll(/src="(\/[^"']+\.svg)"|visualSrc:\s*'(\/[^']+\.svg)'/g)) {
+    const url = match[1] ?? match[2];
+    checkPublicSvg(url, owner);
+  }
+}
+
+const iconFiles = [...gameIcons.matchAll(/file:\s*'([^']+\.svg)'/g)].map((match) => match[1]);
+for (const filename of iconFiles) checkPublicSvg(`/maze-assets/assets/images/${filename}`, 'CreateGameIcons');
+
+if (!brand.includes('<ThemedSvgIcon') || !loader.includes('<ThemedSvgIcon')) {
+  errors.push('Brand wordmark and page-loader mark must use ThemedSvgIcon.');
+}
+if (!avatar.includes('color: var(--svg-icon-primary)') && !themedIconCss.includes('.user-avatar')) {
+  errors.push('The fallback UserAvatar SVG must inherit the primary SVG theme token.');
+}
+for (const [owner, source] of [['Lobby inline icons', lobbyIcons], ['Wallet inline icons', walletUi], ['Explore inline icons', explorePage], ['Profile inline icons', profilePage]]) {
+  if (!source.includes('theme-svg-inline')) errors.push(`${owner} must use the shared inline-SVG theme class.`);
+}
+if (!createGameCss.includes('background: var(--svg-icon-primary)')) {
+  errors.push('Create Game SVG stencils must use the root SVG token.');
+}
+if (/\.maze-app\s+\.cg-ico\.is-tinted/.test(mazeSiteCss)) {
+  errors.push('Legacy higher-specificity Create Game SVG tint override remains in maze-site.css.');
+}
+
+// These are intentionally outside the in-page CSS theme pipeline: the browser favicon,
+// the Reown metadata image, and external provider brand marks keep their brand artwork.
+const intentionallyExternal = [
+  'index.html favicon (browser chrome resource)',
+  'src/platform/wallet/appkit.ts metadata icon (Reown metadata, not in-page UI)',
+  'third-party provider logos (official brand assets)',
+];
+
+// These pre-existing image references are present in MazeBackground.tsx but their SVG
+// files are not included in the supplied archive. Keep this as a visible warning.
+for (const name of ['3D-bg-grass.svg', '3D-bg-dark.svg', '3D-bg-light.svg']) {
+  if (!fs.existsSync(path.join(root, 'public/css/images', name))) {
+    warnings.push(`MazeBackground references missing pre-existing asset public/css/images/${name}.`);
+  }
+}
+
+if (errors.length) {
+  console.error('[svg-theme] validation failed:');
+  for (const error of errors) console.error(`  - ${error}`);
+  process.exit(1);
+}
+
+console.log('[svg-theme] root-level SVG theme contract verified.');
+console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, MarketSummary, Home hero and Create Game icons are wired to theme tokens.');
+console.log(`[svg-theme] intentionally external/brand-managed resources: ${intentionallyExternal.join('; ')}.`);
+for (const warning of warnings) console.warn(`[svg-theme] warning: ${warning}`);

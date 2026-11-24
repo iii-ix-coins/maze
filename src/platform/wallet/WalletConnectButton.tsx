@@ -804,7 +804,7 @@ export function WalletConnectButton() {
                 onClick={closeWalletMenu}
               >
                 <span className="nav-wallet-menu-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="theme-svg-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="8" r="3.2" />
                     <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
                   </svg>
@@ -827,7 +827,7 @@ export function WalletConnectButton() {
               }}
             >
               <span className="nav-wallet-menu-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="theme-svg-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="6" width="18" height="14" rx="2" />
                   <path d="M3 9h18M16 14h2" />
                 </svg>
@@ -845,7 +845,7 @@ export function WalletConnectButton() {
                 onClick={() => { void handleEndSession(); }}
               >
                 <span className="nav-wallet-menu-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="theme-svg-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2.8v8.7" />
                     <path d="M7.2 5.8a8 8 0 1 0 9.6 0" />
                     {isAuthenticated ? <path d="M15.5 15.5 19 19m0-3.5V19h-3.5" /> : null}

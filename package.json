@@ -19,12 +19,13 @@
     "test:maze": "npm run build:maze-server && npm run test:maze:run",
     "test:all": "npm run test && npm run test:identity && npm run test:maze",
     "check:layout": "node scripts/check-layout.mjs",
-    "check": "npm run check:layout && npm run check:css:duplicates && npm run typecheck && npm run build:all && npm run test && npm run test:identity && npm run test:maze:run",
+    "check": "npm run check:layout && npm run check:css:duplicates && npm run check:svg-theme && npm run typecheck && npm run build:all && npm run test && npm run test:identity && npm run test:maze:run",
     "test:maze:run": "node scripts/run-maze-tests.mjs",
     "test:maze:e2e": "node --import tsx tests/maze/e2e/parity.mjs",
     "test:maze:e2e:self": "node --import tsx tests/maze/e2e/parity.mjs --self",
     "check:css:duplicates": "node scripts/check-css-duplicates.mjs",
-    "test:identity": "node --test tests/identity/identity-routes.test.cjs"
+    "test:identity": "node --test tests/identity/identity-routes.test.cjs",
+    "check:svg-theme": "node scripts/check-svg-theme.mjs"
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.15",

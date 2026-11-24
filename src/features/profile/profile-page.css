@@ -258,7 +258,6 @@
     display: block;
     width: clamp(68px, 12vw, 88px);
     height: clamp(68px, 12vw, 88px);
-    color: var(--text-mute, #9ba8aa);
     opacity: .82;
   }
 

@@ -305,8 +305,7 @@
 
     /* Brand glyphs are navy-on-black SVGs: lift them so they read on the dark canvas */
     .brand-logo-img,
-    .banner-logo,
-    .token-summary-icon {
+    .banner-logo {
         image-rendering: auto;
     }
 
@@ -329,6 +328,46 @@
 /* ==========================================================================
    4 · FX — backdrop, scroll progress, loader, entrance
    ========================================================================== */
+@layer components {
+    /* One theme contract for external SVG geometry used as interface icons. */
+    .themed-svg-icon {
+        --_themed-svg-color: var(--svg-icon-primary);
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 1em;
+        height: 1em;
+        color: var(--_themed-svg-color);
+        background-color: currentColor;
+        -webkit-mask-image: var(--themed-svg-source);
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        -webkit-mask-size: contain;
+        mask-image: var(--themed-svg-source);
+        mask-mode: alpha;
+        mask-repeat: no-repeat;
+        mask-position: center;
+        mask-size: contain;
+        pointer-events: none;
+    }
+
+    .themed-svg-icon[data-tone="secondary"] {
+        --_themed-svg-color: var(--svg-icon-secondary);
+    }
+
+    .themed-svg-icon[data-tone="accent"] {
+        --_themed-svg-color: var(--svg-icon-accent);
+    }
+
+    .themed-svg-icon[data-tone="on-accent"] {
+        --_themed-svg-color: var(--svg-icon-on-accent);
+    }
+
+    /* Inline UI SVGs use stroke/fill="currentColor" and inherit the same palette. */
+    .theme-svg-inline {
+        color: var(--svg-icon-primary);
+    }
+}
+
 @layer fx {
     /* —— 4.1 Backdrop: aurora + living maze + grain + vignette ——————————— */
     .backdrop {
@@ -1448,27 +1487,10 @@ html[data-theme="grass"] .nav {
 }
 
 .nav-brand-logo {
-    display: none;
-    height: 100%;
+    display: block;
+    width: 125px;
+    height: 30px;
     max-height: var(--nav-control-height);
-    width: auto;
-    object-fit: contain;
-}
-
-
-/* Theme -> logo:  grass = green (default), dark = white, light = black */
-.nav-brand-logo--green {
-    display: block;
-}
-
-html[data-theme="dark"] .nav-brand-logo--green,
-html[data-theme="light"] .nav-brand-logo--green {
-    display: none;
-}
-
-html[data-theme="dark"] .nav-brand-logo--white,
-html[data-theme="light"] .nav-brand-logo--black {
-    display: block;
 }
 
 /* Link group + actions */
@@ -1555,7 +1577,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     place-items: center;
     width: 18px;
     flex: 0 0 18px;
-    color: var(--nav-accent);
+    color: var(--svg-icon-primary);
     font-size: 0.9rem;
     line-height: 1;
 }
@@ -1620,7 +1642,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     border: 1px solid var(--nav-wallet-connected-border, rgba(92, 205, 170, .38));
     border-radius: 50%;
     background: var(--panel-bg, rgba(16, 28, 30, .9));
-    color: var(--mint, #78edc0);
+    color: var(--svg-icon-primary);
 }
 
 .user-avatar--large {
@@ -1797,11 +1819,10 @@ html[data-theme="light"] .nav-brand-logo--black {
         filter 220ms ease;
 }
 
-.theme-toggle .theme-toggle__option img {
+.theme-toggle .theme-toggle__option .theme-toggle__icon {
     display: block;
     width: var(--tt-icon-size);
     height: var(--tt-icon-size);
-    object-fit: contain;
     pointer-events: none;
     user-select: none;
     transform: rotate(0deg);
@@ -1810,7 +1831,7 @@ html[data-theme="light"] .nav-brand-logo--black {
         filter 220ms ease;
 }
 
-.theme-toggle .theme-toggle__option.is-active img {
+.theme-toggle .theme-toggle__option.is-active .theme-toggle__icon {
     transform: rotate(360deg);
 }
 
@@ -1867,7 +1888,7 @@ html[data-theme="light"] .nav-brand-logo--black {
     .nav *::after,
     .theme-toggle__thumb,
     .theme-toggle__option,
-    .theme-toggle__option img {
+    .theme-toggle__option .theme-toggle__icon {
         scroll-behavior: auto !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 import './home-hero-slider.css';
 
 type Slide = {
@@ -106,14 +107,9 @@ export function HomeHeroSlider() {
         className={`home-hero-art home-hero-art--${slide.visual}`}
         aria-hidden="true"
       >
-        <img
+        <ThemedSvgIcon
           className="home-hero-visual"
           src={slide.visualSrc}
-          alt=""
-          width="464"
-          height="464"
-          loading={active === 0 ? 'eager' : 'lazy'}
-          decoding="async"
         />
 
       </div>

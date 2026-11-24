@@ -75,7 +75,7 @@ export function ProfilePage() {
       {status === 'anonymous' ? (
         <section className="profile-connect-stage" aria-labelledby="profile-sign-in-title">
           <div className="profile-connect-prompt">
-            <svg className="profile-connect-mark" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+            <svg className="profile-connect-mark theme-svg-inline" viewBox="0 0 96 96" fill="none" aria-hidden="true">
               <circle cx="48" cy="31" r="18" stroke="currentColor" strokeWidth="4" />
               <path d="M12 84c5-20 18-30 36-30s31 10 36 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
             </svg>

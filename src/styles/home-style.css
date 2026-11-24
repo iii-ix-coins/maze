@@ -338,7 +338,10 @@
         display: block;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        background-color: var(--svg-icon-primary);
+        mask-position: center;
+        mask-repeat: no-repeat;
+        mask-size: contain;
     }
 
     .site-home-content .market-feature .token-summary-main {

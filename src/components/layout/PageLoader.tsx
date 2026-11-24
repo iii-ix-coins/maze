@@ -1,3 +1,5 @@
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
+
 
 type PageLoaderProps = {
   visible: boolean;
@@ -11,12 +13,7 @@ export function PageLoader({ visible }: PageLoaderProps) {
       aria-label="Loading"
       aria-hidden={!visible}
     >
-      <img
-        className="page-loader__logo"
-        src="/css/images/maze-logo.svg"
-        alt=""
-        draggable={false}
-      />
+      <ThemedSvgIcon className="page-loader__logo" src="/css/images/maze-logo.svg" />
     </div>
   );
 }
