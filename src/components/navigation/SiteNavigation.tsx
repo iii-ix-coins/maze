@@ -6,7 +6,7 @@ import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
-type NavIconName = 'home' | 'explore' | 'create' | 'profile' | 'notifications';
+type NavIconName = 'maze' | 'home' | 'explore' | 'create' | 'profile' | 'notifications';
 type NavItem = {
   label: string;
   href: string;
@@ -47,6 +47,8 @@ function NavIconFallback({ name }: { name: NavIconName }) {
   };
 
   switch (name) {
+    case 'maze':
+      return <svg {...common}><path d="M4 4h16v16H4z" /><path d="M4 9h5V4M15 4v5h5M4 15h5v5M15 20v-5h5M9 9v6h6V9" /></svg>;
     case 'home':
       return <svg {...common}><path d="m3 10 9-7 9 7" /><path d="M5.5 9v11h13V9M9 20v-6h6v6" /></svg>;
     case 'explore':
@@ -167,6 +169,7 @@ export function SiteNavigation() {
           <div className="nav-links">
             <DockLink item={{ label: 'Home', href: getSiteRoutePath('home'), key: 'index', icon: 'home' }} />
             <DockLink item={{ label: 'Explore', href: getSiteRoutePath('explore'), key: 'explore', icon: 'explore' }} />
+            <DockLink item={{ label: 'Maze', href: getSiteRoutePath('maze-hub'), key: 'maze-hub', icon: 'maze' }} />
             <a
               className={`nav-link nav-dock-link nav-dock-create${isCreateViewActive() ? ' active' : ''}`}
               href={MAZE_VIEW_URLS.create}

@@ -1,5 +1,7 @@
-# Home feature — native React route
+# Home — Game Feed
 
-The active Home route is composed from React-owned feature sections. `SiteChromeHosts` owns the common page lifecycle, navigation and independent brand header. `MarketSummary` presents the market snapshot.
+The root route (`/`) is the social game feed. It reads the existing read-only Maze lobby snapshot (`GET /rooms`) and groups live sessions, joinable waiting rooms and short-lived recent finish summaries. It does not create a second game engine or WebSocket session.
 
-The Home route does not include a Live Feed rail, Live Feed polling, or a Holders preview. Holder-specific page, API, snapshot service, state and background engine have been retired. The upstream market provider payload may still contain its original `holderCount` field; it is retained as provider data only and is not consumed by a Holders feature.
+The Maze multiplayer service currently retains recent finish summaries in memory for a short window; these are not replay recordings. Persistent replay support requires a separate server-side event recorder and durable storage.
+
+`game-feed-api.ts` resolves the Maze service HTTP endpoint from the configured multiplayer URL and normalizes its public snapshot. `HomePage.tsx` owns polling, filtering and post presentation.

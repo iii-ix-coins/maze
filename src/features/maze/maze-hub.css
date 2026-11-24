@@ -1,0 +1,25 @@
+@layer pages {
+  .maze-hub-page {
+    max-width: 1180px;
+    padding-bottom: 116px;
+  }
+
+  .maze-hub-title {
+    padding-top: 10px;
+  }
+
+  .maze-hub-market {
+    min-width: 0;
+  }
+
+  .maze-hub-hero-host {
+    min-width: 0;
+    width: 100%;
+  }
+
+  @media (max-width: 650px) {
+    .maze-hub-page {
+      width: min(100% - 24px, 1180px);
+    }
+  }
+}

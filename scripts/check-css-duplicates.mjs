@@ -9,6 +9,8 @@ const postcss = require('postcss');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const entryPoints = [
   'src/styles/site.css',
+  'src/features/home/game-feed.css',
+  'src/features/maze/maze-hub.css',
   'src/styles/home-style.css',
   'src/components/home/home-hero-slider.css',
   'src/features/explore/explore-page.css',

@@ -2,12 +2,12 @@
 
 The active site navigation is implemented in React:
 
-- `SiteNavigation.tsx` owns the Home, Explore, Create, Notifications and Profile dock actions, active route states and notification panel interaction.
+- `SiteNavigation.tsx` owns the Home, Explore, Maze, Create, Notifications and Profile dock actions, active route states and notification panel interaction.
 - `SiteChromeHosts.tsx` mounts the independent top-left brand and the navigation host.
 - `ThemeSwitcher.tsx` owns the vertical three-theme radio control and delegates changes to the central theme engine.
-- The dock order is Home, Explore, Create, Notifications, Profile, then the compact vertical Theme selector at the far right. Create continues to open the existing Maze Create view.
+- The dock order is Home, Explore, Maze, Create, Notifications, Profile, then the compact vertical Theme selector at the far right. Maze opens the separate Maze Hub route (`/maze`); Create continues to open the existing Maze runtime Create view (`/maze.html?view=create`).
 - `ExplorePage.tsx` provides the only site-level entry to the existing Maze Live and Rooms views.
-- The Profile destination is always present; the wallet connection CTA remains in the Profile page and is shown for anonymous users only.
+- The Profile destination is always present; the wallet connection CTA remains in the Profile page and is shown for anonymous users only. The former Home market summary and hero slider now live in Maze Hub (`/maze`).
 
 ## Navigation icon assets
 
@@ -15,11 +15,12 @@ Place optional SVG icons in `public/css/images/`. The app will use them when pre
 
 | Action | Public URL | File path |
 |---|---|---|
-| Home | `/css/images/nav-home.svg` | `public/css/images/nav-home.svg` |
-| Explore | `/css/images/nav-explore.svg` | `public/css/images/nav-explore.svg` |
-| Create | `/css/images/nav-create.svg` | `public/css/images/nav-create.svg` |
-| Notifications | `/css/images/nav-notifications.svg` | `public/css/images/nav-notifications.svg` |
-| Profile | `/css/images/nav-profile.svg` | `public/css/images/nav-profile.svg` |
+| Maze | `/css/images/nav/nav-maze.svg` | `public/css/images/nav/nav-maze.svg` |
+| Home | `/css/images/nav/nav-home.svg` | `public/css/images/nav/nav-home.svg` |
+| Explore | `/css/images/nav/nav-explore.svg` | `public/css/images/nav/nav-explore.svg` |
+| Create | `/css/images/nav/nav-create.svg` | `public/css/images/nav/nav-create.svg` |
+| Notifications | `/css/images/nav/nav-notifications.svg` | `public/css/images/nav/nav-notifications.svg` |
+| Profile | `/css/images/nav/nav-profile.svg` | `public/css/images/nav/nav-profile.svg` |
 
 Square SVGs with a transparent background and `viewBox="0 0 24 24"` are recommended. The default display size is 23×23 px (22×22 px on small screens).
 

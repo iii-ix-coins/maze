@@ -188,6 +188,8 @@ if (fs.existsSync(path.join(root, 'apps/site')) || fs.existsSync(path.join(root,
 const activeFrontend = [
   'src/app/router.tsx',
   'src/features/home/HomePage.tsx',
+  'src/features/home/game-feed-api.ts',
+  'src/features/maze/MazeHubPage.tsx',
   'src/features/maze/MazePage.tsx',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
@@ -291,6 +293,12 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
   console.error('[layout] React router must resolve active routes from the shared route manifest.');
   process.exit(1);
 }
+const siteRoutes = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8')).routes;
+const mazeHubRoute = siteRoutes.find((route) => route.id === 'maze-hub');
+if (!mazeHubRoute || !mazeHubRoute.paths.includes('/maze') || mazeHubRoute.server !== 'spa' || mazeHubRoute.navKey !== 'maze-hub') {
+  console.error('[layout] Maze Hub must be a distinct soft-navigation SPA route at /maze; /maze.html remains the game document.');
+  process.exit(1);
+}
 
 const navigationComponent = fs.readFileSync(path.join(root, 'src/components/navigation/SiteNavigation.tsx'), 'utf8');
 const themeSwitcherComponent = fs.readFileSync(path.join(root, 'src/components/navigation/ThemeSwitcher.tsx'), 'utf8');
@@ -300,6 +308,8 @@ const profileComponent = fs.readFileSync(path.join(root, 'src/features/profile/P
 const walletComponent = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
 if (
   !navigationComponent.includes("label: 'Explore'") ||
+  !navigationComponent.includes("label: 'Maze'") ||
+  !navigationComponent.includes("getSiteRoutePath('maze-hub')") ||
   navigationComponent.includes("label: 'Market'") ||
   navigationComponent.includes("label: 'Token'") ||
   !navigationComponent.includes('href={MAZE_VIEW_URLS.create}') ||
@@ -335,11 +345,12 @@ if (
   navigationComponent.includes('nav-dock-label') ||
   navigationComponent.includes('MoreMenu') ||
   navigationComponent.includes('Holders') ||
-  !navigationComponent.includes("'/css/images/nav-home.svg'") ||
-  !navigationComponent.includes("'/css/images/nav-explore.svg'") ||
-  !navigationComponent.includes("'/css/images/nav-create.svg'") ||
-  !navigationComponent.includes("'/css/images/nav-notifications.svg'") ||
-  !navigationComponent.includes("'/css/images/nav-profile.svg'")
+  !navigationComponent.includes("'/css/images/nav/nav-maze.svg'") ||
+  !navigationComponent.includes("'/css/images/nav/nav-home.svg'") ||
+  !navigationComponent.includes("'/css/images/nav/nav-explore.svg'") ||
+  !navigationComponent.includes("'/css/images/nav/nav-create.svg'") ||
+  !navigationComponent.includes("'/css/images/nav/nav-notifications.svg'") ||
+  !navigationComponent.includes("'/css/images/nav/nav-profile.svg'")
 ) {
   console.error('[layout] Brand must remain outside the dock; vertical theme selection and Notifications must be inside it, with no Holders/More entries.');
   process.exit(1);
@@ -504,7 +515,7 @@ const themeSlotHostRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-t
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
   !sharedSiteStyles.includes('.nav.site-bottom-nav::before') ||
-  !sharedSiteStyles.includes('grid-template-columns: repeat(5, minmax(0, 1fr)) auto') ||
+  !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr)) auto') ||
   !sharedSiteStyles.includes('#site-brand') ||
   !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
   !themeSlotHostRule.includes('width: max-content;') ||
@@ -610,15 +621,27 @@ if (apiManifest.liveFeedHolders || apiManifest.holdersTop || apiManifest.holders
 const serverSource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
 const startSource = fs.readFileSync(path.join(root, 'start.js'), 'utf8');
 const homePage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
+const mazeHubPage = fs.readFileSync(path.join(root, 'src/features/maze/MazeHubPage.tsx'), 'utf8');
+const gameFeedPage = fs.readFileSync(path.join(root, 'src/features/home/HomePage.tsx'), 'utf8');
+const gameFeedApi = fs.readFileSync(path.join(root, 'src/features/home/game-feed-api.ts'), 'utf8');
 const marketSummary = fs.readFileSync(path.join(root, 'src/features/market/MarketSummary.tsx'), 'utf8');
 if (
-  !/<MarketSummary\b[^>]*\bshowTitle=\{false\}/.test(homePage) ||
+  !/<MarketSummary\b[^>]*\bshowTitle=\{false\}/.test(mazeHubPage) ||
+  !mazeHubPage.includes('<HomeHeroSlider />') ||
+  !gameFeedPage.includes('Live games') ||
+  !gameFeedPage.includes('Open rooms') ||
+  !gameFeedPage.includes('Just finished') ||
+  !gameFeedPage.includes('fetchGameFeedSnapshot') ||
+  !gameFeedApi.includes("new URL('/rooms', server.origin).href") ||
+  !gameFeedApi.includes("cache: 'no-store'") ||
+  gameFeedPage.includes('new WebSocket') ||
+  homePage.includes('<MarketSummary') ||
   homePage.includes('HoldersPanel') ||
   marketSummary.includes('data-market="holders"') ||
   /HoldersSnapshotService|holdersTop|holdersSummary|getHolderState/.test(serverSource) ||
   /Holder Engine|holder-engine/.test(startSource)
 ) {
-  console.error('[layout] Holders page/service/engine must be retired while Home keeps its compact market summary.');
+  console.error('[layout] Home must consume the existing read-only /rooms snapshot for live/open/recent feed cards; the former market summary and hero must live in Maze Hub, with no duplicate WebSocket or retired Holders feature.');
   process.exit(1);
 }
 for (const [file, source] of [['server.js', serverSource], ['HomePage.tsx', homePage], ['MarketSummary.tsx', marketSummary]]) {
@@ -630,7 +653,7 @@ for (const [file, source] of [['server.js', serverSource], ['HomePage.tsx', home
 const activeCssSources = [
   'src/styles/theme-tokens.css', 'src/styles/home-style.css', 'src/styles/home-shared.css',
   'src/styles/site.css', 'src/styles/style.css', 'src/components/home/home-hero-slider.css',
-  'src/features/explore/explore-page.css', 'src/features/profile/profile-page.css',
+  'src/features/explore/explore-page.css', 'src/features/home/game-feed.css', 'src/features/maze/maze-hub.css', 'src/features/profile/profile-page.css',
   'src/features/maze/styles/maze-site.css', 'src/features/maze/styles/maze-unify.css',
   'src/features/maze/styles/maze-theme.css', 'src/features/maze/styles/create-game.css',
   'src/features/maze/styles/lobby.css',

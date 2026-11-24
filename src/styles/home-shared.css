@@ -8,10 +8,6 @@
     gap: clamp(20px, 3vw, 30px);
   }
 
-  .site-home-content {
-    padding-top: 26px;
-  }
-
   /* Non-home feature routes use a tighter top offset than the Home shell. */
   .feature-page-shell:not(.site-home-content) {
     width: min(1180px, calc(100% - 40px));

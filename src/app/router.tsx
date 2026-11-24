@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
-import { HomeHeroSlider } from '../components/home/HomeHeroSlider';
 
 import { usePathname } from './navigation';
 import { resolveSiteRoute } from './routes';
@@ -16,6 +15,12 @@ const HomePage = lazy(() =>
 const ExplorePage = lazy(() =>
   import('../features/explore/ExplorePage').then((module) => ({
     default: module.ExplorePage
+  }))
+);
+
+const MazeHubPage = lazy(() =>
+  import('../features/maze/MazeHubPage').then((module) => ({
+    default: module.MazeHubPage
   }))
 );
 
@@ -34,6 +39,7 @@ function MazeRouteShell() {
 const PAGE_COMPONENTS = {
   home: HomePage,
   maze: MazeRouteShell,
+  'maze-hub': MazeHubPage,
   explore: ExplorePage,
   profile: ProfilePage,
 };
@@ -52,6 +58,7 @@ export function AppRouter() {
   }
 
   const isHomePage = route.id === 'home';
+  const isMazeHubPage = route.id === 'maze-hub';
 
   return (
     <>
@@ -64,22 +71,13 @@ export function AppRouter() {
         <>
           {/* Active route content */}
           <div
-            className={`route-page${isHomePage ? ' route-page--home' : ''}`}
+            className={`route-page${isHomePage ? ' route-page--home' : ''}${isMazeHubPage ? ' route-page--maze-hub' : ''}`}
             key={pathname}
             data-route-page={pathname}
           >
             <Page />
           </div>
 
-          {/* Home Hero appears after Market Summary, only on Home */}
-          {isHomePage && (
-            <div
-              id="site-brand-header"
-              className="site-brand-header-host"
-            >
-              <HomeHeroSlider />
-            </div>
-          )}
         </>
       </Suspense>
     </>

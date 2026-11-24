@@ -1,0 +1,389 @@
+@layer pages {
+  .game-feed-page {
+    max-width: 920px;
+    align-content: start;
+    gap: clamp(18px, 3vw, 28px);
+    padding-bottom: 116px;
+  }
+
+  .game-feed-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .game-feed-heading h1 {
+    margin: 6px 0 8px;
+    color: var(--text, #e6e6e6);
+    font: 800 clamp(2rem, 4vw, 3rem)/1 var(--font-display, Montserrat, sans-serif);
+    letter-spacing: -.045em;
+  }
+
+  .game-feed-heading p {
+    max-width: 620px;
+    margin: 0;
+    color: var(--text-mute, #999);
+    font-size: .9rem;
+    line-height: 1.6;
+  }
+
+  .game-feed-refresh {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--stroke, #666);
+    background: var(--panel-bg, #000);
+    color: var(--text, #eee);
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .game-feed-refresh:disabled {
+    opacity: .55;
+    cursor: wait;
+  }
+
+  .game-feed-overview {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border: 1px solid var(--stroke, #666);
+    background: var(--panel-bg, #000);
+  }
+
+  .game-feed-overview > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding: 13px 16px;
+  }
+
+  .game-feed-overview > div + div {
+    border-left: 1px solid var(--stroke, #666);
+  }
+
+  .game-feed-overview strong {
+    color: var(--text, #eee);
+    font-size: clamp(1.1rem, 2.6vw, 1.55rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .game-feed-overview span {
+    color: var(--text-mute, #999);
+    font-size: .72rem;
+  }
+
+  .game-feed-filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scrollbar-width: thin;
+  }
+
+  .game-feed-filters button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0 15px;
+    border: 1px solid var(--stroke, #666);
+    background: var(--panel-bg, #000);
+    color: var(--text-mute, #999);
+    font: inherit;
+    font-size: .78rem;
+    cursor: pointer;
+  }
+
+  .game-feed-filters button.is-active {
+    border-color: var(--nav-accent, var(--mint));
+    background: var(--nav-active-bg, var(--tile-bg));
+    color: var(--nav-active-text, var(--text));
+  }
+
+  .game-feed-section {
+    display: grid;
+    gap: 13px;
+  }
+
+  .game-feed-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .game-feed-section-heading h2 {
+    margin: 0;
+    color: var(--text, #eee);
+    font: 750 clamp(1.15rem, 2.4vw, 1.45rem)/1.2 var(--font-display, Montserrat, sans-serif);
+    letter-spacing: -.025em;
+  }
+
+  .game-feed-section-heading > span {
+    color: var(--text-mute, #999);
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .game-feed-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    max-width: 760px;
+  }
+
+  .game-feed-post {
+    display: grid;
+    min-width: 0;
+    border: 1px solid var(--stroke, #666);
+    background: var(--panel-bg, #000);
+    color: var(--text, #eee);
+  }
+
+  .game-feed-post-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    padding: 13px 15px;
+  }
+
+  .game-feed-author-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--nav-accent, var(--mint));
+    color: var(--nav-accent, var(--mint));
+    font-size: .9rem;
+    font-weight: 800;
+  }
+
+  .game-feed-author-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .game-feed-author-copy strong {
+    overflow: hidden;
+    color: var(--text, #eee);
+    font-size: .85rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-feed-author-copy small {
+    color: var(--text-mute, #999);
+    font-size: .68rem;
+  }
+
+  .game-feed-status {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 5px 8px;
+    border: 1px solid var(--stroke, #666);
+    color: var(--text-soft, #ccc);
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  .game-feed-status--live {
+    border-color: var(--bright-fern, var(--mint));
+    color: var(--bright-fern, var(--mint));
+  }
+
+  .game-feed-status--open {
+    border-color: var(--radioactive-grass, var(--mint));
+    color: var(--radioactive-grass, var(--mint));
+  }
+
+  .game-feed-post-art,
+  .game-feed-finish-art {
+    display: grid;
+    place-items: center;
+    position: relative;
+    min-height: 190px;
+    overflow: hidden;
+    background: var(--tile-bg, #101010);
+  }
+
+  .game-feed-post-art--live {
+    border-block: 1px solid var(--bright-fern, var(--stroke));
+  }
+
+  .game-feed-post-art--open {
+    border-block: 1px solid var(--radioactive-grass, var(--stroke));
+  }
+
+  .game-feed-art-center {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 15px 24px;
+    border: 1px solid var(--stroke, #666);
+    text-align: center;
+  }
+
+  .game-feed-art-center span,
+  .game-feed-finish-caption {
+    color: var(--text-mute, #999);
+    font-size: .62rem;
+    font-weight: 750;
+    letter-spacing: .16em;
+  }
+
+  .game-feed-art-center strong {
+    color: var(--text, #eee);
+    font: 800 clamp(1.5rem, 5vw, 2.2rem)/1 var(--font-display, Montserrat, sans-serif);
+    letter-spacing: .1em;
+  }
+
+  .game-feed-art-size {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    color: var(--text-mute, #999);
+    font-size: .72rem;
+  }
+
+  .game-feed-finish-art {
+    align-content: center;
+    gap: 8px;
+    border-block: 1px solid var(--stroke, #666);
+  }
+
+  .game-feed-finish-mark {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .game-feed-finish-art > strong {
+    color: var(--text, #eee);
+    font-size: 1.35rem;
+  }
+
+  .game-feed-finish-art > small {
+    color: var(--text-mute, #999);
+    font-size: .72rem;
+  }
+
+  .game-feed-post-body {
+    display: grid;
+    gap: 10px;
+    padding: 14px 15px 16px;
+  }
+
+  .game-feed-post-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .game-feed-post-body h3 {
+    margin: 0;
+    color: var(--text, #eee);
+    font-size: .98rem;
+    font-weight: 780;
+  }
+
+  .game-feed-post-code {
+    color: var(--text-mute, #999);
+    font-family: var(--font-mono, monospace);
+    font-size: .72rem;
+  }
+
+  .game-feed-post-body p {
+    margin: 0;
+    color: var(--text-mute, #999);
+    font-size: .76rem;
+    line-height: 1.55;
+  }
+
+  .game-feed-stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 17px;
+    padding-top: 4px;
+    color: var(--text-mute, #999);
+    font-size: .7rem;
+  }
+
+  .game-feed-stat-row strong {
+    color: var(--text, #eee);
+    font-weight: 750;
+  }
+
+  .game-feed-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 42px;
+    margin-top: 2px;
+    padding: 0 13px;
+    border: 1px solid var(--nav-accent, var(--mint));
+    color: var(--nav-accent, var(--mint));
+    font-size: .78rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .game-feed-action:focus-visible,
+  .game-feed-refresh:focus-visible,
+  .game-feed-filters button:focus-visible {
+    outline: 2px solid var(--nav-accent, var(--mint));
+    outline-offset: 3px;
+  }
+
+  .game-feed-replay-note {
+    padding-top: 6px;
+    border-top: 1px solid var(--stroke, #666);
+    font-size: .68rem !important;
+  }
+
+  .game-feed-empty,
+  .game-feed-message {
+    max-width: 760px;
+    margin: 0;
+    padding: 15px;
+    border: 1px solid var(--stroke, #666);
+    background: var(--panel-bg, #000);
+    color: var(--text-mute, #999);
+    font-size: .8rem;
+    line-height: 1.6;
+  }
+
+  .game-feed-message--error {
+    border-color: var(--coral, #c4c4c4);
+    color: var(--coral, #c4c4c4);
+  }
+
+  .game-feed-footnote {
+    max-width: 760px;
+    margin: 0;
+    color: var(--text-mute, #999);
+    font-size: .68rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 650px) {
+    .game-feed-page,
+    .game-feed-overview > div {
+      padding: 11px 9px;
+    }
+
+    .game-feed-overview span {
+      font-size: .65rem;
+    }
+
+    .game-feed-post-art,
+    .game-feed-finish-art {
+      min-height: 160px;
+    }
+  }
+}

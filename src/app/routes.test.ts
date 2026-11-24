@@ -18,6 +18,10 @@ describe('shared site route manifest', () => {
 
   it('resolves aliases to the same page definition', () => {
     expect(resolveSiteRoute('/explore')?.id).toBe('explore');
+    expect(resolveSiteRoute('/maze')?.id).toBe('maze-hub');
+    expect(resolveSiteRoute('/maze')?.navKey).toBe('maze-hub');
+    expect(SOFT_NAVIGATION_PATHS.has('/maze')).toBe(true);
+    expect(getSiteRoutePathByNavKey('maze-hub')).toBe('/maze');
     expect(resolveSiteRoute('/explore')?.navKey).toBe('explore');
     expect(SOFT_NAVIGATION_PATHS.has('/explore')).toBe(true);
     expect(getSiteRoutePathByNavKey('explore')).toBe('/explore');
@@ -38,6 +42,7 @@ describe('shared site route manifest', () => {
     expect(resolveSiteRoute('/play')?.id).toBe('maze');
     expect(isMazeDocumentPath('/play')).toBe(true);
     expect(isMazeDocumentPath('/market')).toBe(false);
+    expect(isMazeDocumentPath('/maze')).toBe(false);
     expect(SOFT_NAVIGATION_PATHS.has('/maze.html')).toBe(false);
     expect(SOFT_NAVIGATION_PATHS.has('/profile')).toBe(true);
   });

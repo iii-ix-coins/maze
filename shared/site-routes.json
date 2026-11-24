@@ -23,6 +23,17 @@
       "navKey": "explore"
     },
     {
+      "id": "maze-hub",
+      "paths": [
+        "/maze"
+      ],
+      "title": "Maze Hub · Hollld",
+      "page": "maze-hub",
+      "soft": true,
+      "server": "spa",
+      "navKey": "maze-hub"
+    },
+    {
       "id": "maze",
       "paths": [
         "/maze.html",
