@@ -286,7 +286,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 /* Paint the clipped dock surface on a pseudo-element so popovers can extend outside it. */
 .nav.site-bottom-nav::before {
-    --dock-cut: 24px;
+    --dock-cut: 9px;
     content: "";
     position: absolute;
     z-index: 0;
