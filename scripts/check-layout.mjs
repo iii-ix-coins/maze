@@ -107,7 +107,7 @@ if (
 const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before\s*\{([^}]*)\}/s)?.[1] ?? '';
-const mobileFrameTokens = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?:root\s*\{([^}]*)\}/)?.[1] ?? '';
+const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
@@ -118,7 +118,8 @@ if (
   !routeFrameRule.includes('position: fixed') ||
   !routeFrameRule.includes('overflow: hidden') ||
   !routeFrameStrokeRule.includes('z-index: 2') ||
-  !mobileFrameTokens.includes('--site-frame-edge-gap: clamp(6px, 1.25vw, 9px)') ||
+  !siteChromeCss.includes('--site-frame-edge-gap: 9px') ||
+  !mobileHeaderRule.includes('bottom: var(--site-frame-edge-gap)') ||
   !routeScrollRule.includes('height: 100%') ||
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
@@ -406,11 +407,18 @@ if (
   process.exit(1);
 }
 if (
-  !profileComponent.includes("status === 'anonymous'") ||
-  !profileComponent.includes('<WalletConnectButton />') ||
-  !profileComponent.includes('profile-connect-stage')
+  !profileComponent.includes("status === 'anonymous' || status === 'authenticating' || isAuthenticated") ||
+  !profileComponent.includes('<WalletConnectButton compactAuthenticated />') ||
+  (profileComponent.match(/<WalletConnectButton\b/g) ?? []).length !== 1 ||
+  !profileComponent.includes('profile-connect-stage') ||
+  !profileComponent.includes('profile-account-actions') ||
+  !walletComponent.includes('compactAuthenticated ?') ||
+  !walletComponent.includes('is-compact-account') ||
+  !walletComponent.includes("'[role=\"menuitem\"]:not(:disabled)'") ||
+  !walletComponent.includes("event.key === 'ArrowDown'") ||
+  !walletComponent.includes("event.key === 'ArrowUp'")
 ) {
-  console.error('[layout] Wallet connection must be presented in the centered Profile prompt only for anonymous sessions.');
+  console.error('[layout] Profile must keep one wallet control mounted across anonymous/sign-in/authenticated states and expose an accessible authenticated account menu.');
   process.exit(1);
 }
 if (
@@ -601,9 +609,9 @@ if (
   !sharedSiteStyles.includes('--site-dock-height: 45px;') ||
   !sharedSiteStyles.includes('--site-dock-height: 39px;') ||
   !sharedSiteStyles.includes('--site-dock-item-size: calc(var(--site-dock-height) - 6px);') ||
-  !sharedSiteStyles.includes('--site-header-height: 26px;') ||
+  !sharedSiteStyles.includes('--site-header-height: 30px;') ||
   !sharedSiteStyles.includes('--site-brand-width: 51px;') ||
-  !sharedSiteStyles.includes('--site-brand-height: 18px;') ||
+  !sharedSiteStyles.includes('--site-brand-height: 20px;') ||
   !sharedSiteStyles.includes('grid-template-rows: repeat(3, 10px);') ||
   !sharedSiteStyles.includes('width: 10px;') ||
   sharedSiteStyles.includes('.nav-dock-create-icon') ||

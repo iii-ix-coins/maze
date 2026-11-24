@@ -65,6 +65,14 @@
     padding: clamp(18px, 3vw, 25px);
   }
 
+  .profile-identity-main {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
   .profile-identity-copy {
     display: grid;
     gap: 5px;
@@ -214,9 +222,20 @@
       flex-wrap: wrap;
     }
 
+    .profile-identity-main {
+      align-items: flex-start;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
     .profile-auth-state {
       width: 100%;
       margin-left: 0;
+    }
+
+    .profile-identity-card .profile-account-actions {
+      width: 100%;
+      justify-content: flex-end;
     }
 
     .profile-section-heading {
@@ -241,6 +260,7 @@
   .profile-connect-stage {
     display: grid;
     place-items: center;
+    gap: clamp(16px, 3vh, 24px);
     width: 100%;
     min-height: clamp(330px, 56svh, 620px);
     padding: 12px 0 70px;
@@ -281,19 +301,70 @@
     line-height: 1.7;
   }
 
-  .profile-connect-action {
+  .profile-account-actions {
     display: grid;
     justify-items: center;
     width: 100%;
   }
 
-  .profile-connect-action .nav-wallet-wrap {
+  .profile-identity-card .profile-account-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .profile-identity-card .profile-account-actions .nav-wallet-wrap {
+    display: flex;
+    align-items: center;
+    width: auto;
+  }
+
+  .profile-identity-card .nav-wallet-button.is-compact-account {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border: 1px solid var(--stroke, var(--ar-line));
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--text, var(--ar-text));
+  }
+
+  .profile-identity-card .nav-wallet-button.is-compact-account:hover:not(:disabled),
+  .profile-identity-card .nav-wallet-button.is-compact-account:focus-visible {
+    border-color: var(--ar-accent);
+    background: transparent;
+    color: var(--ar-accent);
+    transform: none;
+  }
+
+  .profile-identity-card .nav-wallet-account-menu-icon {
+    display: block;
+    width: 19px;
+    height: 19px;
+  }
+
+  .profile-identity-card .profile-account-actions .nav-wallet-feedback {
+    position: static;
+    width: min(320px, calc(100vw - 24px));
+    margin-top: 8px;
+    text-align: left;
+  }
+
+  .profile-connect-stage .profile-account-actions .nav-wallet-wrap {
     display: grid;
     justify-items: center;
     width: 100%;
   }
 
-  .profile-connect-action .nav-wallet-button {
+  .profile-connect-stage .profile-account-actions .nav-wallet-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -314,19 +385,19 @@
     white-space: normal;
   }
 
-  .profile-connect-action .nav-wallet-button:hover:not(:disabled) {
+  .profile-connect-stage .profile-account-actions .nav-wallet-button:hover:not(:disabled) {
     background: var(--ar-text);
     border-color: var(--ar-text);
     color: var(--ar-bg);
     transform: translateY(-1px);
   }
 
-  .profile-connect-action .nav-wallet-button:disabled {
+  .profile-connect-stage .profile-account-actions .nav-wallet-button:disabled {
     opacity: .6;
     cursor: not-allowed;
   }
 
-  .profile-connect-action .nav-wallet-feedback {
+  .profile-connect-stage .profile-account-actions .nav-wallet-feedback {
     position: static;
     width: min(100%, 360px);
     margin-top: 10px;

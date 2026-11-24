@@ -15,6 +15,8 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // Keep one wallet control mounted from anonymous through sign-in and authenticated states.
+  const showAccountPanel = status === 'anonymous' || status === 'authenticating' || isAuthenticated;
 
   useEffect(() => {
     setUsername(user?.username ?? '');
@@ -72,36 +74,44 @@ export function ProfilePage() {
         </section>
       ) : null}
 
-      {status === 'anonymous' ? (
-        <section className="profile-connect-stage" aria-labelledby="profile-sign-in-title">
-          <div className="profile-connect-prompt">
-            <svg className="profile-connect-mark theme-svg-inline" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <circle cx="48" cy="31" r="18" stroke="currentColor" strokeWidth="4" />
-              <path d="M12 84c5-20 18-30 36-30s31 10 36 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-            <div className="profile-connect-copy">
-              <h2 id="profile-sign-in-title">Connect your wallet</h2>
-              <p>Sign in to Maze to create your profile and manage your account. A separate sign-in approval is required; no blockchain transaction is requested.</p>
+      {showAccountPanel ? (
+        <section
+          className={`profile-account-panel${isAuthenticated && user ? ' profile-identity-card is-authenticated' : ' profile-connect-stage'}`}
+          aria-label={isAuthenticated && user ? 'Account identity and options' : 'Account access'}
+        >
+          {isAuthenticated && user ? (
+            <div className="profile-identity-main">
+              <UserAvatar seed={user.id} imageUrl={user.avatarUrl} size="large" />
+              <div className="profile-identity-copy">
+                <span className="profile-identity-eyebrow">Maze account</span>
+                <h2>{user.username || shortenAddress(user.walletAddress)}</h2>
+                <span className="profile-identity-wallet" title={user.walletAddress}>{shortenAddress(user.walletAddress)}</span>
+              </div>
+              <span className="profile-auth-state"><span aria-hidden="true" /> Authenticated</span>
             </div>
-            <div className="profile-connect-action">
-              <WalletConnectButton />
+          ) : (
+            <div className="profile-connect-prompt">
+              <svg className="profile-connect-mark theme-svg-inline" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+                <circle cx="48" cy="31" r="18" stroke="currentColor" strokeWidth="4" />
+                <path d="M12 84c5-20 18-30 36-30s31 10 36 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              </svg>
+              <div className="profile-connect-copy">
+                <h2 id="profile-sign-in-title">{status === 'authenticating' ? 'Signing in…' : 'Connect your wallet'}</h2>
+                <p>{status === 'authenticating'
+                  ? 'Verifying wallet ownership and establishing your secure Maze session.'
+                  : 'Sign in to Maze to create your profile and manage your account. A separate sign-in approval is required; no blockchain transaction is requested.'}</p>
+              </div>
             </div>
+          )}
+
+          <div className="profile-account-actions">
+            <WalletConnectButton compactAuthenticated />
           </div>
         </section>
       ) : null}
 
       {isAuthenticated && user ? (
         <>
-          <section className="profile-identity-card" aria-label="Account identity">
-            <UserAvatar seed={user.id} imageUrl={user.avatarUrl} size="large" />
-            <div className="profile-identity-copy">
-              <span className="profile-identity-eyebrow">Maze account</span>
-              <h2>{user.username || shortenAddress(user.walletAddress)}</h2>
-              <span className="profile-identity-wallet" title={user.walletAddress}>{shortenAddress(user.walletAddress)}</span>
-            </div>
-            <span className="profile-auth-state"><span aria-hidden="true" /> Authenticated</span>
-          </section>
-
           <section className="profile-edit-card" aria-labelledby="profile-edit-title">
             <div className="profile-section-heading">
               <div>

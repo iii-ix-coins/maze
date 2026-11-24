@@ -68,7 +68,7 @@ function scheduleIdle(task: () => void): () => void {
   return () => window.clearTimeout(id);
 }
 
-export function WalletConnectButton() {
+export function WalletConnectButton({ compactAuthenticated = false }: { compactAuthenticated?: boolean } = {}) {
   const { status: identityStatus, isAuthenticated, user, error: identityError, login, logout } = useIdentity();
   const [Runtime, setRuntime] = useState<{ Component: RuntimeComponent } | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('idle');
@@ -90,6 +90,7 @@ export function WalletConnectButton() {
 
 
   const walletRootRef = useRef<HTMLDivElement>(null);
+  const walletMenuRef = useRef<HTMLDivElement>(null);
   const walletButtonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef<WalletOpenFn | null>(null);
   const disconnectRef = useRef<WalletDisconnectFn | null>(null);
@@ -364,6 +365,7 @@ export function WalletConnectButton() {
     setEndSessionPending(true);
     setActionError(null);
     closeWalletMenu();
+    walletButtonRef.current?.focus();
 
     try {
       await runWalletSessionTeardown({
@@ -489,7 +491,15 @@ export function WalletConnectButton() {
     logoutAfterWalletChange,
   ]);
 
-  // Close wallet menu on outside click or Escape.
+  // Move focus into the account menu after it opens; the trigger remains its
+  // return point for Escape and explicit teardown actions.
+  useEffect(() => {
+    if (!walletMenuOpen || walletMenuClosing) return;
+    const firstItem = walletMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)');
+    firstItem?.focus();
+  }, [walletMenuOpen, walletMenuClosing]);
+
+  // Close on outside click or Escape and provide the expected menu arrow-key model.
   // Keep the menu mounted until its exit animation finishes.
   useEffect(() => {
     if (!walletMenuOpen || walletMenuClosing) return undefined;
@@ -501,10 +511,27 @@ export function WalletConnectButton() {
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeWalletMenu();
+        walletButtonRef.current?.focus();
+        return;
+      }
 
-      closeWalletMenu();
-      walletButtonRef.current?.focus();
+      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+      const items = Array.from(
+        walletMenuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [],
+      );
+      if (!items.length) return;
+
+      event.preventDefault();
+      const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+      let nextIndex = currentIndex;
+      if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = items.length - 1;
+      else if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1 + items.length) % items.length;
+      else if (event.key === 'ArrowUp') nextIndex = (currentIndex <= 0 ? items.length : currentIndex) - 1;
+      items[nextIndex]?.focus();
     };
 
     document.addEventListener('pointerdown', handlePointerDown);
@@ -682,7 +709,7 @@ export function WalletConnectButton() {
       <div className="nav-wallet-wrap" ref={walletRootRef}>
         <button
           ref={walletButtonRef}
-          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${showAuthenticatedAccount ? ' is-authenticated' : ''}`}
+          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${showAuthenticatedAccount ? ' is-authenticated' : ''}${showAuthenticatedAccount && compactAuthenticated ? ' is-compact-account' : ''}`}
           type="button"
           data-nav-action="connect-wallet"
           data-wallet-status={status ?? 'disconnected'}
@@ -703,7 +730,9 @@ export function WalletConnectButton() {
                 : isConnected
                   ? `Connected wallet ${address ?? ''}. Click to sign in to Maze`
                 : 'Connect Solana wallet'}
-          title={actionError || (disconnectRecoveryRequired
+          title={actionError || (showAuthenticatedAccount && compactAuthenticated
+            ? `Account options for ${displayName}`
+            : disconnectRecoveryRequired
             ? 'The Maze session is closed. Click to retry wallet disconnect.'
             : loadState === 'error'
               ? 'Wallet failed to load. Click to retry.'
@@ -760,6 +789,12 @@ export function WalletConnectButton() {
           {showAuthenticatedAccount && user ? (
             endSessionPending ? (
               <span className="nav-wallet-address">Signing out…</span>
+            ) : compactAuthenticated ? (
+              <svg className="nav-wallet-account-menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.7" />
+                <circle cx="12" cy="12" r="1.7" />
+                <circle cx="19" cy="12" r="1.7" />
+              </svg>
             ) : (
               <>
                 <UserAvatar seed={accountSeed} imageUrl={user.avatarUrl} />
@@ -786,6 +821,7 @@ export function WalletConnectButton() {
 
         {((showAuthenticatedAccount && walletMenuOpen) || walletMenuClosing) ? (
           <div
+            ref={walletMenuRef}
             className={`nav-wallet-menu${walletMenuClosing ? ' is-closing' : ''}`}
             id="nav-wallet-menu"
             role="menu"

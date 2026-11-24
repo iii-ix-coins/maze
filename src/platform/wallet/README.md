@@ -6,7 +6,7 @@ The wallet platform owns wallet connection and account-state integration. It mus
 
 - **Connection SDK:** Reown AppKit with its Solana adapter.
 - **UI:** Official Reown AppKit modal and internal views.
-- **Navigation trigger:** The Maze-owned `WalletConnectButton` opens the official modal through AppKit's `open()` API.
+- **Profile trigger:** The Profile account panel owns the Maze `WalletConnectButton`; it opens the official modal through AppKit's `open()` API.
 - **Browser wallet discovery:** Wallet integrations exposed by the Solana adapter.
 - **Remote and mobile connection:** WalletConnect through Reown's wallet network and QR/deep-link flow.
 - **Supported chain:** Solana mainnet.
@@ -25,7 +25,7 @@ The AppKit runtime is loaded on demand or during browser idle time only when an 
 
 `VITE_REOWN_PROJECT_ID` is intentionally public because Vite embeds `VITE_*` values into the browser bundle. Never put a seed phrase, private key, server secret or session secret in a `VITE_*` variable.
 
-If the Project ID is missing, the existing navigation button remains visibly disabled and explains which build variable is missing.
+If the Project ID is missing, the Profile connect button remains visibly disabled and explains which build variable is missing.
 
 ## Connection is not authentication
 
@@ -35,9 +35,13 @@ The primary `Connect Wallet` action owns the whole sign-in intent: after AppKit 
 
 A signature is accepted only for its exact challenge, wallet address, configured origin and expiry. The mainnet SIWS message uses `Chain ID: solana:mainnet`, the identifier accepted by current Solana wallet sign-in flows. The nonce is consumed atomically. The server then issues a session cookie with `HttpOnly`, `SameSite=Lax`, and (in production) `Secure` attributes.
 
+## Account menu availability
+
+The Profile account panel keeps one `WalletConnectButton` mounted while Identity is anonymous, authenticating or authenticated. Anonymous users see the primary Connect Wallet action. After authentication, the same control becomes a compact account-menu trigger beside the account identity. This avoids remounting the wallet runtime during the sign-in/logout state transition and keeps the unified teardown action available from Profile. The menu supports outside-click dismissal, Escape, focus restoration, and ArrowUp/ArrowDown/Home/End item navigation.
+
 ## Unified disconnect and logout
 
-The Maze account menu exposes a single teardown action. When both the Maze session and Solana wallet are active, the action is labelled `Disconnect & log out`: it revokes the server session first and then closes the AppKit wallet connection. If server revocation fails, the wallet is deliberately left connected; if revocation succeeds but transport disconnect fails, the account stays signed out and the UI offers the remaining `Disconnect wallet` action. When only one state is active, the same action ends only that state (`Log out` for a disconnected wallet or `Disconnect wallet` for an anonymous connected wallet).
+The Profile account menu exposes a single teardown action. When both the Maze session and Solana wallet are active, the action is labelled `Disconnect & log out`: it revokes the server session first and then closes the AppKit wallet connection. If server revocation fails, the wallet is deliberately left connected; if revocation succeeds but transport disconnect fails, the account stays signed out and the UI offers the remaining `Disconnect wallet` action. When only one state is active, the same action ends only that state (`Log out` for a disconnected wallet or `Disconnect wallet` for an anonymous connected wallet).
 
 A stable disconnect made through the Reown modal or directly in the wallet is synchronized by revoking the Maze session. Switching the active Solana account while authenticated also revokes the previous account session; the newly selected wallet must explicitly sign in. Transient `connecting` and `reconnecting` states are ignored. Initial page restoration is different: the app does not infer a deliberate disconnect merely because the wallet runtime has not restored yet, so a valid server account session can still be restored.
 
