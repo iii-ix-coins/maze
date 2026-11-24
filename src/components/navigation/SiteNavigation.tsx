@@ -5,7 +5,7 @@ import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
+import { ThemedSvgIcon, type ThemedSvgTone } from '../media/ThemedSvgIcon';
 
 type NavIconName = 'maze' | 'home' | 'explore' | 'create' | 'profile' | 'notifications';
 type NavItem = {
@@ -35,7 +35,7 @@ const NAV_ICON_SOURCES: Record<NavIconName, string> = {
   profile: '/css/images/nav/nav-profile.svg',
 };
 
-function NavIcon({ name, tone = 'primary' }: { name: NavIconName; tone?: 'primary' | 'secondary' | 'accent' | 'on-accent' }) {
+function NavIcon({ name, tone = 'primary' }: { name: NavIconName; tone?: ThemedSvgTone }) {
   return <ThemedSvgIcon className="nav-dock-image" src={NAV_ICON_SOURCES[name]} tone={tone} />;
 }
 
@@ -137,7 +137,7 @@ export function SiteNavigation() {
               aria-current={isCreateViewActive() ? 'page' : undefined}
               aria-label="Create a Maze"
             >
-              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><NavIcon name="create" tone="on-accent" /></span>
+              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><NavIcon name="create" tone="create" /></span>
             </a>
             <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
             <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />

@@ -46,8 +46,7 @@
         var(--hero-cut) 100%,
         0 calc(100% - var(--hero-cut)));
 
-    background:
-      var(--surface-solid, #000000);
+    background: var(--home-hero-surface);
 
     color: var(--text, #172033);
   }
@@ -60,7 +59,7 @@
     right: 9%;
     top: -65%;
     border-radius: 50%;
-    background: var(--surface-solid, #000000);
+    background: var(--home-hero-glow-surface);
     filter: blur(10px);
     pointer-events: none;
   }

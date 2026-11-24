@@ -41,6 +41,9 @@ const explorePage = read('src/features/explore/ExplorePage.tsx');
 const profilePage = read('src/features/profile/ProfilePage.tsx');
 const mazeSiteCss = read('src/features/maze/styles/maze-site.css');
 const createGameCss = read('src/features/maze/styles/create-game.css');
+const siteCss = read('src/styles/site.css');
+const gameFeedCss = read('src/features/home/game-feed.css');
+const homeHeroCss = read('src/components/home/home-hero-slider.css');
 
 for (const theme of ['light', 'dark', 'grass']) {
   const block = themeTokens.match(new RegExp(`html\\[data-theme=["']${theme}["']\\]\\s*\\{([\\s\\S]*?)\\n\\s*\\}`, 'm'))?.[1] ?? '';
@@ -54,6 +57,33 @@ if (!themedIconCss.includes('.themed-svg-icon') || !themedIconCss.includes('mask
 }
 if (!themedIconComponent.includes('--themed-svg-source') || !themedIconComponent.includes('ThemedSvgIcon')) {
   errors.push('ThemedSvgIcon component is missing its central SVG source contract.');
+}
+if (!themedIconComponent.includes("'create'") || !themedIconCss.includes('data-tone="create"') || !themeTokens.includes('--svg-icon-create')) {
+  errors.push('ThemedSvgIcon must expose the dedicated Create tone and root pigment token.');
+}
+if (!themeTokens.includes('--create-button-gradient: linear-gradient') || !siteCss.includes('background: var(--create-button-gradient)')) {
+  errors.push('The Create dock tile must consume the shared root gold gradient token.');
+}
+for (const token of [
+  '--site-navigation-surface', '--site-navigation-active-surface',
+  '--home-hero-surface', '--home-hero-glow-surface',
+  '--home-feed-panel-surface', '--home-feed-media-surface',
+  '--home-feed-control-active-surface',
+]) {
+  const grassBlock = themeTokens.match(/html\[data-theme=["']grass["']\]\s*\{([\s\S]*?)\n\s*\}/m)?.[1] ?? '';
+  if (!grassBlock.includes(`${token}: transparent`)) errors.push(`Grass theme must define ${token} as transparent.`);
+}
+if (!siteCss.includes('background: var(--site-navigation-surface)') || !siteCss.includes('background: var(--site-navigation-active-surface)')) {
+  errors.push('Site navigation surfaces must consume semantic root tokens.');
+}
+if (!gameFeedCss.includes('var(--home-feed-panel-surface)') || !gameFeedCss.includes('var(--home-feed-media-surface)') || !gameFeedCss.includes('var(--home-feed-control-active-surface)')) {
+  errors.push('Game Feed panels, media and active controls must consume semantic Home surface tokens.');
+}
+if (!homeHeroCss.includes('background: var(--home-hero-surface)') || !homeHeroCss.includes('background: var(--home-hero-glow-surface)')) {
+  errors.push('Home Hero and its glow must consume semantic Home surface tokens.');
+}
+if (!/--svg-icon-primary:\s*var\(--slime-lime\)/.test(themeTokens.match(/html\[data-theme=["']grass["']\]\s*\{([\s\S]*?)\n\s*\}/m)?.[1] ?? '')) {
+  errors.push('Grass primary SVG pigment must use the bright slime-lime foreground.');
 }
 if (!hero.includes('<ThemedSvgIcon') || /<img[\s\S]{0,240}slide\.visualSrc/.test(hero)) {
   errors.push('Home hero SVG artwork must use ThemedSvgIcon rather than an untinted external img.');
@@ -126,6 +156,6 @@ if (errors.length) {
 }
 
 console.log('[svg-theme] root-level SVG theme contract verified.');
-console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, MarketSummary, Home hero and Create Game icons are wired to theme tokens.');
+console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, Home surfaces, gold Create tile, MarketSummary, Home hero and Create Game icons are wired to root theme tokens.');
 console.log(`[svg-theme] intentionally external/brand-managed resources: ${intentionallyExternal.join('; ')}.`);
 for (const warning of warnings) console.warn(`[svg-theme] warning: ${warning}`);

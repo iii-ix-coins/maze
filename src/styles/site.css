@@ -85,7 +85,7 @@ body>#root>#site-brand {
     z-index: 0;
     inset: 0;
     border: 1px solid var(--ar-line);
-    background: var(--ar-fill-2);
+    background: var(--site-navigation-surface);
     box-shadow: var(--ar-glow);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
@@ -183,7 +183,7 @@ body>#root>#site-brand {
 
 .site-bottom-nav .nav-link.active {
     color: var(--nav-active-text);
-    background: var(--nav-active-bg);
+    background: var(--site-navigation-active-surface);
     border-color: transparent;
     box-shadow: none;
     text-shadow: none;
@@ -224,8 +224,8 @@ body>#root>#site-brand {
     aspect-ratio: 1 / 1;
     border: 0;
     border-radius: 0;
-    background: var(--ar-accent);
-    color: var(--ar-on-accent);
+    background: var(--create-button-gradient);
+    color: var(--create-button-foreground);
     box-shadow: none;
     transform: none;
     clip-path: polygon(var(--dock-item-cut) 0, 100% 0, 100% calc(100% - var(--dock-item-cut)), calc(100% - var(--dock-item-cut)) 100%, 0 100%, 0 var(--dock-item-cut));

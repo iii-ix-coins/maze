@@ -16,6 +16,9 @@
     --svg-icon-secondary: #555555;
     --svg-icon-accent: #333333;
     --svg-icon-on-accent: #ffffff;
+    --create-button-gradient: linear-gradient(135deg, #94620b 0%, #c9952f 24%, #f8df88 48%, #c1871c 73%, #f4d47a 100%);
+    --create-button-foreground: #2b1d05;
+    --svg-icon-create: var(--create-button-foreground);
   }
 
   html[data-theme="light"] {
@@ -62,6 +65,15 @@
     --svg-icon-secondary: #555555;
     --svg-icon-accent: #333333;
     --svg-icon-on-accent: #ffffff;
+
+    /* Home and navigation keep their established Light surfaces. */
+    --site-navigation-surface: var(--ar-fill-2);
+    --site-navigation-active-surface: var(--nav-active-bg);
+    --home-hero-surface: var(--surface-solid);
+    --home-hero-glow-surface: var(--surface-solid);
+    --home-feed-panel-surface: var(--panel-bg);
+    --home-feed-media-surface: var(--tile-bg);
+    --home-feed-control-active-surface: var(--nav-active-bg);
   }
 
   html[data-theme="dark"] {
@@ -103,6 +115,15 @@
     --svg-icon-secondary: #c4c4c4;
     --svg-icon-accent: #ffffff;
     --svg-icon-on-accent: #000000;
+
+    /* Home and navigation keep their established Dark surfaces. */
+    --site-navigation-surface: var(--ar-fill-2);
+    --site-navigation-active-surface: var(--nav-active-bg);
+    --home-hero-surface: var(--surface-solid);
+    --home-hero-glow-surface: var(--surface-solid);
+    --home-feed-panel-surface: var(--panel-bg);
+    --home-feed-media-surface: var(--tile-bg);
+    --home-feed-control-active-surface: var(--nav-active-bg);
   }
 
   html[data-theme="grass"] {
@@ -123,7 +144,7 @@
     --page-background: var(--green);
     --maze-canvas: var(--green);
 
-    /* Solid same-hue surfaces; no gradients or translucent colour washes. */
+    /* General site/game surfaces stay solid; the Create dock tile has a separate shared gold gradient. */
     --ar-fill: var(--green-2);
     --ar-fill-2: var(--dark-spruce);
     --surface-solid: var(--dark-spruce);
@@ -176,10 +197,20 @@
     --nav-hover-bg: var(--green-2);
     --nav-active-bg: var(--green-3);
     --nav-sub-bg: var(--dark-spruce);
-    --svg-icon-primary: var(--dark-spruce);
-    --svg-icon-secondary: var(--green-2);
+    /* Root SVG pigment follows the bright foreground greens, not the dark canvas. */
+    --svg-icon-primary: var(--slime-lime);
+    --svg-icon-secondary: var(--radioactive-grass);
     --svg-icon-accent: var(--chartreuse);
     --svg-icon-on-accent: var(--dark-spruce);
+
+    /* Transparent Home and site-chrome surfaces: the page canvas shows through. */
+    --site-navigation-surface: transparent;
+    --site-navigation-active-surface: transparent;
+    --home-hero-surface: transparent;
+    --home-hero-glow-surface: transparent;
+    --home-feed-panel-surface: transparent;
+    --home-feed-media-surface: transparent;
+    --home-feed-control-active-surface: transparent;
   }
 
   html[data-theme] {

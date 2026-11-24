@@ -35,7 +35,7 @@
     width: 44px;
     height: 44px;
     border: 1px solid var(--stroke, #666);
-    background: var(--panel-bg, #000);
+    background: var(--home-feed-panel-surface);
     color: var(--text, #eee);
     font-size: 1.5rem;
     cursor: pointer;
@@ -50,7 +50,7 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     border: 1px solid var(--stroke, #666);
-    background: var(--panel-bg, #000);
+    background: var(--home-feed-panel-surface);
   }
 
   .game-feed-overview > div {
@@ -88,7 +88,7 @@
     min-height: 36px;
     padding: 0 15px;
     border: 1px solid var(--stroke, #666);
-    background: var(--panel-bg, #000);
+    background: var(--home-feed-panel-surface);
     color: var(--text-mute, #999);
     font: inherit;
     font-size: .78rem;
@@ -97,7 +97,7 @@
 
   .game-feed-filters button.is-active {
     border-color: var(--nav-accent, var(--mint));
-    background: var(--nav-active-bg, var(--tile-bg));
+    background: var(--home-feed-control-active-surface);
     color: var(--nav-active-text, var(--text));
   }
 
@@ -137,7 +137,7 @@
     display: grid;
     min-width: 0;
     border: 1px solid var(--stroke, #666);
-    background: var(--panel-bg, #000);
+    background: var(--home-feed-panel-surface);
     color: var(--text, #eee);
   }
 
@@ -208,7 +208,7 @@
     position: relative;
     min-height: 190px;
     overflow: hidden;
-    background: var(--tile-bg, #101010);
+    background: var(--home-feed-media-surface);
   }
 
   .game-feed-post-art--live {
@@ -352,7 +352,7 @@
     margin: 0;
     padding: 15px;
     border: 1px solid var(--stroke, #666);
-    background: var(--panel-bg, #000);
+    background: var(--home-feed-panel-surface);
     color: var(--text-mute, #999);
     font-size: .8rem;
     line-height: 1.6;
