@@ -52,7 +52,7 @@ body:not(.in-menu)>#root>#site-topbar {
     position: absolute;
     z-index: 0;
     inset: 0;
-    border: 1px solid var(--ar-line);
+    border: 2px solid var(--ar-line);
     background: transparent;
     clip-path: polygon(0 0,
             100% 0,
@@ -192,7 +192,7 @@ body:not(.in-menu) .route-page::before {
     /* Keep the frame stroke above the inner scroller and its scrollbar. */
     z-index: 2;
     inset: 0;
-    border: 1px solid var(--ar-line);
+    border: 2px solid var(--ar-line);
     background: transparent;
     clip-path: polygon(var(--site-frame-cut) 0,
             100% 0,
@@ -282,7 +282,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hove
     position: absolute;
     z-index: 0;
     inset: 0;
-    border: 1px solid var(--ar-line);
+    border: 2px solid var(--ar-line);
     background: var(--site-navigation-surface);
     box-shadow: var(--ar-glow);
     -webkit-backdrop-filter: blur(14px);
