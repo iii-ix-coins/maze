@@ -540,7 +540,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hove
     }
 
     #site-header {
-        bottom: 0;
+        bottom: var(--site-frame-edge-gap);
         left: 50%;
         width: var(--site-frame-width);
         max-width: var(--site-frame-max-width);
