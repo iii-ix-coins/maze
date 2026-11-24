@@ -104,6 +104,31 @@ if (
   console.error('[layout] the topbar, route content and navigation must use the shared three-frame geometry.');
   process.exit(1);
 }
+const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page > \.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
+const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
+const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
+if (
+  !htmlFoundationRules.some((rule) => rule.includes('height: 100%') && rule.includes('overflow: hidden')) ||
+  !/body:not\(\.in-menu\)\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
+  !/body:not\(\.in-menu\)\s*>\s*#root\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
+  !routeFrameRule.includes('position: fixed') ||
+  !routeFrameRule.includes('overflow: hidden') ||
+  !routeScrollRule.includes('height: 100%') ||
+  !routeScrollRule.includes('overflow-y: auto') ||
+  !routeScrollRule.includes('overscroll-behavior: contain') ||
+  !navigationSource.includes("'.route-page > .feature-page-shell'") ||
+  navigationSource.includes('window.scrollTo') ||
+  /html\s*\{[^}]*?(?:^|;)\s*scroll-behavior\s*:/ms.test(foundationStyles) ||
+  /html\s*\{[^}]*?(?:^|;)\s*scroll-padding(?:-top)?\s*:/ms.test(foundationStyles) ||
+  /(^|\n)\s*::-webkit-scrollbar\s*\{/m.test(foundationStyles) ||
+  siteChromeCss.includes('@import "./header-scroll-scrim.css";') ||
+  fs.existsSync(path.join(root, 'src/styles/header-scroll-scrim.css'))
+) {
+  console.error('[layout] normal site documents must stay viewport-locked; only the inner route content frame may scroll.');
+  process.exit(1);
+}
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
 const walletTeardownSource = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.ts'), 'utf8');
 const walletTeardownTests = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.test.ts'), 'utf8');

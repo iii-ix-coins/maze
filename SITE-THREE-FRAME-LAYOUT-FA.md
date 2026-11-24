@@ -30,3 +30,7 @@
 ## اعتبارسنجی
 
 آزمون‌های Layout، CSS duplicate، SVG Theme و Parse فایل‌های CSS اجرا می‌شوند. Build/Typecheck در صورت نبود `node_modules` قابل تأیید نیستند و نباید موفق فرض شوند.
+
+## اصلاح بعدی: اسکرول فقط در قاب محتوا
+
+سند و `body` در صفحات عادی قفل هستند و اسکرول عمودی فقط در `.route-page > .feature-page-shell` انجام می‌شود. قاب `.route-page` ثابت و بدون اسکرول می‌ماند تا Border و برش گوشه‌ها جابه‌جا نشوند. تغییر مسیر نیز `scrollTop` همین قاب داخلی را reset می‌کند. جزئیات در `PAGE-FRAME-SCROLL-UPDATE-FA.md` ثبت شده است.

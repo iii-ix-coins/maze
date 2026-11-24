@@ -247,12 +247,11 @@
    ========================================================================== */
 @layer base {
     html {
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
         background-color: var(--page-background);
         background-image: none;
-        scroll-behavior: smooth;
-        scroll-padding-top: 7.5rem;
-        scrollbar-width: thin;
-        scrollbar-color: var(--ar-accent, var(--ink-600)) var(--ar-bg, transparent);
     }
 
     body {
@@ -319,10 +318,6 @@
     h1, h2, h3{
         text-transform: uppercase;
     }
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--ar-bg, var(--page-background)); }
-::-webkit-scrollbar-thumb { background: var(--ar-line, var(--stroke)); border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: var(--ar-accent, var(--mint)); }
 }
 
 /* ==========================================================================
@@ -1294,10 +1289,6 @@
    8 · MOTION PREFERENCES
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
-
     *,
     *::before,
     *::after {
@@ -1893,7 +1884,6 @@ html[data-theme="grass"] .nav {
     .theme-toggle__thumb,
     .theme-toggle__option,
     .theme-toggle__option .theme-toggle__icon {
-        scroll-behavior: auto !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;

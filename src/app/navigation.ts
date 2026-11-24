@@ -30,12 +30,11 @@ export function usePathname() {
 }
 
 /** Keep route changes synchronous: data and images render progressively without blocking input. */
-function resetScroll() {
-    const root = document.documentElement;
-    const previous = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    window.scrollTo(0, 0);
-    root.style.scrollBehavior = previous;
+function resetRouteScroll() {
+    const pageScroller = document.querySelector<HTMLElement>(
+        '.route-page > .feature-page-shell'
+    );
+    if (pageScroller) pageScroller.scrollTop = 0;
 }
 
 export function playPageEnter(): Promise<void> {
@@ -44,7 +43,7 @@ export function playPageEnter(): Promise<void> {
 
 function swapTo(url: URL, push: boolean): void {
     if (push) window.history.pushState(null, '', url.href);
-    resetScroll();
+    resetRouteScroll();
     emitPath();
 }
 
