@@ -13,10 +13,18 @@ body.in-menu #site-header {
 /* One shared horizontal frame for the topbar, route content and bottom dock. */
 :root {
     --site-frame-max-width: 900px;
-    --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--gutter)));
+    --site-frame-side-gutter: clamp(8px, 1.8vw, 16px);
+    --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--site-frame-side-gutter)));
     --site-frame-edge-gap: 9px;
     --site-frame-content-gap: clamp(9px, 2.5vh, 12px);
     --site-frame-content-padding: clamp(6px, 2vw, 9px);
+    --site-scrollbar-track-width: 8px;
+    --site-scrollbar-hit-width: 12px;
+    --site-scrollbar-inset: clamp(3px, 0.55vw, 6px);
+    --site-scrollbar-content-gap: 5px;
+    --site-scrollbar-content-gutter: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-track-width) + var(--site-scrollbar-content-gap));
+    --site-frame-content-inline-padding: max(var(--site-frame-content-padding), var(--site-scrollbar-content-gutter));
+    --site-scrollbar-cut: 2px;
     --site-frame-cut: 24px;
     --site-header-cut: 18px;
     --site-dock-height: 45px;
@@ -220,31 +228,94 @@ body:not(.in-menu) .route-page>.feature-page-shell {
     max-height: 100%;
     min-height: 0;
     margin: 0;
-    padding: var(--site-frame-content-padding);
+    padding-block: var(--site-frame-content-padding);
+    padding-inline: var(--site-frame-content-inline-padding);
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ar-line) transparent;
-    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-gutter: auto;
 }
 
 body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
+    display: none;
+    width: 0;
+    height: 0;
 }
 
-body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-track {
-    background: transparent;
+/* A single custom rail keeps its track, thumb and position consistent across browsers. */
+.route-scrollbar {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    right: var(--site-scrollbar-inset);
+    width: var(--site-scrollbar-hit-width);
+    height: 60%;
+    margin: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+    outline: none;
 }
 
-body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb {
+.route-scrollbar-track,
+.route-scrollbar-thumb {
+    position: absolute;
+    right: 0;
+    width: var(--site-scrollbar-track-width);
+    clip-path: polygon(
+        0 0,
+        calc(100% - var(--site-scrollbar-cut)) 0,
+        100% var(--site-scrollbar-cut),
+        100% 100%,
+        var(--site-scrollbar-cut) 100%,
+        0 calc(100% - var(--site-scrollbar-cut))
+    );
+    -webkit-clip-path: polygon(
+        0 0,
+        calc(100% - var(--site-scrollbar-cut)) 0,
+        100% var(--site-scrollbar-cut),
+        100% 100%,
+        var(--site-scrollbar-cut) 100%,
+        0 calc(100% - var(--site-scrollbar-cut))
+    );
+}
+
+.route-scrollbar-track {
+    top: 0;
+    bottom: 0;
+    background: rgba(var(--ar-rgb), .16);
+    border: 1px solid var(--ar-line);
+}
+
+.route-scrollbar-thumb {
+    top: var(--route-scroll-thumb-offset, 0px);
+    height: var(--route-scroll-thumb-height, 22px);
     background: var(--ar-line);
+    border: 1px solid var(--ar-line);
+    cursor: grab;
 }
 
-body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hover {
+.route-scrollbar:hover .route-scrollbar-thumb,
+.route-scrollbar:focus-visible .route-scrollbar-thumb {
+    background: var(--ar-accent);
+}
+
+.route-scrollbar.is-dragging {
+    cursor: grabbing;
+}
+
+.route-scrollbar:focus-visible {
+    outline: 1px solid var(--ar-accent);
+    outline-offset: 2px;
+}
+
+.route-scrollbar.is-dragging .route-scrollbar-thumb {
     background: var(--ar-accent);
 }
 

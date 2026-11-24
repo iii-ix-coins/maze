@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
+import { RouteScrollbar } from '../components/layout/RouteScrollbar';
 
 import { usePathname } from './navigation';
 import { resolveSiteRoute } from './routes';
@@ -76,6 +77,7 @@ export function AppRouter() {
             data-route-page={pathname}
           >
             <Page />
+            <RouteScrollbar />
           </div>
 
         </>

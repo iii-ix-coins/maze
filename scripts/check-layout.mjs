@@ -13,6 +13,7 @@ const required = [
   'public/css', 'public/css/images', 'public/css/font', 'engines', 'shared', 'tests',
   'src/main.tsx', 'src/app/App.tsx', 'src/features/home/HomePage.tsx', 'src/styles/theme-tokens.css',
   'src/components/layout/SiteChromeHosts.tsx',
+  'src/components/layout/RouteScrollbar.tsx',
   'src/components/navigation/SiteNavigation.tsx',
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/features/explore/ExplorePage.tsx',
@@ -82,6 +83,7 @@ for (const file of interactionFreeSources) {
   }
 }
 const chromeSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
+const routeScrollbarSource = fs.readFileSync(path.join(root, 'src/components/layout/RouteScrollbar.tsx'), 'utf8');
 if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<InteractionBar')) {
   console.error('[layout] SiteChromeHosts must mount only the shared SiteNavigation chrome.');
   process.exit(1);
@@ -123,6 +125,24 @@ if (
   !routeScrollRule.includes('height: 100%') ||
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
+  !routeScrollRule.includes('scrollbar-width: none') ||
+  !routeScrollRule.includes('padding-inline: var(--site-frame-content-inline-padding)') ||
+  !routeScrollRule.includes('-ms-overflow-style: none') ||
+  !siteChromeCss.includes('::-webkit-scrollbar {\n    display: none;') ||
+  !siteChromeCss.includes('height: 60%') ||
+  !siteChromeCss.includes('top: 50%') ||
+  !siteChromeCss.includes('--site-frame-side-gutter:') ||
+  !siteChromeCss.includes('--site-frame-content-inline-padding:') ||
+  !siteChromeCss.includes('.route-scrollbar-track') ||
+  !siteChromeCss.includes('.route-scrollbar-thumb') ||
+  !siteChromeCss.includes('--site-scrollbar-content-gap: 5px') ||
+  !siteChromeCss.includes('--site-scrollbar-inset: clamp(3px, 0.55vw, 6px)') ||
+  !routeScrollbarSource.includes('role="scrollbar"') ||
+  !routeScrollbarSource.includes("case 'PageDown':") ||
+  !routeScrollbarSource.includes('setPointerCapture') ||
+  !routeScrollbarSource.includes('onWheel') ||
+  !routeScrollbarSource.includes('ResizeObserver') ||
+  !fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8').includes('<RouteScrollbar />') ||
   !navigationSource.includes("'.route-page > .feature-page-shell'") ||
   navigationSource.includes('window.scrollTo') ||
   /html\s*\{[^}]*?(?:^|;)\s*scroll-behavior\s*:/ms.test(foundationStyles) ||
