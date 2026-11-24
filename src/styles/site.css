@@ -14,13 +14,13 @@ body.in-menu #site-header {
 :root {
     --site-frame-max-width: 900px;
     --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--gutter)));
-    --site-frame-edge-gap: 16px;
-    --site-frame-content-gap: clamp(16px, 2.5vh, 24px);
-    --site-frame-content-padding: clamp(14px, 2vw, 20px);
+    --site-frame-edge-gap: 9px;
+    --site-frame-content-gap: clamp(9px, 2.5vh, 12px);
+    --site-frame-content-padding: clamp(6px, 2vw, 9px);
     --site-frame-cut: 24px;
     --site-header-cut: 12px;
-    --site-dock-height: 67px;
-    --site-header-height: calc(var(--site-dock-height) / 2);
+    --site-header-height: 30px;
+    --site-dock-height: 45px;
     --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
     --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
 }
@@ -81,17 +81,17 @@ body:not(.in-menu) > #root > #site-topbar {
     height: 100%;
     min-width: 0;
     margin: 0;
-    padding: 0 14px;
+    padding: 0 3px;
     text-decoration: none;
     pointer-events: auto;
 }
 
 #site-brand .nav-brand-mark {
-    height: 30px;
+    height: 24px;
 }
 
 #site-brand .nav-brand-logo {
-    max-height: 30px;
+    max-height: 24px;
 }
 
 /* Preserve the previous compact top-left brand placement inside the game shell. */
@@ -304,7 +304,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     min-width: 0;
     min-height: 0;
     margin: 0;
-    padding: 5px 7px;
+    padding: 3px 3px;
 }
 
 .site-bottom-nav .nav-links {
@@ -325,11 +325,10 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     align-items: center;
     justify-content: center;
     gap: 0;
-    width: 54px;
-    min-width: 54px;
-    max-width: 54px;
-    min-height: 54px;
-    height: 54px;
+    width: auto;
+    min-width: auto;
+    min-height: 100%;
+    height: 100%;
     aspect-ratio: 1 / 1;
     justify-self: center;
     padding: 3px 0;
@@ -384,17 +383,17 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 .nav-dock-icon {
     display: grid;
     place-items: center;
-    width: 27px;
-    height: 27px;
-    flex: 0 0 27px;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
     color: currentColor;
 }
 
 .nav-dock-icon > svg,
 .nav-dock-image {
     display: block;
-    width: 23px;
-    height: 23px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
 }
 
@@ -406,9 +405,9 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 .nav-dock-create-icon {
     --dock-item-cut: 24px;
-    width: 42px;
-    height: 42px;
-    flex-basis: 42px;
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
     aspect-ratio: 1 / 1;
     border: 0;
     border-radius: 0;
@@ -422,8 +421,8 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 .nav-dock-create-icon .nav-dock-image,
 .nav-dock-create-icon > svg {
-    width: 23px;
-    height: 23px;
+    width: 27px;
+    height: 27px;
 }
 
 .site-bottom-nav .nav-dock-profile .user-avatar {
@@ -561,11 +560,11 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 @media (max-width: 720px) {
     :root {
         --site-frame-edge-gap: 0px;
-        --site-frame-content-gap: clamp(14px, 2.2vh, 18px);
-        --site-frame-content-padding: 12px;
+        --site-frame-content-gap: clamp(3px, 2.2vh, 6px);
+        --site-frame-content-padding: clamp(3px, 2.2vh, 6px);
         --site-frame-cut: 18px;
         --site-header-cut: 10px;
-        --site-dock-height: 66px;
+        --site-dock-height: 39px;
     }
 
     #site-header {
@@ -590,7 +589,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     }
 
     .site-bottom-nav .nav-inner {
-        padding: 2px 4px;
+        padding: 2px 2px;
     }
 
     .site-bottom-nav .nav-links {
@@ -600,32 +599,27 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     .site-bottom-nav .nav-link,
     .site-bottom-nav .nav-notifications-trigger {
         flex: 0 0 auto;
-        width: min(54px, 100%);
-        min-width: 0;
-        max-width: 54px;
-        min-height: 0;
-        height: auto;
         aspect-ratio: 1 / 1;
         padding: 0;
         justify-self: center;
     }
 
     .nav-dock-icon {
-        width: 24px;
-        height: 24px;
-        flex-basis: 24px;
+        width: 27px;
+        height: 27px;
+        flex-basis: 27px;
     }
 
     .nav-dock-icon > svg,
     .nav-dock-image {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
     }
 
     .nav-dock-create-icon {
-        width: 38px;
-        height: 38px;
-        flex-basis: 38px;
+        width: 27px;
+        height: 27px;
+        flex-basis: 27px;
     }
 
 }

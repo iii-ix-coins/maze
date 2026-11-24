@@ -1483,9 +1483,9 @@ html[data-theme="grass"] .nav {
 
 .nav-brand-logo {
     display: block;
-    width: 125px;
-    height: 30px;
-    max-height: var(--nav-control-height);
+    width: auto;
+    height: 24px;
+    max-height: 24px;
 }
 
 /* Link group + actions */
