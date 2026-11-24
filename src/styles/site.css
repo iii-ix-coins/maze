@@ -342,7 +342,6 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 .site-bottom-nav .nav-link,
 .site-bottom-nav .nav-notifications-trigger {
-    --dock-item-cut: 12px;
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
@@ -365,29 +364,16 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     background: transparent;
     box-shadow: none;
     color: var(--nav-muted);
+    opacity: 0.55;
     font-size: 0;
     line-height: 0;
     text-align: center;
     white-space: nowrap;
     text-shadow: none;
     cursor: pointer;
-    transition: color 160ms ease;
-    clip-path: polygon(
-        var(--dock-item-cut) 0,
-        100% 0,
-        100% calc(100% - var(--dock-item-cut)),
-        calc(100% - var(--dock-item-cut)) 100%,
-        0 100%,
-        0 var(--dock-item-cut)
-    );
-    -webkit-clip-path: polygon(
-        var(--dock-item-cut) 0,
-        100% 0,
-        100% calc(100% - var(--dock-item-cut)),
-        calc(100% - var(--dock-item-cut)) 100%,
-        0 100%,
-        0 var(--dock-item-cut)
-    );
+    transition: opacity 160ms ease, color 160ms ease;
+    clip-path: none;
+    -webkit-clip-path: none;
 }
 
 .site-bottom-nav .nav-link:focus-visible,
@@ -398,7 +384,8 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 .site-bottom-nav .nav-link.active {
     color: var(--nav-active-text);
-    background: var(--site-navigation-active-surface);
+    opacity: 1;
+    background: transparent;
     border-color: transparent;
     box-shadow: none;
     text-shadow: none;

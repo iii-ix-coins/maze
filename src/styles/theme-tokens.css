@@ -65,7 +65,6 @@
 
     /* Home and navigation keep their established Light surfaces. */
     --site-navigation-surface: var(--ar-fill-2);
-    --site-navigation-active-surface: var(--nav-active-bg);
     --home-hero-surface: var(--surface-solid);
     --home-hero-glow-surface: var(--surface-solid);
     --home-feed-panel-surface: var(--panel-bg);
@@ -115,7 +114,6 @@
 
     /* Home and navigation keep their established Dark surfaces. */
     --site-navigation-surface: var(--ar-fill-2);
-    --site-navigation-active-surface: var(--nav-active-bg);
     --home-hero-surface: var(--surface-solid);
     --home-hero-glow-surface: var(--surface-solid);
     --home-feed-panel-surface: var(--panel-bg);
@@ -202,7 +200,6 @@
 
     /* Transparent Home and site-chrome surfaces: the page canvas shows through. */
     --site-navigation-surface: transparent;
-    --site-navigation-active-surface: transparent;
     --home-hero-surface: transparent;
     --home-hero-glow-surface: transparent;
     --home-feed-panel-surface: transparent;

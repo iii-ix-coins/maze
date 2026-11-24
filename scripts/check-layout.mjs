@@ -563,6 +563,7 @@ const dockRule = sharedSiteStyles.match(/\.nav\.site-bottom-nav\s*\{([^}]*)\}/s)
 const dockInnerRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-inner\s*\{([^}]*)\}/s)?.[1] ?? '';
 const dockLinksRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-links\s*\{([^}]*)\}/s)?.[1] ?? '';
 const dockItemRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-link,\s*\.site-bottom-nav \.nav-notifications-trigger\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockActiveRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-link\.active\s*\{([^}]*)\}/s)?.[1] ?? '';
 const logoRule = sharedSiteStyles.match(/#site-brand \.nav-brand-logo\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
@@ -584,6 +585,12 @@ if (
   !dockItemRule.includes('height: 100%;') ||
   !dockItemRule.includes('width: var(--site-dock-item-size);') ||
   !dockItemRule.includes('aspect-ratio: 1 / 1;') ||
+  !dockItemRule.includes('opacity: 0.55;') ||
+  !dockItemRule.includes('clip-path: none;') ||
+  !dockItemRule.includes('-webkit-clip-path: none;') ||
+  dockItemRule.includes('clip-path: polygon(') ||
+  !dockActiveRule.includes('opacity: 1;') ||
+  !dockActiveRule.includes('background: transparent;') ||
   !notificationHostRule.includes('height: 100%;') ||
   !logoRule.includes('width: var(--site-brand-width);') ||
   !logoRule.includes('height: var(--site-brand-height);') ||

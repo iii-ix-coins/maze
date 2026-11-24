@@ -65,7 +65,7 @@ if (themeTokens.includes('--create-button-gradient') || themeTokens.includes('--
   errors.push('The Create dock item must not retain its former special gold tile treatment.');
 }
 for (const token of [
-  '--site-navigation-surface', '--site-navigation-active-surface',
+  '--site-navigation-surface',
   '--home-hero-surface', '--home-hero-glow-surface',
   '--home-feed-panel-surface', '--home-feed-media-surface',
   '--home-feed-control-active-surface',
@@ -73,8 +73,13 @@ for (const token of [
   const grassBlock = themeTokens.match(/html\[data-theme=["']grass["']\]\s*\{([\s\S]*?)\n\s*\}/m)?.[1] ?? '';
   if (!grassBlock.includes(`${token}: transparent`)) errors.push(`Grass theme must define ${token} as transparent.`);
 }
-if (!siteCss.includes('background: var(--site-navigation-surface)') || !siteCss.includes('background: var(--site-navigation-active-surface)')) {
-  errors.push('Site navigation surfaces must consume semantic root tokens.');
+if (!siteCss.includes('background: var(--site-navigation-surface)') || siteCss.includes('var(--site-navigation-active-surface)')) {
+  errors.push('The dock frame must consume its semantic surface token while navigation buttons remain surface-free.');
+}
+const dockItemBlock = siteCss.match(/\.site-bottom-nav \.nav-link,\s*\.site-bottom-nav \.nav-notifications-trigger\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockActiveBlock = siteCss.match(/\.site-bottom-nav \.nav-link\.active\s*\{([^}]*)\}/s)?.[1] ?? '';
+if (!dockItemBlock.includes('opacity: 0.55;') || !dockItemBlock.includes('background: transparent;') || !dockActiveBlock.includes('opacity: 1;') || !dockActiveBlock.includes('background: transparent;')) {
+  errors.push('Navigation controls must use opacity for state and remain transparent in every state.');
 }
 if (!gameFeedCss.includes('var(--home-feed-panel-surface)') || !gameFeedCss.includes('var(--home-feed-media-surface)') || !gameFeedCss.includes('var(--home-feed-control-active-surface)')) {
   errors.push('Game Feed panels, media and active controls must consume semantic Home surface tokens.');
