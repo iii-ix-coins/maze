@@ -26,10 +26,11 @@ function isCreateViewActive(): boolean {
 }
 
 const NAV_ICON_SOURCES: Record<NavIconName, string> = {
+  maze: '/css/images/nav/nav-maze.svg',
   home: '/css/images/nav/nav-home.svg',
   explore: '/css/images/nav/nav-explore.svg',
   create: '/css/images/nav/nav-create.svg',
-  notifications: '/css/nav/images/nav-notifications.svg',
+  notifications: '/css/images/nav/nav-notifications.svg',
   profile: '/css/images/nav/nav-profile.svg',
 };
 
