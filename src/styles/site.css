@@ -293,8 +293,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 .route-scrollbar-thumb {
     top: var(--route-scroll-thumb-offset, 0px);
     height: var(--route-scroll-thumb-height, 22px);
-    background: var(--ar-line);
-    border: 1px solid var(--ar-line);
+    background: red;
     cursor: grab;
 }
 
