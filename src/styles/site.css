@@ -15,8 +15,8 @@ body.in-menu #site-header {
     --site-frame-max-width: 900px;
     --site-frame-side-gutter: clamp(8px, 1.8vw, 16px);
     --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--site-frame-side-gutter)));
-    --site-frame-edge-gap: 3px;
-    --site-frame-content-gap: clamp(3px, 2.5vh, 6px);
+    --site-frame-edge-gap: 7px;
+    --site-frame-content-gap: clamp(6px, 2.5vh, 9px);
     --site-frame-content-padding: clamp(6px, 2vw, 9px);
     --site-scrollbar-track-width: 12px;
     --site-scrollbar-hit-width: 15px;
