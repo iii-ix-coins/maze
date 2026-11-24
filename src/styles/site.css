@@ -20,7 +20,7 @@ body.in-menu #site-header {
     --site-frame-cut: 24px;
     --site-header-cut: 18px;
     --site-dock-height: 45px;
-    --site-header-height: 26px;
+    --site-header-height: 30px;
     --site-brand-width: 51px;
     --site-brand-height: 20px;
     --site-dock-item-size: calc(var(--site-dock-height) - 6px);
