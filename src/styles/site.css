@@ -194,18 +194,18 @@ body:not(.in-menu) .route-page::before {
     inset: 0;
     border: 2px solid var(--ar-line);
     background: transparent;
-    clip-path: polygon(var(--site-frame-cut) 0,
-            100% 0,
-            100% calc(100% - var(--site-frame-cut)),
-            calc(100% - var(--site-frame-cut)) 100%,
-            0 100%,
-            0 var(--site-frame-cut));
-    -webkit-clip-path: polygon(var(--site-frame-cut) 0,
-            100% 0,
-            100% calc(100% - var(--site-frame-cut)),
-            calc(100% - var(--site-frame-cut)) 100%,
-            0 100%,
-            0 var(--site-frame-cut));
+    clip-path: polygon(0 0,
+            calc(100% - var(--site-frame-cut)) 0,
+            100% var(--site-frame-cut),
+            100% 100%,
+            var(--site-frame-cut) 100%,
+            0 calc(100% - var(--site-frame-cut)));
+    -webkit-clip-path: polygon(0 0,
+            calc(100% - var(--site-frame-cut)) 0,
+            100% var(--site-frame-cut),
+            100% 100%,
+            var(--site-frame-cut) 100%,
+            0 calc(100% - var(--site-frame-cut)));
     pointer-events: none;
 }
 
