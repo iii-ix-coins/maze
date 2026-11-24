@@ -57,7 +57,6 @@ body:not(.in-menu) > #root > #site-topbar {
     clip-path: polygon(
         var(--site-header-cut) 0,
         100% 0,
-        100% calc(100% - var(--site-header-cut)),
         calc(100% - var(--site-header-cut)) 100%,
         0 100%,
         0 var(--site-header-cut)
@@ -65,7 +64,6 @@ body:not(.in-menu) > #root > #site-topbar {
     -webkit-clip-path: polygon(
         var(--site-header-cut) 0,
         100% 0,
-        100% calc(100% - var(--site-header-cut)),
         calc(100% - var(--site-header-cut)) 100%,
         0 100%,
         0 var(--site-header-cut)
