@@ -18,7 +18,7 @@ body.in-menu #site-header {
     --site-frame-content-gap: clamp(9px, 2.5vh, 12px);
     --site-frame-content-padding: clamp(6px, 2vw, 9px);
     --site-frame-cut: 24px;
-    --site-header-cut: 24px;
+    --site-header-cut: 18px;
     --site-dock-height: 45px;
     --site-header-height: 26px;
     --site-brand-width: 51px;
@@ -531,7 +531,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hove
         --site-frame-content-gap: clamp(3px, 2.2vh, 6px);
         --site-frame-content-padding: clamp(3px, 2.2vh, 6px);
         --site-frame-cut: 18px;
-        --site-header-cut: 21px;
+        --site-header-cut: 15px;
         --site-dock-height: 39px;
         --site-brand-width: 46px;
         --site-brand-height: 18px;
