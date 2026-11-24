@@ -1419,7 +1419,7 @@
 /* —— 1 · LAYOUT TOKENS ———————————————————————————————————————————————— */
 .nav {
     /* Shared geometry and typography tokens; theme-tokens.css owns theme colours. */
-    --nav-control-height: 26px;
+    --nav-control-height: 20px;
     --nav-fs: clamp(12.5px, 1.09vw + 3.55px, 15px);
 
     /* Theme-specific panel shadows remain local to the navigation surface. */
@@ -1481,8 +1481,8 @@ html[data-theme="grass"] .nav {
 .nav-brand-logo {
     display: block;
     width: auto;
-    height: 24px;
-    max-height: 24px;
+    height: 20px;
+    max-height: 20px;
 }
 
 /* Link group + actions */
@@ -1845,7 +1845,7 @@ html[data-theme="grass"] .nav {
    owned by src/styles/site.css so this file contains no competing nav grid. */
 @media (max-width: 1023px) {
     .nav {
-        --nav-control-height: 27px;
+        --nav-control-height: 20px;
         --nav-fs: 15px;
     }
 
@@ -1891,7 +1891,7 @@ html[data-theme="grass"] .nav {
 /* Compact mobile menu content; header geometry is centralized in site.css. */
 @media (max-width: 600px) {
     .nav {
-        --nav-control-height: 30px;
+        --nav-control-height: 18px;
         --nav-fs: clamp(11px, 3vw, 13px);
     }
 
