@@ -286,7 +286,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 /* Paint the clipped dock surface on a pseudo-element so popovers can extend outside it. */
 .nav.site-bottom-nav::before {
-    --dock-cut: 9px;
+    --dock-cut: 24px;
     content: "";
     position: absolute;
     z-index: 0;
@@ -342,7 +342,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 
 .site-bottom-nav .nav-link,
 .site-bottom-nav .nav-notifications-trigger {
-    --dock-item-cut: 24px;
+    --dock-item-cut: 12px;
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
