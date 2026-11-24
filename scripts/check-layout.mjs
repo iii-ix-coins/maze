@@ -86,6 +86,24 @@ if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<Inte
   console.error('[layout] SiteChromeHosts must mount only the shared SiteNavigation chrome.');
   process.exit(1);
 }
+const siteChromeCss = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
+const hasSharedFrameGeometry = [
+  '--site-frame-width:',
+  '--site-header-height: calc(var(--site-dock-height) / 2)',
+  'width: var(--site-frame-width)',
+  'body:not(.in-menu) .route-page',
+  'body:not(.in-menu) .route-page::before',
+  '#site-topbar::before',
+].every((token) => siteChromeCss.includes(token));
+if (
+  !chromeSource.includes('<header id="site-topbar"') ||
+  !chromeSource.includes('<div id="site-header"') ||
+  !chromeSource.includes('id="site-brand"') ||
+  !hasSharedFrameGeometry
+) {
+  console.error('[layout] the topbar, route content and navigation must use the shared three-frame geometry.');
+  process.exit(1);
+}
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
 const walletTeardownSource = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.ts'), 'utf8');
 const walletTeardownTests = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.test.ts'), 'utf8');

@@ -3,7 +3,7 @@
     max-width: 920px;
     align-content: start;
     gap: clamp(18px, 3vw, 28px);
-    padding-bottom: 116px;
+    padding-bottom: 0;
   }
 
   .game-feed-heading {

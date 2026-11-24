@@ -32,3 +32,8 @@ Square SVGs with a transparent background and `viewBox="0 0 24 24"` are recommen
 - The clipped dock background is rendered on `nav::before`, rather than clipping the navigation container itself, so the Notifications popover can extend above the dock without being cropped.
 
 Navigation destinations, wallet sign-in behavior and theme storage contracts remain unchanged. The top-right Create / Rooms / Live switcher is retired; Live and Rooms are reached from Explore.
+
+
+## Shared three-frame site geometry
+
+`site.css` owns one `--site-frame-width` token shared by `#site-topbar`, `#site-header` and `.route-page`. The topbar height is half the dock height; its top inset shares the dock's bottom inset. Topbar and route content use the same transparent chamfered border language as the dock. Normal site routes fill the content frame between those two fixed regions. The `/maze.html` gameplay shell remains outside this route-frame geometry so its in-flow navigation and game viewport are preserved.

@@ -3,7 +3,7 @@ import { getSiteRoutePath } from '../../app/routes';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
-/** Persistent chrome: brand stays independent; notifications, theme and routes live in the bottom dock. */
+/** Persistent chrome: a shared topbar frame and the bottom navigation dock. */
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
   useEffect(() => {
     const markChromeEntered = (event: Event) => {
@@ -15,7 +15,7 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
 
       const enteredClass = target.id === 'site-header'
         ? 'maze-header-entered'
-        : target.id === 'site-brand'
+        : target.id === 'site-topbar'
           ? 'maze-site-brand-entered'
           : target.id === 'site-brand-header'
             ? 'maze-brand-entered'
@@ -30,11 +30,13 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
 
   return (
     <>
-      <a id="site-brand" className="site-brand" href={getSiteRoutePath('home')} aria-label="Maze home">
-        <span className="nav-brand-mark" aria-hidden="true">
-          <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo-white.svg" />
-        </span>
-      </a>
+      <header id="site-topbar" className="site-topbar" aria-label="Maze site header">
+        <a id="site-brand" className="site-brand" href={getSiteRoutePath('home')} aria-label="Maze home">
+          <span className="nav-brand-mark" aria-hidden="true">
+            <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo-white.svg" />
+          </span>
+        </a>
+      </header>
 
 
       <div id="site-header" data-maze-page={mazePage ? 'true' : undefined}>

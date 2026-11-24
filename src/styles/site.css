@@ -11,19 +11,78 @@ body.in-menu #site-header {
     z-index: 1000;
 }
 
-/* Independent brand: never consumes a slot in the bottom navigation. */
-body>#root>#site-brand {
+/* One shared horizontal frame for the topbar, route content and bottom dock. */
+:root {
+    --site-frame-max-width: 900px;
+    --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--gutter)));
+    --site-frame-edge-gap: 16px;
+    --site-frame-content-gap: clamp(16px, 2.5vh, 24px);
+    --site-frame-content-padding: clamp(14px, 2vw, 20px);
+    --site-frame-cut: 24px;
+    --site-header-cut: 12px;
+    --site-dock-height: 67px;
+    --site-header-height: calc(var(--site-dock-height) / 2);
+    --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
+    --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
+}
+
+/* The topbar is a real frame; the brand link only occupies its own content. */
+body:not(.in-menu) > #root > #site-topbar {
     position: fixed;
-    top: calc(14px + env(safe-area-inset-top));
-    left: max(16px, env(safe-area-inset-left));
+    top: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top));
+    left: 50%;
     z-index: 1002;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    width: var(--site-frame-width);
+    height: var(--site-header-height);
+    min-height: var(--site-header-height);
+    margin: 0;
+    padding: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+/* Header frame matches the dock chamfer direction while keeping its interior clear. */
+#site-topbar::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border: 1px solid var(--ar-line);
+    background: transparent;
+    clip-path: polygon(
+        var(--site-header-cut) 0,
+        100% 0,
+        100% calc(100% - var(--site-header-cut)),
+        calc(100% - var(--site-header-cut)) 100%,
+        0 100%,
+        0 var(--site-header-cut)
+    );
+    -webkit-clip-path: polygon(
+        var(--site-header-cut) 0,
+        100% 0,
+        100% calc(100% - var(--site-header-cut)),
+        calc(100% - var(--site-header-cut)) 100%,
+        0 100%,
+        0 var(--site-header-cut)
+    );
+    pointer-events: none;
+}
+
+#site-brand {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-start;
     width: auto;
+    position: relative;
+    z-index: 1;
+    height: 100%;
     min-width: 0;
     margin: 0;
-    padding: 4px;
+    padding: 0 14px;
     text-decoration: none;
     pointer-events: auto;
 }
@@ -36,6 +95,18 @@ body>#root>#site-brand {
     max-height: 30px;
 }
 
+/* Preserve the previous compact top-left brand placement inside the game shell. */
+body.in-menu > #root > #site-topbar {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    left: max(16px, env(safe-area-inset-left));
+    width: auto;
+    height: auto;
+    min-height: 0;
+    padding: 4px;
+    transform: none;
+}
+
 /* Theme selection is a compact vertical stack of three square, chamfer-cut controls. */
 
 /* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
@@ -44,14 +115,72 @@ body>#root>#site-brand {
     top: auto;
     left: 50%;
     right: auto;
-    bottom: calc(16px + env(safe-area-inset-bottom));
+    bottom: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom));
     z-index: 1000;
     display: flex;
     justify-content: center;
-    width: min(100% - 2 * var(--gutter), 900px);
+    width: var(--site-frame-width);
     margin: 0;
     transform: translateX(-50%);
     pointer-events: none;
+}
+
+/* Normal site routes share the same content frame and measured vertical rhythm. */
+body:not(.in-menu) {
+    gap: 0;
+    padding-top: 0;
+    padding-bottom: var(--site-frame-bottom-space);
+}
+
+body:not(.in-menu) .route-page {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    flex: 0 0 auto;
+    align-self: center;
+    width: var(--site-frame-width);
+    min-width: 0;
+    min-height: max(0px, calc(100vh - var(--site-frame-top-space) - var(--site-frame-bottom-space)));
+    margin: var(--site-frame-top-space) auto 0;
+    padding: var(--site-frame-content-padding);
+    box-sizing: border-box;
+}
+
+/* Content frame uses the same chamfer and border language, with no filled surface. */
+body:not(.in-menu) .route-page::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border: 1px solid var(--ar-line);
+    background: transparent;
+    clip-path: polygon(
+        var(--site-frame-cut) 0,
+        100% 0,
+        100% calc(100% - var(--site-frame-cut)),
+        calc(100% - var(--site-frame-cut)) 100%,
+        0 100%,
+        0 var(--site-frame-cut)
+    );
+    -webkit-clip-path: polygon(
+        var(--site-frame-cut) 0,
+        100% 0,
+        100% calc(100% - var(--site-frame-cut)),
+        calc(100% - var(--site-frame-cut)) 100%,
+        0 100%,
+        0 var(--site-frame-cut)
+    );
+    pointer-events: none;
+}
+
+/* Feature pages fill the shared content frame instead of defining their own outer width. */
+body:not(.in-menu) .route-page > .feature-page-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 #site-header > .header {
@@ -371,12 +500,21 @@ body>#root>#site-brand {
 
 
 @media (max-width: 720px) {
+    :root {
+        --site-frame-edge-gap: 0px;
+        --site-frame-content-gap: clamp(14px, 2.2vh, 18px);
+        --site-frame-content-padding: 12px;
+        --site-frame-cut: 18px;
+        --site-header-cut: 10px;
+        --site-dock-height: 66px;
+    }
+
     #site-header {
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        max-width: none;
-        transform: none;
+        bottom: env(safe-area-inset-bottom);
+        left: 50%;
+        width: var(--site-frame-width);
+        max-width: var(--site-frame-max-width);
+        transform: translateX(-50%);
     }
 
     #site-header > .header {
@@ -384,7 +522,7 @@ body>#root>#site-brand {
     }
 
     .nav.site-bottom-nav {
-        min-height: calc(66px + env(safe-area-inset-bottom));
+        min-height: calc(var(--site-dock-height) + env(safe-area-inset-bottom));
         padding: 3px 5px calc(3px + env(safe-area-inset-bottom));
         border-right: 0;
         border-bottom: 0;

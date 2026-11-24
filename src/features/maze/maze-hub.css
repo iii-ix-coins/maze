@@ -1,7 +1,7 @@
 @layer pages {
   .maze-hub-page {
     max-width: 1180px;
-    padding-bottom: 116px;
+    padding-bottom: 0;
   }
 
   .maze-hub-title {
