@@ -89,7 +89,7 @@ if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<Inte
 const siteChromeCss = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const hasSharedFrameGeometry = [
   '--site-frame-width:',
-  '--site-header-height: calc(var(--site-dock-height) / 2)',
+  '--site-header-height:',
   'width: var(--site-frame-width)',
   'body:not(.in-menu) .route-page',
   'body:not(.in-menu) .route-page::before',
@@ -104,8 +104,10 @@ if (
   console.error('[layout] the topbar, route content and navigation must use the shared three-frame geometry.');
   process.exit(1);
 }
-const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page > \.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before\s*\{([^}]*)\}/s)?.[1] ?? '';
+const mobileFrameTokens = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?:root\s*\{([^}]*)\}/)?.[1] ?? '';
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
@@ -115,6 +117,8 @@ if (
   !/body:not\(\.in-menu\)\s*>\s*#root\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
   !routeFrameRule.includes('position: fixed') ||
   !routeFrameRule.includes('overflow: hidden') ||
+  !routeFrameStrokeRule.includes('z-index: 2') ||
+  !mobileFrameTokens.includes('--site-frame-edge-gap: clamp(6px, 1.25vw, 9px)') ||
   !routeScrollRule.includes('height: 100%') ||
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
@@ -585,7 +589,7 @@ if (
   !dockItemRule.includes('height: 100%;') ||
   !dockItemRule.includes('width: var(--site-dock-item-size);') ||
   !dockItemRule.includes('aspect-ratio: 1 / 1;') ||
-  !dockItemRule.includes('opacity: 0.55;') ||
+  !dockItemRule.includes('opacity: 0.33;') ||
   !dockItemRule.includes('clip-path: none;') ||
   !dockItemRule.includes('-webkit-clip-path: none;') ||
   dockItemRule.includes('clip-path: polygon(') ||
@@ -597,8 +601,8 @@ if (
   !sharedSiteStyles.includes('--site-dock-height: 45px;') ||
   !sharedSiteStyles.includes('--site-dock-height: 39px;') ||
   !sharedSiteStyles.includes('--site-dock-item-size: calc(var(--site-dock-height) - 6px);') ||
-  !sharedSiteStyles.includes('--site-header-height: calc(var(--site-dock-height) / 2);') ||
-  !sharedSiteStyles.includes('--site-brand-width: 74px;') ||
+  !sharedSiteStyles.includes('--site-header-height: 26px;') ||
+  !sharedSiteStyles.includes('--site-brand-width: 51px;') ||
   !sharedSiteStyles.includes('--site-brand-height: 18px;') ||
   !sharedSiteStyles.includes('grid-template-rows: repeat(3, 10px);') ||
   !sharedSiteStyles.includes('width: 10px;') ||

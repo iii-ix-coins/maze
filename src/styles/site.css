@@ -189,7 +189,8 @@ body:not(.in-menu) .route-page {
 body:not(.in-menu) .route-page::before {
     content: "";
     position: absolute;
-    z-index: 0;
+    /* Keep the frame stroke above the inner scroller and its scrollbar. */
+    z-index: 2;
     inset: 0;
     border: 1px solid var(--ar-line);
     background: transparent;
@@ -527,7 +528,8 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hove
 
 @media (max-width: 720px) {
     :root {
-        --site-frame-edge-gap: 0px;
+        /* Preserve a proportional top inset on narrow viewports. */
+        --site-frame-edge-gap: clamp(6px, 1.25vw, 9px);
         --site-frame-content-gap: clamp(3px, 2.2vh, 6px);
         --site-frame-content-padding: clamp(3px, 2.2vh, 6px);
         --site-frame-cut: 18px;

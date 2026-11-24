@@ -78,7 +78,7 @@ if (!siteCss.includes('background: var(--site-navigation-surface)') || siteCss.i
 }
 const dockItemBlock = siteCss.match(/\.site-bottom-nav \.nav-link,\s*\.site-bottom-nav \.nav-notifications-trigger\s*\{([^}]*)\}/s)?.[1] ?? '';
 const dockActiveBlock = siteCss.match(/\.site-bottom-nav \.nav-link\.active\s*\{([^}]*)\}/s)?.[1] ?? '';
-if (!dockItemBlock.includes('opacity: 0.55;') || !dockItemBlock.includes('background: transparent;') || !dockActiveBlock.includes('opacity: 1;') || !dockActiveBlock.includes('background: transparent;')) {
+if (!dockItemBlock.includes('opacity: 0.33;') || !dockItemBlock.includes('background: transparent;') || !dockActiveBlock.includes('opacity: 1;') || !dockActiveBlock.includes('background: transparent;')) {
   errors.push('Navigation controls must use opacity for state and remain transparent in every state.');
 }
 if (!gameFeedCss.includes('var(--home-feed-panel-surface)') || !gameFeedCss.includes('var(--home-feed-media-surface)') || !gameFeedCss.includes('var(--home-feed-control-active-surface)')) {
