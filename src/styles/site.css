@@ -24,7 +24,7 @@ body.in-menu #site-header {
     --site-scrollbar-content-gap: clamp(9px, 0.55vw, 18px);
     --site-scrollbar-content-gutter: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-track-width) + var(--site-scrollbar-content-gap));
     --site-frame-content-inline-padding: max(var(--site-frame-content-padding), var(--site-scrollbar-content-gutter));
-    --site-scrollbar-cut: 9px;
+    --site-scrollbar-cut: 6px;
     --site-frame-cut: 18px;
     --site-header-cut: 18px;
     --site-dock-height: 45px;
@@ -287,7 +287,6 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     top: 0;
     bottom: 0;
     background: rgba(var(--ar-rgb), .16);
-    border: 1px solid var(--ar-line);
 }
 
 .route-scrollbar-thumb {
