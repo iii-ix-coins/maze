@@ -528,10 +528,6 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar-thumb:hove
 
 @media (max-width: 720px) {
     :root {
-        /* Preserve a proportional top inset on narrow viewports. */
-        --site-frame-edge-gap: clamp(6px, 1.25vw, 9px);
-        --site-frame-content-gap: clamp(3px, 2.2vh, 6px);
-        --site-frame-content-padding: clamp(3px, 2.2vh, 6px);
         --site-frame-cut: 18px;
         --site-header-cut: 18px;
         --site-dock-height: 39px;
