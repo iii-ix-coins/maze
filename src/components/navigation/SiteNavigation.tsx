@@ -5,7 +5,7 @@ import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { ThemedSvgIcon, type ThemedSvgTone } from '../media/ThemedSvgIcon';
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 type NavIconName = 'maze' | 'home' | 'explore' | 'create' | 'profile' | 'notifications';
 type NavItem = {
@@ -35,8 +35,8 @@ const NAV_ICON_SOURCES: Record<NavIconName, string> = {
   profile: '/css/images/nav/nav-profile.svg',
 };
 
-function NavIcon({ name, tone = 'primary' }: { name: NavIconName; tone?: ThemedSvgTone }) {
-  return <ThemedSvgIcon className="nav-dock-image" src={NAV_ICON_SOURCES[name]} tone={tone} />;
+function NavIcon({ name }: { name: NavIconName }) {
+  return <ThemedSvgIcon className="nav-dock-image" src={NAV_ICON_SOURCES[name]} />;
 }
 
 function DockLink({ item, avatar }: { item: NavItem; avatar?: ReactNode }) {
@@ -131,13 +131,13 @@ export function SiteNavigation() {
             <DockLink item={{ label: 'Explore', href: getSiteRoutePath('explore'), key: 'explore', icon: 'explore' }} />
             <DockLink item={{ label: 'Maze', href: getSiteRoutePath('maze-hub'), key: 'maze-hub', icon: 'maze' }} />
             <a
-              className={`nav-link nav-dock-link nav-dock-create${isCreateViewActive() ? ' active' : ''}`}
+              className={`nav-link nav-dock-link${isCreateViewActive() ? ' active' : ''}`}
               href={MAZE_VIEW_URLS.create}
               data-nav-key="maze"
               aria-current={isCreateViewActive() ? 'page' : undefined}
               aria-label="Create a Maze"
             >
-              <span className="nav-dock-icon nav-dock-create-icon" aria-hidden="true"><NavIcon name="create" tone="create" /></span>
+              <span className="nav-dock-icon" aria-hidden="true"><NavIcon name="create" /></span>
             </a>
             <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
             <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />

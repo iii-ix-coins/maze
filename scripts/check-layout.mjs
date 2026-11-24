@@ -373,7 +373,7 @@ if (
 }
 const notificationsIndex = navigationComponent.indexOf('<NotificationsMenu');
 const themeIndex = navigationComponent.indexOf('<ThemeSwitcher />');
-const createIndex = navigationComponent.indexOf('nav-dock-create');
+const createIndex = navigationComponent.indexOf('href={MAZE_VIEW_URLS.create}');
 if (
   !chromeComponent.includes('id="site-brand"') ||
   chromeComponent.includes('id="site-controls"') ||
@@ -386,6 +386,9 @@ if (
   themeIndex <= notificationsIndex ||
   !navigationComponent.includes('No notifications yet') ||
   navigationComponent.includes('nav-dock-label') ||
+  navigationComponent.includes('nav-dock-create-icon') ||
+  navigationComponent.includes("tone=\"create\"") ||
+  !navigationComponent.includes('<span className="nav-dock-icon" aria-hidden="true"><NavIcon name="create" /></span>') ||
   navigationComponent.includes('MoreMenu') ||
   navigationComponent.includes('Holders') ||
   !navigationComponent.includes("'/css/images/nav/nav-maze.svg'") ||
@@ -555,6 +558,12 @@ const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'u
 const themeSlotRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical\s*\{([^}]*)\}/s)?.[1] ?? '';
 const themeOptionRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical \.theme-toggle__option\s*\{([^}]*)\}/s)?.[1] ?? '';
 const themeSlotHostRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot\s*\{([^}]*)\}/s)?.[1] ?? '';
+const notificationHostRule = sharedSiteStyles.match(/\.nav-notifications-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockRule = sharedSiteStyles.match(/\.nav\.site-bottom-nav\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockInnerRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-inner\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockLinksRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-links\s*\{([^}]*)\}/s)?.[1] ?? '';
+const dockItemRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-link,\s*\.site-bottom-nav \.nav-notifications-trigger\s*\{([^}]*)\}/s)?.[1] ?? '';
+const logoRule = sharedSiteStyles.match(/#site-brand \.nav-brand-logo\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
   !sharedSiteStyles.includes('.nav.site-bottom-nav::before') ||
@@ -562,11 +571,31 @@ if (
   !sharedSiteStyles.includes('#site-brand') ||
   !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
   !themeSlotHostRule.includes('width: max-content;') ||
-  !themeSlotRule.includes('grid-template-columns: 18px;') ||
-  !themeSlotRule.includes('grid-template-rows: repeat(3, 18px);') ||
-  !themeOptionRule.includes('width: 18px;') ||
-  !themeOptionRule.includes('height: 18px;') ||
+  !themeSlotRule.includes('grid-template-columns: 12px;') ||
+  !themeSlotRule.includes('grid-template-rows: repeat(3, 12px);') ||
+  !themeOptionRule.includes('width: 12px;') ||
+  !themeOptionRule.includes('height: 12px;') ||
   !themeOptionRule.includes('aspect-ratio: 1 / 1;') ||
+  !dockRule.includes('height: var(--site-dock-height);') ||
+  !dockInnerRule.includes('height: 100%;') ||
+  !dockInnerRule.includes('padding: 3px;') ||
+  !dockLinksRule.includes('height: 100%;') ||
+  !dockLinksRule.includes('grid-template-rows: minmax(0, 1fr);') ||
+  !dockItemRule.includes('height: 100%;') ||
+  !dockItemRule.includes('width: var(--site-dock-item-size);') ||
+  !dockItemRule.includes('aspect-ratio: 1 / 1;') ||
+  !notificationHostRule.includes('height: 100%;') ||
+  !logoRule.includes('width: var(--site-brand-width);') ||
+  !logoRule.includes('height: var(--site-brand-height);') ||
+  !sharedSiteStyles.includes('--site-dock-height: 45px;') ||
+  !sharedSiteStyles.includes('--site-dock-height: 39px;') ||
+  !sharedSiteStyles.includes('--site-dock-item-size: calc(var(--site-dock-height) - 6px);') ||
+  !sharedSiteStyles.includes('--site-header-height: calc(var(--site-dock-height) / 2);') ||
+  !sharedSiteStyles.includes('--site-brand-width: 74px;') ||
+  !sharedSiteStyles.includes('--site-brand-height: 18px;') ||
+  !sharedSiteStyles.includes('grid-template-rows: repeat(3, 10px);') ||
+  !sharedSiteStyles.includes('width: 10px;') ||
+  sharedSiteStyles.includes('.nav-dock-create-icon') ||
   !sharedSiteStyles.includes('clip-path: polygon(') ||
   !sharedSiteStyles.includes('-webkit-clip-path: polygon(') ||
   sharedSiteStyles.includes('.site-bottom-nav .nav-link:hover') ||

@@ -16,9 +16,6 @@
     --svg-icon-secondary: #555555;
     --svg-icon-accent: #333333;
     --svg-icon-on-accent: #ffffff;
-    --create-button-gradient: linear-gradient(135deg, #94620b 0%, #c9952f 24%, #f8df88 48%, #c1871c 73%, #f4d47a 100%);
-    --create-button-foreground: #2b1d05;
-    --svg-icon-create: var(--create-button-foreground);
   }
 
   html[data-theme="light"] {
@@ -144,7 +141,7 @@
     --page-background: var(--green);
     --maze-canvas: var(--green);
 
-    /* General site/game surfaces stay solid; the Create dock tile has a separate shared gold gradient. */
+    /* General site/game surfaces stay solid; the Create Dock action uses the shared icon treatment. */
     --ar-fill: var(--green-2);
     --ar-fill-2: var(--dark-spruce);
     --surface-solid: var(--dark-spruce);

@@ -19,8 +19,11 @@ body.in-menu #site-header {
     --site-frame-content-padding: clamp(6px, 2vw, 9px);
     --site-frame-cut: 24px;
     --site-header-cut: 12px;
-    --site-header-height: 30px;
     --site-dock-height: 45px;
+    --site-header-height: calc(var(--site-dock-height) / 2);
+    --site-brand-width: 74px;
+    --site-brand-height: 18px;
+    --site-dock-item-size: calc(var(--site-dock-height) - 6px);
     --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
     --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
 }
@@ -87,11 +90,23 @@ body:not(.in-menu) > #root > #site-topbar {
 }
 
 #site-brand .nav-brand-mark {
-    height: 24px;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-start;
+    width: var(--site-brand-width);
+    height: var(--site-brand-height);
 }
 
+/* ThemedSvgIcon is a mask span, not an intrinsically-sized img: give it an explicit box. */
 #site-brand .nav-brand-logo {
-    max-height: 24px;
+    display: block;
+    flex: 0 0 auto;
+    width: var(--site-brand-width);
+    height: var(--site-brand-height);
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 588.63795 / 142.3355;
 }
 
 /* Preserve the previous compact top-left brand placement inside the game shell. */
@@ -102,7 +117,7 @@ body.in-menu > #root > #site-topbar {
     width: auto;
     height: auto;
     min-height: 0;
-    padding: 4px;
+    padding: 3px;
     transform: none;
 }
 
@@ -252,7 +267,11 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 .nav.site-bottom-nav {
     display: block;
     width: 100%;
+    height: var(--site-dock-height);
+    min-height: var(--site-dock-height);
+    max-height: var(--site-dock-height);
     min-width: 0;
+    box-sizing: border-box;
     position: relative;
     isolation: isolate;
     padding: 0;
@@ -301,19 +320,24 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     z-index: 1;
     display: block;
     width: 100%;
+    height: 100%;
     min-width: 0;
     min-height: 0;
     margin: 0;
-    padding: 3px 3px;
+    padding: 3px;
+    box-sizing: border-box;
 }
 
 .site-bottom-nav .nav-links {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
-    align-items: center;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
     gap: 3px;
     width: 100%;
+    height: 100%;
     min-width: 0;
+    min-height: 0;
 }
 
 .site-bottom-nav .nav-link,
@@ -325,13 +349,17 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     align-items: center;
     justify-content: center;
     gap: 0;
-    width: auto;
-    min-width: auto;
-    min-height: 100%;
+    width: var(--site-dock-item-size);
+    max-width: var(--site-dock-item-size);
+    min-width: 0;
+    min-height: 0;
     height: 100%;
+    max-height: 100%;
+    align-self: stretch;
     aspect-ratio: 1 / 1;
     justify-self: center;
-    padding: 3px 0;
+    padding: 0;
+    box-sizing: border-box;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -397,48 +425,15 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     object-fit: contain;
 }
 
-.site-bottom-nav .nav-dock-create {
-    gap: 0;
-    color: var(--nav-text);
-    background: transparent;
-}
-
-.nav-dock-create-icon {
-    --dock-item-cut: 24px;
-    width: 30px;
-    height: 30px;
-    flex-basis: 30px;
-    aspect-ratio: 1 / 1;
-    border: 0;
-    border-radius: 0;
-    background: var(--create-button-gradient);
-    color: var(--create-button-foreground);
-    box-shadow: none;
-    transform: none;
-    clip-path: polygon(var(--dock-item-cut) 0, 100% 0, 100% calc(100% - var(--dock-item-cut)), calc(100% - var(--dock-item-cut)) 100%, 0 100%, 0 var(--dock-item-cut));
-    -webkit-clip-path: polygon(var(--dock-item-cut) 0, 100% 0, 100% calc(100% - var(--dock-item-cut)), calc(100% - var(--dock-item-cut)) 100%, 0 100%, 0 var(--dock-item-cut));
-}
-
-.nav-dock-create-icon .nav-dock-image,
-.nav-dock-create-icon > svg {
-    width: 27px;
-    height: 27px;
-}
-
-.site-bottom-nav .nav-dock-profile .user-avatar {
-    width: 25px;
-    height: 25px;
-    flex-basis: 25px;
-}
-
-
 .nav-notifications-menu {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    height: 100%;
     min-width: 0;
+    min-height: 0;
 }
 
 .site-bottom-nav .nav-notifications-panel {
@@ -484,7 +479,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     color: var(--nav-muted, var(--ar-soft, #a5afb5));
 }
 
-.site-bottom-nav .nav-notifications-empty-icon svg {
+.site-bottom-nav .nav-notifications-empty-icon .nav-dock-image {
     width: 21px;
     height: 21px;
 }
@@ -508,23 +503,23 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     justify-content: center;
     justify-self: end;
     width: max-content;
+    height: 100%;
     min-width: 0;
-    min-height: 57px;
-    height: 57px;
+    min-height: 0;
     padding: 0;
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
-    --tt-size: 18px;
-    --tt-icon-size: 11px;
+    --tt-size: 12px;
+    --tt-icon-size: 8px;
     --tt-pad: 0px;
-    grid-template-columns: 18px;
-    grid-template-rows: repeat(3, 18px);
-    width: 18px;
-    height: 54px;
-    min-height: 54px;
+    grid-template-columns: 12px;
+    grid-template-rows: repeat(3, 12px);
+    width: 12px;
+    height: 100%;
+    min-height: 0;
     padding: 0;
-    gap: 1px;
+    gap: 1.5px;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -533,11 +528,11 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
 }
 
 .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
-    --option-cut: 6px;
-    width: 18px;
-    min-width: 18px;
-    min-height: 18px;
-    height: 18px;
+    --option-cut: 3px;
+    width: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    height: 12px;
     aspect-ratio: 1 / 1;
     padding: 0;
     border: 0;
@@ -565,10 +560,12 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
         --site-frame-cut: 18px;
         --site-header-cut: 10px;
         --site-dock-height: 39px;
+        --site-brand-width: 62px;
+        --site-brand-height: 15px;
     }
 
     #site-header {
-        bottom: env(safe-area-inset-bottom);
+        bottom: 0;
         left: 50%;
         width: var(--site-frame-width);
         max-width: var(--site-frame-max-width);
@@ -580,8 +577,10 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     }
 
     .nav.site-bottom-nav {
+        height: calc(var(--site-dock-height) + env(safe-area-inset-bottom));
         min-height: calc(var(--site-dock-height) + env(safe-area-inset-bottom));
-        padding: 3px 5px calc(3px + env(safe-area-inset-bottom));
+        max-height: calc(var(--site-dock-height) + env(safe-area-inset-bottom));
+        padding: 0;
         border-right: 0;
         border-bottom: 0;
         border-left: 0;
@@ -589,7 +588,7 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     }
 
     .site-bottom-nav .nav-inner {
-        padding: 2px 2px;
+        padding: 3px 3px calc(3px + env(safe-area-inset-bottom));
     }
 
     .site-bottom-nav .nav-links {
@@ -599,9 +598,18 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
     .site-bottom-nav .nav-link,
     .site-bottom-nav .nav-notifications-trigger {
         flex: 0 0 auto;
+        width: var(--site-dock-item-size);
+        max-width: var(--site-dock-item-size);
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
         aspect-ratio: 1 / 1;
         padding: 0;
         justify-self: center;
+    }
+
+    .site-bottom-nav .nav-notifications-menu {
+        height: 100%;
     }
 
     .nav-dock-icon {
@@ -616,33 +624,33 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
         height: 24px;
     }
 
-    .nav-dock-create-icon {
+    .site-bottom-nav .nav-dock-profile .user-avatar {
         width: 27px;
         height: 27px;
         flex-basis: 27px;
     }
 
-}
-
-@media (max-width: 370px) {
-
     .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical {
-        --tt-size: 16px;
-        --tt-icon-size: 10px;
-        grid-template-columns: 16px;
-        grid-template-rows: repeat(3, 16px);
-        width: 16px;
-        height: 50px;
-        min-height: 50px;
+        --tt-size: 10px;
+        --tt-icon-size: 7px;
+        grid-template-columns: 10px;
+        grid-template-rows: repeat(3, 10px);
+        width: 10px;
+        height: 100%;
+        min-height: 0;
+        gap: 1.5px;
     }
 
     .site-bottom-nav .nav-dock-theme-slot .theme-toggle--vertical .theme-toggle__option {
-        width: 16px;
-        min-width: 16px;
-        min-height: 16px;
-        height: 16px;
+        --option-cut: 2.5px;
+        width: 10px;
+        min-width: 10px;
+        min-height: 10px;
+        height: 10px;
     }
+
 }
+
 
 
 @media (prefers-reduced-motion: reduce) {

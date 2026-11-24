@@ -25,3 +25,7 @@
 - بررسی قراردادی توکن‌ها: شفافیت Home/Navigation در Grass، رنگ روشن SVG و گرادیان مشترک Create تأیید شد.
 - Typecheck و Vite Build اجرا نشدند، چون `node_modules` در آرشیو/محیط موجود نیست.
 - تست بصری واقعی مرورگر انجام نشده است.
+
+## اصلاح بعدی: یکسان‌سازی Create با سایر دکمه‌های Dock
+
+در نسخه‌های بعدی پروژه، طراحی طلایی Create بازنشسته شد. Create اکنون از همان قاب دکمه، ابعاد آیکون و توکن رنگی Primary مانند Home، Explore، Maze، Notifications و Profile استفاده می‌کند. توکن‌های `--create-button-gradient`، `--create-button-foreground` و `--svg-icon-create` حذف شده‌اند. این گزارش، سابقهٔ نسخهٔ قبلی را ثبت می‌کند؛ برای وضعیت جاری به `NAVIGATION-COMPACT-UNIFIED-UPDATE-FA.md` مراجعه شود.

@@ -15,9 +15,8 @@ The root token contract is:
 - `--svg-icon-secondary`: quieter interface icon colour
 - `--svg-icon-accent`: emphasis colour
 - `--svg-icon-on-accent`: contrast colour for icons placed on accent surfaces
-- `--svg-icon-create`: contrast colour for the gold Create dock tile
 
-Theme values are defined once in `theme-tokens.css` for Light, Dark and Grass. Inline SVGs should use `stroke="currentColor"` and/or `fill="currentColor"` and opt into `theme-svg-inline`. Create Game stencil icons use the same `--svg-icon-*` tokens.
+Theme values are defined once in `theme-tokens.css` for Light, Dark and Grass. Inline SVGs should use `stroke="currentColor"` and/or `fill="currentColor"` and opt into `theme-svg-inline`. Create uses the same primary icon pigment and the same 30px icon box as every other Dock action; it has no special background, gradient, tone or size.
 
 Do not automatically mask user photos, third-party provider logos, or complex brand artwork whose original multi-colour identity must remain intact. Decorative first-party monochrome illustrations (for example, Home hero banners) may use `ThemedSvgIcon`.
 
@@ -26,6 +25,6 @@ Do not automatically mask user photos, third-party provider logos, or complex br
 
 Home Hero, Game Feed panels/media/active controls, and the site navigation consume dedicated semantic surface tokens defined in each theme block in `theme-tokens.css`. Grass sets those surfaces to `transparent`; Light and Dark retain their existing surface values. Do not recolour these regions with theme-specific selector overrides.
 
-The Create dock tile uses the shared `--create-button-gradient` and `--create-button-foreground` tokens, so its gold treatment is identical in Light, Dark, and Grass. Its icon uses the dedicated `create` tone (`--svg-icon-create`) rather than the theme-dependent generic `on-accent` tone.
+The bottom Dock has one shared geometry contract: `--site-dock-height` defines its outer height (45px desktop, 39px compact/mobile); `.nav-inner` has 3px padding on every side; every navigation action fills the resulting content height and remains square. The vertical Theme control is sized to fit that same content height. Create and Notifications must use the same dimensions and visual rules as Home, Explore, Maze and Profile.
 
 Grass SVG primary/secondary pigments use `--slime-lime` and `--radioactive-grass`, respectively, to match the bright foreground palette.

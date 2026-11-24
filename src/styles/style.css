@@ -357,9 +357,6 @@
         --_themed-svg-color: var(--svg-icon-on-accent);
     }
 
-    .themed-svg-icon[data-tone="create"] {
-        --_themed-svg-color: var(--svg-icon-create);
-    }
 
     /* Inline UI SVGs use stroke/fill="currentColor" and inherit the same palette. */
     .theme-svg-inline {

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-export type ThemedSvgTone = 'primary' | 'secondary' | 'accent' | 'on-accent' | 'create';
+export type ThemedSvgTone = 'primary' | 'secondary' | 'accent' | 'on-accent';
 
 type ThemedSvgIconProps = {
   src: string;

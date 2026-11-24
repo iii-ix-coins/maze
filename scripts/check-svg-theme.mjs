@@ -58,11 +58,11 @@ if (!themedIconCss.includes('.themed-svg-icon') || !themedIconCss.includes('mask
 if (!themedIconComponent.includes('--themed-svg-source') || !themedIconComponent.includes('ThemedSvgIcon')) {
   errors.push('ThemedSvgIcon component is missing its central SVG source contract.');
 }
-if (!themedIconComponent.includes("'create'") || !themedIconCss.includes('data-tone="create"') || !themeTokens.includes('--svg-icon-create')) {
-  errors.push('ThemedSvgIcon must expose the dedicated Create tone and root pigment token.');
+if (themedIconComponent.includes("'create'") || themedIconCss.includes('data-tone="create"') || themeTokens.includes('--svg-icon-create')) {
+  errors.push('The Create dock icon must use the same primary SVG pigment as all other navigation icons.');
 }
-if (!themeTokens.includes('--create-button-gradient: linear-gradient') || !siteCss.includes('background: var(--create-button-gradient)')) {
-  errors.push('The Create dock tile must consume the shared root gold gradient token.');
+if (themeTokens.includes('--create-button-gradient') || themeTokens.includes('--create-button-foreground') || siteCss.includes('nav-dock-create-icon')) {
+  errors.push('The Create dock item must not retain its former special gold tile treatment.');
 }
 for (const token of [
   '--site-navigation-surface', '--site-navigation-active-surface',
@@ -156,6 +156,6 @@ if (errors.length) {
 }
 
 console.log('[svg-theme] root-level SVG theme contract verified.');
-console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, Home surfaces, gold Create tile, MarketSummary, Home hero and Create Game icons are wired to root theme tokens.');
+console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, Home surfaces, uniform Create action, MarketSummary, Home hero and Create Game icons are wired to root theme tokens.');
 console.log(`[svg-theme] intentionally external/brand-managed resources: ${intentionallyExternal.join('; ')}.`);
 for (const warning of warnings) console.warn(`[svg-theme] warning: ${warning}`);
