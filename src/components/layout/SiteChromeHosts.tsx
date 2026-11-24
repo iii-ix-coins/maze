@@ -33,7 +33,7 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
       <header id="site-topbar" className="site-topbar" aria-label="Maze site header">
         <a id="site-brand" className="site-brand" href={getSiteRoutePath('home')} aria-label="Maze home">
           <span className="nav-brand-mark" aria-hidden="true">
-            <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo-white.svg" />
+            <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo.svg" />
           </span>
         </a>
       </header>

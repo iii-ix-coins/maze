@@ -20,9 +20,9 @@ body.in-menu #site-header {
     --site-frame-cut: 24px;
     --site-header-cut: 12px;
     --site-dock-height: 45px;
-    --site-header-height: calc(var(--site-dock-height) / 2);
-    --site-brand-width: 74px;
-    --site-brand-height: 18px;
+    --site-header-height: 26px;
+    --site-brand-width: 51px;
+    --site-brand-height: 20px;
     --site-dock-item-size: calc(var(--site-dock-height) - 6px);
     --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
     --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
@@ -547,8 +547,8 @@ body:not(.in-menu) .route-page > .feature-page-shell::-webkit-scrollbar-thumb:ho
         --site-frame-cut: 18px;
         --site-header-cut: 10px;
         --site-dock-height: 39px;
-        --site-brand-width: 62px;
-        --site-brand-height: 15px;
+        --site-brand-width: 46px;
+        --site-brand-height: 18px;
     }
 
     #site-header {
