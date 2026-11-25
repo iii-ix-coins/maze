@@ -35,7 +35,7 @@ body.in-menu #site-header {
     --site-header-theme-button-size: 12px;
     --site-header-theme-gap: 9px;
     --site-header-theme-active-border: #ff0000;
-    --site-header-coin-gap: 4px;
+    --site-header-coin-gap: 2px;
     --site-dock-item-size: calc(var(--site-dock-height) - 6px);
     --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
     --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
@@ -198,7 +198,7 @@ body:not(.in-menu)>#root>#site-topbar {
     z-index: 2;
 
     display: inline-flex;
-    padding: 0px 3px 0px 9px ;
+    padding: 0px 6px 0px 12px ;
     align-items: center;
     align-content: center;
     justify-content: center;
