@@ -193,7 +193,7 @@ body:not(.in-menu)>#root>#site-topbar {
     position: absolute;
 
     top: 50%;
-    right: 2px;
+    right: 0;
     z-index: 2;
 
     display: inline-flex;
