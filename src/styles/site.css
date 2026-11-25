@@ -27,6 +27,7 @@ body.in-menu #site-header {
     --site-scrollbar-cut: 6px;
     --site-frame-cut: 18px;
     --site-header-cut: 18px;
+    --balance-cut: 6px;
     --site-dock-height: 45px;
     --site-header-height: 30px;
     --site-brand-width: 51px;
@@ -197,18 +198,18 @@ body:not(.in-menu)>#root>#site-topbar {
     z-index: 2;
 
     display: inline-flex;
-    padding: 0px 4px;
+    padding: 0px 9px 0px 5px;
     align-items: center;
     align-content: center;
     justify-content: center;
 
     min-width: 54px;
     width: fit-content;
-    max-width: fit-content;
+    max-width: 30%;
     height: 22px;
     min-height: 22px;
 
-    background: var(--nav-panel);
+    background: var(--nav-accent);
 
     transform: translateY(-50%);
 
@@ -218,13 +219,13 @@ body:not(.in-menu)>#root>#site-topbar {
 
     clip-path: polygon(0 0,
             100% 0,
-            100% calc(100% - var(--site-header-cut)),
-            calc(100% - var(--site-header-cut)) 100%,
+            100% calc(100% - var(--balance-cut)),
+            calc(100% - var(--balance-cut)) 100%,
             0 100%);
     -webkit-clip-path: polygon(0 0,
             100% 0,
-            100% calc(100% - var(--site-header-cut)),
-            calc(100% - var(--site-header-cut)) 100%,
+            100% calc(100% - var(--balance-cut)),
+            calc(100% - var(--balance-cut)) 100%,
             0 100%);
 }
 
