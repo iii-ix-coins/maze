@@ -135,9 +135,9 @@
     --chartreuse: #ccff33ff;
 
     /* The page canvas is always the requested deep green. */
-    --ar-bg: var(--green);
-    --page-background: var(--green);
-    --maze-canvas: var(--green);
+    --ar-bg: var(--dark-spruce);
+    --page-background: var(--dark-spruce);
+    --maze-canvas: var(--dark-spruce);
 
     /* General site/game surfaces stay solid; the Create Dock action uses the shared icon treatment. */
     --ar-fill: var(--green-2);
