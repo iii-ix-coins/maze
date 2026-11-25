@@ -283,8 +283,8 @@ body:not(.in-menu)>#root>#site-topbar {
 
     flex: 0 0 auto;
 
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
 
     object-fit: contain;
 }
@@ -305,7 +305,7 @@ body:not(.in-menu)>#root>#site-topbar {
     white-space: nowrap;
 
     font-size: 15px;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.063em;
     line-height: 1;
 
     text-overflow: ellipsis;
