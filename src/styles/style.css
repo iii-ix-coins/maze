@@ -227,7 +227,7 @@
     /* LIGHT */
 
     /* GRASS */
-/* Squircle corners = the brand logo's silhouette (Chromium 139+; harmless elsewhere) */
+    /* Squircle corners = the brand logo's silhouette (Chromium 139+; harmless elsewhere) */
     @supports (corner-shape: squircle) {
         :root {
             --corner: squircle;
@@ -315,7 +315,9 @@
         }
     }
 
-    h1, h2, h3{
+    h1,
+    h2,
+    h3 {
         text-transform: uppercase;
     }
 }
@@ -324,6 +326,7 @@
    4 · FX — backdrop, scroll progress, loader, entrance
    ========================================================================== */
 @layer components {
+
     /* One theme contract for external SVG geometry used as interface icons. */
     .themed-svg-icon {
         --_themed-svg-color: var(--svg-icon-primary);
@@ -343,6 +346,10 @@
         mask-position: center;
         mask-size: contain;
         pointer-events: none;
+    }
+
+    .themed-svg-icon[data-tone="tile"] {
+        --_themed-svg-color: var(--tile-bg);
     }
 
     .themed-svg-icon[data-tone="secondary"] {
@@ -365,6 +372,7 @@
 }
 
 @layer fx {
+
     /* —— 4.1 Backdrop: aurora + living maze + grain + vignette ——————————— */
     .backdrop {
         position: fixed;
@@ -1286,6 +1294,7 @@
    8 · MOTION PREFERENCES
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -2143,10 +2152,29 @@ html[data-theme="grass"] .header {
 
 /* Flat monochrome theme canvas: no grid, vignette, aurora or gradient layers. */
 @layer base {
-  html, body, #root { background: var(--page-background, #000000); }
+
+    html,
+    body,
+    #root {
+        background: var(--page-background, #000000);
+    }
 }
+
 @layer fx {
-  html::before, html::after { content: none !important; display: none !important; }
-  .backdrop, .backdrop-aurora, .backdrop-grain { background: var(--page-background, #000000) !important; }
-  .backdrop-aurora i { display: none !important; }
+
+    html::before,
+    html::after {
+        content: none !important;
+        display: none !important;
+    }
+
+    .backdrop,
+    .backdrop-aurora,
+    .backdrop-grain {
+        background: var(--page-background, #000000) !important;
+    }
+
+    .backdrop-aurora i {
+        display: none !important;
+    }
 }

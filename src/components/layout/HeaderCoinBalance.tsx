@@ -8,6 +8,7 @@ import {
 
 import { API_PATHS } from '../../services/api/contracts';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
+import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 import type {
   WalletRuntimeProps,
@@ -333,12 +334,10 @@ export function HeaderCoinBalance() {
         aria-label={`Copy token Mint address. Balance: ${displayedAmount}`}
         title={buttonTitle}
       >
-        <img
+        <ThemedSvgIcon
           className="site-header-coin-image"
           src="/css/images/amount-logo.svg"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
+          tone="tile"
         />
 
         <span
