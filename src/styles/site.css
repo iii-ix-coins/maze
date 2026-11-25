@@ -206,8 +206,8 @@ body:not(.in-menu)>#root>#site-topbar {
     min-width: 54px;
     width: fit-content;
     max-width: 30%;
-    height: 22px;
-    min-height: 22px;
+    height: 24px;
+    min-height: 24px;
 
     background: var(--nav-accent);
 
@@ -305,7 +305,7 @@ body:not(.in-menu)>#root>#site-topbar {
     white-space: nowrap;
 
     font-size: 15px;
-    letter-spacing: 0.036em;
+    letter-spacing: 0.09em;
     line-height: 1;
 
     text-overflow: ellipsis;
