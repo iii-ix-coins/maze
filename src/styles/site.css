@@ -305,7 +305,7 @@ body:not(.in-menu)>#root>#site-topbar {
     white-space: nowrap;
 
     font-size: 16px;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.018em;
     line-height: 1;
 
     text-overflow: ellipsis;
