@@ -251,7 +251,7 @@ body:not(.in-menu)>#root>#site-topbar {
     background: transparent;
     box-shadow: none;
 
-    color: var(--tile-bg);
+    color: var(--ar-text);
     font: inherit;
     direction: ltr;
 
@@ -298,7 +298,7 @@ body:not(.in-menu)>#root>#site-topbar {
 
     overflow: hidden;
 
-    color: var(--svg-icon-primary);
+    color: var(--tile-bg);
 
     white-space: nowrap;
 
