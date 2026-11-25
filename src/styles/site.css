@@ -193,22 +193,22 @@ body:not(.in-menu)>#root>#site-topbar {
     position: absolute;
 
     top: 50%;
-    right: 0;
+    right:5px;
     z-index: 2;
 
     display: inline-flex;
-    padding: 7px 0px;
+    padding: 0px 4px;
     align-items: center;
     align-content: center;
     justify-content: center;
 
-    min-width: 63px;
-    width: max-content;
-    max-width: 30%;
-    height: 30px;
-    min-height: 30px;
+    min-width: 54px;
+    width: fit-content;
+    max-width: fit-content;
+    height: 22px;
+    min-height: 22px;
 
-    background: red;
+    background: var(--nav-panel);
 
     transform: translateY(-50%);
 
