@@ -197,16 +197,16 @@ body:not(.in-menu)>#root>#site-topbar {
     z-index: 2;
 
     display: inline-flex;
-    flex-direction: column-reverse;
+    padding: 7px 0px;
     align-items: center;
     align-content: center;
-    justify-content: flex-end;
+    justify-content: center;
 
-    min-width: 49px;
+    min-width: 63px;
     width: max-content;
     max-width: 30%;
-    height: 26px;
-    min-height: 26px;
+    height: 30px;
+    min-height: 30px;
 
     background: red;
 
