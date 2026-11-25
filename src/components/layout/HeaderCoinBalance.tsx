@@ -38,18 +38,21 @@ const BALANCE_REFRESH_MS = 30_000;
 function formatHeaderAmount(value: string): string {
   if (!/^\d+(?:\.\d+)?$/.test(value)) return '—';
 
-  const [integerPart, fractionPart = ''] = value.split('.');
+  const amount = Number(value);
 
-  const groupedInteger = integerPart.replace(
-    /\B(?=(\d{3})+(?!\d))/g,
-    ',',
+  if (!Number.isFinite(amount)) return '—';
+
+  const formatted = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+  return formatted.replace(
+    /([KMBT])$/,
+    (_, suffix: string) => suffix.toLowerCase(),
   );
-
-  const fraction = fractionPart.slice(0, 4).replace(/0+$/, '');
-
-  return fraction
-    ? `${groupedInteger}.${fraction}`
-    : groupedInteger;
 }
 
 export function HeaderCoinBalance() {
