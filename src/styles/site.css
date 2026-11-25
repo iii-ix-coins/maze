@@ -27,7 +27,7 @@ body.in-menu #site-header {
     --site-scrollbar-cut: 6px;
     --site-frame-cut: 18px;
     --site-header-cut: 18px;
-    --balance-cut: 6px;
+    --balance-cut: 12px;
     --site-dock-height: 45px;
     --site-header-height: 30px;
     --site-brand-width: 51px;
@@ -194,7 +194,7 @@ body:not(.in-menu)>#root>#site-topbar {
     position: absolute;
 
     top: 50%;
-    right:5px;
+    right: 3px;
     z-index: 2;
 
     display: inline-flex;
@@ -209,7 +209,7 @@ body:not(.in-menu)>#root>#site-topbar {
     height: 22px;
     min-height: 22px;
 
-    background: var(--nav-accent, 0.45);
+    background: var(--nav-accent);
 
     transform: translateY(-50%);
 
@@ -232,7 +232,7 @@ body:not(.in-menu)>#root>#site-topbar {
 /* Clickable coin balance button */
 .site-header-coin-button {
     display: inline-flex;
-    flex-direction: row;
+    flex-direction: row-reverse;
     align-items: center;
     justify-content: center;
 
@@ -251,7 +251,7 @@ body:not(.in-menu)>#root>#site-topbar {
     background: transparent;
     box-shadow: none;
 
-    color: var(--ar-text);
+    color: var(--tile-bg);
     font: inherit;
     direction: ltr;
 
