@@ -201,11 +201,13 @@ body:not(.in-menu)>#root>#site-topbar {
     align-items: center;
     justify-content: flex-end;
 
-    min-width: 85px;
+    min-width: 49px;
     width: max-content;
     max-width: 30%;
+    height: 32px;
+    min-height: 32px;
 
-    padding: 3px 5px;
+    padding: 2px 4px;
 
     background: red;
 
