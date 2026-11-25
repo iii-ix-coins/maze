@@ -198,7 +198,7 @@ body:not(.in-menu)>#root>#site-topbar {
     z-index: 2;
 
     display: inline-flex;
-    padding: 1px 9px 0px;
+    padding: 0px 9px 0px 12px ;
     align-items: center;
     align-content: center;
     justify-content: center;
@@ -304,8 +304,8 @@ body:not(.in-menu)>#root>#site-topbar {
 
     white-space: nowrap;
 
-    font-size: clamp(12px, 0.52vw, 15px);
-    font-weight: 650;
+    font-size: 16px;
+    letter-spacing: 1em;
     line-height: 1;
 
     text-overflow: ellipsis;
