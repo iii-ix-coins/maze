@@ -226,6 +226,7 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
     if (previous.address === next.address && previous.isConnected === next.isConnected && previous.status === next.status) return;
     snapshotRef.current = next;
     setSnapshot(next);
+    window.dispatchEvent(new CustomEvent('maze:wallet-snapshot', { detail: next }));
 
     // Record connection edges synchronously with the provider event. This avoids
     // missing a fast connect/disconnect pair before React commits the next effect.

@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
+import { ThemeSwitcher } from '../navigation/ThemeSwitcher';
+import { HeaderCoinBalance } from './HeaderCoinBalance';
 
 /** Persistent chrome: a shared topbar frame and the bottom navigation dock. */
 export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
@@ -36,6 +38,10 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
             <ThemedSvgIcon className="nav-brand-logo" src="/css/images/maze-logo.svg" />
           </span>
         </a>
+        <div className="site-topbar-theme-slot" aria-label="Theme selection">
+          <ThemeSwitcher />
+        </div>
+        <HeaderCoinBalance />
       </header>
 
 

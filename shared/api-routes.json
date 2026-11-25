@@ -1,6 +1,7 @@
 {
   "health": "/health",
   "config": "/api/config",
+  "tokenBalance": "/api/token-balance",
   "coinAge": "/api/coin-age",
   "livePrice": "/api/live-price",
   "jupiterMarket": "/api/jupiter-market",

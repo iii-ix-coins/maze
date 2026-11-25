@@ -3,11 +3,11 @@
 The active site navigation is implemented in React:
 
 - `SiteNavigation.tsx` owns the Home, Explore, Maze, Create, Notifications and Profile dock actions, active route states and notification panel interaction.
-- `SiteChromeHosts.tsx` mounts the independent top-left brand and the navigation host.
-- `ThemeSwitcher.tsx` owns the vertical three-theme radio control and delegates changes to the central theme engine.
-- The dock order is Home, Explore, Maze, Create, Notifications, Profile, then the compact vertical Theme selector at the far right. Maze opens the separate Maze Hub route (`/maze`); Create continues to open the existing Maze runtime Create view (`/maze.html?view=create`).
+- `SiteChromeHosts.tsx` mounts the shared header (left brand, centered theme selector, right token balance) and the bottom navigation host.
+- `ThemeSwitcher.tsx` owns the compact horizontal three-theme radio control in the center of the header and delegates changes to the central theme engine.
+- The dock order is Home, Explore, Maze, Create, Notifications and Profile. The theme selector is centered in the header; the configured token balance is aligned to the header right. Maze opens the separate Maze Hub route (`/maze`); Create continues to open the existing Maze runtime Create view (`/maze.html?view=create`).
 - `ExplorePage.tsx` provides the only site-level entry to the existing Maze Live and Rooms views.
-- The Profile destination is always present; the wallet connection CTA remains in the Profile page and is shown for anonymous users only. The former Home market summary and hero slider now live in Maze Hub (`/maze`).
+- The Profile destination is always present; the wallet control in Profile shows Connect while anonymous and the authenticated account menu (including Disconnect & log out) after sign-in. The former Home market summary and hero slider now live in Maze Hub (`/maze`). The header balance shows the connected Solana wallet’s configured mint amount, whether signed in or signed out; when no wallet is connected it shows a placeholder.
 
 ## Navigation icon assets
 
@@ -27,7 +27,7 @@ Square SVGs with a transparent background and `viewBox="0 0 24 24"` are recommen
 ## Visual rules
 
 - Dock surface and icon buttons use a diagonal chamfer on the upper-left and lower-right corners via `clip-path`; `border-radius` is not used for these shapes.
-- Theme choices stay vertical. Each choice is square: 18×18 px normally and 16×16 px on very narrow screens. The same chamfer direction is used.
+- Theme choices are text-only G/D/L buttons centered in the header. Each button is 21×21 px on desktop and 19×19 px on mobile; active state uses a 2px red border while the button background remains the current theme background.
 - Pointer hover styling and visible text labels/tooltips are removed. Semantic `aria-label` values and keyboard focus indicators remain.
 - The clipped dock background is rendered on `nav::before`, rather than clipping the navigation container itself, so the Notifications popover can extend above the dock without being cropped.
 

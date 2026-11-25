@@ -4,7 +4,6 @@ import { getSiteRoutePath, normalizePath, resolveSiteRoute } from '../../app/rou
 import { MAZE_VIEW_URLS } from '../../features/maze/maze-routes';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { UserAvatar } from '../account/UserAvatar';
-import { ThemeSwitcher } from './ThemeSwitcher';
 import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 type NavIconName = 'maze' | 'home' | 'explore' | 'create' | 'profile' | 'notifications';
@@ -141,9 +140,6 @@ export function SiteNavigation() {
             </a>
             <NotificationsMenu open={notificationsOpen} setOpen={setNotificationsOpen} />
             <DockLink item={{ label: 'Profile', href: getSiteRoutePath('profile'), key: 'profile', icon: 'profile' }} avatar={profileAvatar} />
-            <div className="nav-dock-theme-slot" role="group" aria-label="Theme selection">
-              <ThemeSwitcher />
-            </div>
           </div>
         </div>
       </nav>

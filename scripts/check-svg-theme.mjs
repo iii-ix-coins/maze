@@ -99,8 +99,10 @@ if (!market.includes('<ThemedSvgIcon') || /<img[^>]+src="\/css\/images\/maze-coi
 
 const sourceMaps = [
   ['SiteNavigation', navigation.match(/const NAV_ICON_SOURCES[\s\S]*?=\s*\{([\s\S]*?)\};/)?.[1] ?? ''],
-  ['ThemeSwitcher', themeSwitcher.match(/const THEME_ICONS[\s\S]*?=\s*\{([\s\S]*?)\};/)?.[1] ?? ''],
 ];
+if (!themeSwitcher.includes('THEME_MARKS') || !themeSwitcher.includes('theme-toggle--header') || themeSwitcher.includes('THEME_ICONS')) {
+  errors.push('ThemeSwitcher must use text-only theme marks in the header, not image buttons in the dock.');
+}
 for (const [owner, block] of sourceMaps) {
   const urls = [...block.matchAll(/:\s*'([^']+\.svg)'/g)].map((match) => match[1]);
   if (!urls.length) errors.push(`${owner} has no registered SVG icon sources.`);
@@ -161,6 +163,6 @@ if (errors.length) {
 }
 
 console.log('[svg-theme] root-level SVG theme contract verified.');
-console.log('[svg-theme] monochrome UI assets, navigation, theme icons, brand marks, Home surfaces, uniform Create action, MarketSummary, Home hero and Create Game icons are wired to root theme tokens.');
+console.log('[svg-theme] monochrome UI assets, navigation, brand marks, Home surfaces, uniform Create action, MarketSummary, Home hero and Create Game icons are wired to root theme tokens; header theme choices are text-only.');
 console.log(`[svg-theme] intentionally external/brand-managed resources: ${intentionallyExternal.join('; ')}.`);
 for (const warning of warnings) console.warn(`[svg-theme] warning: ${warning}`);

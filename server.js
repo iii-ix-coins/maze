@@ -1,6 +1,10 @@
 'use strict';
 
 const express = require('express');
+const {
+    InvalidSolanaAddressError,
+    SolanaTokenBalanceService
+} = require('./shared/services/SolanaTokenBalanceService');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
@@ -97,6 +101,31 @@ const API_PATHS = require('./shared/api-routes.json');
 const { createIdentityHandlers } = require('./shared/identity/identity-routes');
 const identityHandlers = createIdentityHandlers();
 
+let solanaTokenBalanceService = null;
+const tokenBalanceRateBuckets = new Map();
+const TOKEN_BALANCE_RATE_WINDOW_MS = 60_000;
+const TOKEN_BALANCE_RATE_LIMIT = 30;
+
+function allowTokenBalanceRequest(req) {
+    const key = String(req.ip || req.socket?.remoteAddress || 'unknown');
+    const now = Date.now();
+    const current = tokenBalanceRateBuckets.get(key);
+    const bucket = !current || now - current.startedAt >= TOKEN_BALANCE_RATE_WINDOW_MS
+        ? { startedAt: now, count: 0 }
+        : current;
+
+    bucket.count += 1;
+    tokenBalanceRateBuckets.set(key, bucket);
+
+    if (tokenBalanceRateBuckets.size > 5000) {
+        for (const [entryKey, entry] of tokenBalanceRateBuckets) {
+            if (now - entry.startedAt >= TOKEN_BALANCE_RATE_WINDOW_MS) tokenBalanceRateBuckets.delete(entryKey);
+        }
+    }
+
+    return bucket.count <= TOKEN_BALANCE_RATE_LIMIT;
+}
+
 if (String(process.env.TRUST_PROXY || '').toLowerCase() === 'true') {
     // Enable only when the app is behind a trusted reverse proxy.
     app.set('trust proxy', 1);
@@ -182,6 +211,62 @@ app.get(
                 process.env.MINT_ADDRESS ||
                 ''
         });
+    }
+);
+
+app.get(
+    API_PATHS.tokenBalance,
+    async (req, res) => {
+        if (!allowTokenBalanceRequest(req)) {
+            res.setHeader('Retry-After', '60');
+            return res.status(429).json({
+                ok: false,
+                error: 'Too many token balance requests. Please retry shortly.'
+            });
+        }
+
+        const ownerAddress = String(req.query.owner || '').trim();
+        const mintAddress = String(
+            process.env.MINT_ADDRESS ||
+            process.env.JUPITER_MARKET_MINT ||
+            process.env.TOKEN_MINT ||
+            ''
+        ).trim();
+
+        if (!ownerAddress) {
+            return res.status(400).json({ ok: false, error: 'Wallet owner address is required.' });
+        }
+        if (!mintAddress) {
+            return res.status(503).json({ ok: false, error: 'The platform token mint is not configured.' });
+        }
+
+        try {
+            if (!solanaTokenBalanceService) {
+                solanaTokenBalanceService = new SolanaTokenBalanceService({
+                    rpcUrl: process.env.SOLANA_RPC_URL,
+                    commitment: 'confirmed',
+                    cacheTtlMs: 10_000
+                });
+            }
+
+            const balance = await solanaTokenBalanceService.getTokenBalance(ownerAddress, mintAddress);
+            res.setHeader('Cache-Control', 'private, max-age=8');
+            return res.json({
+                ok: true,
+                ...balance,
+                symbol: String(process.env.TOKEN_SYMBOL || 'COIN').trim() || 'COIN'
+            });
+        } catch (error) {
+            if (error instanceof InvalidSolanaAddressError) {
+                return res.status(400).json({ ok: false, error: error.message });
+            }
+
+            console.error('[Web] Solana token balance lookup failed:', error?.message || error);
+            return res.status(503).json({
+                ok: false,
+                error: 'Token balance is temporarily unavailable. Please try again.'
+            });
+        }
     }
 );
 

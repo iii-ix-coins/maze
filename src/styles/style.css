@@ -1758,10 +1758,9 @@ html[data-theme="grass"] .nav {
 
 /* —— 7 · THEME SWITCHER ——————————————————————————————————————————————— */
 
-/* Theme control uses a three-option icon-only switcher. */
+/* Shared base for the compact three-option theme selector. */
 .theme-toggle {
     --tt-size: 28px;
-    --tt-icon-size: 16px;
     --tt-pad: 3px;
 
     position: relative;
@@ -1785,11 +1784,6 @@ html[data-theme="grass"] .nav {
         background-color 250ms ease;
 }
 
-/* The selected state is painted directly on the active theme option. */
-.theme-toggle__thumb {
-    display: none;
-}
-
 .theme-toggle .theme-toggle__option {
     position: relative;
     z-index: 1;
@@ -1811,21 +1805,7 @@ html[data-theme="grass"] .nav {
         filter 220ms ease;
 }
 
-.theme-toggle .theme-toggle__option .theme-toggle__icon {
-    display: block;
-    width: var(--tt-icon-size);
-    height: var(--tt-icon-size);
-    pointer-events: none;
-    user-select: none;
-    transform: rotate(0deg);
-    transition:
-        transform 320ms cubic-bezier(.2, 1.1, .4, 1.2),
-        filter 220ms ease;
-}
 
-.theme-toggle .theme-toggle__option.is-active .theme-toggle__icon {
-    transform: rotate(360deg);
-}
 
 .theme-toggle .theme-toggle__option:focus-visible {
     outline: 2px solid var(--nav-accent);

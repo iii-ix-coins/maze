@@ -88,6 +88,23 @@ if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<Inte
   console.error('[layout] SiteChromeHosts must mount only the shared SiteNavigation chrome.');
   process.exit(1);
 }
+const headerBalanceSource = fs.readFileSync(path.join(root, 'src/components/layout/HeaderCoinBalance.tsx'), 'utf8');
+const tokenBalanceService = fs.readFileSync(path.join(root, 'shared/services/SolanaTokenBalanceService.js'), 'utf8');
+const tokenBalanceServer = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+const headerApiManifest = JSON.parse(fs.readFileSync(path.join(root, 'shared/api-routes.json'), 'utf8'));
+if (
+  !chromeSource.includes('<HeaderCoinBalance />') ||
+  !headerBalanceSource.includes('maze:wallet-snapshot') ||
+  !headerBalanceSource.includes('API_PATHS.tokenBalance') ||
+  !tokenBalanceService.includes('getParsedTokenAccountsByOwner') ||
+  !tokenBalanceServer.includes('API_PATHS.tokenBalance') ||
+  !tokenBalanceServer.includes('process.env.MINT_ADDRESS') ||
+  !tokenBalanceServer.includes('process.env.SOLANA_RPC_URL') ||
+  headerApiManifest.tokenBalance !== '/api/token-balance'
+) {
+  console.error('[layout] header coin balance must use the shared wallet snapshot and server-side mint-balance API.');
+  process.exit(1);
+}
 const siteChromeCss = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const hasSharedFrameGeometry = [
   '--site-frame-width:',
@@ -120,13 +137,14 @@ if (
   !routeFrameRule.includes('position: fixed') ||
   !routeFrameRule.includes('overflow: hidden') ||
   !routeFrameStrokeRule.includes('z-index: 2') ||
-  !siteChromeCss.includes('--site-frame-edge-gap: 9px') ||
+  !siteChromeCss.includes('--site-frame-edge-gap: 7px') ||
   !mobileHeaderRule.includes('bottom: var(--site-frame-edge-gap)') ||
   !routeScrollRule.includes('height: 100%') ||
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
   !routeScrollRule.includes('scrollbar-width: none') ||
-  !routeScrollRule.includes('padding-inline: var(--site-frame-content-inline-padding)') ||
+  !routeScrollRule.includes('padding-inline-start: clamp(15px, 0.52vw, 24px)') ||
+  !routeScrollRule.includes('padding-inline-end: calc(var(--site-frame-content-inline-padding) + clamp(3px, 0.52vw, 6px))') ||
   !routeScrollRule.includes('-ms-overflow-style: none') ||
   !siteChromeCss.includes('::-webkit-scrollbar {\n    display: none;') ||
   !siteChromeCss.includes('height: 60%') ||
@@ -135,8 +153,8 @@ if (
   !siteChromeCss.includes('--site-frame-content-inline-padding:') ||
   !siteChromeCss.includes('.route-scrollbar-track') ||
   !siteChromeCss.includes('.route-scrollbar-thumb') ||
-  !siteChromeCss.includes('--site-scrollbar-content-gap: 5px') ||
-  !siteChromeCss.includes('--site-scrollbar-inset: clamp(3px, 0.55vw, 6px)') ||
+  !siteChromeCss.includes('--site-scrollbar-content-gap: clamp(9px, 0.55vw, 18px)') ||
+  !siteChromeCss.includes('--site-scrollbar-inset: clamp(9px, 0.55vw, 18px)') ||
   !routeScrollbarSource.includes('role="scrollbar"') ||
   !routeScrollbarSource.includes("case 'PageDown':") ||
   !routeScrollbarSource.includes('setPointerCapture') ||
@@ -397,18 +415,21 @@ if (
   process.exit(1);
 }
 const notificationsIndex = navigationComponent.indexOf('<NotificationsMenu');
-const themeIndex = navigationComponent.indexOf('<ThemeSwitcher />');
+const headerThemeIndex = chromeComponent.indexOf('<ThemeSwitcher />');
+const headerBalanceIndex = chromeComponent.indexOf('<HeaderCoinBalance />');
 const createIndex = navigationComponent.indexOf('href={MAZE_VIEW_URLS.create}');
 if (
   !chromeComponent.includes('id="site-brand"') ||
   chromeComponent.includes('id="site-controls"') ||
   chromeComponent.includes('GameViewSwitcher') ||
-  chromeComponent.includes('<ThemeSwitcher />') ||
-  !navigationComponent.includes('<ThemeSwitcher />') ||
-  !themeSwitcherComponent.includes('theme-toggle--vertical') ||
+  headerThemeIndex < 0 ||
+  headerBalanceIndex <= headerThemeIndex ||
+  navigationComponent.includes('<ThemeSwitcher />') ||
+  !themeSwitcherComponent.includes('theme-toggle--header') ||
+  !themeSwitcherComponent.includes('THEME_MARKS') ||
+  themeSwitcherComponent.includes('THEME_ICONS') ||
   createIndex < 0 ||
   notificationsIndex <= createIndex ||
-  themeIndex <= notificationsIndex ||
   !navigationComponent.includes('No notifications yet') ||
   navigationComponent.includes('nav-dock-label') ||
   navigationComponent.includes('nav-dock-create-icon') ||
@@ -423,7 +444,7 @@ if (
   !navigationComponent.includes("'/css/images/nav/nav-notifications.svg'") ||
   !navigationComponent.includes("'/css/images/nav/nav-profile.svg'")
 ) {
-  console.error('[layout] Brand must remain outside the dock; vertical theme selection and Notifications must be inside it, with no Holders/More entries.');
+  console.error('[layout] Brand, centered header theme, right token balance and six Dock actions must use their assigned chrome regions.');
   process.exit(1);
 }
 if (
@@ -587,9 +608,11 @@ if ((appTitleSource.match(/document\.title\s*=/g) || []).length !== 1 || !appTit
 
 const sharedSiteStyles = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 const globalStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
-const themeSlotRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical\s*\{([^}]*)\}/s)?.[1] ?? '';
-const themeOptionRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot \.theme-toggle--vertical \.theme-toggle__option\s*\{([^}]*)\}/s)?.[1] ?? '';
-const themeSlotHostRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-dock-theme-slot\s*\{([^}]*)\}/s)?.[1] ?? '';
+const headerThemeHostRule = sharedSiteStyles.match(/\.site-topbar-theme-slot\s*\{([^}]*)\}/s)?.[1] ?? '';
+const headerThemeRule = sharedSiteStyles.match(/\.site-topbar-theme-slot \.theme-toggle--header\s*\{([^}]*)\}/s)?.[1] ?? '';
+const headerThemeOptionRule = sharedSiteStyles.match(/\.site-topbar-theme-slot \.theme-toggle--header \.theme-toggle__option\s*\{([^}]*)\}/s)?.[1] ?? '';
+const headerThemeActiveRule = sharedSiteStyles.match(/\.site-topbar-theme-slot \.theme-toggle--header \.theme-toggle__option\.is-active\s*\{([^}]*)\}/s)?.[1] ?? '';
+const headerBalanceRule = sharedSiteStyles.match(/\.site-header-coin-balance\s*\{([^}]*)\}/s)?.[1] ?? '';
 const notificationHostRule = sharedSiteStyles.match(/\.nav-notifications-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
 const dockRule = sharedSiteStyles.match(/\.nav\.site-bottom-nav\s*\{([^}]*)\}/s)?.[1] ?? '';
 const dockInnerRule = sharedSiteStyles.match(/\.site-bottom-nav \.nav-inner\s*\{([^}]*)\}/s)?.[1] ?? '';
@@ -600,15 +623,19 @@ const logoRule = sharedSiteStyles.match(/#site-brand \.nav-brand-logo\s*\{([^}]*
 if (
   !sharedSiteStyles.includes('.nav.site-bottom-nav') ||
   !sharedSiteStyles.includes('.nav.site-bottom-nav::before') ||
-  !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr)) auto') ||
+  !sharedSiteStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr));') ||
   !sharedSiteStyles.includes('#site-brand') ||
-  !sharedSiteStyles.includes('.nav-dock-theme-slot .theme-toggle--vertical') ||
-  !themeSlotHostRule.includes('width: max-content;') ||
-  !themeSlotRule.includes('grid-template-columns: 12px;') ||
-  !themeSlotRule.includes('grid-template-rows: repeat(3, 12px);') ||
-  !themeOptionRule.includes('width: 12px;') ||
-  !themeOptionRule.includes('height: 12px;') ||
-  !themeOptionRule.includes('aspect-ratio: 1 / 1;') ||
+  sharedSiteStyles.includes('.nav-dock-theme-slot') ||
+  !headerThemeHostRule.includes('left: 50%;') ||
+  !headerThemeRule.includes('display: flex;') ||
+  !headerThemeOptionRule.includes('background: var(--ar-bg);') ||
+  !headerThemeOptionRule.includes('width: var(--site-header-theme-button-size);') ||
+  !sharedSiteStyles.includes('--site-header-theme-active-border: #ff0000;') ||
+  !headerThemeActiveRule.includes('border-color: var(--site-header-theme-active-border);') ||
+  !headerBalanceRule.includes('right: 7px;') ||
+  !headerBalanceRule.includes('font-variant-numeric: tabular-nums;') ||
+  !sharedSiteStyles.includes('--site-header-theme-button-size: 21px;') ||
+  !sharedSiteStyles.includes('--site-header-theme-button-size: 19px;') ||
   !dockRule.includes('height: var(--site-dock-height);') ||
   !dockInnerRule.includes('height: 100%;') ||
   !dockInnerRule.includes('padding: 3px;') ||
@@ -632,8 +659,6 @@ if (
   !sharedSiteStyles.includes('--site-header-height: 30px;') ||
   !sharedSiteStyles.includes('--site-brand-width: 51px;') ||
   !sharedSiteStyles.includes('--site-brand-height: 20px;') ||
-  !sharedSiteStyles.includes('grid-template-rows: repeat(3, 10px);') ||
-  !sharedSiteStyles.includes('width: 10px;') ||
   sharedSiteStyles.includes('.nav-dock-create-icon') ||
   !sharedSiteStyles.includes('clip-path: polygon(') ||
   !sharedSiteStyles.includes('-webkit-clip-path: polygon(') ||
@@ -642,7 +667,7 @@ if (
   !sharedSiteStyles.includes('.nav-notifications-panel') ||
   sharedSiteStyles.includes('#site-controls')
 ) {
-  console.error('[layout] site.css must own the bottom dock, vertical theme selector and Notifications panel; no top utility host may remain.');
+  console.error('[layout] site.css must own the six-item dock, centered header theme selector, right token balance and Notifications panel.');
   process.exit(1);
 }
 if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*grid/s.test(globalStyles) || /\.nav-inner\s*\{[^}]*display:\s*flex/s.test(globalStyles)) {
@@ -693,7 +718,7 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   process.exit(1);
 }
 
-console.log('[layout] React routes, notification/theme dock, Holders retirement, unified wallet teardown and migrated Maze UI verified.');
+console.log('[layout] React routes, header theme and coin balance, notification dock, Holders retirement, unified wallet teardown and migrated Maze UI verified.');
 
 // Retired transaction/verification engines and buyer feed must stay removed.
 for (const retiredPath of [

@@ -1,7 +1,6 @@
-import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { useRef, type KeyboardEvent } from 'react';
 import { useSiteTheme } from '../../hooks/useSiteTheme';
 import { applySiteTheme, SITE_THEMES, type SiteTheme } from '../../features/theme/theme';
-import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 
 const THEME_LABELS: Record<SiteTheme, string> = {
   grass: 'Grass',
@@ -9,12 +8,13 @@ const THEME_LABELS: Record<SiteTheme, string> = {
   light: 'Light',
 };
 
-const THEME_ICONS: Record<SiteTheme, string> = {
-  grass: '/css/images/theme-grass.svg',
-  dark: '/css/images/theme-dark.svg',
-  light: '/css/images/theme-light.svg',
+const THEME_MARKS: Record<SiteTheme, string> = {
+  grass: 'G',
+  dark: 'D',
+  light: 'L',
 };
 
+/** Minimal, text-only theme selector centered in the shared site header. */
 export function ThemeSwitcher() {
   const theme = useSiteTheme();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -45,14 +45,11 @@ export function ThemeSwitcher() {
   return (
     <div
       ref={rootRef}
-      className="theme-toggle theme-toggle--vertical"
+      className="theme-toggle theme-toggle--header"
       role="radiogroup"
       aria-label="Choose background theme"
-      data-theme={theme}
-      style={{ '--theme-index': SITE_THEMES.indexOf(theme) } as CSSProperties}
       onKeyDown={handleKeyDown}
     >
-      <span className="theme-toggle__thumb" aria-hidden="true" />
       {SITE_THEMES.map((item) => {
         const active = item === theme;
         return (
@@ -67,7 +64,7 @@ export function ThemeSwitcher() {
             tabIndex={active ? 0 : -1}
             onClick={() => selectTheme(item)}
           >
-            <ThemedSvgIcon className="theme-toggle__icon" src={THEME_ICONS[item]} />
+            <span aria-hidden="true">{THEME_MARKS[item]}</span>
           </button>
         );
       })}
