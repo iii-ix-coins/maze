@@ -8,11 +8,6 @@ const THEME_LABELS: Record<SiteTheme, string> = {
   light: 'Light',
 };
 
-const THEME_MARKS: Record<SiteTheme, string> = {
-  grass: 'G',
-  dark: 'D',
-  light: 'L',
-};
 
 /** Minimal, text-only theme selector centered in the shared site header. */
 export function ThemeSwitcher() {
@@ -64,7 +59,7 @@ export function ThemeSwitcher() {
             tabIndex={active ? 0 : -1}
             onClick={() => selectTheme(item)}
           >
-            <span aria-hidden="true">{THEME_MARKS[item]}</span>
+            <span aria-hidden="true"></span>
           </button>
         );
       })}

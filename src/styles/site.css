@@ -31,8 +31,8 @@ body.in-menu #site-header {
     --site-header-height: 30px;
     --site-brand-width: 51px;
     --site-brand-height: 20px;
-    --site-header-theme-button-size: 21px;
-    --site-header-theme-gap: 3px;
+    --site-header-theme-button-size: 12px;
+    --site-header-theme-gap: 9px;
     --site-header-theme-active-border: #ff0000;
     --site-header-coin-gap: 4px;
     --site-dock-item-size: calc(var(--site-dock-height) - 6px);
@@ -154,7 +154,6 @@ body:not(.in-menu)>#root>#site-topbar {
     padding: 0;
     border: 2px solid transparent;
     border-radius: 0;
-    background: var(--ar-bg);
     color: var(--ar-text);
     box-shadow: none;
     font-size: 10px;
@@ -164,10 +163,23 @@ body:not(.in-menu)>#root>#site-topbar {
     transition: border-color 150ms ease, color 150ms ease;
 }
 
+/* Light button */
+.theme-toggle__option[data-select-theme="light"] {
+    background: #ffffff;
+}
+
+/* Dark button */
+.theme-toggle__option[data-select-theme="dark"] {
+    background: #000000;
+}
+
+/* Grass button */
+.theme-toggle__option[data-select-theme="grass"] {
+    background: #006400;
+}
+
 .site-topbar-theme-slot .theme-toggle--header .theme-toggle__option.is-active {
-    border-color: var(--site-header-theme-active-border);
-    background: var(--ar-bg);
-    color: var(--ar-text);
+    border: 3px solid var(--site-header-theme-active-border);
     box-shadow: none;
 }
 
@@ -176,47 +188,118 @@ body:not(.in-menu)>#root>#site-topbar {
     outline-offset: 2px;
 }
 
-/* The balance remains visible in both identity states; without an available
-   wallet address it displays a neutral placeholder instead of a false value. */
+/* Header coin balance container */
 .site-header-coin-balance {
     position: absolute;
+
     top: 50%;
     right: 7px;
     z-index: 2;
+
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: flex-end;
+
     width: max-content;
     max-width: 30%;
-    gap: var(--site-header-coin-gap);
+
+    padding: 3px 5px;
+
+    background: red;
+
     transform: translateY(-50%);
-    color: var(--ar-text);
+
+    pointer-events: auto;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    pointer-events: auto;
 }
 
+/* Clickable coin balance button */
+.site-header-coin-button {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    width: max-content;
+    max-width: 100%;
+    min-width: 0;
+
+    gap: var(--site-header-coin-gap);
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+    box-shadow: none;
+
+    color: var(--ar-text);
+    font: inherit;
+    direction: ltr;
+
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.site-header-coin-button:hover,
+.site-header-coin-button:active {
+    background: transparent;
+    box-shadow: none;
+}
+
+.site-header-coin-button:focus-visible {
+    outline: 2px solid var(--ar-accent);
+    outline-offset: 2px;
+}
+
+.site-header-coin-button:disabled {
+    cursor: default;
+}
+
+/* Coin image */
+.site-header-coin-image {
+    display: block;
+
+    flex: 0 0 auto;
+
+    width: 17px;
+    height: 17px;
+
+    object-fit: contain;
+}
+
+/* Balance amount - preserve requested typography */
 .site-header-coin-amount {
     display: block;
+
+    flex: 0 1 auto;
+
     min-width: 0;
-    overflow: hidden;
     max-width: 100%;
+
+    overflow: hidden;
+
     color: var(--svg-icon-primary);
+
     white-space: nowrap;
-    font-size: 11px;
-    font-weight: 750;
+
+    font-size: clamp(12px, 0.52vw, 15px);
+    font-weight: 650;
     line-height: 1;
+
     text-overflow: ellipsis;
 }
 
-.site-header-coin-symbol {
-    flex: 0 0 auto;
-    color: var(--ar-soft);
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1;
-    text-transform: uppercase;
+/* Keep coin balance hidden inside gameplay */
+body.in-menu .site-header-coin-balance {
+    display: none;
 }
+
+
 
 /* Keep the gameplay chrome compact: only the established brand remains. */
 body.in-menu .site-topbar-theme-slot,
