@@ -193,13 +193,15 @@ body:not(.in-menu)>#root>#site-topbar {
     position: absolute;
 
     top: 50%;
-    right: 7px;
+    right: 0;
     z-index: 2;
 
     display: inline-flex;
+    flex-direction: column-reverse;
     align-items: center;
     justify-content: flex-end;
 
+    min-width: 85px;
     width: max-content;
     max-width: 30%;
 
@@ -212,6 +214,17 @@ body:not(.in-menu)>#root>#site-topbar {
     pointer-events: auto;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+
+    clip-path: polygon(0 0,
+            100% 0,
+            100% calc(100% - var(--site-header-cut)),
+            calc(100% - var(--site-header-cut)) 100%,
+            0 100%);
+    -webkit-clip-path: polygon(0 0,
+            100% 0,
+            100% calc(100% - var(--site-header-cut)),
+            calc(100% - var(--site-header-cut)) 100%,
+            0 100%);
 }
 
 /* Clickable coin balance button */
