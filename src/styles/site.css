@@ -209,7 +209,7 @@ body:not(.in-menu)>#root>#site-topbar {
     height: 22px;
     min-height: 22px;
 
-    background: var(--nav-accent);
+    background: var(--nav-accent), 0.45;
 
     transform: translateY(-50%);
 
