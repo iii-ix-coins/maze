@@ -662,7 +662,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     text-shadow: none;
     cursor: pointer;
     position: relative;
-    transition: opacity 180ms ease, color 180ms ease;
+    transition: opacity 60ms ease, color 60ms ease;
     clip-path: none;
     -webkit-clip-path: none;
 }
@@ -706,17 +706,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     color: currentColor;
     transform: scale(1);
     transform-origin: center;
-    transition: transform 180ms cubic-bezier(.2, .75, .25, 1);
-}
-
-.site-bottom-nav .nav-link.active .nav-dock-icon,
-.site-bottom-nav .nav-notifications-trigger.active .nav-dock-icon {
-    transform: scale(1.04);
-}
-
-.site-bottom-nav .nav-link:active .nav-dock-icon,
-.site-bottom-nav .nav-notifications-trigger:active .nav-dock-icon {
-    transform: scale(1);
+    transition: transform 60ms cubic-bezier(.2, .75, .25, 1);
 }
 
 .nav-dock-icon>svg,
@@ -734,7 +724,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     .site-bottom-nav .nav-link::after,
     .site-bottom-nav .nav-notifications-trigger::after,
     .site-bottom-nav .nav-dock-icon {
-        transition-duration: .01ms !important;
+        transition-duration: .03ms !important;
     }
 
     .site-bottom-nav .nav-link .nav-dock-icon,
@@ -902,6 +892,6 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 
     .site-bottom-nav .nav-link,
     .site-bottom-nav .nav-notifications-trigger {
-        transition-duration: .01ms !important;
+        transition-duration: .03ms !important;
     }
 }
