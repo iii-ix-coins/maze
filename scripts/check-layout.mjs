@@ -103,6 +103,25 @@ if (
   console.error('[layout] Header, navigation and content frame must persist; only the inner page surface may enter-animate.');
   process.exit(1);
 }
+const mazeMenuSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
+const mazeBootSource = fs.readFileSync(path.join(root, 'src/features/maze/engine/boot.ts'), 'utf8');
+const menuBootDecisionIndex = Math.max(
+  mazeBootSource.indexOf('if (saved) restoreGame(saved); else showMenu();'),
+  -1,
+);
+const menuEngineReadyIndex = mazeBootSource.indexOf("window.dispatchEvent(new Event('maze:engine-ready'));");
+const menuVisibilityIsBootGated =
+  mazeMenuSource.includes("document.documentElement.dataset.mazeEngineReady === 'true'") &&
+  mazeMenuSource.includes("window.addEventListener('maze:engine-ready', handleEngineReady)") &&
+  mazeMenuSource.includes('if (!engineReady) return;') &&
+  mazeMenuSource.includes("document.body.classList.toggle('in-menu', state.visible)") &&
+  /useEffect\(\(\) => \(\) => \{\s*document\.body\.classList\.remove\('in-menu'\);\s*\}, \[\]\);/.test(mazeMenuSource) &&
+  menuBootDecisionIndex >= 0 &&
+  menuEngineReadyIndex > menuBootDecisionIndex;
+if (!menuVisibilityIsBootGated) {
+  console.error('[layout] Maze menu must preserve the initial in-menu frame state until the engine completes its first menu/game decision.');
+  process.exit(1);
+}
 const mazeCreateStyles = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
 const mazeLegacyStyles = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
 const createFrameShowRule = mazeCreateStyles.match(/(?:^|\n)\s*\.cg\.show\s*\{([^}]*)\}/);

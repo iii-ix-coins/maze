@@ -48,6 +48,12 @@ export function initOnload() {
         if (inviteCode.length >= 4) lobbyHub.joinWhenReady(inviteCode);
         const saved = loadSave();
         if (saved) restoreGame(saved); else showMenu();
+
+        // Release the initial document-level menu-frame state only after the
+        // engine has chosen whether to restore gameplay or show the menu.
+        document.documentElement.dataset.mazeEngineReady = 'true';
+        window.dispatchEvent(new Event('maze:engine-ready'));
+
         requestAnimationFrame(frame);
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {

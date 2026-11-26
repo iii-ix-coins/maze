@@ -17,3 +17,7 @@ The Create/Rooms/Live menu, in-race HUD, Race Board, result cards and site-facin
 ## Game Feed integration boundary
 
 The site Home route reads the existing read-only `GET /rooms` snapshot through `src/features/home/game-feed-api.ts`. It does not create another WebSocket client or Game Engine. This currently supports live-room cards, joinable waiting-room cards and short-lived recent result summaries. It does not provide a durable replay, recording, social interactions or a persistent post feed; those require separate server-side features.
+
+## Stable game-content frame initialization
+
+The `/maze.html` document sets `body.in-menu` synchronously from the route before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. Keep the body-class cleanup in an unmount-only effect, never in the `state.visible` effect, because effect cleanup runs on every visibility change and would briefly remove the shared frame geometry.

@@ -109,11 +109,38 @@ export function MazeMenu() {
   const rootRef = useRef<HTMLElement | null>(null);
   const activeTab = state.view === 'room' ? state.homeView : state.view;
   const activeIndex = activeTab === 'create' ? 0 : activeTab === 'rooms' ? 1 : 2;
+  const [engineReady, setEngineReady] = useState(
+    () => document.documentElement.dataset.mazeEngineReady === 'true',
+  );
+
+  // The document marks the game route as in-menu before React mounts. Keep that
+  // frame state untouched until the engine has selected its initial menu/game
+  // state; otherwise the first React effect removes and re-adds the class,
+  // making the shared content frame visibly collapse and re-enter.
+  useEffect(() => {
+    const handleEngineReady = () => setEngineReady(true);
+    window.addEventListener('maze:engine-ready', handleEngineReady);
+
+    if (document.documentElement.dataset.mazeEngineReady === 'true') {
+      setEngineReady(true);
+    }
+
+    return () => {
+      window.removeEventListener('maze:engine-ready', handleEngineReady);
+    };
+  }, []);
 
   useEffect(() => {
+    if (!engineReady) return;
     document.body.classList.toggle('in-menu', state.visible);
-    return () => document.body.classList.remove('in-menu');
-  }, [state.visible]);
+  }, [engineReady, state.visible]);
+
+  // Remove the body mode only when the Maze menu is actually unmounted.
+  // Do not put this cleanup in the visibility effect: that effect re-runs
+  // whenever Create/Rooms/Live visibility changes.
+  useEffect(() => () => {
+    document.body.classList.remove('in-menu');
+  }, []);
 
   const selectView = useCallback((view: MazeMenuView) => createGame.setView(view), []);
   const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
