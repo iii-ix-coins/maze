@@ -25,3 +25,14 @@ The `/maze.html` document sets `body.in-menu` synchronously from the route befor
 ## Persistent content frame
 
 `MazeFrame.tsx` is eager and owns `#mazeApp` (frame, scrollbar, theme and body-mode classes). It mounts in the first React commit together with the header and dock. `MazePage.tsx` is lazy and renders only the content inside that frame and boots the engine. The initial Create / Rooms / Live tab is read from `?view=` by `maze-ui-store.ts` before the first render. The content stays hidden (`visibility`, no animation) until `data-maze-engine-ready` is set.
+
+## Menu tab motion ownership
+
+The Create / Rooms / Live panel transition is coordinated by the React `MazeMenu` presentation layer. `CreateGameComponent` remains a DOM-free state adapter and publishes the selected view through its transition callback; `MazeMenu` applies a named View Transition when supported, or a short CSS exit/enter fallback otherwise. Only the active `.cg-view` receives the transition name. The `#mazeApp` frame, tabs rail, scrollbar, `CreateWizard` mount, preview Canvas, LobbyHub, room store and WebSocket lifecycle remain outside the animated surface.
+
+
+## Shared motion system
+
+Site route transitions are scoped to the inner `.feature-page-shell`; the persistent route frame, custom scrollbar, header and navigation dock remain mounted and do not animate. Native View Transitions are used only when the target lazy page chunk has already resolved. First visits to an unloaded route use a brief CSS exit/entry fallback so Suspense does not produce an empty transition snapshot.
+
+Create / Rooms / Live panel transitions are owned by the React `MazeMenu` presentation layer. `CreateGameComponent` remains a DOM-free state adapter and the panel switch does not unmount the persistent wizard preview or canvas. Reduced-motion preferences disable these transitions.

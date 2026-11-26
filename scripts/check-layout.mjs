@@ -98,9 +98,13 @@ if (
   !chromeSource.includes('memo(function SiteChromeHosts') ||
   /body\.page-loaded[^{}]*#site-header|body\.page-loaded[^{}]*#site-topbar/.test(motionStyles) ||
   /maze-header-entered|maze-site-brand-entered|maze-brand-entered/.test(chromeSource + motionStyles) ||
-  !/body\.page-loaded \.route-page\s*>\s*\.feature-page-shell\s*\{[^}]*animation:\s*maze-unified-enter/s.test(motionStyles)
+  !siteCssEntry.includes('view-transition-name: site-route-content;') ||
+  !motionStyles.includes('::view-transition-old(site-route-content)') ||
+  !motionStyles.includes('::view-transition-new(site-route-content)') ||
+  !motionStyles.includes('data-ui-view-transition=\"scoped\"') ||
+  !motionStyles.includes('data-site-route-exiting=\"true\"')
 ) {
-  console.error('[layout] Header, navigation and content frame must persist; only the inner page surface may enter-animate.');
+  console.error('[layout] Header, dock and outer content frame must persist; route motion must be scoped to the inner page surface.');
   process.exit(1);
 }
 const mazeMenuSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
@@ -181,7 +185,26 @@ if (!routeFrameIsPersistent) {
   process.exit(1);
 }
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
+const routeLoadersSource = fs.readFileSync(path.join(root, 'src/app/route-loaders.ts'), 'utf8');
+const scopedTransitionSource = fs.readFileSync(path.join(root, 'src/platform/scoped-view-transition.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+if (
+  !navigationSource.includes('startScopedViewTransition') ||
+  !navigationSource.includes('ROUTE_EXIT_DURATION_MS = 130') ||
+  !navigationSource.includes('cancelPendingRouteSwap') ||
+  !navigationSource.includes('isRoutePageLoaded(destinationPage)') ||
+  !navigationSource.includes('supportsScopedViewTransitions()') ||
+  !routeLoadersSource.includes('loadedRoutePages.add(\'home\')') ||
+  !routerSource.includes('onAnimationEnd=') ||
+  !routerSource.includes('dataset.siteRouteFallback') ||
+  !foundationStyles.includes('html[data-site-route-fallback=\"true\"]') ||
+  !scopedTransitionSource.includes('prefersReducedMotion') ||
+  !scopedTransitionSource.includes('uiViewTransitionSupport') ||
+  !scopedTransitionSource.includes("VIEW_TRANSITION_DATASET_KEY = 'uiViewTransition'")
+) {
+  console.error('[layout] route motion must use the shared scoped transition helper and a reduced-motion-aware CSS fallback.');
+  process.exit(1);
+}
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
 if (
   !htmlFoundationRules.some((rule) => rule.includes('height: 100%') && rule.includes('overflow: hidden')) ||
@@ -233,6 +256,22 @@ const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/
 const lobbyCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8');
 const legacyMazeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
 const mazeMenuCssSources = [mazeFrameCss, createGameCss, lobbyCss, legacyMazeCss];
+const createGameControllerSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/create-game/create-game.ts'), 'utf8');
+const mazeMenuPresentationSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
+if (
+  !createGameControllerSource.includes('onViewTransition') ||
+  /(document|window|HTMLElement|Element|querySelector|addEventListener)/.test(createGameControllerSource) ||
+  !mazeMenuPresentationSource.includes('startScopedViewTransition(update)') ||
+  !mazeMenuPresentationSource.includes('dataset.mazeTabExiting') ||
+  !mazeMenuPresentationSource.includes('dataset.mazeTabEntering') ||
+  !legacyMazeCss.includes('view-transition-name: maze-menu-content;') ||
+  !legacyMazeCss.includes('maze-menu-view-exit 120ms') ||
+  !legacyMazeCss.includes('maze-menu-view-enter 190ms') ||
+  !legacyMazeCss.includes('transform 260ms cubic-bezier(.22, .78, .24, 1)')
+) {
+  console.error('[layout] Create/Rooms/Live tab motion must be scoped to the active panel and preserve the mounted Maze UI.');
+  process.exit(1);
+}
 const hasNestedMenuScroller = mazeMenuCssSources.some((css) => {
   const blocks = css.match(/[^{}]+\{[^{}]*\}/g) ?? [];
   return blocks.some((block) => {
@@ -784,6 +823,14 @@ if (
   !dockItemRule.includes('height: 100%;') ||
   !dockItemRule.includes('width: var(--site-dock-item-size);') ||
   !dockItemRule.includes('aspect-ratio: 1 / 1;') ||
+  !dockItemRule.includes('transition: opacity 180ms ease, color 180ms ease;') ||
+  !sharedSiteStyles.includes('.site-bottom-nav .nav-link.active::after') ||
+  !sharedSiteStyles.includes('transform: translateX(-50%) scaleX(1);') ||
+  !sharedSiteStyles.includes('.site-bottom-nav .nav-link:active') ||
+  !sharedSiteStyles.includes('transform: none;') ||
+  !sharedSiteStyles.includes('.site-bottom-nav .nav-link.active .nav-dock-icon') ||
+  !sharedSiteStyles.includes('transform: scale(.94);') ||
+  !sharedSiteStyles.includes('prefers-reduced-motion: reduce') ||
   !dockItemRule.includes('opacity: 0.33;') ||
   !dockItemRule.includes('clip-path: none;') ||
   !dockItemRule.includes('-webkit-clip-path: none;') ||

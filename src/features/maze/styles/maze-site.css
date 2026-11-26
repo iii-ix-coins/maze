@@ -2383,7 +2383,7 @@
         background: var(--glass);
         -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
-        transition: opacity .35s ease;
+        transition: opacity 180ms ease;
     }
 
     .maze-app .cg-tabs-glider {
@@ -2396,7 +2396,7 @@
         background: var(--surface-solid, #000000);
         box-shadow: 0 8px 22px rgba(139, 224, 164, .22), 0 0 0 1px rgba(255, 255, 255, .25) inset;
         transform: translateX(calc(var(--tab, 0) * 100%));
-        transition: transform .6s cubic-bezier(.3, 1.25, .4, 1), opacity .3s ease;
+        transition: transform 260ms cubic-bezier(.22, .78, .24, 1), opacity 180ms ease;
     }
 
     .maze-app .cg[data-view="room"] .cg-tabs {
@@ -2419,7 +2419,7 @@
         border-radius: 999px;
         color: var(--fog);
         white-space: nowrap;
-        transition: color .36s ease;
+        transition: color 180ms ease;
         font-weight: 600;
     }
 
@@ -2439,7 +2439,7 @@
         color: var(--lantern);
         font-size: .68rem;
         font-weight: 700;
-        transition: background .3s ease, color .3s ease;
+        transition: background 180ms ease, color 180ms ease;
     }
 
     .maze-app .cg-tab.is-active .cg-tab-count {
@@ -4201,5 +4201,32 @@
 
     }
 
+}
+
+/* Menu view motion is scoped to the active panel. The #mazeApp frame,
+   tabs rail, scrollbar, CreateWizard canvas and shared stores remain mounted. */
+.maze-app .cg-views > .cg-view:not([hidden]) {
+    view-transition-name: maze-menu-content;
+}
+
+html[data-maze-tab-exiting="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
+    animation: maze-menu-view-exit 120ms cubic-bezier(.4, 0, 1, 1) both;
+    pointer-events: none;
+}
+
+html[data-maze-tab-entering="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
+    animation: maze-menu-view-enter 190ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .maze-app .cg-tabs,
+    .maze-app .cg-tabs-glider,
+    .maze-app .cg-tab,
+    .maze-app .cg-tab-count,
+    .maze-app .cg-views > .cg-view:not([hidden]) {
+        transition-duration: .01ms !important;
+        animation: none !important;
+        translate: none !important;
+    }
 }
 

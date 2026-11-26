@@ -5,6 +5,8 @@ import {
     resolveSiteRoute,
     SOFT_NAVIGATION_PATHS,
 } from './routes';
+import { prefersReducedMotion, startScopedViewTransition, supportsScopedViewTransitions } from '../platform/scoped-view-transition';
+import { isRoutePageLoaded } from './route-loaders';
 
 export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
@@ -41,10 +43,54 @@ export function playPageEnter(): Promise<void> {
     return Promise.resolve();
 }
 
-function swapTo(url: URL, push: boolean): void {
+const ROUTE_EXIT_DURATION_MS = 130;
+let pendingRouteSwap: number | null = null;
+
+function cancelPendingRouteSwap(): void {
+    if (pendingRouteSwap !== null) {
+        window.clearTimeout(pendingRouteSwap);
+        pendingRouteSwap = null;
+    }
+    delete document.documentElement.dataset.siteRouteExiting;
+    delete document.documentElement.dataset.siteRouteFallback;
+}
+
+function applyRouteSwap(url: URL, push: boolean): void {
     if (push) window.history.pushState(null, '', url.href);
     resetRouteScroll();
     emitPath();
+}
+
+function swapTo(url: URL, push: boolean): void {
+    cancelPendingRouteSwap();
+
+    const destinationPage = resolveSiteRoute(url.pathname)?.page ?? '';
+    const destinationIsReady = isRoutePageLoaded(destinationPage);
+    const canCaptureDestination = supportsScopedViewTransitions() && destinationIsReady;
+
+    // A native transition is used only when the destination lazy chunk has
+    // already resolved. On a first visit, React Suspense would otherwise
+    // capture an empty frame; use the CSS fallback for that one navigation.
+    if (canCaptureDestination && startScopedViewTransition(() => applyRouteSwap(url, push))) return;
+
+    // The CSS fallback gives the current surface a short exit before React
+    // replaces it. For browsers with View Transitions, mark the destination
+    // so its entrance still runs after a first-visit lazy chunk resolves.
+    const hasRouteSurface = Boolean(document.querySelector('.route-page > .feature-page-shell'));
+    if (!prefersReducedMotion() && hasRouteSurface) {
+        if (supportsScopedViewTransitions()) {
+            document.documentElement.dataset.siteRouteFallback = 'true';
+        }
+        document.documentElement.dataset.siteRouteExiting = 'true';
+        pendingRouteSwap = window.setTimeout(() => {
+            pendingRouteSwap = null;
+            delete document.documentElement.dataset.siteRouteExiting;
+            applyRouteSwap(url, push);
+        }, ROUTE_EXIT_DURATION_MS);
+        return;
+    }
+
+    applyRouteSwap(url, push);
 }
 
 export function navigateTo(href: string) {
@@ -76,6 +122,8 @@ function onClick(event: MouseEvent) {
         normalizePath(url.pathname) === normalizePath(window.location.pathname) &&
         url.search === window.location.search;
     if (samePage) {
+        // A click back to the still-current page cancels a pending CSS fallback.
+        if (pendingRouteSwap !== null) cancelPendingRouteSwap();
         if (!url.hash) event.preventDefault();
         return;
     }
@@ -86,7 +134,9 @@ function onClick(event: MouseEvent) {
 }
 
 function onPopState() {
-    if (normalizePath(window.location.pathname) === currentPath) return;
+    const nextPath = normalizePath(window.location.pathname);
+    if (pendingRouteSwap !== null) cancelPendingRouteSwap();
+    if (nextPath === currentPath) return;
     swapTo(new URL(window.location.href), false);
 }
 

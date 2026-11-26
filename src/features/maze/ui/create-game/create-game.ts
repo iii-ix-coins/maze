@@ -31,6 +31,7 @@ export class CreateGameComponent {
   onLaunch: (config: any) => any = () => undefined;
   onViewChange: (view: MazeMenuView, previous: MazeMenuView) => void = () => undefined;
   onVisibility: (visible: boolean) => void = () => undefined;
+  onViewTransition: (next: MazeMenuView, previous: MazeMenuView, update: () => void, instant: boolean) => void = (_next, _previous, update) => update();
 
   constructor() {
     const saved = loadState();
@@ -105,11 +106,20 @@ export class CreateGameComponent {
     this.onVisibility(false);
   }
 
-  setView(name: MazeMenuView, _options: { instant?: boolean } = {}) {
+  setView(name: MazeMenuView, options: { instant?: boolean } = {}) {
     const current = this.state.view;
-    if (current === name) return;
-    mazeUiStore.patch({ view: name, homeView: name === 'room' ? this.state.homeView : name });
-    this.onViewChange(name, current);
+    if (current === name) {
+      // Let the React owner cancel any pending fallback transition if the user
+      // returns to the currently visible tab before the exit completes.
+      this.onViewTransition(name, current, () => undefined, true);
+      return;
+    }
+
+    const update = () => {
+      mazeUiStore.patch({ view: name, homeView: name === 'room' ? this.state.homeView : name });
+      this.onViewChange(name, current);
+    };
+    this.onViewTransition(name, current, update, options.instant === true);
   }
 
   setNetworkStatus(state: string, _message?: string) {

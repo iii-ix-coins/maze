@@ -9,6 +9,7 @@ import {
 import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { DIFFICULTIES } from '@maze/shared';
 import { createGame } from '../create-game/create-game';
+import { prefersReducedMotion, startScopedViewTransition } from '../../../../platform/scoped-view-transition';
 import { MazeStage } from '../create-game/maze-stage';
 import { iconUrl, STEP_ICONS } from '../create-game/icons';
 import { LiveThumb } from '../lobby/live-thumb';
@@ -107,6 +108,7 @@ function RepeatButton({
 export function MazeMenu() {
   const state = useMazeUi();
   const rootRef = useRef<HTMLElement | null>(null);
+  const cancelTabTransitionRef = useRef<(() => void) | null>(null);
   const activeTab = state.view === 'room' ? state.homeView : state.view;
   const activeIndex = activeTab === 'create' ? 0 : activeTab === 'rooms' ? 1 : 2;
   const [engineReady, setEngineReady] = useState(
@@ -141,6 +143,71 @@ export function MazeMenu() {
   useEffect(() => () => {
     document.body.classList.remove('in-menu');
   }, []);
+
+  // Tab transitions belong to the React presentation layer, not the
+  // DOM-free CreateGame state adapter or LobbyHub protocol coordinator.
+  useEffect(() => {
+    let exitTimer: number | null = null;
+    let entryTimer: number | null = null;
+    const root = document.documentElement;
+
+    const clearPending = () => {
+      if (exitTimer !== null) window.clearTimeout(exitTimer);
+      if (entryTimer !== null) window.clearTimeout(entryTimer);
+      exitTimer = null;
+      entryTimer = null;
+      delete root.dataset.mazeTabExiting;
+      delete root.dataset.mazeTabEntering;
+    };
+
+    const transitionView = (
+      next: MazeMenuView,
+      previous: MazeMenuView,
+      update: () => void,
+      instant: boolean,
+    ) => {
+      clearPending();
+      if (next === previous) return;
+      if (instant || !createGame.visible) {
+        update();
+        return;
+      }
+      if (startScopedViewTransition(update)) return;
+      if (prefersReducedMotion()) {
+        update();
+        return;
+      }
+
+      // CSS fallback: complete the short exit before switching the active
+      // panel, then animate only the newly active panel into place.
+      root.dataset.mazeTabExiting = 'true';
+      exitTimer = window.setTimeout(() => {
+        exitTimer = null;
+        delete root.dataset.mazeTabExiting;
+        root.dataset.mazeTabEntering = 'true';
+        update();
+        entryTimer = window.setTimeout(() => {
+          entryTimer = null;
+          delete root.dataset.mazeTabEntering;
+        }, 210);
+      }, 120);
+    };
+
+    cancelTabTransitionRef.current = clearPending;
+    createGame.onViewTransition = transitionView;
+    return () => {
+      clearPending();
+      cancelTabTransitionRef.current = null;
+      if (createGame.onViewTransition === transitionView) {
+        createGame.onViewTransition = (_next, _previous, update) => update();
+      }
+    };
+  }, []);
+
+  // A room launch or other hide action cancels any in-flight CSS fallback.
+  useEffect(() => {
+    if (!state.visible) cancelTabTransitionRef.current?.();
+  }, [state.visible]);
 
   const selectView = useCallback((view: MazeMenuView) => createGame.setView(view), []);
   const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {

@@ -4,32 +4,13 @@ import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { RouteScrollbar } from '../components/layout/RouteScrollbar';
 
 import { usePathname } from './navigation';
+import { loadExplorePage, loadHomePage, loadMazeHubPage, loadProfilePage } from './route-loaders';
 import { resolveSiteRoute } from './routes';
 
-const HomePage = lazy(() =>
-  import('../features/home/HomePage').then((module) => ({
-    default: module.HomePage
-  }))
-);
-
-const ExplorePage = lazy(() =>
-  import('../features/explore/ExplorePage').then((module) => ({
-    default: module.ExplorePage
-  }))
-);
-
-const MazeHubPage = lazy(() =>
-  import('../features/maze/MazeHubPage').then((module) => ({
-    default: module.MazeHubPage
-  }))
-);
-
-
-const ProfilePage = lazy(() =>
-  import('../features/profile/ProfilePage').then((module) => ({
-    default: module.ProfilePage
-  }))
-);
+const HomePage = lazy(loadHomePage);
+const ExplorePage = lazy(loadExplorePage);
+const MazeHubPage = lazy(loadMazeHubPage);
+const ProfilePage = lazy(loadProfilePage);
 
 // Maze itself is mounted by App.tsx into the dedicated #maze-root portal.
 function MazeRouteShell() {
@@ -64,6 +45,13 @@ export function AppRouter() {
     <div
       className={`route-page${isHomePage ? ' route-page--home' : ''}${isMazeHubPage ? ' route-page--maze-hub' : ''}`}
       data-route-page={pathname}
+      onAnimationEnd={(event) => {
+        // Clear the first-visit CSS fallback only when the new page surface
+        // finishes its entrance; nested component animations must not clear it.
+        if (event.target === event.currentTarget.firstElementChild) {
+          delete document.documentElement.dataset.siteRouteFallback;
+        }
+      }}
     >
       {/* Keep this frame and its border mounted; only the keyed page content changes. */}
       <Suspense fallback={null}>

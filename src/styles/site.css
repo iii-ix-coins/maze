@@ -457,6 +457,7 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 body:not(.in-menu) .route-page>.feature-page-shell {
     position: relative;
     z-index: 1;
+    view-transition-name: site-route-content;
     display: grid;
     width: 100%;
     height: 100%;
@@ -660,9 +661,33 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     white-space: nowrap;
     text-shadow: none;
     cursor: pointer;
-    transition: opacity 160ms ease, color 160ms ease;
+    position: relative;
+    transition: opacity 180ms ease, color 180ms ease;
     clip-path: none;
     -webkit-clip-path: none;
+}
+
+.site-bottom-nav .nav-link::after,
+.site-bottom-nav .nav-notifications-trigger::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 1px;
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--nav-accent);
+    opacity: 0;
+    transform: translateX(-50%) scaleX(.55);
+    transform-origin: center;
+    transition: opacity 180ms ease, transform 180ms cubic-bezier(.2, .75, .25, 1);
+    pointer-events: none;
+}
+
+.site-bottom-nav .nav-link:active,
+.site-bottom-nav .nav-notifications-trigger:active {
+    /* The dock cell stays fixed; only its inner icon gives press feedback. */
+    transform: none;
 }
 
 .site-bottom-nav .nav-link:focus-visible,
@@ -684,6 +709,17 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     display: none;
 }
 
+.site-bottom-nav .nav-link.active::after,
+.site-bottom-nav .nav-notifications-trigger.active::after {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+}
+
+.site-bottom-nav .nav-link:not(.active):hover,
+.site-bottom-nav .nav-notifications-trigger:not(.active):hover {
+    opacity: .58;
+}
+
 .nav-dock-icon {
     display: grid;
     place-items: center;
@@ -691,6 +727,19 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     height: 30px;
     flex: 0 0 30px;
     color: currentColor;
+    transform: scale(1);
+    transform-origin: center;
+    transition: transform 180ms cubic-bezier(.2, .75, .25, 1);
+}
+
+.site-bottom-nav .nav-link.active .nav-dock-icon,
+.site-bottom-nav .nav-notifications-trigger.active .nav-dock-icon {
+    transform: scale(1.035);
+}
+
+.site-bottom-nav .nav-link:active .nav-dock-icon,
+.site-bottom-nav .nav-notifications-trigger:active .nav-dock-icon {
+    transform: scale(.94);
 }
 
 .nav-dock-icon>svg,
@@ -699,6 +748,21 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     width: 30px;
     height: 30px;
     object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-bottom-nav .nav-link,
+    .site-bottom-nav .nav-notifications-trigger,
+    .site-bottom-nav .nav-link::after,
+    .site-bottom-nav .nav-notifications-trigger::after,
+    .site-bottom-nav .nav-dock-icon {
+        transition-duration: .01ms !important;
+    }
+
+    .site-bottom-nav .nav-link .nav-dock-icon,
+    .site-bottom-nav .nav-notifications-trigger .nav-dock-icon {
+        transform: none !important;
+    }
 }
 
 .nav-notifications-menu {
