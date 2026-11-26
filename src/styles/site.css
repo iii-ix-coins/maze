@@ -208,7 +208,7 @@ body.in-menu>#root>#site-topbar {
     z-index: 2;
 
     display: inline-flex;
-    padding: 0px 6px 0px 12px ;
+    padding: 0px 6px 0px 12px;
     align-items: center;
     align-content: center;
     justify-content: center;
@@ -449,7 +449,7 @@ body.in-menu #mazeApp.maze-app.in-menu {
    revealed instantly (no animation) in its final state. The frame, its border and
    its scrollbar rail stay fully visible and untouched the whole time. If the
    engine fails to boot, the content is released so the page is never left blank. */
-html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app > #createGame {
+html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app>#createGame {
     visibility: hidden;
 }
 
@@ -667,23 +667,6 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     -webkit-clip-path: none;
 }
 
-.site-bottom-nav .nav-link::after,
-.site-bottom-nav .nav-notifications-trigger::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 1px;
-    width: 12px;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--nav-accent);
-    opacity: 0;
-    transform: translateX(-50%) scaleX(.55);
-    transform-origin: center;
-    transition: opacity 180ms ease, transform 180ms cubic-bezier(.2, .75, .25, 1);
-    pointer-events: none;
-}
-
 .site-bottom-nav .nav-link:active,
 .site-bottom-nav .nav-notifications-trigger:active {
     /* The dock cell stays fixed; only its inner icon gives press feedback. */
@@ -709,12 +692,6 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
     display: none;
 }
 
-.site-bottom-nav .nav-link.active::after,
-.site-bottom-nav .nav-notifications-trigger.active::after {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(1);
-}
-
 .site-bottom-nav .nav-link:not(.active):hover,
 .site-bottom-nav .nav-notifications-trigger:not(.active):hover {
     opacity: .58;
@@ -734,12 +711,12 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 
 .site-bottom-nav .nav-link.active .nav-dock-icon,
 .site-bottom-nav .nav-notifications-trigger.active .nav-dock-icon {
-    transform: scale(1.035);
+    transform: scale(1.04);
 }
 
 .site-bottom-nav .nav-link:active .nav-dock-icon,
 .site-bottom-nav .nav-notifications-trigger:active .nav-dock-icon {
-    transform: scale(.94);
+    transform: scale(1);
 }
 
 .nav-dock-icon>svg,
@@ -751,6 +728,7 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .site-bottom-nav .nav-link,
     .site-bottom-nav .nav-notifications-trigger,
     .site-bottom-nav .nav-link::after,
@@ -902,8 +880,8 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 
     .nav-dock-icon>svg,
     .nav-dock-image {
-        width: 24px;
-        height: 24px;
+        width: 27px;
+        height: 27px;
     }
 
     .site-bottom-nav .nav-dock-profile .user-avatar {
