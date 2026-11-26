@@ -524,25 +524,11 @@
         }
     }
 
-    /* Persistent chrome animates only on its first appearance.
-       SiteChromeHosts marks the navigation and brand region after entrance. */
+    /* Header and dock are persistent application chrome: they never animate on route changes. */
 
-    body.page-loaded:not(.maze-header-entered) #site-header {
-        animation: maze-unified-enter 800ms var(--maze-enter-easing) 0ms backwards;
-    }
+    /* The content frame stays mounted; only its keyed page surface enters. */
 
-    body.page-loaded:not(.maze-site-brand-entered) #site-topbar {
-        animation: maze-unified-enter 800ms var(--maze-enter-easing) 60ms backwards;
-    }
-
-
-    body.page-loaded:not(.maze-brand-entered) #site-brand-header {
-        animation: maze-unified-enter 800ms var(--maze-enter-easing) 90ms backwards;
-    }
-
-    /* Route content: a fresh keyed .route-page enters on every soft navigation. */
-
-    body.page-loaded .route-page {
+    body.page-loaded .route-page > .feature-page-shell {
         width: 100%;
         min-width: 0;
         animation: maze-unified-enter var(--maze-enter-duration) var(--maze-enter-easing) 180ms backwards;
@@ -550,10 +536,7 @@
 
     @media (prefers-reduced-motion: reduce) {
 
-        body.page-loaded #site-header,
-        body.page-loaded #site-topbar,
-        body.page-loaded #site-brand-header,
-        body.page-loaded .route-page {
+        body.page-loaded .route-page > .feature-page-shell {
             animation: none !important;
             translate: none !important;
             filter: none !important;

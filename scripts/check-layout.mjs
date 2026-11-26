@@ -84,8 +84,23 @@ for (const file of interactionFreeSources) {
 }
 const chromeSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
 const routeScrollbarSource = fs.readFileSync(path.join(root, 'src/components/layout/RouteScrollbar.tsx'), 'utf8');
+const appSource = fs.readFileSync(path.join(root, 'src/app/App.tsx'), 'utf8');
+const routerSource = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
+const motionStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 if (!chromeSource.includes('<SiteNavigation />') || chromeSource.includes('<InteractionBar')) {
   console.error('[layout] SiteChromeHosts must mount only the shared SiteNavigation chrome.');
+  process.exit(1);
+}
+if (
+  !appSource.includes('<SiteChromeHosts />') ||
+  appSource.indexOf('<SiteChromeHosts />') > appSource.indexOf('<AppRouter />') ||
+  routerSource.includes('<SiteChromeHosts') ||
+  !chromeSource.includes('memo(function SiteChromeHosts') ||
+  /body\.page-loaded[^{}]*#site-header|body\.page-loaded[^{}]*#site-topbar/.test(motionStyles) ||
+  /maze-header-entered|maze-site-brand-entered|maze-brand-entered/.test(chromeSource + motionStyles) ||
+  !/body\.page-loaded \.route-page\s*>\s*\.feature-page-shell\s*\{[^}]*animation:\s*maze-unified-enter/s.test(motionStyles)
+) {
+  console.error('[layout] Header, navigation and content frame must persist; only the inner page surface may enter-animate.');
   process.exit(1);
 }
 const headerBalanceSource = fs.readFileSync(path.join(root, 'src/components/layout/HeaderCoinBalance.tsx'), 'utf8');
@@ -127,6 +142,12 @@ const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\
 const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
+const routeFrameOpening = routerSource.match(/<div\s+className=\{`route-page[^>]*>/s)?.[0] ?? '';
+const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<RouteScrollbar \/>/.test(routerSource);
+if (!routeFrameIsPersistent) {
+  console.error('[layout] the outer content frame must remain unkeyed while only the inner route component is keyed.');
+  process.exit(1);
+}
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
@@ -409,7 +430,6 @@ if (/document\.createElement|createElementNS|appendChild\(|initMazeBackground/.t
   console.error('[layout] site background must be React-owned and must not use a DOM bootstrap.');
   process.exit(1);
 }
-const appSource = fs.readFileSync(path.join(root, 'src/app/App.tsx'), 'utf8');
 if (!/lazy\(\(\) => import\('..\/features\/maze\/MazePage'/.test(appSource)) {
   console.error('[layout] MazePage must be loaded as a route-level lazy chunk.');
   process.exit(1);

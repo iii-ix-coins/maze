@@ -1,35 +1,15 @@
-import { useEffect } from 'react';
+import { memo } from 'react';
 import { getSiteRoutePath } from '../../app/routes';
 import { SiteNavigation } from '../navigation/SiteNavigation';
 import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 import { ThemeSwitcher } from '../navigation/ThemeSwitcher';
 import { HeaderCoinBalance } from './HeaderCoinBalance';
 
-/** Persistent chrome: a shared topbar frame and the bottom navigation dock. */
-export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
-  useEffect(() => {
-    const markChromeEntered = (event: Event) => {
-      const animationEvent = event as AnimationEvent;
-      if (animationEvent.animationName !== 'maze-unified-enter') return;
-
-      const target = animationEvent.target;
-      if (!(target instanceof HTMLElement)) return;
-
-      const enteredClass = target.id === 'site-header'
-        ? 'maze-header-entered'
-        : target.id === 'site-topbar'
-          ? 'maze-site-brand-entered'
-          : target.id === 'site-brand-header'
-            ? 'maze-brand-entered'
-            : undefined;
-
-      if (enteredClass) document.body.classList.add(enteredClass);
-    };
-
-    document.addEventListener('animationend', markChromeEntered);
-    return () => document.removeEventListener('animationend', markChromeEntered);
-  }, []);
-
+/**
+ * Persistent site chrome is mounted above AppRouter and memoized.
+ * Route changes replace only the content frame; the header and dock stay mounted.
+ */
+export const SiteChromeHosts = memo(function SiteChromeHosts() {
   return (
     <>
       <header id="site-topbar" className="site-topbar" aria-label="Maze site header">
@@ -44,10 +24,9 @@ export function SiteChromeHosts({ mazePage = false }: { mazePage?: boolean }) {
         <HeaderCoinBalance />
       </header>
 
-
-      <div id="site-header" data-maze-page={mazePage ? 'true' : undefined}>
+      <div id="site-header">
         <SiteNavigation />
       </div>
     </>
   );
-}
+});

@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
-import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
 import { RouteScrollbar } from '../components/layout/RouteScrollbar';
 
 import { usePathname } from './navigation';
@@ -62,26 +61,16 @@ export function AppRouter() {
   const isMazeHubPage = route.id === 'maze-hub';
 
   return (
-    <>
-      {/* Persistent site navigation */}
-      <SiteChromeHosts
-        mazePage={route.id === 'maze'}
-      />
-
+    <div
+      className={`route-page${isHomePage ? ' route-page--home' : ''}${isMazeHubPage ? ' route-page--maze-hub' : ''}`}
+      data-route-page={pathname}
+    >
+      {/* Keep this frame and its border mounted; only the keyed page content changes. */}
       <Suspense fallback={null}>
-        <>
-          {/* Active route content */}
-          <div
-            className={`route-page${isHomePage ? ' route-page--home' : ''}${isMazeHubPage ? ' route-page--maze-hub' : ''}`}
-            key={pathname}
-            data-route-page={pathname}
-          >
-            <Page />
-            <RouteScrollbar />
-          </div>
-
-        </>
+        <Page key={pathname} />
       </Suspense>
-    </>
+      {/* The scrollbar stays mounted and rebinds to the new direct child scroller. */}
+      <RouteScrollbar />
+    </div>
   );
 }
