@@ -44,13 +44,7 @@
     --glass: rgba(228, 246, 234, .055);
     --ease: cubic-bezier(.2, .8, .2, 1);
 
-    /* the shared container: tab bar, title, maze, controls (and the lobby's .lb) all use it */
-    --cg-max: 1180px;
-    --cg-gutter: clamp(16px, 4vw, 44px);
-    --cg-top-pad: max(8px, env(safe-area-inset-top));
-    --cg-pad-t: 12px;
-    --cg-pad-b: max(12px, env(safe-area-inset-bottom));
-    --cg-tabs-h: 42px;                           /* the tab bar's height (lobby.css: 40px) plus a little slack */
+    /* Outer width, gutters, vertical padding and tabs are owned by maze-unify.css. */
 
     /* rhythm */
     --cg-row: clamp(10px, 1.8vh, 16px);        /* vertical space between blocks */        /* vertical space between blocks */
@@ -63,25 +57,23 @@
     --sub-h: 1.3rem;                             /* the caption line under the title (landscape) */
 
     /* what the preview and the dial are allowed to take */
-    --maze-m: clamp(140px, 30vh, 440px);       /* stacked layout: side of the visible maze */       /* stacked layout: side of the visible maze */
+    --maze-m: clamp(140px, 30vh, 440px); /* stacked layout: visible maze side */
     --dial: clamp(130px, 22vh, 240px);
     --glow-x: 50%;
     --glow-y: 36%;
     --charge: 0;
 
-    position: fixed;
-    inset: 0;
-    z-index: 100;
+    position: relative;
+    inset: auto;
+    z-index: auto;
     display: none;
     flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: visible;
     box-sizing: border-box;
     color: var(--haze);
     font-family: 'Montserrat', sans-serif;
     text-align: left;
-    background:
-        var(--surface-solid, #000000);
+    background: transparent;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -159,9 +151,9 @@
     min-height: 0;
     box-sizing: border-box;
     width: 100%;
-    max-width: var(--cg-max);
-    margin-inline: auto;
-    padding: var(--cg-pad-t) var(--cg-gutter) var(--cg-pad-b);
+    max-width: none;
+    margin: 0;
+    padding: 0;
 
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -243,13 +235,13 @@
     min-width: 0;
 }
 
-/* Back / Continue stay reachable while the page scrolls. */
+/* Back / Continue remain reachable inside the shared Site Content Frame scroll area. */
 .cg-nav {
     position: sticky;
     bottom: 0;
     z-index: 3;
-    padding: 10px 0 max(2px, env(safe-area-inset-bottom));
-    background: var(--surface-solid, #000000);
+    padding: 10px 0 2px;
+    background: transparent;
 }
 
 /* ── Layout, landscape (desktop, laptop, wide tablet) ──────────────────────
@@ -263,30 +255,21 @@
     .cg {
         --node: clamp(44px, 7.6vh, 54px);
         --dial: clamp(130px, 27vh, 240px);
-        /* everything above and below the maze: tab bar, padding, tile band, gaps */
-        --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
+        /* Preview cap is a feature dimension; available frame space is calculated by maze-unify.css. */
         --maze-cap: 760px;
-        --cg-need: 540px;                            /* the least height the controls column needs to show its tallest step */
-        /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
-        --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
-        --maze-side: min(100vh - var(--v-chrome), var(--maze-cap), var(--maze-w));
         --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
         --glow-y: 56%;
     }
 
     .cg-layout {
-        /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
-           The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
-        overflow: hidden;
-        /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
-           that is too tall scrolls inside its own box instead of pushing the whole page down. */
-        flex: none;
-        /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
-           below the tab bar; on a short one it takes all of it. */
-        height: min(100vh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-        margin-block: auto;
+        /* The shared Site frame owns height and scrolling; the wizard only owns its grid. */
+        flex: 1 0 auto;
+        height: auto;
+        min-height: 100%;
+        margin-block: 0;
+        overflow: visible;
         grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
-        grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(0, 1fr) auto;
+        grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(min-content, auto) auto;
         grid-template-areas:
             "title rail"
             "sub   rail"
@@ -327,10 +310,7 @@
         align-self: stretch;
         margin: calc(var(--rail-below) + var(--cg-row)) -8px 0;
         padding: 6px 8px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
+        overflow: visible;
     }
 
     .cg-nav {
@@ -344,16 +324,6 @@
         .cg {
             --node: clamp(44px, 7.6dvh, 54px);
             --dial: clamp(130px, 27dvh, 240px);
-            --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
-        }
-        .cg-layout {
-            height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-        }
-    }
-
-    @supports (overflow: clip) {
-        .cg-layout {
-            overflow: clip;
         }
     }
 }
@@ -1450,11 +1420,7 @@
         --node: 38px;
         --rail-below: 36px;
         --sub-h: 0px;
-        --cg-need: 0px;
         --cg-row: 8px;
-        --cg-top-pad: max(6px, env(safe-area-inset-top));
-        --cg-pad-t: 8px;
-        --cg-pad-b: max(8px, env(safe-area-inset-bottom));
         --dial: clamp(96px, 28vh, 140px);
     }
 

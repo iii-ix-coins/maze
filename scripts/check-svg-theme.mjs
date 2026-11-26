@@ -100,8 +100,8 @@ if (!market.includes('<ThemedSvgIcon') || /<img[^>]+src="\/css\/images\/maze-coi
 const sourceMaps = [
   ['SiteNavigation', navigation.match(/const NAV_ICON_SOURCES[\s\S]*?=\s*\{([\s\S]*?)\};/)?.[1] ?? ''],
 ];
-if (!themeSwitcher.includes('THEME_MARKS') || !themeSwitcher.includes('theme-toggle--header') || themeSwitcher.includes('THEME_ICONS')) {
-  errors.push('ThemeSwitcher must use text-only theme marks in the header, not image buttons in the dock.');
+if (themeSwitcher.includes('THEME_MARKS') || !themeSwitcher.includes('theme-toggle--header') || themeSwitcher.includes('THEME_ICONS') || !themeSwitcher.includes('data-select-theme={item}') || !themeSwitcher.includes('aria-label={`${THEME_LABELS[item]} theme`}') || !themeSwitcher.includes('<span aria-hidden="true"></span>')) {
+  errors.push('ThemeSwitcher must use accessible, text-free color swatches in the shared header.');
 }
 for (const [owner, block] of sourceMaps) {
   const urls = [...block.matchAll(/:\s*'([^']+\.svg)'/g)].map((match) => match[1]);

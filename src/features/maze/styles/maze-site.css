@@ -1006,10 +1006,7 @@
         --glass: rgba(228, 246, 234, .055);
         --ease: cubic-bezier(.2, .8, .2, 1);
 
-        /* the shared container: tab bar, title, maze, controls (and the lobby's .lb) all use it */
-        --cg-pad-b: max(12px, env(safe-area-inset-bottom));
-        --cg-tabs-h: 42px;
-        /* the tab bar's height (lobby.css: 40px) plus a little slack */
+        /* Frame width, gutters, padding, tabs and scroll are owned by maze-unify.css. */
 
         /* rhythm */
         --cg-row: clamp(10px, 1.8vh, 16px);
@@ -1033,8 +1030,6 @@
         --charge: 0;
         display: none;
         flex-direction: column;
-        overflow-x: hidden;
-        overflow-y: auto;
         box-sizing: border-box;
         color: var(--haze);
         font-family: "Montserrat", sans-serif;
@@ -1101,37 +1096,12 @@
     .maze-app .cg-top {
         flex: none;
         box-sizing: border-box;
-        width: 100%;
-        max-width: var(--cg-max);
-        margin-inline: auto;
-        padding: var(--cg-top-pad) var(--cg-gutter) 0;
     }
 
     /* ── Layout, stacked (phones, portrait tablets) ─────────────────────────────
    title → maze → progress tiles → current step → Back / Continue, all on one left edge.
    The panel and the figure are transparent boxes: their children (title, rail, steps, nav,
    canvas, caption) are the grid items, so the HTML and the step logic stay as they are. */
-    .maze-app .cg-layout {
-        flex: 1 1 auto;
-        min-height: 0;
-        box-sizing: border-box;
-        width: 100%;
-        max-width: var(--cg-max);
-        margin-inline: auto;
-        padding: var(--cg-pad-t) var(--cg-gutter) var(--cg-pad-b);
-
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto auto auto auto auto;
-        grid-template-areas:
-            "title"
-            "stage"
-            "rail"
-            "steps"
-            "nav";
-        align-content: start;
-        row-gap: var(--cg-row);
-    }
 
     .maze-app .cg-panel,
     .maze-app .cg-stage {
@@ -1188,12 +1158,6 @@
         min-width: 0;
     }
 
-    .maze-app .cg-steps {
-        grid-area: steps;
-        min-width: 0;
-        min-height: 0;
-    }
-
     .maze-app .cg-nav {
         grid-area: nav;
         min-width: 0;
@@ -1205,7 +1169,7 @@
         bottom: 0;
         z-index: 3;
         padding: 10px 0 max(2px, env(safe-area-inset-bottom));
-        background: var(--surface-solid, #000000);
+        background: transparent;
     }
 
     /* ── Layout, landscape (desktop, laptop, wide tablet) ──────────────────────
@@ -1215,108 +1179,6 @@
    The first two rows together are exactly one tile tall, so the title block and the tile
    row share one band; the labels and chosen-value chips hang below the tiles and the step
    starts under them. */
-    @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
-        .maze-app .cg {
-            --node: clamp(44px, 7.6vh, 54px);
-            --dial: clamp(130px, 27vh, 240px);
-            /* everything above and below the maze: tab bar, padding, tile band, gaps */
-            --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
-            --maze-cap: 760px;
-            --cg-need: 540px;
-            /* the least height the controls column needs to show its tallest step */
-            /* the maze's side: what the window's height allows, what the width leaves next to the controls, or the cap */
-            --maze-w: calc(min(100vw, var(--cg-max)) - 2 * var(--cg-gutter) - var(--cg-aside) - var(--cg-gap));
-            --maze-side: min(100vh - var(--v-chrome), var(--maze-cap), var(--maze-w));
-            --glow-x: calc(50% - min(50%, var(--cg-max) / 2) + var(--cg-gutter) + var(--maze-side) / 2);
-            --glow-y: 56%;
-        }
-
-        .maze-app .cg-layout {
-            /* The canvas's empty 5% margin hangs below the maze; it must not add scrollable height.
-           The padding (12px top, the gutter on the sides) still leaves room for the tiles' glow. */
-            overflow: hidden;
-            /* A definite height (the window minus the tab bar): the maze is sized from it, and a step
-           that is too tall scrolls inside its own box instead of pushing the whole page down. */
-            flex: none;
-            /* On a tall window the block is only as tall as the maze needs, and sits in the middle of what is left
-           below the tab bar; on a short one it takes all of it. */
-            height: min(100vh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-            margin-block: auto;
-            grid-template-columns: min(var(--maze-side), 100% - var(--cg-aside) - var(--cg-gap)) minmax(0, var(--cg-aside));
-            grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(0, 1fr) auto;
-            grid-template-areas:
-                "title rail"
-                "sub   rail"
-                "stage steps"
-                "stage nav";
-            justify-content: space-between;
-            align-content: stretch;
-            column-gap: var(--cg-gap);
-            row-gap: 0;
-        }
-
-        .maze-app .cg-title {
-            align-self: end;
-        }
-
-        .maze-app .cg-stage figcaption {
-            display: block;
-            align-self: start;
-            padding-top: 2px;
-        }
-
-        .maze-app .cg-stage canvas {
-            grid-row: 3 / 5;
-            justify-self: start;
-            width: calc(100% / .9);
-            margin: -5.5556%;
-            margin-top: calc(-5.5556% + var(--cg-row));
-        }
-
-        .maze-app .cg-rail {
-            align-self: start;
-            height: var(--node);
-        }
-
-        .maze-app .cg-steps {
-            align-self: stretch;
-            margin: calc(var(--rail-below) + var(--cg-row)) -8px 0;
-            padding: 6px 8px;
-            overflow-x: hidden;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            scrollbar-width: thin;
-        }
-
-        .maze-app .cg-nav {
-            align-self: end;
-            padding: 14px 0 0;
-            border-top: 1px solid var(--line);
-            background: none;
-        }
-
-        @supports (height: 100dvh) {
-            .maze-app .cg {
-                --node: clamp(44px, 7.6dvh, 54px);
-                --dial: clamp(130px, 27dvh, 240px);
-                --maze-side: min(100dvh - var(--v-chrome), var(--maze-cap), var(--maze-w));
-
-            }
-            .maze-app .cg-layout {
-                height: min(100dvh - var(--cg-top-pad) - var(--cg-tabs-h), max(var(--cg-need), var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--maze-side) + var(--cg-pad-b) + 8px));
-
-            }
-
-        }
-
-        @supports (overflow: clip) {
-            .maze-app .cg-layout {
-                overflow: clip;
-
-            }
-
-        }
-    }
 
     /* ── Progress rail: a level map ────────────────────────────────────────────
    Four rounded-square tiles on a track. Each tile has its own colour, matching what it
@@ -1625,10 +1487,6 @@
     }
 
     /* ── Steps ── */
-    .maze-app .cg-steps {
-        display: grid;
-        position: relative;
-    }
 
     .maze-app .cg-step {
         grid-area: 1 / 1;
@@ -2393,11 +2251,7 @@
             --node: 38px;
             --rail-below: 36px;
             --sub-h: 0px;
-            --cg-need: 0px;
             --cg-row: 8px;
-            --cg-top-pad: max(6px, env(safe-area-inset-top));
-            --cg-pad-t: 8px;
-            --cg-pad-b: max(8px, env(safe-area-inset-bottom));
             --dial: clamp(96px, 28vh, 140px);
         }
 
@@ -2622,13 +2476,11 @@
     }
 
     .maze-app .lb {
-        margin: 0 auto;
         box-sizing: border-box;
         flex: 1 0 auto;
         display: flex;
         flex-direction: column;
         gap: 14px;
-        padding: 16px clamp(16px, 4vw, 44px) max(28px, env(safe-area-inset-bottom));
     }
 
     .maze-app .lb-head {
@@ -3700,13 +3552,9 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
-        max-height: min(32vh, 280px);
         margin: 0;
         padding: 0;
-        overflow-y: auto;
         list-style: none;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(228, 246, 234, .2) transparent;
     }
 
     .maze-app .lb-members:empty {
@@ -4021,7 +3869,6 @@
     @media (max-height: 540px) and (min-aspect-ratio: 5/4) {
         .maze-app .lb {
             gap: 10px;
-            padding-top: 16px;
         }
 
         .maze-app .lb-title {
@@ -4034,7 +3881,7 @@
             align-items: start;
         }
 
-        /* The panel is taller than the screen here; the flower stays in view while it scrolls. */
+        /* The stage remains a visual anchor while the shared frame scrolls. */
         .maze-app .lb-room-stage {
             position: sticky;
             top: 8px;
@@ -4046,20 +3893,11 @@
             min-height: 0;
         }
 
-        .maze-app .lb-members {
-            max-height: 26vh;
-        }
-
         @supports (height: 100dvh) {
             .maze-app .lb-room-stage {
                 width: min(100%, 64dvh);
 
             }
-            .maze-app .lb-members {
-                max-height: 26dvh;
-
-            }
-
         }
     }
 
@@ -4078,7 +3916,6 @@
 
     /* Hollld shell integration: scoped tokens and theme bridge. */
     .maze-app {
-        --cg-max: 1180px;
         width: min(100%, 1440px);
         margin-inline: auto;
         padding: clamp(12px, 2vw, 24px) clamp(10px, 2vw, 24px) 36px;
@@ -4206,8 +4043,6 @@
         width: 100%;
         overflow: visible;
         background: transparent;
-        --cg-top-pad: 0px;
-        --cg-pad-t: 0px;
     }
 
     .maze-app .cg::after {
@@ -4259,9 +4094,9 @@
         display: none !important;
     }
 
-    /* Let wheel input scroll the document naturally. Camera zoom is Ctrl/Cmd + wheel
-   on the canvas (see input/pointer.ts), so page navigation and game controls do
-   not compete for the same gesture. */
+    /* During active gameplay, preserve the engine's wheel/camera behavior.
+       The pre-game Create / Rooms / Live menu scrolls only through #createGame
+       inside the shared Site Content Frame (owned by maze-unify.css). */
     .maze-app {
         overscroll-behavior-y: auto;
     }
@@ -4323,7 +4158,7 @@
     }
 
     .maze-app[data-theme="light"] .cg .cg-nav {
-        background: var(--surface-solid, #000000);
+        background: transparent;
     }
 
     .maze-app[data-theme="light"] .cg .cg-node {
@@ -4360,195 +4195,16 @@
         border-color: rgba(22, 122, 85, .38);
     }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-   MAZE MENU LAYOUT REFINEMENT
-   - Use the full viewport width for Create / Rooms / Waiting Room.
-   - Keep consistent safe gutters instead of the previous 1180px cap.
-   ────────────────────────────────────────────────────────────────────────── */
-    .maze-app .cg {
-        --cg-max: min(100vw, 1440px);
-        --cg-gutter: clamp(16px, 2.5vw, 34px);
-        --cg-gap: clamp(20px, 2.8vw, 40px);
-        --cg-aside: clamp(330px, 32vw, 440px);
-    }
-
-    .maze-app .cg-top,
-    .maze-app .cg-layout {
-        width: 100%;
-        max-width: none;
-    }
-
-    .maze-app .lb {
-        width: 100%;
-        max-width: none;
-        padding-left: var(--cg-gutter);
-        padding-right: var(--cg-gutter);
-        padding-top: 10px;
-    }
-
+    /* Dynamic-height values for the inner controls remain feature-owned;
+       all page width, padding and frame sizing come from site.css/maze-unify.css. */
     @supports (height: 100dvh) {
-        .maze-app {
-            min-height: 100dvh;
-
-        }
         .maze-app .cg {
             --cg-row: clamp(10px, 1.8dvh, 16px);
             --maze-m: clamp(140px, 30dvh, 440px);
             --dial: clamp(130px, 22dvh, 240px);
-
-        }
-        .maze-app .lb-members {
-            max-height: min(32dvh, 280px);
-
         }
 
     }
 
 }
 
-/* =========================================
-   MAZE / SITE HEADER FLOW INTEGRATION
-   ========================================= */
-
-/* Remove the empty Brand Header host on Maze pages. */
-body.in-menu>#root>#site-brand-header:empty {
-    display: none !important;
-}
-
-/* The shared home-page section rhythm must not insert a gap before the Maze UI. */
-
-/*
- * #site-header is a normal-flow sibling of #mazeApp on /maze.html. Its height
- * is already accounted for by the document layout, so copying its measured
- * bottom into .cg-top padding would count the header twice and create a blank
- * band above the wizard. Keep the hidden tabs and top inset at zero.
- */
-.maze-app .cg {
-    --cg-top-pad: 0px;
-    --cg-tabs-h: 0px;
-}
-
-/* Keep the wizard in normal flow instead of applying legacy vertical offsets. */
-@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
-    .maze-app .cg-layout {
-        margin-block: 0 !important;
-        transform: none !important;
-    }
-}
-
-/* Compact landscape: keep the maze and its controls side by side.
-   This avoids shrinking the preview to a tiny centered tile on 420–559px screens. */
-@media (min-width: 420px) and (max-width: 559px) and (orientation: landscape) {
-    .maze-app .cg {
-        --cg-gutter: 12px;
-        --cg-pad-t: 8px;
-        --cg-pad-b: 8px;
-        --cg-row: 8px;
-        --cg-gap: 12px;
-        --maze-m: clamp(156px, 40vw, 218px);
-        --node: clamp(30px, 7vw, 38px);
-        --rail-below: 34px;
-        --dial: clamp(104px, 29vh, 142px);
-    }
-
-    .maze-app .cg-layout {
-        display: grid;
-        flex: 1 1 auto;
-        width: 100%;
-        height: auto;
-        min-height: 0;
-        margin: 0;
-        padding: var(--cg-pad-t) var(--cg-gutter) var(--cg-pad-b);
-        grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
-        grid-template-rows: auto minmax(0, 1fr) auto;
-        grid-template-areas:
-            "title rail"
-            "stage steps"
-            "stage nav";
-        column-gap: var(--cg-gap);
-        row-gap: 0;
-        align-content: stretch;
-        justify-content: stretch;
-        overflow: hidden;
-    }
-
-    .maze-app .cg-title {
-        align-self: end;
-        font-size: clamp(1.2rem, 4vw, 1.55rem);
-        line-height: 1.05;
-    }
-
-    .maze-app .cg-stage figcaption {
-        display: none;
-    }
-
-    .maze-app .cg-stage canvas {
-        grid-row: 2 / 4;
-        justify-self: center;
-        align-self: center;
-        width: calc(min(var(--maze-m), 100%) / .9);
-        margin: -5.5556%;
-    }
-
-    .maze-app .cg-rail {
-        align-self: start;
-        height: var(--node);
-    }
-
-    .maze-app .cg-rail-text b {
-        font-size: .62rem;
-    }
-
-    .maze-app .cg-rail-text small {
-        font-size: .58rem;
-        padding-inline: 5px;
-    }
-
-    .maze-app .cg-steps {
-        align-self: stretch;
-        min-height: 0;
-        margin: calc(var(--rail-below) + 6px) -5px 0;
-        padding: 4px 5px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
-    }
-
-    .maze-app .cg-step {
-        gap: 7px;
-    }
-
-    .maze-app .cg-step-title {
-        font-size: .98rem;
-    }
-
-    .maze-app .cg-step-help,
-    .maze-app .cg-note {
-        font-size: .7rem;
-        line-height: 1.35;
-    }
-
-    .maze-app .cg-nav {
-        align-self: end;
-        padding: 7px 0 0;
-        border-top: 1px solid var(--line);
-        background: none;
-    }
-
-    @supports (height: 100dvh) {
-        .maze-app .cg {
-            --dial: clamp(104px, 29dvh, 142px);
-
-        }
-
-    }
-
-    @supports (overflow: clip) {
-        .maze-app .cg-layout {
-            overflow: clip;
-
-        }
-
-    }
-}

@@ -1,180 +1,54 @@
-/* ۰. FRAME TOKENS */
-#mazeApp.in-menu {
-    --frame-pad: clamp(16px, 1.8vw, 24px);      /* فاصله‌ی داخلی قاب */
-    --frame-gap: 14px;                          /* فاصله‌ی دو قاب مجاور */
-    --frame-r: var(--r-lg, 24px);
-    --frame-stroke: var(--stroke, var(--line));
-    --frame-bg: var(--tile-bg, var(--glass));
-    --frame-shadow: var(--shadow-1, none);
-    --frame-split: 0px;                         /* فقط تک‌ستون مقدار می‌گیرد */
-}
-#mazeApp.in-menu[data-theme="light"] {
-    --frame-stroke: rgba(26,62,43,.18);
-    --frame-bg: rgba(255,255,255,.82);
-    --frame-shadow: 0 12px 32px rgba(30,60,44,.09);
-}
-
-/* ۱. ظرف صفحه */
-#mazeApp.in-menu {
-    --maze-gap: clamp(12px, 3vw, 20px);
-    --maze-bleed: 12px;
-    width: min(100% - 2 * var(--gutter, 24px) + 2 * var(--maze-bleed), var(--page-max, 1240px) + 2 * var(--maze-bleed));
-    padding: var(--maze-gap) var(--maze-bleed);
-}
-#mazeApp.in-menu .cg {
-    --cg-max: min(100vw - 2 * var(--gutter, 24px), var(--page-max, 1240px));
-    --cg-gutter: var(--frame-pad);
-    --cg-pad-t: var(--frame-pad);
-    --cg-pad-b: var(--frame-pad);
-    --cg-gap: calc(var(--frame-pad) * 2 + var(--frame-gap));
-}
-#mazeApp.in-menu .cg-top,
-#mazeApp.in-menu .cg-layout { width: 100%; max-width: none; }
-#mazeApp.in-menu .lb { max-width: none; padding-inline: 0; }
-#mazeApp.in-menu .cg-stage canvas { max-width: none; }
-
-/* ۲. CREATE: دو قاب در همه‌ی اندازه‌ها */
-#mazeApp.in-menu .cg-layout { position: relative; isolation: isolate; }
-#mazeApp.in-menu .cg-layout::before,
-#mazeApp.in-menu .cg-layout::after {
-    content: "";
-    z-index: -1;
-    margin: calc(var(--frame-pad) * -1);
-    box-sizing: border-box;
-    pointer-events: none;
-    border: 1px solid var(--frame-stroke);
-    border-radius: var(--frame-r);
-    background: var(--frame-bg);
-    box-shadow: var(--frame-shadow);
-}
-/* grid-area: row-start / col-start / row-end / col-end */
-#mazeApp.in-menu .cg-layout::before { grid-area: title-start / title-start / stage-end / stage-end; }
-#mazeApp.in-menu .cg-layout::after {
-    grid-area: rail-start / rail-start / nav-end / nav-end;
-    margin-top: calc(var(--frame-pad) * -1 + var(--frame-split));
-}
-
-/* تک‌ستون (نه عریض، نه landscape فشرده) */
-@media not (((min-width: 560px) and (min-aspect-ratio: 5/4)) or ((min-width: 420px) and (max-width: 559px) and (orientation: landscape))) {
-    #mazeApp.in-menu .cg { --frame-split: calc(var(--frame-pad) * 2 + var(--frame-gap) - var(--cg-row)); }
-    #mazeApp.in-menu .cg-rail { margin-top: var(--frame-split); }
-    #mazeApp.in-menu .cg-nav { background: var(--surface-solid, #000000); }
-    #mazeApp.in-menu[data-theme="light"] .cg-nav { --frame-nav-fade: rgba(255,255,255,.92); }
-}
-
-@media (min-width: 560px) and (min-aspect-ratio: 5/4) {
-    #mazeApp.in-menu .cg { --cg-aside: clamp(340px, 34vw, 440px); }
-    #mazeApp.in-menu .cg-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, var(--cg-aside));
-        justify-content: stretch;
-    }
-    #mazeApp.in-menu .cg-stage canvas {
-        --m: min(var(--maze-side), 100%);
-        justify-self: center;
-        width: calc(var(--m) / .9);
-        margin: calc(var(--m) / .9 * -.05);
-        margin-top: calc(var(--m) / .9 * -.05 + var(--cg-row));
-    }
-}
-
-@media (min-width: 420px) and (max-width: 559px) and (orientation: landscape) {
-    #mazeApp.in-menu { --frame-pad: 12px; }
-}
-
-/* ۳. OPEN ROOMS و LIVE RACES */
-#mazeApp.in-menu .lb[data-view="rooms"],
-#mazeApp.in-menu .lb[data-view="live"] {
-    box-sizing: border-box;
-    padding: var(--frame-pad);
-    border: 1px solid var(--frame-stroke);
-    border-radius: var(--frame-r);
-    background: var(--frame-bg);
-    box-shadow: var(--frame-shadow);
-}
-/* قاب حدود ۵۰px از عرض مفید کم می‌کند؛ بدون این، Live در حداکثر عرض از ۳ به ۲ ستون می‌رفت */
-#mazeApp.in-menu .lb-grid-live { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
-
-/* ۴. اتاق انتظار: رفتار قبلی، فقط از توکن‌ها می‌خواند */
-@media (min-width: 880px) {
-    #mazeApp.in-menu .lb-room-screen {
-        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-        gap: clamp(24px, 4vw, 56px);
-        padding: clamp(20px, 3vw, 36px);
-        box-sizing: border-box;
-        border: 1px solid var(--frame-stroke);
-        border-radius: var(--frame-r);
-        background: var(--frame-bg);
-        box-shadow: var(--frame-shadow);
-    }
-    #mazeApp.in-menu .lb-room-stage { width: min(100%, 360px); }
-    #mazeApp.in-menu .lb-room-panel { max-width: none; }
-}
-@media (min-width: 880px) and (min-height: 541px) {
-    #mazeApp.in-menu .lb-room-screen { align-items: center; }
-}
-
-/* ۵. حالت‌های خالی */
-#mazeApp.in-menu .lb-empty {
-    box-sizing: border-box;
-    padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px);
-    border: 1px dashed var(--stroke-hi, var(--line));
-    border-radius: var(--frame-r);
-    background: var(--veil, var(--glass));
-}
-
-/* --------------------------------------------------------------------------
-   React Maze page flow. Keep these rules unlayered: create-game.css is also
-   unlayered, while the historical .maze-app overrides in maze-site.css live
-   inside @layer pages and therefore cannot beat its fixed-position .cg rule.
-   -------------------------------------------------------------------------- */
-body.in-menu {
-    --section-gap: 10px;
-    height: 100vh;
-    min-height: 100vh;
-    gap: 10px;
-    align-items: stretch;
-    overflow-y: hidden;
-    padding-block: 10px max(12px, env(safe-area-inset-bottom));
-}
-
-body.in-menu #site-header {
-    position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    transform: none;
-    flex: 0 0 auto;
-}
-
-body.in-menu #site-brand-header {
-    display: none !important;
-}
-
+/*
+ * Maze menu integration with the shared Site Content Frame.
+ * The site owns the outer frame, viewport bounds, header and dock.
+ * Create / Rooms / Live / Waiting Room only provide content inside it.
+ */
 #mazeApp.maze-app.in-menu {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
+    min-width: 0;
     min-height: 0;
-    height: auto;
-    box-sizing: border-box;
-    overflow: visible;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+    background: transparent;
 }
 
+/* The absolute inner content surface is the sole vertical scroller for all menu views. */
 #mazeApp.maze-app.in-menu > #createGame.cg {
-    position: relative;
-    inset: auto;
+    position: absolute;
+    inset: 0;
     z-index: 1;
-    flex: 1 1 auto;
-    width: 100%;
-    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    width: auto;
     height: auto;
+    min-width: 0;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background: transparent;
+
+    /* Create Wizard sizing inherits the shared Site Content Frame tokens. */
+    --cg-max: 100%;
+    --cg-gutter: var(--site-frame-content-padding-start);
+    --cg-pad-t: var(--site-frame-content-padding);
+    --cg-pad-b: var(--site-frame-content-padding);
+    --cg-gap: clamp(14px, 2.5vw, 24px);
     --cg-top-pad: 0px;
     --cg-tabs-h: 0px;
+}
+
+#mazeApp.maze-app.in-menu > #createGame.cg::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 #mazeApp.maze-app.in-menu > #createGame.cg > .cg-top {
@@ -184,7 +58,11 @@ body.in-menu #site-brand-header {
 }
 
 #mazeApp.maze-app.in-menu > #createGame.cg > .cg-views {
+    display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
     min-height: 0;
 }
 
@@ -192,45 +70,170 @@ body.in-menu #site-brand-header {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
+    min-width: 0;
     min-height: 0;
 }
 
 #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     width: 100%;
     max-width: none;
     height: auto;
-    min-height: 0;
+    min-width: 0;
+    min-height: 100%;
     margin: 0;
+    padding-block: var(--cg-pad-t) var(--cg-pad-b);
+    padding-inline-start: var(--site-frame-content-padding-start);
+    padding-inline-end: var(--site-frame-content-padding-end);
 }
 
+/* Rooms, Live and Waiting Room share the same frame and content gutters. */
+#mazeApp.maze-app.in-menu .lb {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding-block: var(--site-frame-content-padding);
+    padding-inline-start: var(--site-frame-content-padding-start);
+    padding-inline-end: var(--site-frame-content-padding-end);
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+#mazeApp.maze-app.in-menu .lb-room-screen {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+#mazeApp.maze-app.in-menu .lb-empty {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Vertical overflow belongs to the shared #createGame frame, not nested controls. */
+#mazeApp.maze-app.in-menu .cg-steps,
+#mazeApp.maze-app.in-menu .lb-members {
+    max-height: none;
+    overflow: visible;
+}
+
+/* Live cards keep their own responsive grid within the shared content width. */
+#mazeApp.maze-app.in-menu .lb-grid-live {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+}
+
+/* Waiting-room composition adapts inside the site frame without its own shell. */
+@media (min-width: 880px) {
+    #mazeApp.maze-app.in-menu .lb-room-screen {
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        gap: clamp(24px, 4vw, 56px);
+        align-items: start;
+    }
+
+    #mazeApp.maze-app.in-menu .lb-room-stage {
+        width: min(100%, 360px);
+    }
+
+    #mazeApp.maze-app.in-menu .lb-room-panel {
+        max-width: none;
+    }
+}
+
+@media (min-width: 880px) and (min-height: 541px) {
+    #mazeApp.maze-app.in-menu .lb-room-screen {
+        align-items: center;
+    }
+}
+
+/* Create layout is sized from the actual height left between the site header and dock. */
 @media (min-width: 560px) and (min-aspect-ratio: 5/4) {
-    #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
-        height: 100%;
-        overflow: hidden;
-    }
-
-    /* The shared site navigation now occupies its own row above the wizard.
-       Reserve that height when sizing the preview canvas so it cannot slide
-       underneath the header or get clipped at the bottom of short viewports. */
     #mazeApp.maze-app.in-menu > #createGame.cg {
-        --maze-side: min(100vh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
+        --cg-aside: clamp(300px, 34vw, 440px);
+        --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
+        --maze-w: calc(100% - var(--site-frame-content-padding-start) - var(--site-frame-content-padding-end) - var(--cg-aside) - var(--cg-gap));
+        --maze-side: min(
+            max(120px, calc(var(--site-frame-content-height) - var(--v-chrome))),
+            var(--maze-cap),
+            var(--maze-w)
+        );
     }
-    @supports (overflow: clip) {
-        #mazeApp.maze-app.in-menu > #createGame.cg #cgViewCreate > .cg-layout {
-            overflow: clip;
-        }
+
+    #mazeApp.maze-app.in-menu #cgViewCreate > .cg-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, var(--cg-aside));
+        grid-template-rows: calc(var(--node) - var(--sub-h)) var(--sub-h) minmax(min-content, auto) auto;
+        justify-content: stretch;
+        flex: 1 0 auto;
+        height: auto;
+        min-height: 100%;
+        margin-block: 0;
+        overflow: visible;
     }
-    @supports (height: 100dvh) {
-        #mazeApp.maze-app.in-menu > #createGame.cg {
-            --maze-side: min(100dvh - 100px - var(--v-chrome), var(--maze-cap), var(--maze-w));
-        }
+
+    #mazeApp.maze-app.in-menu .cg-stage canvas {
+        --m: min(var(--maze-side), 100%);
+        justify-self: center;
+        width: calc(var(--m) / .9);
+        margin: calc(var(--m) / .9 * -.05);
+        margin-top: calc(var(--m) / .9 * -.05 + var(--cg-row));
     }
 }
 
-@supports (height: 100dvh) {
-    body.in-menu {
-        height: 100dvh;
-        min-height: 100dvh;
+/* Compact landscape keeps the preview and its controls side-by-side in the same frame. */
+@media (min-width: 420px) and (max-width: 559px) and (orientation: landscape) {
+    #mazeApp.maze-app.in-menu .cg {
+        --cg-row: 8px;
+        --cg-gap: 12px;
+        --maze-m: clamp(156px, 40vw, 218px);
+        --node: clamp(30px, 7vw, 38px);
+        --rail-below: 34px;
+        --dial: clamp(104px, 29vh, 142px);
+    }
+
+    #mazeApp.maze-app.in-menu #cgViewCreate > .cg-layout {
+        display: grid;
+        flex: 1 1 auto;
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        margin: 0;
+        padding-block: var(--cg-pad-t) var(--cg-pad-b);
+        padding-inline-start: var(--site-frame-content-padding-start);
+        padding-inline-end: var(--site-frame-content-padding-end);
+        grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+        grid-template-rows: auto minmax(min-content, auto) auto;
+        grid-template-areas:
+            "title rail"
+            "stage steps"
+            "stage nav";
+        column-gap: var(--cg-gap);
+        row-gap: 0;
+        align-content: start;
+        justify-content: stretch;
+        overflow: visible;
     }
 }
+
+/* The launch veil and transient Lobby notices stay inside the central frame. */
+#mazeApp.maze-app.in-menu > #createGame.cg::after {
+    position: absolute;
+    inset: 0;
+}
+
+#mazeApp.maze-app.in-menu .lb-toast {
+    position: absolute;
+    z-index: 5;
+    bottom: var(--site-frame-content-padding);
+}
+

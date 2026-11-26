@@ -117,15 +117,12 @@
 }
 
 .lb {
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
     box-sizing: border-box;
-    flex: 1 0 auto;
     display: flex;
+    flex: 1 0 auto;
     flex-direction: column;
+    min-width: 0;
     gap: 14px;
-    padding: 16px clamp(16px, 4vw, 44px) max(28px, env(safe-area-inset-bottom));
 }
 
 .lb-head {
@@ -1007,15 +1004,12 @@
 }
 
 .lb-room-screen {
-    justify-items: center;
     display: grid;
+    min-width: 0;
+    justify-items: center;
     grid-template-columns: minmax(220px, .85fr) minmax(0, 1.15fr);
     align-items: center;
     gap: clamp(20px, 5vw, 64px);
-    width: 100%;
-    max-width: 1040px;
-    margin: auto;
-    padding: 26px clamp(16px, 4vw, 44px) 42px;
     box-sizing: border-box;
 }
 
@@ -1162,10 +1156,6 @@
 }
 
 .lb-members {
-    max-height: min(32vh, 280px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(228, 246, 234, .2) transparent;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 8px;
@@ -1484,7 +1474,6 @@
 @media (max-height: 540px) and (min-aspect-ratio: 5/4) {
     .lb {
         gap: 10px;
-        padding-top: 16px;
     }
 
     .lb-title {
@@ -1497,7 +1486,7 @@
     align-items: start;
 }
 
-    /* The panel is taller than the screen here; the flower stays in view while it scrolls. */
+    /* The stage stays visually anchored while the shared Site Content Frame scrolls. */
     .lb-room-stage {
     position: sticky;
     top: 8px;
@@ -1509,16 +1498,9 @@
         min-height: 0;
     }
 
-    .lb-members {
-    max-height: 26vh;
-}
-
     @supports (height: 100dvh) {
   .lb-room-stage {
     width: min(100%, 64dvh);
-}
-  .lb-members {
-    max-height: 26dvh;
 } }
 }
 
@@ -1568,11 +1550,6 @@
         transition-duration: .01ms !important;
     }
 }
-
-@supports (height: 100dvh) {
- .lb-members {
-    max-height: min(32dvh, 280px);
-} }
 
 .lb-seat-bloom {
     position: relative;

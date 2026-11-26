@@ -1,6 +1,7 @@
 import './styles/index.css';
 import { useEffect } from 'react';
 import { usePageLoading } from '../../components/layout/PageLoadingProvider';
+import { RouteScrollbar } from '../../components/layout/RouteScrollbar';
 import { MazeMarkup } from './MazeMarkup';
 
 /**
@@ -88,6 +89,10 @@ export function MazePage() {
   return (
     <main className="maze-app in-menu" id="mazeApp">
       <MazeMarkup />
+      <RouteScrollbar
+        contentSelector=":scope > #createGame.cg"
+        label="Maze menu scrollbar"
+      />
     </main>
   );
 }

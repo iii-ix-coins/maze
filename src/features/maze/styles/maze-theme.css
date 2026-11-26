@@ -29,9 +29,9 @@
   --coral-highlight: var(--ar-text);
   --coral-depth: var(--ar-mute);
 }
-.maze-app .cg, .maze-app .lb { background: var(--ar-bg); color: var(--ar-text); }
+.maze-app .cg, .maze-app .lb { background: transparent; color: var(--ar-text); }
 .maze-app .cg-panel, .maze-app .cg-card, .maze-app .cg-step, .maze-app .lb-card,
-.maze-app .lb-room, .maze-app .lb-empty, .maze-app .cg-readout,
+.maze-app .lb-room, .maze-app .cg-readout,
 .maze-app .cg-summary, .maze-app .cg-control { background: var(--surface-solid); border-color: var(--ar-line); box-shadow: none; }
 
 /* Grass palette bridge: keep the whole Maze UI on the same exact site palette. */

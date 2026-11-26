@@ -124,8 +124,8 @@ if (
   process.exit(1);
 }
 const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
@@ -143,8 +143,8 @@ if (
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
   !routeScrollRule.includes('scrollbar-width: none') ||
-  !routeScrollRule.includes('padding-inline-start: clamp(15px, 0.52vw, 24px)') ||
-  !routeScrollRule.includes('padding-inline-end: calc(var(--site-frame-content-inline-padding) + clamp(3px, 0.52vw, 6px))') ||
+  !routeScrollRule.includes('padding-inline-start: var(--site-frame-content-padding-start)') ||
+  !routeScrollRule.includes('padding-inline-end: var(--site-frame-content-padding-end)') ||
   !routeScrollRule.includes('-ms-overflow-style: none') ||
   !siteChromeCss.includes('::-webkit-scrollbar {\n    display: none;') ||
   !siteChromeCss.includes('height: 60%') ||
@@ -170,6 +170,64 @@ if (
   fs.existsSync(path.join(root, 'src/styles/header-scroll-scrim.css'))
 ) {
   console.error('[layout] normal site documents must stay viewport-locked; only the inner route content frame may scroll.');
+  process.exit(1);
+}
+const mazeFrameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-unify.css'), 'utf8');
+const mazeThemeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-theme.css'), 'utf8');
+const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
+const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
+const lobbyCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8');
+const legacyMazeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
+const mazeMenuCssSources = [mazeFrameCss, createGameCss, lobbyCss, legacyMazeCss];
+const hasNestedMenuScroller = mazeMenuCssSources.some((css) => {
+  const blocks = css.match(/[^{}]+\{[^{}]*\}/g) ?? [];
+  return blocks.some((block) => {
+    const opening = block.indexOf('{');
+    const selector = block.slice(0, opening);
+    const declarations = block.slice(opening + 1, -1);
+    if (!/(?:\.cg-steps|\.lb-members)\b/.test(selector)) return false;
+    return /overflow(?:-y)?\s*:\s*(?:auto|scroll)\b/.test(declarations);
+  });
+});
+const mazeFrameVerticalScrollCount = (mazeFrameCss.match(/overflow-y\s*:\s*auto/g) ?? []).length;
+if (
+  !siteChromeCss.includes('body.in-menu #mazeApp.maze-app.in-menu') ||
+  !siteChromeCss.includes('body.in-menu>#root>#site-topbar') ||
+  !/body\.in-menu\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
+  !mazeFrameCss.includes('--site-frame-content-padding-start') ||
+  !mazeFrameCss.includes('--cg-gutter: var(--site-frame-content-padding-start)') ||
+  !mazeFrameCss.includes('--cg-pad-t: var(--site-frame-content-padding)') ||
+  !mazeFrameCss.includes('--cg-pad-b: var(--site-frame-content-padding)') ||
+  !mazeFrameCss.includes('--site-frame-content-padding-end') ||
+  !mazeFrameCss.includes('overflow-y: auto') ||
+  !mazeFrameCss.includes('background: transparent') ||
+  !mazeFrameCss.includes('--cg-max: 100%') ||
+  !mazeFrameCss.includes('--cg-gutter: var(--site-frame-content-padding-start)') ||
+  /body\.in-menu>\#root>\#site-brand-header:empty/.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8')) ||
+  mazeFrameCss.includes('.cg-layout::before') ||
+  mazeFrameCss.includes('.cg-layout::after') ||
+  /#mazeApp\.in-menu\s+\.lb\[data-view="(?:rooms|live)"\]\s*\{[^}]*border:\s*1px/s.test(mazeFrameCss) ||
+  !mazePageSource.includes('contentSelector=":scope > #createGame.cg"') ||
+  !mazePageSource.includes('<RouteScrollbar') ||
+  mazeFrameVerticalScrollCount !== 1 ||
+  hasNestedMenuScroller ||
+  !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*position:\s*absolute/s.test(mazeFrameCss) ||
+  !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*inset:\s*0/s.test(mazeFrameCss) ||
+  !mazeFrameCss.includes('overflow-y: auto') ||
+  !mazeFrameCss.includes('padding-inline-start: var(--site-frame-content-padding-start)') ||
+  !mazeFrameCss.includes('padding-inline-end: var(--site-frame-content-padding-end)') ||
+  /\.maze-app \.cg-layout\s*\{/.test(legacyMazeCss) ||
+  /--cg-max:\s*1180px/.test(legacyMazeCss) ||
+  /--cg-(?:top-pad|pad-t|pad-b|tabs-h):/.test(legacyMazeCss) ||
+  /(?:\.cg-steps|\.lb-members)[^{}]*\{[^}]*overflow-y\s*:\s*(?:auto|scroll)/s.test(legacyMazeCss) ||
+  /position:\s*fixed|inset:\s*0/.test(createGameCss.match(/\.cg\s*\{([^}]*)\}/s)?.[1] ?? '') ||
+  /\.maze-app \.lb\s*\{[^}]*padding:\s*16px/s.test(legacyMazeCss) ||
+  !mazeThemeCss.includes('.maze-app .cg, .maze-app .lb { background: transparent;') ||
+  /\.lb\s*\{[^}]*max-width:\s*1180px/s.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8')) ||
+  /\.lb-room-screen\s*\{[^}]*max-width:\s*1040px/s.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8')) ||
+  /\.maze-app\s+\.cg-nav\s*\{[^}]*background:\s*var\(--surface-solid/s.test(createGameCss)
+) {
+  console.error('[layout] Create, Rooms, Live and Waiting Room must share one Site Content Frame and one vertical scroller.');
   process.exit(1);
 }
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
@@ -426,7 +484,9 @@ if (
   headerBalanceIndex <= headerThemeIndex ||
   navigationComponent.includes('<ThemeSwitcher />') ||
   !themeSwitcherComponent.includes('theme-toggle--header') ||
-  !themeSwitcherComponent.includes('THEME_MARKS') ||
+  themeSwitcherComponent.includes('THEME_MARKS') ||
+  !themeSwitcherComponent.includes('data-select-theme={item}') ||
+  !themeSwitcherComponent.includes('aria-label={`${THEME_LABELS[item]} theme`}') ||
   themeSwitcherComponent.includes('THEME_ICONS') ||
   createIndex < 0 ||
   notificationsIndex <= createIndex ||
@@ -628,13 +688,15 @@ if (
   sharedSiteStyles.includes('.nav-dock-theme-slot') ||
   !headerThemeHostRule.includes('left: 50%;') ||
   !headerThemeRule.includes('display: flex;') ||
-  !headerThemeOptionRule.includes('background: var(--ar-bg);') ||
+  !sharedSiteStyles.includes('.theme-toggle__option[data-select-theme="light"] {\n    background: #ffffff;') ||
+  !sharedSiteStyles.includes('.theme-toggle__option[data-select-theme="dark"] {\n    background: #000000;') ||
+  !sharedSiteStyles.includes('.theme-toggle__option[data-select-theme="grass"] {\n    background: #006400;') ||
   !headerThemeOptionRule.includes('width: var(--site-header-theme-button-size);') ||
   !sharedSiteStyles.includes('--site-header-theme-active-border: #ff0000;') ||
-  !headerThemeActiveRule.includes('border-color: var(--site-header-theme-active-border);') ||
-  !headerBalanceRule.includes('right: 7px;') ||
+  !headerThemeActiveRule.includes('border: 3px solid var(--site-header-theme-active-border);') ||
+  !headerBalanceRule.includes('right: 3px;') ||
   !headerBalanceRule.includes('font-variant-numeric: tabular-nums;') ||
-  !sharedSiteStyles.includes('--site-header-theme-button-size: 21px;') ||
+  !sharedSiteStyles.includes('--site-header-theme-button-size: 12px;') ||
   !sharedSiteStyles.includes('--site-header-theme-button-size: 19px;') ||
   !dockRule.includes('height: var(--site-dock-height);') ||
   !dockInnerRule.includes('height: 100%;') ||
@@ -675,7 +737,6 @@ if (/\.nav-inner\s*\{[^}]*grid-template-areas/s.test(globalStyles) || /\.nav-inn
   process.exit(1);
 }
 
-const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
 const mazeStyleEntry = fs.readFileSync(path.join(root, 'src/features/maze/styles/index.css'), 'utf8');
 if ((mazePageSource.match(/\.\/styles\/index\.css/g) || []).length !== 1 || /\.\/styles\/(?:maze-site|maze-unify|maze-theme|create-game|lobby)\.css/.test(mazePageSource)) {
   console.error('[layout] MazePage must load its feature styles through one canonical CSS entry.');
@@ -718,7 +779,7 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   process.exit(1);
 }
 
-console.log('[layout] React routes, header theme and coin balance, notification dock, Holders retirement, unified wallet teardown and migrated Maze UI verified.');
+console.log('[layout] React routes, header theme and coin balance, notification dock, Holders retirement, unified wallet teardown, and shared Maze content frame verified.');
 
 // Retired transaction/verification engines and buyer feed must stay removed.
 for (const retiredPath of [

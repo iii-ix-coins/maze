@@ -1,7 +1,16 @@
 import { useEffect, useRef } from 'react';
 
-/** Cross-browser scrollbar for the fixed site content frame. */
-export function RouteScrollbar() {
+type RouteScrollbarProps = {
+  /** Scoped scrolling element inside the owning frame. */
+  contentSelector?: string;
+  label?: string;
+};
+
+/** Cross-browser scrollbar shared by site routes and the Maze content frame. */
+export function RouteScrollbar({
+  contentSelector = ':scope > .feature-page-shell',
+  label = 'Page content scrollbar',
+}: RouteScrollbarProps) {
   const scrollbarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,7 +95,7 @@ export function RouteScrollbar() {
     }
 
     function bindScroller() {
-      const nextScroller = frame.querySelector<HTMLElement>(':scope > .feature-page-shell');
+      const nextScroller = frame.querySelector<HTMLElement>(contentSelector);
       if (nextScroller === scroller) return;
 
       if (scroller) {
@@ -234,14 +243,14 @@ export function RouteScrollbar() {
       scrollbar.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', scheduleUpdate);
     };
-  }, []);
+  }, [contentSelector]);
 
   return (
     <div
       ref={scrollbarRef}
       className="route-scrollbar"
       role="scrollbar"
-      aria-label="Page content scrollbar"
+      aria-label={label}
       aria-orientation="vertical"
       aria-valuemin={0}
       aria-valuemax={0}

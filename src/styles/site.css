@@ -24,6 +24,8 @@ body.in-menu #site-header {
     --site-scrollbar-content-gap: clamp(9px, 0.55vw, 18px);
     --site-scrollbar-content-gutter: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-track-width) + var(--site-scrollbar-content-gap));
     --site-frame-content-inline-padding: max(var(--site-frame-content-padding), var(--site-scrollbar-content-gutter));
+    --site-frame-content-padding-start: clamp(15px, 0.52vw, 24px);
+    --site-frame-content-padding-end: calc(var(--site-frame-content-inline-padding) + clamp(3px, 0.52vw, 6px));
     --site-scrollbar-cut: 6px;
     --site-frame-cut: 18px;
     --site-header-cut: 18px;
@@ -39,10 +41,12 @@ body.in-menu #site-header {
     --site-dock-item-size: calc(var(--site-dock-height) - 6px);
     --site-frame-top-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top) + var(--site-header-height) + var(--site-frame-content-gap));
     --site-frame-bottom-space: calc(var(--site-frame-edge-gap) + env(safe-area-inset-bottom) + var(--site-dock-height) + var(--site-frame-content-gap));
+    --site-frame-content-height: calc(100vh - var(--site-frame-top-space) - var(--site-frame-bottom-space));
 }
 
 /* The topbar is a real frame; the brand link only occupies its own content. */
-body:not(.in-menu)>#root>#site-topbar {
+body:not(.in-menu)>#root>#site-topbar,
+body.in-menu>#root>#site-topbar {
     position: fixed;
     top: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top));
     left: 50%;
@@ -57,6 +61,12 @@ body:not(.in-menu)>#root>#site-topbar {
     padding: 0;
     transform: translateX(-50%);
     pointer-events: none;
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --site-frame-content-height: calc(100dvh - var(--site-frame-top-space) - var(--site-frame-bottom-space));
+    }
 }
 
 /* Header frame matches the dock chamfer direction while keeping its interior clear. */
@@ -311,31 +321,6 @@ body:not(.in-menu)>#root>#site-topbar {
     text-overflow: ellipsis;
 }
 
-/* Keep coin balance hidden inside gameplay */
-body.in-menu .site-header-coin-balance {
-    display: none;
-}
-
-
-
-/* Keep the gameplay chrome compact: only the established brand remains. */
-body.in-menu .site-topbar-theme-slot,
-body.in-menu .site-header-coin-balance {
-    display: none;
-}
-
-/* Preserve the previous compact top-left brand placement inside the game shell. */
-body.in-menu>#root>#site-topbar {
-    position: fixed;
-    top: calc(14px + env(safe-area-inset-top));
-    left: max(16px, env(safe-area-inset-left));
-    width: auto;
-    height: auto;
-    min-height: 0;
-    padding: 3px 6px;
-    transform: none;
-}
-
 /* Theme selection is a compact vertical stack of three square, chamfer-cut controls. */
 
 /* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
@@ -352,6 +337,27 @@ body.in-menu>#root>#site-topbar {
     margin: 0;
     transform: translateX(-50%);
     pointer-events: none;
+}
+
+/* Both site routes and the Maze menu use the same viewport and content-frame geometry. */
+body.in-menu {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100vh;
+    min-height: 0;
+    max-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+@supports (height: 100dvh) {
+    body.in-menu {
+        height: 100dvh;
+        max-height: 100dvh;
+    }
 }
 
 /* Normal site routes are viewport-locked; the page frame owns vertical scrolling. */
@@ -387,7 +393,8 @@ body:not(.in-menu)>#root {
     }
 }
 
-body:not(.in-menu) .route-page {
+body:not(.in-menu) .route-page,
+body.in-menu #mazeApp.maze-app.in-menu {
     position: fixed;
     isolation: isolate;
     display: block;
@@ -407,7 +414,8 @@ body:not(.in-menu) .route-page {
 }
 
 /* Content frame uses the same chamfer and border language, with no filled surface. */
-body:not(.in-menu) .route-page::before {
+body:not(.in-menu) .route-page::before,
+body.in-menu #mazeApp.maze-app.in-menu::before {
     content: "";
     position: absolute;
     /* Keep the frame stroke above the inner scroller and its scrollbar. */
@@ -442,8 +450,8 @@ body:not(.in-menu) .route-page>.feature-page-shell {
     min-height: 0;
     margin: 0;
     padding-block: var(--site-frame-content-padding);
-    padding-inline-start: clamp(15px, 0.52vw, 24px);
-    padding-inline-end: calc(var(--site-frame-content-inline-padding) + clamp(3px, 0.52vw, 6px));
+    padding-inline-start: var(--site-frame-content-padding-start);
+    padding-inline-end: var(--site-frame-content-padding-end);
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
