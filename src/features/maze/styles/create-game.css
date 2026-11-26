@@ -77,9 +77,9 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* The shared Maze content frame must appear immediately; route/frame entrance motion is not applied here. */
 .cg.show {
     display: flex;
-    animation: cgFade .5s ease both;
 }
 
 .cg [hidden] {
@@ -1505,11 +1505,6 @@
 }
 
 /* ── Keyframes ── */
-@keyframes cgFade {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 @keyframes cgPulse {
     0%, 100% { opacity: .6; transform: scale(.9); }
     50% { opacity: 1; transform: scale(1.15); }

@@ -1037,11 +1037,6 @@
         -webkit-tap-highlight-color: transparent;
     }
 
-    .maze-app .cg.show {
-        display: flex;
-        animation: cgFade .5s ease both;
-    }
-
     .maze-app .cg [hidden] {
         display: none !important;
     }

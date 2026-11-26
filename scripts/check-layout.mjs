@@ -103,6 +103,19 @@ if (
   console.error('[layout] Header, navigation and content frame must persist; only the inner page surface may enter-animate.');
   process.exit(1);
 }
+const mazeCreateStyles = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
+const mazeLegacyStyles = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
+const createFrameShowRule = mazeCreateStyles.match(/(?:^|\n)\s*\.cg\.show\s*\{([^}]*)\}/);
+if (
+  !createFrameShowRule ||
+  /animation\s*:/i.test(createFrameShowRule[1]) ||
+  /animation\s*:\s*cgFade\b/.test(mazeCreateStyles + mazeLegacyStyles) ||
+  /@keyframes\s+cgFade\b/.test(mazeCreateStyles + mazeLegacyStyles)
+) {
+  console.error('[layout] The shared Create/Rooms/Live content surface must not entrance-animate.');
+  process.exit(1);
+}
+
 const headerBalanceSource = fs.readFileSync(path.join(root, 'src/components/layout/HeaderCoinBalance.tsx'), 'utf8');
 const tokenBalanceService = fs.readFileSync(path.join(root, 'shared/services/SolanaTokenBalanceService.js'), 'utf8');
 const tokenBalanceServer = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
