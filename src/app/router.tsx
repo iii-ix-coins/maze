@@ -12,14 +12,8 @@ const ExplorePage = lazy(loadExplorePage);
 const MazeHubPage = lazy(loadMazeHubPage);
 const ProfilePage = lazy(loadProfilePage);
 
-// Maze itself is mounted by App.tsx into the dedicated #maze-root portal.
-function MazeRouteShell() {
-  return null;
-}
-
 const PAGE_COMPONENTS = {
   home: HomePage,
-  maze: MazeRouteShell,
   'maze-hub': MazeHubPage,
   explore: ExplorePage,
   profile: ProfilePage,
@@ -29,6 +23,11 @@ const PAGE_COMPONENTS = {
 export function AppRouter() {
   const pathname = usePathname();
   const route = resolveSiteRoute(pathname);
+
+  // The Maze document owns its own persistent frame and scrollbar through the
+  // #maze-root portal. Do not create an empty site route frame (or a second
+  // orphaned RouteScrollbar) for this route.
+  if (route?.id === 'maze') return null;
 
   const Page = route
     ? PAGE_COMPONENTS[route.page as keyof typeof PAGE_COMPONENTS]

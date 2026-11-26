@@ -485,6 +485,14 @@ body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
 }
 
 /* A single custom rail keeps its track, thumb and position consistent across browsers. */
+/* A scrollbar without an overflowing content target must not paint an
+   orphaned rail. This also prevents a second, viewport-edge rail on Maze
+   routes where AppRouter does not own the content frame. */
+.route-scrollbar[data-visible="false"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .route-scrollbar {
     position: absolute;
     z-index: 3;

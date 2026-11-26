@@ -554,6 +554,15 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
   console.error('[layout] React router must resolve active routes from the shared route manifest.');
   process.exit(1);
 }
+if (
+  !featureRouter.includes("if (route?.id === 'maze') return null;") ||
+  featureRouter.includes('MazeRouteShell') ||
+  !siteCssEntry.includes('.route-scrollbar[data-visible="false"]') ||
+  !siteCssEntry.includes('visibility: hidden;')
+) {
+  console.error('[layout] Maze must use only its portal-owned content frame, and scrollbars without a target must stay hidden.');
+  process.exit(1);
+}
 const siteRoutes = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8')).routes;
 const mazeHubRoute = siteRoutes.find((route) => route.id === 'maze-hub');
 if (!mazeHubRoute || !mazeHubRoute.paths.includes('/maze') || mazeHubRoute.server !== 'spa' || mazeHubRoute.navKey !== 'maze-hub') {
