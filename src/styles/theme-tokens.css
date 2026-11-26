@@ -16,6 +16,9 @@
     --svg-icon-secondary: #555555;
     --svg-icon-accent: #333333;
     --svg-icon-on-accent: #ffffff;
+    --ar-line-rgb: 102, 102, 102;
+    --ar-fill-rgb: 0, 0, 0;
+    --ar-hot-rgb: 204, 204, 204;
   }
 
   html[data-theme="light"] {
@@ -33,6 +36,9 @@
     --ar-soft: #555555;
     --ar-mute: #777777;
     --ar-line: #666666;
+    --ar-line-rgb: 102, 102, 102;
+    --ar-fill-rgb: 255, 255, 255;
+    --ar-hot-rgb: 68, 68, 68;
     --ar-accent: #333333;
     --ar-rgb: 51, 51, 51;
     --ar-accent-2: #555555;
@@ -87,6 +93,9 @@
     --ar-soft: #c4c4c4;
     --ar-mute: #999999;
     --ar-line: #999999;
+    --ar-line-rgb: 153, 153, 153;
+    --ar-fill-rgb: 0, 0, 0;
+    --ar-hot-rgb: 204, 204, 204;
     --ar-accent: #e0e0e0;
     --ar-rgb: 224, 224, 224;
     --ar-accent-2: #bdbdbd;
@@ -154,6 +163,9 @@
     --ar-soft: var(--radioactive-grass);
     --ar-mute: var(--radioactive-grass);
     --ar-line: var(--radioactive-grass);
+    --ar-line-rgb: 112, 224, 0;
+    --ar-fill-rgb: 0, 114, 0;
+    --ar-hot-rgb: 204, 255, 51;
     --ar-accent: var(--radioactive-grass);
     --ar-rgb: 112, 224, 0;
     --ar-accent-2: var(--slime-lime);
