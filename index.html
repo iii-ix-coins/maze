@@ -30,7 +30,10 @@
   <body class="page-loading">
     <script>
       const mazeDocumentPaths = /* @maze-route-paths */;
-      if (mazeDocumentPaths.includes(window.location.pathname)) {
+      // Same normalization as normalizePath() in src/app/routes.ts, so the frame mode
+      // chosen before React mounts always agrees with the router (case, trailing slash).
+      const mazeDocumentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+      if (mazeDocumentPaths.includes(mazeDocumentPath)) {
         document.body.classList.add('in-menu');
       }
     </script>

@@ -1,72 +1,53 @@
 import './styles/index.css';
 import { useEffect } from 'react';
 import { usePageLoading } from '../../components/layout/PageLoadingProvider';
-import { RouteScrollbar } from '../../components/layout/RouteScrollbar';
 import { MazeMarkup } from './MazeMarkup';
 
+/** Upper bound for holding the page loader if the engine never reports readiness. */
+const ENGINE_READY_TIMEOUT_MS = 10_000;
+
 /**
- * React-owned Maze page surface.
+ * Lazy Maze page CONTENT.
  *
- * The static markup is the exact existing Maze DOM contract (IDs, classes,
- * canvas elements and control nodes). The TypeScript game engine binds to those
- * nodes after React commits them. Keeping that DOM contract stable is deliberate:
- * the renderer, input handlers, save format and multiplayer protocol are not
- * rewritten as part of a frontend bundler/framework migration.
+ * The persistent content frame (`#mazeApp`, its border, scrollbar, theme and
+ * body-mode classes) is owned by the eager `MazeFrame` and is never created or
+ * destroyed by this component. This component only renders the static Maze DOM
+ * contract (IDs, classes, canvas elements and control nodes) inside that frame
+ * and boots the independent game engine after those nodes have committed.
+ * Keeping that DOM contract stable is deliberate: the renderer, input handlers,
+ * save format and multiplayer protocol are not rewritten.
+ *
+ * The initial Create / Rooms / Live view comes from `?view=` and is applied by
+ * the UI store before the first render, so no tab is clicked programmatically
+ * and the content never visibly switches views while booting.
  */
 export function MazePage() {
   const finishPageLoading = usePageLoading();
+
   useEffect(() => {
     let disposed = false;
-    let viewTimer: number | undefined;
-    let bodyObserver: MutationObserver | undefined;
-
-    const app = document.getElementById('mazeApp');
-
-    const applyTheme = (theme: string | undefined) => {
-      if (!app) return;
-      app.dataset.theme = ['grass', 'dark', 'light'].includes(theme ?? '') ? theme : 'grass';
-    };
-    const syncBodyClasses = () => {
-      if (!app) return;
-      for (const name of ['in-menu', 'wide', 'spectating']) {
-        app.classList.toggle(name, document.body.classList.contains(name));
-      }
-    };
-    const onThemeChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ theme?: string }>).detail;
-      applyTheme(detail?.theme);
-    };
-
-    applyTheme(document.documentElement.dataset.theme);
-    syncBodyClasses();
-    bodyObserver = new MutationObserver(syncBodyClasses);
-    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    window.addEventListener('site:themechange', onThemeChange);
+    let readyTimer: number | undefined;
+    let onEngineReady: (() => void) | undefined;
 
     void (async () => {
       try {
-        // Site chrome and the complete static Maze UI tree are mounted by React.
-        // The independent engine starts only after those DOM nodes have committed.
+        // Site chrome, the persistent frame and the complete static Maze UI tree
+        // are mounted by React. The engine starts only after those nodes commit.
         await import('./engine-entry');
         if (disposed) return;
 
-        finishPageLoading();
-
-        const view = new URLSearchParams(window.location.search).get('view');
-        if (view && ['create', 'rooms', 'live'].includes(view)) {
-          const tabId = view === 'create' ? 'tabCreate' : view === 'rooms' ? 'tabRooms' : 'tabLive';
-          let attempts = 0;
-          viewTimer = window.setInterval(() => {
-            document.getElementById(tabId)?.click();
-            attempts += 1;
-            if (
-              attempts >= 10 ||
-              document.getElementById(tabId)?.getAttribute('aria-selected') === 'true'
-            ) {
-              if (viewTimer !== undefined) window.clearInterval(viewTimer);
-            }
-          }, 150);
+        // Hold the page loader until the engine has chosen its first menu/game
+        // state, so the content is revealed once, already in its final state.
+        if (document.documentElement.dataset.mazeEngineReady !== 'true') {
+          await new Promise<void>((resolve) => {
+            onEngineReady = () => resolve();
+            window.addEventListener('maze:engine-ready', onEngineReady, { once: true });
+            readyTimer = window.setTimeout(resolve, ENGINE_READY_TIMEOUT_MS);
+          });
+          if (disposed) return;
         }
+
+        finishPageLoading();
       } catch (error) {
         console.error('[Maze] React/Vite bootstrap failed:', error);
         document.body.dataset.mazeBootstrapError = 'true';
@@ -76,23 +57,10 @@ export function MazePage() {
 
     return () => {
       disposed = true;
-
-      if (viewTimer !== undefined) {
-        window.clearInterval(viewTimer);
-      }
-
-      bodyObserver?.disconnect();
-      window.removeEventListener('site:themechange', onThemeChange);
+      if (readyTimer !== undefined) window.clearTimeout(readyTimer);
+      if (onEngineReady) window.removeEventListener('maze:engine-ready', onEngineReady);
     };
   }, [finishPageLoading]);
 
-  return (
-    <main className="maze-app in-menu" id="mazeApp">
-      <MazeMarkup />
-      <RouteScrollbar
-        contentSelector=":scope > #createGame.cg"
-        label="Maze menu scrollbar"
-      />
-    </main>
-  );
+  return <MazeMarkup />;
 }

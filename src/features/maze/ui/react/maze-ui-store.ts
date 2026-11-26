@@ -37,11 +37,26 @@ export interface MazeUiState {
   now: number;
 }
 
+/**
+ * The Create / Rooms / Live tab requested by the document URL (`?view=`).
+ * Resolved once, before the first render, so the menu is born on the right tab
+ * instead of mounting on Create and then switching after the engine boots.
+ */
+function readInitialHomeView(): 'create' | 'rooms' | 'live' {
+  try {
+    const requested = new URLSearchParams(window.location.search).get('view');
+    if (requested === 'rooms' || requested === 'live' || requested === 'create') return requested;
+  } catch { /* Non-browser or restricted contexts fall back to Create. */ }
+  return 'create';
+}
+
+const initialHomeView = readInitialHomeView();
+
 const initialState: MazeUiState = {
   visible: false,
   showVersion: 0,
-  view: 'create',
-  homeView: 'create',
+  view: initialHomeView,
+  homeView: initialHomeView,
   step: 0,
   maxStep: 0,
   levelIndex: 1,

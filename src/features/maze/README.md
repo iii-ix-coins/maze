@@ -21,3 +21,7 @@ The site Home route reads the existing read-only `GET /rooms` snapshot through `
 ## Stable game-content frame initialization
 
 The `/maze.html` document sets `body.in-menu` synchronously from the route before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. Keep the body-class cleanup in an unmount-only effect, never in the `state.visible` effect, because effect cleanup runs on every visibility change and would briefly remove the shared frame geometry.
+
+## Persistent content frame
+
+`MazeFrame.tsx` is eager and owns `#mazeApp` (frame, scrollbar, theme and body-mode classes). It mounts in the first React commit together with the header and dock. `MazePage.tsx` is lazy and renders only the content inside that frame and boots the engine. The initial Create / Rooms / Live tab is read from `?view=` by `maze-ui-store.ts` before the first render. The content stays hidden (`visibility`, no animation) until `data-maze-engine-ready` is set.

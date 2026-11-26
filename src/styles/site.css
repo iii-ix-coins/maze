@@ -438,6 +438,21 @@ body.in-menu #mazeApp.maze-app.in-menu::before {
     pointer-events: none;
 }
 
+/* The Maze frame is mounted eagerly and never changes between first paint and
+   gameplay hand-off. Its stacking order is owned here (not by the lazy Maze CSS
+   chunk), so loading that chunk cannot change the frame. */
+body.in-menu #mazeApp.maze-app.in-menu {
+    z-index: 1;
+}
+
+/* Only the CONTENT waits for the engine's first menu/game decision, and it is
+   revealed instantly (no animation) in its final state. The frame, its border and
+   its scrollbar rail stay fully visible and untouched the whole time. If the
+   engine fails to boot, the content is released so the page is never left blank. */
+html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app > #createGame {
+    visibility: hidden;
+}
+
 /* The inner page is the only vertical scroll container; the outer frame stays fixed. */
 body:not(.in-menu) .route-page>.feature-page-shell {
     position: relative;

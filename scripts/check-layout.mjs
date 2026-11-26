@@ -228,6 +228,7 @@ if (
 const mazeFrameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-unify.css'), 'utf8');
 const mazeThemeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-theme.css'), 'utf8');
 const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
+const mazeFrameSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
 const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
 const lobbyCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8');
 const legacyMazeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
@@ -260,8 +261,8 @@ if (
   mazeFrameCss.includes('.cg-layout::before') ||
   mazeFrameCss.includes('.cg-layout::after') ||
   /#mazeApp\.in-menu\s+\.lb\[data-view="(?:rooms|live)"\]\s*\{[^}]*border:\s*1px/s.test(mazeFrameCss) ||
-  !mazePageSource.includes('contentSelector=":scope > #createGame.cg"') ||
-  !mazePageSource.includes('<RouteScrollbar') ||
+  !mazeFrameSource.includes('contentSelector=":scope > #createGame.cg"') ||
+  !mazeFrameSource.includes('<RouteScrollbar') ||
   mazeFrameVerticalScrollCount !== 1 ||
   hasNestedMenuScroller ||
   !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*position:\s*absolute/s.test(mazeFrameCss) ||
@@ -281,6 +282,31 @@ if (
   /\.maze-app\s+\.cg-nav\s*\{[^}]*background:\s*var\(--surface-solid/s.test(createGameCss)
 ) {
   console.error('[layout] Create, Rooms, Live and Waiting Room must share one Site Content Frame and one vertical scroller.');
+  process.exit(1);
+}
+// The Maze content frame must be as persistent as the site frame: it exists from the first
+// React commit, independent of the lazy Maze chunk and of the engine boot.
+const mazeStoreSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/maze-ui-store.ts'), 'utf8');
+const indexHtmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const mazeFrameIsEagerAndPersistent =
+  /import\s+\{\s*MazeFrame\s*\}\s+from\s+'\.\.\/features\/maze\/MazeFrame'/.test(appSource) &&
+  !/lazy\([^)]*MazeFrame/.test(appSource) &&
+  /<MazeFrame>\s*<Suspense fallback=\{null\}>\s*<MazePage \/>\s*<\/Suspense>\s*<\/MazeFrame>/.test(appSource) &&
+  !appSource.includes('maze-loading') &&
+  /id="mazeApp"/.test(mazeFrameSource) &&
+  !/id=["']mazeApp["']/.test(mazePageSource) &&
+  !/<main\b/.test(mazePageSource) &&
+  !/import\s+['"]\.\/styles\/index\.css['"]/.test(mazeFrameSource) &&
+  !/setInterval|\.click\(\)/.test(mazePageSource) &&
+  /useLayoutEffect/.test(mazeFrameSource) &&
+  mazeStoreSource.includes('readInitialHomeView') &&
+  /view:\s*initialHomeView/.test(mazeStoreSource) &&
+  /html:not\(\[data-maze-engine-ready="true"\]\)[^{]*#mazeApp\.maze-app\s*>\s*#createGame\s*\{[^}]*visibility:\s*hidden/s.test(siteChromeCss) &&
+  /body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{[^}]*z-index:\s*1/s.test(siteChromeCss) &&
+  indexHtmlSource.includes('mazeDocumentPath') &&
+  indexHtmlSource.includes("toLowerCase().replace(/\\/+$/, '')");
+if (!mazeFrameIsEagerAndPersistent) {
+  console.error('[layout] The Maze content frame must be mounted eagerly (MazeFrame) and stay constant; only its lazy content may load or appear.');
   process.exit(1);
 }
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');

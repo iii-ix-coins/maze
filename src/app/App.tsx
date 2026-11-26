@@ -7,6 +7,7 @@ import { initNavigation, usePathname } from './navigation';
 import { resolveSiteRoute, SITE_DEFAULT_TITLE } from './routes';
 import { PageLoadingProvider } from '../components/layout/PageLoadingProvider';
 import { SiteChromeHosts } from '../components/layout/SiteChromeHosts';
+import { MazeFrame } from '../features/maze/MazeFrame';
 
 const MazePage = lazy(() => import('../features/maze/MazePage').then((module) => ({ default: module.MazePage })));
 
@@ -29,8 +30,14 @@ export function App() {
           {/* Persistent site chrome lives outside the route dispatcher. */}
           <SiteChromeHosts />
           <AppRouter />
+          {/* The Maze frame is eager and persistent; only its inner content is lazy. */}
           {isMazePage && mazeHost
-            ? createPortal(<Suspense fallback={<div className="maze-loading" role="status">Loading Maze…</div>}><MazePage /></Suspense>, mazeHost)
+            ? createPortal(
+                <MazeFrame>
+                  <Suspense fallback={null}><MazePage /></Suspense>
+                </MazeFrame>,
+                mazeHost,
+              )
             : null}
         </PageLoadingProvider>
       </AppProviders>
