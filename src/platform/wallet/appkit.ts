@@ -6,7 +6,7 @@ import { installWalletModalVisuals } from './walletModalVisuals';
 /**
  * Official Reown AppKit initialization for Maze.
  * The AppKit UI keeps Reown's default theme and components, with two small
- * presentation preferences: the site's Montserrat font and a theme-colored
+ * presentation preferences: the site's Nunito font and a theme-colored
  * ambient glow behind the modal.
  *
  * Domain handling: metadata.url always matches the actual serving origin.
@@ -38,7 +38,7 @@ function initWalletModal() {
     // Reown's theme mode remains at its default: follow the user's system.
     // Only the base font is overridden; all other AppKit theme values remain default.
     themeVariables: {
-      '--apkt-font-family': 'Montserrat, sans-serif',
+      '--apkt-font-family': 'Nunito, sans-serif',
     },
   });
 

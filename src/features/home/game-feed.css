@@ -16,7 +16,7 @@
   .game-feed-heading h1 {
     margin: 6px 0 8px;
     color: var(--text, #e6e6e6);
-    font: 800 clamp(2rem, 4vw, 3rem)/1 var(--font-display, Montserrat, sans-serif);
+    font: 800 clamp(2rem, 4vw, 3rem)/1 var(--font-display, Nunito, sans-serif);
     letter-spacing: -.045em;
   }
 
@@ -116,7 +116,7 @@
   .game-feed-section-heading h2 {
     margin: 0;
     color: var(--text, #eee);
-    font: 750 clamp(1.15rem, 2.4vw, 1.45rem)/1.2 var(--font-display, Montserrat, sans-serif);
+    font: 750 clamp(1.15rem, 2.4vw, 1.45rem)/1.2 var(--font-display, Nunito, sans-serif);
     letter-spacing: -.025em;
   }
 
@@ -238,7 +238,7 @@
 
   .game-feed-art-center strong {
     color: var(--text, #eee);
-    font: 800 clamp(1.5rem, 5vw, 2.2rem)/1 var(--font-display, Montserrat, sans-serif);
+    font: 800 clamp(1.5rem, 5vw, 2.2rem)/1 var(--font-display, Nunito, sans-serif);
     letter-spacing: .1em;
   }
 

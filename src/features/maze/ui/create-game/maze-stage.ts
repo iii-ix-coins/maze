@@ -388,7 +388,7 @@ export class MazeStage {
             const fits = label.length === 1 ? digits >= 6.5 : digits >= 8.5;
             if (fits) {
                 ctx.fillStyle = '#0b1d3a';
-                ctx.font = `700 ${Math.round(label.length === 1 ? digits : digits * 0.82)}px Montserrat, sans-serif`;
+                ctx.font = `700 ${Math.round(label.length === 1 ? digits : digits * 0.82)}px Nunito, sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(label, x, y + cell * 0.02);

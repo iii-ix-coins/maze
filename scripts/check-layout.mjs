@@ -10,7 +10,7 @@ const required = [
   'src/features/maze/rooms', 'src/features/maze/create-game', 'src/features/maze/live',
   'src/features/maze/race', 'src/features/maze/canvas', 'src/features/maze/engine',
   'src/services', 'src/hooks', 'src/types', 'src/styles',
-  'public/css', 'public/css/images', 'public/css/font', 'engines', 'shared', 'tests',
+  'public/css', 'public/css/images', 'public/fonts/nunito', 'engines', 'shared', 'tests',
   'src/main.tsx', 'src/app/App.tsx', 'src/features/home/HomePage.tsx', 'src/styles/theme-tokens.css',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/layout/RouteScrollbar.tsx',
@@ -46,6 +46,51 @@ for (const retiredPath of retiredCssArchitecture) {
     process.exit(1);
   }
 }
+const nunitoWeights = [200, 300, 400, 600, 700, 800, 900];
+const nunitoDirectory = path.join(root, 'public/fonts/nunito');
+if (!fs.existsSync(path.join(nunitoDirectory, 'OFL.txt'))) {
+  console.error('[layout] Nunito SIL Open Font License 1.1 file is missing.');
+  process.exit(1);
+}
+const nunitoStyle = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+const nunitoHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+for (const weight of nunitoWeights) {
+  for (const extension of ['woff2', 'woff']) {
+    const fontPath = path.join(nunitoDirectory, `nunito-${weight}-normal.${extension}`);
+    if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size === 0) {
+      console.error(`[layout] missing Nunito ${weight} ${extension} webfont: ${path.relative(root, fontPath)}`);
+      process.exit(1);
+    }
+  }
+  if (!nunitoStyle.includes(`font-weight: ${weight};`) || !nunitoStyle.includes(`/fonts/nunito/nunito-${weight}-normal.woff2`)) {
+    console.error(`[layout] global Nunito @font-face is missing weight ${weight}.`);
+    process.exit(1);
+  }
+}
+const retiredFontDirectories = ['public/css/font', 'src/features/maze/styles/font'];
+for (const retiredFontDirectory of retiredFontDirectories) {
+  if (fs.existsSync(path.join(root, retiredFontDirectory))) {
+    console.error(`[layout] retired Montserrat font assets remain: ${retiredFontDirectory}`);
+    process.exit(1);
+  }
+}
+const typographySources = [
+  'src/styles/style.css', 'src/styles/home-shared.css', 'src/components/home/home-hero-slider.css',
+  'src/features/home/game-feed.css', 'src/features/maze/styles/maze-site.css',
+  'src/features/maze/styles/create-game.css', 'src/features/maze/ui/create-game/maze-stage.ts',
+  'src/platform/wallet/appkit.ts', 'src/platform/wallet/walletModalVisuals.ts',
+].map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]);
+for (const [file, source] of typographySources) {
+  if (/Montserrat/i.test(source)) {
+    console.error(`[layout] retired Montserrat reference remains in ${file}.`);
+    process.exit(1);
+  }
+}
+if (!nunitoHtml.includes('/fonts/nunito/nunito-400-normal.woff2') || !nunitoHtml.includes('/fonts/nunito/nunito-700-normal.woff2')) {
+  console.error('[layout] index.html must preload the common Nunito body and heading weights.');
+  process.exit(1);
+}
+
 const siteCssEntry = fs.readFileSync(path.join(root, 'src/styles/site.css'), 'utf8');
 if (!siteCssEntry.includes('@import "./theme-tokens.css";') || /@import\s+["']\.\/arena\.css["']/.test(siteCssEntry)) {
   console.error('[layout] site.css must load the dedicated theme token owner and must not load arena.css.');

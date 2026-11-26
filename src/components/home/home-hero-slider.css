@@ -85,7 +85,7 @@
     margin: 0;
 
     color: var(--text, #172033);
-    font-family: var(--font-display, Montserrat, sans-serif);
+    font-family: var(--font-display, Nunito, sans-serif);
 
     font-size: clamp(35px, 3.2vw, 40px);
     font-weight: 600;

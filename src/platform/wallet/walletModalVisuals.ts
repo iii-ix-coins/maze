@@ -11,7 +11,7 @@ const FONT_CSS = `
 ::slotted(*),
 *::before,
 *::after {
-  font-family: "Montserrat", sans-serif !important;
+  font-family: "Nunito", sans-serif !important;
 }
 `;
 

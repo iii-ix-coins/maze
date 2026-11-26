@@ -24,34 +24,67 @@
 }
 
 /* ==========================================================================
-   Montserrat (self-hosted) — the ONLY font family used across the site
+   Nunito (self-hosted) — the single font family used across the site and game
    ========================================================================== */
 @font-face {
-    font-family: "Montserrat";
-    src: url("/css/font/montserrat-regular-webfont.woff2") format("woff2"),
-        url("/css/font/montserrat-regular-webfont.woff") format("woff"),
-        url("/css/font/montserrat-regular-webfont.ttf") format("truetype");
-    font-weight: 100 500;
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-200-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-200-normal.woff") format("woff");
+    font-weight: 200;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: "Montserrat";
-    src: url("/css/font/montserrat-semibold-webfont.woff2") format("woff2"),
-        url("/css/font/montserrat-semibold-webfont.woff") format("woff"),
-        url("/css/font/montserrat-semibold-webfont.ttf") format("truetype");
-    font-weight: 501 650;
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-300-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-300-normal.woff") format("woff");
+    font-weight: 300;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: "Montserrat";
-    src: url("/css/font/montserrat-bold-webfont.woff2") format("woff2"),
-        url("/css/font/montserrat-bold-webfont.woff") format("woff"),
-        url("/css/font/montserrat-bold-webfont.ttf") format("truetype");
-    font-weight: 651 900;
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-400-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-400-normal.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-600-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-600-normal.woff") format("woff");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-700-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-700-normal.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-800-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-800-normal.woff") format("woff");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Nunito";
+    src: url("/fonts/nunito/nunito-900-normal.woff2") format("woff2"),
+        url("/fonts/nunito/nunito-900-normal.woff") format("woff");
+    font-weight: 900;
     font-style: normal;
     font-display: swap;
 }
@@ -187,9 +220,9 @@
         --r-pill: 999px;
 
         /* —— Type —— */
-        --font-display: "Montserrat";
-        --font-body: "Montserrat";
-        --font-mono: "Montserrat";
+        --font-display: "Nunito", sans-serif;
+        --font-body: "Nunito", sans-serif;
+        --font-mono: "Nunito", sans-serif;
 
         --fs-xs: clamp(0.68rem, 0.66rem + 0.10vw, 0.74rem);
         --fs-sm: clamp(0.78rem, 0.75rem + 0.14vw, 0.86rem);
@@ -1444,7 +1477,7 @@
     }
 }
 
-/* Force Montserrat everywhere (buttons, inputs, pseudo-elements, SVG text …) */
+/* Keep one typography family across all site and game UI surfaces. */
 @layer base {
 
     *,
@@ -1461,7 +1494,7 @@
     samp,
     pre,
     svg text {
-        font-family: "Montserrat" !important;
+        font-family: "Nunito", sans-serif !important;
     }
 }
 

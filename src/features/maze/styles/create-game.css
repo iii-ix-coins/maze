@@ -71,7 +71,7 @@
     overflow: visible;
     box-sizing: border-box;
     color: var(--haze);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-body, "Nunito", sans-serif);
     text-align: left;
     background: transparent;
     -webkit-tap-highlight-color: transparent;
