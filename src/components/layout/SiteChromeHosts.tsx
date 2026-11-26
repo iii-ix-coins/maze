@@ -4,12 +4,15 @@ import { SiteNavigation } from '../navigation/SiteNavigation';
 import { ThemedSvgIcon } from '../media/ThemedSvgIcon';
 import { ThemeSwitcher } from '../navigation/ThemeSwitcher';
 import { HeaderCoinBalance } from './HeaderCoinBalance';
+import { useIdentity } from '../../platform/identity/IdentityProvider';
 
 /**
  * Persistent site chrome is mounted above AppRouter and memoized.
  * Route changes replace only the content frame; the header and dock stay mounted.
  */
 export const SiteChromeHosts = memo(function SiteChromeHosts() {
+  const { isAuthenticated } = useIdentity();
+
   return (
     <>
       <header id="site-topbar" className="site-topbar" aria-label="Maze site header">
@@ -21,7 +24,7 @@ export const SiteChromeHosts = memo(function SiteChromeHosts() {
         <div className="site-topbar-theme-slot" aria-label="Theme selection">
           <ThemeSwitcher />
         </div>
-        <HeaderCoinBalance />
+        {isAuthenticated ? <HeaderCoinBalance /> : null}
       </header>
 
       <div id="site-header">

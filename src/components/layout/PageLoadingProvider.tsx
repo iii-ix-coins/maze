@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { PageLoader } from './PageLoader';
+import type { IdentityStatus } from '../../platform/identity/identity-types';
 import {
     LOADER_HIDE_EVENT,
     LOADER_SHOW_EVENT,
@@ -24,9 +25,11 @@ const PageLoadingContext = createContext<PageLoadingContextValue | null>(null);
 export function PageLoadingProvider({
     children,
     waitForMazeEngine = false,
+    mazeIdentityStatus,
 }: {
     children: ReactNode;
     waitForMazeEngine?: boolean;
+    mazeIdentityStatus?: IdentityStatus;
 }) {
     const [loading, setLoading] = useState(true);
     const finishingRef = useRef(false);
@@ -55,8 +58,19 @@ export function PageLoadingProvider({
     }, []);
 
     useEffect(() => {
-        // Maze signals readiness after its engine has initialized.
-        if (waitForMazeEngine) return;
+        if (waitForMazeEngine) {
+            // Keep the initial document loader visible while the server session
+            // is restored. Guests must see the access gate rather than an endless
+            // loader; an initially authenticated session waits for engine-ready.
+            if (mazeIdentityStatus === 'checking' || mazeIdentityStatus === 'authenticating' || !mazeIdentityStatus) return;
+            if (mazeIdentityStatus === 'authenticated') {
+                return;
+            }
+            if (mazeIdentityStatus === 'anonymous' || mazeIdentityStatus === 'error') {
+                finishPageLoading();
+            }
+            return;
+        }
 
         const onLoad = () => finishPageLoading();
 
@@ -69,7 +83,7 @@ export function PageLoadingProvider({
         return () => {
             window.removeEventListener('load', onLoad);
         };
-    }, [waitForMazeEngine, finishPageLoading]);
+    }, [waitForMazeEngine, mazeIdentityStatus, finishPageLoading]);
 
     return (
         <PageLoadingContext.Provider value={{ finishPageLoading }}>

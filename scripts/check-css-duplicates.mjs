@@ -15,6 +15,7 @@ const entryPoints = [
   'src/components/home/home-hero-slider.css',
   'src/features/explore/explore-page.css',
   'src/features/profile/profile-page.css',
+  'src/components/access/page-access-gate.css',
   'src/features/maze/styles/index.css',
 ];
 const visited = new Set();

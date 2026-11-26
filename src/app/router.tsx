@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { RouteScrollbar } from '../components/layout/RouteScrollbar';
+import { PageAccessGate, type AccessPreviewPage } from '../components/access/PageAccessGate';
+import { useIdentity } from '../platform/identity/IdentityProvider';
 
 import { usePathname } from './navigation';
 import { loadExplorePage, loadHomePage, loadMazeHubPage, loadProfilePage } from './route-loaders';
@@ -20,8 +22,16 @@ const PAGE_COMPONENTS = {
 };
 
 /** One React router dispatches all active site features without touching API routes. */
+const ACCESS_PAGE_BY_ROUTE: Record<string, AccessPreviewPage> = {
+  home: 'home',
+  explore: 'explore',
+  'maze-hub': 'maze-hub',
+  profile: 'profile',
+};
+
 export function AppRouter() {
   const pathname = usePathname();
+  const { status, isAuthenticated, error, refreshSession } = useIdentity();
   const route = resolveSiteRoute(pathname);
 
   // The Maze document owns its own persistent frame and scrollbar through the
@@ -53,9 +63,18 @@ export function AppRouter() {
       }}
     >
       {/* Keep this frame and its border mounted; only the keyed page content changes. */}
-      <Suspense fallback={null}>
-        <Page key={pathname} />
-      </Suspense>
+      {isAuthenticated ? (
+        <Suspense fallback={null}>
+          <Page key={pathname} />
+        </Suspense>
+      ) : (
+        <PageAccessGate
+          page={ACCESS_PAGE_BY_ROUTE[route.id] ?? 'home'}
+          status={status}
+          error={error}
+          onRetry={refreshSession}
+        />
+      )}
       {/* The scrollbar stays mounted and rebinds to the new direct child scroller. */}
       <RouteScrollbar />
     </div>

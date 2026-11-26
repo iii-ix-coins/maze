@@ -115,6 +115,10 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     }
 
     loginInFlightRef.current = true;
+    // After server verification, return to the exact page the visitor tried to open.
+    // The current path is same-origin by construction; never accept an external redirect.
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`
+      || getSiteRoutePath('profile');
     const requestVersion = ++requestVersionRef.current;
     commit('authenticating', null);
     setError(null);
@@ -199,7 +203,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       }
 
       commit('authenticated', result.user);
-      navigateTo(getSiteRoutePath('profile'));
+      navigateTo(returnTo);
       return result.user;
     } catch (loginError) {
       if (requestVersion === requestVersionRef.current) {

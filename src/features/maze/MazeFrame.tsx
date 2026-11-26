@@ -1,5 +1,7 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { RouteScrollbar } from '../../components/layout/RouteScrollbar';
+import { PageAccessGate, type AccessPreviewPage } from '../../components/access/PageAccessGate';
+import { useIdentity } from '../../platform/identity/IdentityProvider';
 
 const SITE_THEMES = ['grass', 'dark', 'light'];
 const BODY_MODE_CLASSES = ['in-menu', 'wide', 'spectating'] as const;
@@ -18,8 +20,25 @@ const BODY_MODE_CLASSES = ['in-menu', 'wide', 'spectating'] as const;
  * Now only the *content* inside the frame is lazy; the frame, its border, its
  * scrollbar, its theme and its body-mode classes are all stable from first paint.
  */
+function getRequestedMazePreview(): AccessPreviewPage {
+  const view = new URLSearchParams(window.location.search).get('view');
+  if (view === 'rooms') return 'rooms';
+  if (view === 'live') return 'live';
+  if (view === 'waiting') return 'waiting-room';
+  return 'create';
+}
+
 export function MazeFrame({ children }: { children: ReactNode }) {
+  const { status, isAuthenticated, error, refreshSession } = useIdentity();
+  const [engineReady, setEngineReady] = useState(() => document.documentElement.dataset.mazeEngineReady === 'true');
   const frameRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const handleEngineReady = () => setEngineReady(true);
+    window.addEventListener('maze:engine-ready', handleEngineReady);
+    if (document.documentElement.dataset.mazeEngineReady === 'true') setEngineReady(true);
+    return () => window.removeEventListener('maze:engine-ready', handleEngineReady);
+  }, []);
 
   // Layout effect: theme and mode classes are applied before the browser paints,
   // so the frame never renders once in an intermediate (unthemed) state.
@@ -54,10 +73,24 @@ export function MazeFrame({ children }: { children: ReactNode }) {
 
   return (
     <main ref={frameRef} className="maze-app in-menu" id="mazeApp">
-      {children}
+      {isAuthenticated ? children : (
+        <PageAccessGate
+          page={getRequestedMazePreview()}
+          status={status}
+          error={error}
+          onRetry={refreshSession}
+        />
+      )}
+      {isAuthenticated && !engineReady ? (
+        <div className="maze-authenticated-boot" role="status">
+          <span className="maze-authenticated-boot-mark" aria-hidden="true" />
+          <strong>Preparing your Maze environment…</strong>
+          <small>Identity verified · Starting game services</small>
+        </div>
+      ) : null}
       <RouteScrollbar
-        contentSelector=":scope > #createGame.cg"
-        label="Maze menu scrollbar"
+        contentSelector=":scope > #createGame.cg, :scope > .access-gate"
+        label={isAuthenticated ? 'Maze menu scrollbar' : 'Sign-in preview scrollbar'}
       />
     </main>
   );

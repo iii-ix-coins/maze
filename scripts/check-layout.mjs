@@ -15,6 +15,7 @@ const required = [
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/layout/RouteScrollbar.tsx',
   'src/components/navigation/SiteNavigation.tsx',
+  'src/components/access/PageAccessGate.tsx', 'src/components/access/page-access-gate.css',
   'src/components/navigation/ThemeSwitcher.tsx',
   'src/features/explore/ExplorePage.tsx',
   'src/platform/wallet/WalletConnectButton.tsx', 'src/platform/wallet/wallet-session-teardown.ts',
@@ -345,7 +346,7 @@ if (
   mazeFrameCss.includes('.cg-layout::before') ||
   mazeFrameCss.includes('.cg-layout::after') ||
   /#mazeApp\.in-menu\s+\.lb\[data-view="(?:rooms|live)"\]\s*\{[^}]*border:\s*1px/s.test(mazeFrameCss) ||
-  !mazeFrameSource.includes('contentSelector=":scope > #createGame.cg"') ||
+  !mazeFrameSource.includes('contentSelector=":scope > #createGame.cg, :scope > .access-gate"') ||
   !mazeFrameSource.includes('<RouteScrollbar') ||
   mazeFrameVerticalScrollCount !== 1 ||
   hasNestedMenuScroller ||
@@ -391,6 +392,38 @@ const mazeFrameIsEagerAndPersistent =
   indexHtmlSource.includes("toLowerCase().replace(/\\/+$/, '')");
 if (!mazeFrameIsEagerAndPersistent) {
   console.error('[layout] The Maze content frame must be mounted eagerly (MazeFrame) and stay constant; only its lazy content may load or appear.');
+  process.exit(1);
+}
+
+// Logged-out pages must render an inert preview and must not mount protected feature trees.
+const accessGateSource = fs.readFileSync(path.join(root, 'src/components/access/PageAccessGate.tsx'), 'utf8');
+const accessGateCss = fs.readFileSync(path.join(root, 'src/components/access/page-access-gate.css'), 'utf8');
+const accessGateIdentitySource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
+const pageLoadingSource = fs.readFileSync(path.join(root, 'src/components/layout/PageLoadingProvider.tsx'), 'utf8');
+const siteChromeHostsSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
+const authGateIsFailClosed =
+  routerSource.includes('isAuthenticated ? (') &&
+  routerSource.includes('<Page key={pathname} />') &&
+  routerSource.includes('<PageAccessGate') &&
+  mazeFrameSource.includes('{isAuthenticated ? children : (') &&
+  mazeFrameSource.includes('<PageAccessGate') &&
+  accessGateSource.includes('<WalletConnectButton />') &&
+  accessGateSource.includes('inert') &&
+  accessGateSource.includes("status === 'authenticating'") &&
+  accessGateSource.includes('role="img"') &&
+  !/fetch\s*\(|API_PATHS|axios\./.test(accessGateSource) &&
+  accessGateCss.includes('width: min(100%, 360px)') &&
+  accessGateCss.includes('aspect-ratio: 1 / 1') &&
+  accessGateCss.includes('access-preview-auto-pan') &&
+  accessGateCss.includes('prefers-reduced-motion: reduce') &&
+  accessGateIdentitySource.includes("if (!result.authenticated || !result.user)") &&
+  accessGateIdentitySource.includes('navigateTo(returnTo)') &&
+  pageLoadingSource.includes("mazeIdentityStatus === 'authenticated'") &&
+  pageLoadingSource.includes("mazeIdentityStatus === 'anonymous'") &&
+  siteChromeHostsSource.includes('const { isAuthenticated } = useIdentity()') &&
+  siteChromeHostsSource.includes('{isAuthenticated ? <HeaderCoinBalance /> : null}');
+if (!authGateIsFailClosed) {
+  console.error('[layout] Guests must stay outside Home, Explore, Profile and the Maze engine until the server confirms the wallet identity; previews must remain inert and bounded.');
   process.exit(1);
 }
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
@@ -500,6 +533,7 @@ const activeFrontend = [
   'src/features/maze/MazePage.tsx',
   'src/components/layout/SiteChromeHosts.tsx',
   'src/components/navigation/SiteNavigation.tsx',
+  'src/components/access/PageAccessGate.tsx', 'src/components/access/page-access-gate.css',
   'src/features/market/MarketSummary.tsx',
   'src/features/explore/ExplorePage.tsx',
 ];
@@ -731,7 +765,7 @@ const identityStoreSource = fs.readFileSync(path.join(root, 'shared/identity/ide
 if (
   !appProvidersSource.includes('<IdentityProvider>') ||
   !identityProviderSource.includes('getIdentitySession') ||
-  !identityProviderSource.includes("navigateTo(getSiteRoutePath('profile'))") ||
+  !identityProviderSource.includes('navigateTo(returnTo)') || !identityProviderSource.includes('window.location.pathname') ||
   !identityRoutesSource.includes('verifyEd25519') ||
   !identityRoutesSource.includes('requireTrustedOrigin') ||
   !identityRoutesSource.includes('sessionCookie') ||
