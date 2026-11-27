@@ -578,7 +578,7 @@
 
 
     /* Initial document entrance only; soft route swaps are owned by the coordinator. */
-    html:not([data-ui-view-transition-support="true"]):not([data-ui-content-transition-fallback="true"]) body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
+    html:not([data-ui-view-transition-support="true"]):not([data-ui-content-transition-fallback="true"]) body.page-loaded .route-page>.feature-page-shell>.route-view:not([hidden]) {
         width: 100%;
         min-width: 0;
         animation: site-route-content-enter var(--motion-route-duration) var(--motion-route-easing) both;
@@ -604,7 +604,8 @@
 
 
     @media (prefers-reduced-motion: reduce) {
-        body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]),
+
+        body.page-loaded .route-page>.feature-page-shell>.route-view:not([hidden]),
         ::view-transition-group(site-route-content),
         ::view-transition-old(site-route-content),
         ::view-transition-new(site-route-content) {
@@ -1732,21 +1733,33 @@ html[data-theme="grass"] .nav {
 /* Primary CTA variant is shared by every route, including the access gate. */
 .nav-wallet-button.is-primary {
     width: 100%;
-    min-height: 48px;
+    min-height: 39px;
     height: auto;
     padding: 12px 18px;
-    border: 1px solid var(--ar-accent);
-    border-radius: var(--r-pill, 999px);
-    background: var(--ar-accent);
+    border: 0;
+    background: var(--ar-accent-2);
     color: var(--ar-on-accent);
     font: inherit;
-    font-size: 14px;
-    font-weight: 850;
+    font-size: 15px;
+    font-weight: 500;
     box-shadow: none;
     transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, filter 180ms ease;
+
+    clip-path: polygon(0 0,
+            calc(100% - var(--site-scrollbar-cut)) 0,
+            100% var(--site-scrollbar-cut),
+            100% 100%,
+            var(--site-scrollbar-cut) 100%,
+            0 calc(100% - var(--site-scrollbar-cut)));
+    -webkit-clip-path: polygon(0 0,
+            calc(100% - var(--site-scrollbar-cut)) 0,
+            100% var(--site-scrollbar-cut),
+            100% 100%,
+            var(--site-scrollbar-cut) 100%,
+            0 calc(100% - var(--site-scrollbar-cut)));
 }
 
-.nav-wallet-button.is-primary > span,
+.nav-wallet-button.is-primary>span,
 .nav-wallet-button.is-primary .nav-wallet-address {
     color: inherit;
 }
