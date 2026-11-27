@@ -36,7 +36,7 @@ function AppContent() {
   }, [route?.title]);
 
   return (
-    <PageLoadingProvider waitForMazeEngine={isMazePage} mazeIdentityStatus={status}>
+    <PageLoadingProvider waitForMazeEngine={isMazePage} identityStatus={status}>
       {/* Persistent site chrome lives outside the route dispatcher. */}
       <SiteChromeHosts />
       <AppRouter />

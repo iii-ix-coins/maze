@@ -460,6 +460,14 @@ function createIdentityHandlers({ store = new IdentityStore() } = {}) {
         requireTrustedOrigin,
         requireSession,
         getSessionUser,
+        /**
+         * Session snapshot for HTML bootstrap. Same payload as GET /api/auth/session,
+         * but returned to the caller instead of being sent. Clears a stale cookie.
+         */
+        readSessionSnapshot(req, res) {
+            const user = readAuthenticatedUser(req, res);
+            return user ? publicUser(user) : null;
+        },
         close() {
             store.close();
         }

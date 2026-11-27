@@ -100,6 +100,39 @@ const SITE_ROUTE_CONFIG = require('./shared/site-routes.json').routes;
 const API_PATHS = require('./shared/api-routes.json');
 const { createIdentityHandlers } = require('./shared/identity/identity-routes');
 const identityHandlers = createIdentityHandlers();
+const { createSnapshot, injectIdentityBootstrap } = require('./shared/identity/identity-bootstrap');
+
+// The built index.html is read once per file change. Each response only splices
+// the visitor's public session snapshot into it, so no per-request disk read.
+const siteDocumentCache = { mtimeMs: -1, html: '' };
+function readSiteDocument() {
+    const { mtimeMs } = fs.statSync(SITE_DIST_INDEX);
+    if (mtimeMs !== siteDocumentCache.mtimeMs) {
+        siteDocumentCache.html = fs.readFileSync(SITE_DIST_INDEX, 'utf8');
+        siteDocumentCache.mtimeMs = mtimeMs;
+    }
+    return siteDocumentCache.html;
+}
+
+/**
+ * Serve the shared React document with the identity snapshot embedded, so the
+ * first client render already knows whether the visitor is signed in. Any
+ * failure falls back to the plain document; the client then restores the
+ * session through /api/auth/session exactly as before.
+ */
+function sendSiteDocument(req, res, fallbackFile) {
+    if (!fs.existsSync(SITE_DIST_INDEX)) return res.sendFile(fallbackFile);
+    try {
+        const snapshot = createSnapshot(identityHandlers.readSessionSnapshot(req, res));
+        const html = injectIdentityBootstrap(readSiteDocument(), snapshot);
+        res.setHeader('Cache-Control', 'no-store');
+        res.vary('Cookie');
+        return res.type('html').send(html);
+    } catch (error) {
+        console.error('[Web] Could not embed the identity bootstrap:', error?.message || error);
+        return res.sendFile(SITE_DIST_INDEX);
+    }
+}
 
 let solanaTokenBalanceService = null;
 const tokenBalanceRateBuckets = new Map();
@@ -152,10 +185,7 @@ const HOME_DOCUMENT_PATH = getConfiguredDocumentPaths('root')[0];
 
 // Both `/` and `/maze.html` are routes in the same root React/Vite application.
 // The old standalone documents remain available only as explicit rollback URLs.
-app.get(MAZE_DOCUMENT_PATHS, (req, res) => {
-    const page = fs.existsSync(SITE_DIST_INDEX) ? SITE_DIST_INDEX : LEGACY_MAZE_INDEX;
-    return res.sendFile(page);
-});
+app.get(MAZE_DOCUMENT_PATHS, (req, res) => sendSiteDocument(req, res, LEGACY_MAZE_INDEX));
 
 app.get('/maze-legacy.html', (req, res) => res.sendFile(LEGACY_MAZE_INDEX));
 
@@ -475,7 +505,7 @@ app.get(
 
 // Client routes must resolve to the shared Vite document on direct visits and refreshes.
 app.get(SPA_ROUTE_PATHS, (req, res, next) => {
-    if (fs.existsSync(SITE_DIST_INDEX)) return res.sendFile(SITE_DIST_INDEX);
+    if (fs.existsSync(SITE_DIST_INDEX)) return sendSiteDocument(req, res, SITE_DIST_INDEX);
     return next();
 });
 
@@ -485,11 +515,7 @@ app.get(
     (req, res) => {
         // Use the single root Vite/React build when present. If it has not been built yet,
         // fall back to the untouched legacy Home document so deployment is reversible.
-        const indexFile = fs.existsSync(SITE_DIST_INDEX)
-            ? SITE_DIST_INDEX
-            : LEGACY_SITE_INDEX;
-
-        return res.sendFile(indexFile);
+        return sendSiteDocument(req, res, LEGACY_SITE_INDEX);
     }
 );
 

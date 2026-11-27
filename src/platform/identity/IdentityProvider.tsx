@@ -14,6 +14,7 @@ import { preloadSiteRoutePage } from '../../app/route-loaders';
 import { startContentViewTransition, waitForDocumentEntryToFinish } from '../transition-coordinator';
 import { navigateTo } from '../../app/navigation';
 import { ApiError } from '../../services/api/http';
+import { isSameSession, readIdentityBootstrap } from './identity-bootstrap';
 import {
   encodeSignatureBase64,
   getIdentitySession,
@@ -53,8 +54,14 @@ function isAbortError(error: unknown): boolean {
 }
 
 export function IdentityProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<IdentityStatus>('checking');
-  const [user, setUser] = useState<IdentityUser | null>(null);
+  // The server embeds the session snapshot in the HTML document. When present,
+  // the very first render is already authenticated or anonymous, so a signed-in
+  // visitor never sees the guest Gate while the session request is in flight.
+  const [bootstrap] = useState(readIdentityBootstrap);
+  const [status, setStatus] = useState<IdentityStatus>(
+    bootstrap ? (bootstrap.authenticated && bootstrap.user ? 'authenticated' : 'anonymous') : 'checking',
+  );
+  const [user, setUser] = useState<IdentityUser | null>(bootstrap?.user ?? null);
   const [error, setError] = useState<string | null>(null);
   const stateRef = useRef({ status, user });
   const loginInFlightRef = useRef(false);
@@ -100,6 +107,11 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         // A user action (login/logout/manual refresh) supersedes the initial session read.
         if (requestVersion !== requestVersionRef.current) return;
 
+        // The first paint already used the server snapshot. When the live session
+        // agrees with it (the normal case) there is nothing to change: no state
+        // update, no transition, no re-render.
+        if (bootstrap && isSameSession(bootstrap, response)) return;
+
         // For Site documents, let the one-shot cross-document entry settle before
         // replacing the guest Gate with an authenticated page. Maze is different:
         // it must publish authenticated state first so MazeFrame can reveal Boot,
@@ -129,6 +141,9 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       })
       .catch((loadError: unknown) => {
         if (isAbortError(loadError) || requestVersion !== requestVersionRef.current) return;
+        // A transient failure of the background revalidation must not tear down a
+        // session the server has just confirmed in the document itself.
+        if (bootstrap) return;
         commit('error', null);
         setError(getErrorMessage(loadError, 'Could not restore the account session.'));
       });
@@ -137,7 +152,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       mountedRef.current = false;
       controller.abort();
     };
-  }, [commit, commitWithContentTransition]);
+  }, [bootstrap, commit, commitWithContentTransition]);
 
   const login = useCallback(async ({ walletAddress, signIn, signMessage, isWalletConnected }: LoginInput) => {
     if (loginInFlightRef.current) throw new Error('A sign-in request is already in progress.');

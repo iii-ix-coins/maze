@@ -24,7 +24,7 @@
     "test:maze:e2e": "node --import tsx tests/maze/e2e/parity.mjs",
     "test:maze:e2e:self": "node --import tsx tests/maze/e2e/parity.mjs --self",
     "check:css:duplicates": "node scripts/check-css-duplicates.mjs",
-    "test:identity": "node --test tests/identity/identity-routes.test.cjs",
+    "test:identity": "node --test tests/identity/identity-routes.test.cjs tests/identity/identity-bootstrap.test.cjs",
     "test:token-balance": "node --test tests/solana/token-balance-service.test.cjs",
     "check:svg-theme": "node scripts/check-svg-theme.mjs"
   },

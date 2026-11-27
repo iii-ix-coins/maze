@@ -475,12 +475,27 @@ const authGateIsFailClosed =
   accessGateCss.includes('prefers-reduced-motion: reduce') &&
   accessGateIdentitySource.includes("if (!result.authenticated || !result.user)") &&
   accessGateIdentitySource.includes('navigateTo(returnTo)') &&
-  pageLoadingSource.includes("mazeIdentityStatus === 'authenticated'") &&
-  pageLoadingSource.includes("mazeIdentityStatus === 'anonymous'") &&
+  pageLoadingSource.includes("identityStatus === 'authenticated'") &&
+  pageLoadingSource.includes("identityStatus === 'checking' && !identityWaitExpired") &&
   siteChromeHostsSource.includes('const { isAuthenticated } = useIdentity()') &&
   siteChromeHostsSource.includes('{isAuthenticated ? <HeaderCoinBalance /> : null}');
 if (!authGateIsFailClosed) {
   console.error('[layout] Guests must stay outside Home, Explore, Profile and the Maze engine until the server confirms the wallet identity; previews must remain inert and bounded.');
+  process.exit(1);
+}
+// Identity bootstrap: the server embeds the session snapshot in the HTML, so a
+// signed-in visitor's first render is never the guest Gate or a "checking" state.
+const identityProviderBootstrapSource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
+const serverEntrySource = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+const identityBootstrapIsWired =
+  identityProviderBootstrapSource.includes('readIdentityBootstrap') &&
+  identityProviderBootstrapSource.includes('isSameSession(bootstrap, response)') &&
+  serverEntrySource.includes('function sendSiteDocument') &&
+  serverEntrySource.includes("res.setHeader('Cache-Control', 'no-store')") &&
+  serverEntrySource.includes("res.vary('Cookie')") &&
+  !/res\.sendFile\(SITE_DIST_INDEX\);\s*\}\);\s*\n\s*\napp\.get\(\s*HOME_DOCUMENT_PATH/.test(serverEntrySource);
+if (!identityBootstrapIsWired) {
+  console.error('[layout] Every site document response must embed the server-verified identity snapshot (no-store, Vary: Cookie) and IdentityProvider must start from it.');
   process.exit(1);
 }
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
