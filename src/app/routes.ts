@@ -25,6 +25,15 @@ export const SOFT_NAVIGATION_PATHS = new Set(
   SITE_ROUTES.filter((route) => route.soft).flatMap((route) => route.paths),
 );
 
+/** A client-side transition is valid only when both ends belong to the SPA route set. */
+export function isSoftNavigationPath(pathname: string): boolean {
+  return SOFT_NAVIGATION_PATHS.has(normalizePath(pathname));
+}
+
+export function canSoftNavigateBetween(fromPath: string, toPath: string): boolean {
+  return isSoftNavigationPath(fromPath) && isSoftNavigationPath(toPath);
+}
+
 export function isMazeDocumentPath(pathname: string): boolean {
   const normalized = normalizePath(pathname);
   return resolveSiteRoute(normalized)?.id === 'maze';

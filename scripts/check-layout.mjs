@@ -207,8 +207,8 @@ const hasSharedFrameGeometry = [
   '--site-frame-width:',
   '--site-header-height:',
   'width: var(--site-frame-width)',
-  'body:not(.in-menu) .route-page',
-  'body:not(.in-menu) .route-page::before',
+  '.route-page,',
+  '.route-page::before',
   '#site-topbar::before',
 ].every((token) => siteChromeCss.includes(token));
 if (
@@ -220,15 +220,34 @@ if (
   console.error('[layout] the topbar, route content and navigation must use the shared three-frame geometry.');
   process.exit(1);
 }
-const routeScrollRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameStrokeRule = siteChromeCss.match(/body:not\(\.in-menu\) \.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeScrollRule = siteChromeCss.match(/\.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameRule = siteChromeCss.match(/\.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameStrokeRule = siteChromeCss.match(/\.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
+if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
+  console.error('[layout] normal site frame geometry must not depend on Maze document body modes.');
+  process.exit(1);
+}
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
 const routeFrameOpening = routerSource.match(/<div\s+className=\{`route-page[^>]*>/s)?.[0] ?? '';
 const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<RouteScrollbar \/>/.test(routerSource);
 if (!routeFrameIsPersistent) {
   console.error('[layout] the outer content frame must remain unkeyed while only the inner route component is keyed.');
   process.exit(1);
+}
+const routeDefinitionsSource = fs.readFileSync(path.join(root, 'src/app/routes.ts'), 'utf8');
+if (
+  !routeDefinitionsSource.includes('export function canSoftNavigateBetween') ||
+  !navigationSourceHasBidirectionalBoundary()
+) {
+  console.error('[layout] navigation must not cross the standalone Maze document boundary with SPA transitions.');
+  process.exit(1);
+}
+
+function navigationSourceHasBidirectionalBoundary() {
+  const navigation = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
+  return navigation.includes('canSoftNavigateBetween(window.location.pathname, url.pathname)') &&
+    navigation.includes('canSoftNavigateBetween(currentPath, nextPath)') &&
+    navigation.includes('window.location.reload()');
 }
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const routeLoadersSource = fs.readFileSync(path.join(root, 'src/app/route-loaders.ts'), 'utf8');
@@ -298,6 +317,10 @@ const mazeFrameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/m
 const mazeThemeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-theme.css'), 'utf8');
 const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
 const mazeFrameSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
+if (!mazeFrameSource.includes('document.body.classList.remove(...BODY_MODE_CLASSES)')) {
+  console.error('[layout] MazeFrame must clean document-level Maze modes on unmount, including the guest-gate path.');
+  process.exit(1);
+}
 const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
 const lobbyCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8');
 const legacyMazeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
@@ -856,7 +879,7 @@ if (!profileRoute?.paths.includes('/profile') || profileRoute.server !== 'spa' |
 const profileRouter = fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8');
 const profileNavigation = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const profileServer = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
-if (!profileRouter.includes('resolveSiteRoute') || !profileNavigation.includes('SOFT_NAVIGATION_PATHS') || !profileServer.includes("require('./shared/site-routes.json')")) {
+if (!profileRouter.includes('resolveSiteRoute') || !profileNavigation.includes('canSoftNavigateBetween') || !profileServer.includes("require('./shared/site-routes.json')")) {
   console.error('[layout] React, soft navigation and Express must consume the shared route manifest.');
   process.exit(1);
 }
@@ -911,13 +934,13 @@ if (
   !dockItemRule.includes('height: 100%;') ||
   !dockItemRule.includes('width: var(--site-dock-item-size);') ||
   !dockItemRule.includes('aspect-ratio: 1 / 1;') ||
-  !dockItemRule.includes('transition: opacity 180ms ease, color 180ms ease;') ||
-  !sharedSiteStyles.includes('.site-bottom-nav .nav-link.active::after') ||
-  !sharedSiteStyles.includes('transform: translateX(-50%) scaleX(1);') ||
+  !dockItemRule.includes('transition: opacity 60ms ease, color 60ms ease;') ||
+  sharedSiteStyles.includes('.site-bottom-nav .nav-link.active::after') ||
+  sharedSiteStyles.includes('transform: translateX(-50%) scaleX(1);') ||
   !sharedSiteStyles.includes('.site-bottom-nav .nav-link:active') ||
   !sharedSiteStyles.includes('transform: none;') ||
-  !sharedSiteStyles.includes('.site-bottom-nav .nav-link.active .nav-dock-icon') ||
-  !sharedSiteStyles.includes('transform: scale(.94);') ||
+  sharedSiteStyles.includes('.site-bottom-nav .nav-link.active .nav-dock-icon') ||
+  sharedSiteStyles.includes('transform: scale(.94);') ||
   !sharedSiteStyles.includes('prefers-reduced-motion: reduce') ||
   !dockItemRule.includes('opacity: 0.33;') ||
   !dockItemRule.includes('clip-path: none;') ||

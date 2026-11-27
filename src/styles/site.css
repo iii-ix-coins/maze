@@ -393,7 +393,7 @@ body:not(.in-menu)>#root {
     }
 }
 
-body:not(.in-menu) .route-page,
+.route-page,
 body.in-menu #mazeApp.maze-app.in-menu {
     position: fixed;
     isolation: isolate;
@@ -414,7 +414,7 @@ body.in-menu #mazeApp.maze-app.in-menu {
 }
 
 /* Content frame uses the same chamfer and border language, with no filled surface. */
-body:not(.in-menu) .route-page::before,
+.route-page::before,
 body.in-menu #mazeApp.maze-app.in-menu::before {
     content: "";
     position: absolute;
@@ -454,7 +454,7 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 }
 
 /* The inner page is the only vertical scroll container; the outer frame stays fixed. */
-body:not(.in-menu) .route-page>.feature-page-shell {
+.route-page>.feature-page-shell {
     position: relative;
     z-index: 1;
     view-transition-name: site-route-content;
@@ -478,7 +478,7 @@ body:not(.in-menu) .route-page>.feature-page-shell {
     scrollbar-gutter: auto;
 }
 
-body:not(.in-menu) .route-page>.feature-page-shell::-webkit-scrollbar {
+.route-page>.feature-page-shell::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;

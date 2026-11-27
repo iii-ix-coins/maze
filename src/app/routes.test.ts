@@ -3,6 +3,7 @@ import {
   CLIENT_ROUTE_PATHS,
   SITE_ROUTES,
   SOFT_NAVIGATION_PATHS,
+  canSoftNavigateBetween,
   isMazeDocumentPath,
   normalizePath,
   resolveSiteRoute,
@@ -45,6 +46,14 @@ describe('shared site route manifest', () => {
     expect(isMazeDocumentPath('/maze')).toBe(false);
     expect(SOFT_NAVIGATION_PATHS.has('/maze.html')).toBe(false);
     expect(SOFT_NAVIGATION_PATHS.has('/profile')).toBe(true);
+  });
+
+  it('keeps the standalone Maze document outside SPA transitions in both directions', () => {
+    expect(canSoftNavigateBetween('/', '/profile')).toBe(true);
+    expect(canSoftNavigateBetween('/maze.html', '/')).toBe(false);
+    expect(canSoftNavigateBetween('/play', '/explore')).toBe(false);
+    expect(canSoftNavigateBetween('/profile', '/maze.html')).toBe(false);
+    expect(canSoftNavigateBetween('/maze', '/profile')).toBe(true);
   });
 
   it('normalizes slash and index aliases consistently', () => {

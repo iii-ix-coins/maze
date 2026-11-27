@@ -20,7 +20,7 @@ The site Home route reads the existing read-only `GET /rooms` snapshot through `
 
 ## Stable game-content frame initialization
 
-The `/maze.html` document sets `body.in-menu` synchronously from the route before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. Keep the body-class cleanup in an unmount-only effect, never in the `state.visible` effect, because effect cleanup runs on every visibility change and would briefly remove the shared frame geometry.
+The `/maze.html` document sets `body.in-menu` synchronously from the route before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. `MazeFrame` owns the route lifetime and clears all Maze body-mode classes on unmount, including the guest-gate path where `MazeMenu` is never mounted. `MazeMenu` also keeps its unmount-only cleanup as a local safeguard; never put that cleanup in the `state.visible` effect.
 
 ## Persistent content frame
 

@@ -3,7 +3,7 @@ import {
     CLIENT_ROUTE_PATHS,
     normalizePath,
     resolveSiteRoute,
-    SOFT_NAVIGATION_PATHS,
+    canSoftNavigateBetween,
 } from './routes';
 import { prefersReducedMotion, startScopedViewTransition, supportsScopedViewTransitions } from '../platform/scoped-view-transition';
 import { isRoutePageLoaded } from './route-loaders';
@@ -100,7 +100,10 @@ export function navigateTo(href: string) {
         return;
     }
     if (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.search === window.location.search) return;
-    if (!SOFT_NAVIGATION_PATHS.has(normalizePath(url.pathname))) {
+    // Maze is a standalone runtime document. Crossing the SPA boundary in
+    // either direction must be a document navigation so its engine lifecycle
+    // and body-level frame mode cannot leak into ordinary site routes.
+    if (!canSoftNavigateBetween(window.location.pathname, url.pathname)) {
         window.location.assign(url.href);
         return;
     }
@@ -137,6 +140,14 @@ function onPopState() {
     const nextPath = normalizePath(window.location.pathname);
     if (pendingRouteSwap !== null) cancelPendingRouteSwap();
     if (nextPath === currentPath) return;
+
+    // Back/Forward must respect the same document boundary as ordinary links.
+    // The browser has already changed the URL for popstate, so reload that URL.
+    if (!canSoftNavigateBetween(currentPath, nextPath)) {
+        window.location.reload();
+        return;
+    }
+
     swapTo(new URL(window.location.href), false);
 }
 

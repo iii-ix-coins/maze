@@ -68,6 +68,11 @@ export function MazeFrame({ children }: { children: ReactNode }) {
     return () => {
       bodyObserver.disconnect();
       window.removeEventListener('site:themechange', onThemeChange);
+
+      // MazeFrame owns the route lifetime, unlike MazeMenu which is not mounted
+      // for guests. Always release document-level Maze modes when this frame
+      // leaves the tree so normal site frame styling is restored before paint.
+      document.body.classList.remove(...BODY_MODE_CLASSES);
     };
   }, []);
 
