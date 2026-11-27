@@ -13,7 +13,6 @@
     font-family: var(--font-display, Nunito, sans-serif);
     font-size: clamp(2rem, 4vw, 3.1rem);
     font-weight: 800;
-    letter-spacing: -0.045em;
     line-height: 1.05;
   }
 
@@ -55,7 +54,6 @@
     font-family: var(--font-display, Nunito, sans-serif);
     font-size: clamp(1.35rem, 2.6vw, 1.8rem);
     font-weight: 750;
-    letter-spacing: -0.035em;
   }
 
   .eyebrow {

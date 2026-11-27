@@ -87,7 +87,6 @@
     .maze-app .lbl {
         display: block;
         font-size: 0.6rem;
-        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: #7f9488;
     }
@@ -687,7 +686,6 @@
         gap: 5px;
         color: #82e692;
         font-size: .55rem;
-        letter-spacing: .15em;
         font-weight: 900;
         margin: 0 0 6px;
     }
@@ -696,7 +694,6 @@
         color: #526f57;
         font-size: .5rem;
         font-weight: 600;
-        letter-spacing: 0;
     }
 
     .maze-app .race-board ol {
@@ -1104,7 +1101,6 @@
         margin: 0;
         font-size: clamp(1.6rem, 3vw, 2.1rem);
         font-weight: 700;
-        letter-spacing: -.03em;
         line-height: 1.1;
         text-shadow: none;
         overflow-wrap: anywhere;
@@ -1510,7 +1506,6 @@
         margin: 0;
         font-size: 1.12rem;
         font-weight: 600;
-        letter-spacing: -.01em;
     }
 
     .maze-app .cg-step-help {
@@ -1548,7 +1543,6 @@
         color: rgb(var(--tint, 255 215 154));
         font-size: clamp(2.1rem, 7vw, 3rem);
         font-weight: 600;
-        letter-spacing: -.04em;
         line-height: 1.05;
     }
 
@@ -1572,7 +1566,6 @@
         display: inline-flex;
         font-weight: 600;
         line-height: 1;
-        letter-spacing: -.04em;
     }
 
     .maze-app .cg-odo-col {
@@ -2485,7 +2478,6 @@
         margin: 0;
         font-size: clamp(1.55rem, 4.6vw, 2.2rem);
         font-weight: 700;
-        letter-spacing: -.03em;
         line-height: 1.1;
     }
 
@@ -2506,7 +2498,6 @@
     .maze-app .lb-code-label {
         color: var(--fog);
         font-size: .7rem;
-        letter-spacing: .08em;
     }
 
     .maze-app .lb-code-row {
@@ -2533,7 +2524,6 @@
         background: transparent;
         color: var(--lantern);
         font: 700 1rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        letter-spacing: .3em;
         text-transform: uppercase;
     }
 
@@ -2766,7 +2756,6 @@
         border-radius: 8px;
         color: rgb(var(--tint));
         font: 700 .7rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        letter-spacing: .16em;
     }
 
     .maze-app .lb-badge {
@@ -2776,7 +2765,6 @@
         color: rgb(var(--tint));
         font-size: .68rem;
         font-weight: 700;
-        letter-spacing: .02em;
     }
 
     .maze-app .lb-card-title {
@@ -2784,7 +2772,6 @@
         overflow: hidden;
         font-size: 1.02rem;
         font-weight: 650;
-        letter-spacing: -.01em;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -3093,7 +3080,6 @@
         color: var(--coral);
         font-size: .58rem;
         font-weight: 700;
-        letter-spacing: .14em;
     }
 
     .maze-app .lb-live-badge i {
@@ -3171,7 +3157,6 @@
         color: var(--fog);
         font-size: .74rem;
         font-weight: 600;
-        letter-spacing: .1em;
         text-transform: uppercase;
     }
 
@@ -3221,7 +3206,6 @@
         color: var(--haze);
         font-size: 1.18rem;
         font-weight: 650;
-        letter-spacing: -.01em;
     }
 
     .maze-app .lb-empty p {
@@ -3431,7 +3415,6 @@
         color: var(--lantern);
         font-size: .7rem;
         font-weight: 700;
-        letter-spacing: .18em;
         text-transform: uppercase;
     }
 
@@ -3440,7 +3423,6 @@
         outline: 0;
         font-size: clamp(1.6rem, 5.4vw, 2.3rem);
         font-weight: 700;
-        letter-spacing: -.03em;
         line-height: 1.1;
     }
 
@@ -3473,7 +3455,6 @@
         display: block;
         color: var(--fog);
         font-size: .66rem;
-        letter-spacing: .1em;
         text-transform: uppercase;
     }
 
@@ -3481,7 +3462,6 @@
         display: block;
         color: var(--lantern);
         font: 700 1.8rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        letter-spacing: .22em;
     }
 
     .maze-app .lb-copy {
@@ -3593,7 +3573,6 @@
         border-radius: 999px;
         font-size: .64rem;
         font-weight: 700;
-        letter-spacing: .06em;
     }
 
     .maze-app .lb-tag .lb-ic {

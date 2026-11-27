@@ -119,7 +119,6 @@
         margin-left: 2px;
         font-size: var(--fs-xs);
         font-weight: 650;
-        letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--text-mute);
     }
@@ -171,7 +170,6 @@
     .slider-title {
         font-family: var(--font-display);
         font-weight: 600;
-        letter-spacing: -0.028em;
         line-height: 1.14;
         font-size: clamp(1.4rem, 0.85rem + 2.1vw, 2.45rem);
         font-stretch: 92%;
@@ -402,7 +400,6 @@
         font-size: clamp(9px, 1.45vw, 20px);
         font-weight: 700;
         line-height: 1.08;
-        letter-spacing: -.035em;
     }
 
     .maze-hub-page .market-feature .token-summary-symbol {
@@ -468,7 +465,6 @@
         font-size: clamp(8px, calc(2px + 1.6667vw), 13px);
         font-weight: 600;
         line-height: 1.12;
-        letter-spacing: .055em;
         text-transform: uppercase;
     }
 
@@ -490,7 +486,6 @@
         font-size: clamp(9px, calc(2px + 1.6667vw), 24px);
         font-weight: 650;
         line-height: 1;
-        letter-spacing: -.025em;
         font-variant-numeric: tabular-nums;
         overflow-wrap: anywhere;
     }
@@ -609,7 +604,6 @@
         font-weight: 800;
         font-size: clamp(6rem, 11vw, 9rem);
         line-height: 1;
-        letter-spacing: -0.06em;
         color: transparent;
         -webkit-text-stroke: 1px rgba(var(--accent-rgb), .45);
         opacity: 0.55;
@@ -705,7 +699,6 @@
     .maze-teaser-title {
         font-size: var(--fs-2xl);
         font-stretch: 88%;
-        letter-spacing: -0.04em;
     }
 
     .maze-teaser-title em {

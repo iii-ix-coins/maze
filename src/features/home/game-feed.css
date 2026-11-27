@@ -17,7 +17,6 @@
     margin: 6px 0 8px;
     color: var(--text, #e6e6e6);
     font: 800 clamp(2rem, 4vw, 3rem)/1 var(--font-display, Nunito, sans-serif);
-    letter-spacing: -.045em;
   }
 
   .game-feed-heading p {
@@ -117,7 +116,6 @@
     margin: 0;
     color: var(--text, #eee);
     font: 750 clamp(1.15rem, 2.4vw, 1.45rem)/1.2 var(--font-display, Nunito, sans-serif);
-    letter-spacing: -.025em;
   }
 
   .game-feed-section-heading > span {
@@ -188,7 +186,6 @@
     color: var(--text-soft, #ccc);
     font-size: .62rem;
     font-weight: 800;
-    letter-spacing: .06em;
   }
 
   .game-feed-status--live {
@@ -233,13 +230,11 @@
     color: var(--text-mute, #999);
     font-size: .62rem;
     font-weight: 750;
-    letter-spacing: .16em;
   }
 
   .game-feed-art-center strong {
     color: var(--text, #eee);
     font: 800 clamp(1.5rem, 5vw, 2.2rem)/1 var(--font-display, Nunito, sans-serif);
-    letter-spacing: .1em;
   }
 
   .game-feed-art-size {

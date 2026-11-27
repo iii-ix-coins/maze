@@ -180,7 +180,6 @@
     color: var(--haze);
     font-size: clamp(1.4rem, 5.6vw, 1.9rem);
     font-weight: 700;
-    letter-spacing: -.03em;
     line-height: 1.08;
     text-shadow: none;
     overflow-wrap: anywhere;
@@ -692,7 +691,6 @@
     margin: 0;
     font-size: 1.12rem;
     font-weight: 600;
-    letter-spacing: -.01em;
 }
 
 .cg-step-help {
@@ -730,7 +728,6 @@
     color: rgb(var(--tint, 255 215 154));
     font-size: clamp(2.1rem, 7vw, 3rem);
     font-weight: 600;
-    letter-spacing: -.04em;
     line-height: 1.05;
 }
 
@@ -754,7 +751,6 @@
     display: inline-flex;
     font-weight: 600;
     line-height: 1;
-    letter-spacing: -.04em;
 }
 
 .cg-odo-col {

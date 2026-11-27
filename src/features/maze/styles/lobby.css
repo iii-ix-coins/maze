@@ -137,7 +137,6 @@
     margin: 0;
     font-size: clamp(1.55rem, 4.6vw, 2.2rem);
     font-weight: 700;
-    letter-spacing: -.03em;
     line-height: 1.1;
 }
 
@@ -158,7 +157,6 @@
 .lb-code-label {
     color: var(--fog);
     font-size: .7rem;
-    letter-spacing: .08em;
 }
 
 .lb-code-row {
@@ -185,7 +183,6 @@
     background: transparent;
     color: var(--lantern);
     font: 700 1rem ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-    letter-spacing: .3em;
     text-transform: uppercase;
 }
 
@@ -418,7 +415,6 @@
     border-radius: 8px;
     color: rgb(var(--tint));
     font: 700 .7rem ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-    letter-spacing: .16em;
 }
 
 .lb-badge {
@@ -428,7 +424,6 @@
     color: rgb(var(--tint));
     font-size: .68rem;
     font-weight: 700;
-    letter-spacing: .02em;
 }
 
 .lb-card-title {
@@ -436,7 +431,6 @@
     overflow: hidden;
     font-size: 1.02rem;
     font-weight: 650;
-    letter-spacing: -.01em;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -745,7 +739,6 @@
     color: var(--coral);
     font-size: .58rem;
     font-weight: 700;
-    letter-spacing: .14em;
 }
 
 .lb-live-badge i {
@@ -823,7 +816,6 @@
     color: var(--fog);
     font-size: .74rem;
     font-weight: 600;
-    letter-spacing: .1em;
     text-transform: uppercase;
 }
 
@@ -873,7 +865,6 @@
     color: var(--haze);
     font-size: 1.18rem;
     font-weight: 650;
-    letter-spacing: -.01em;
 }
 
 .lb-empty p {
@@ -1067,14 +1058,12 @@
     color: var(--moss);
     font-size: .72rem;
     font-weight: 700;
-    letter-spacing: .12em;
     text-transform: uppercase;
 }
 
 .lb-room-title {
     outline: 0;
     font-weight: 700;
-    letter-spacing: -.03em;
     margin: 6px 0 8px;
     font-size: clamp(1.6rem, 4vw, 2.4rem);
     line-height: 1.08;
@@ -1095,7 +1084,6 @@
 }
 
 .lb-code-box small {
-    letter-spacing: .1em;
     text-transform: uppercase;
     display: block;
     margin-bottom: 5px;
@@ -1106,7 +1094,6 @@
 .lb-code-big {
     display: block;
     font: 700 1.5rem ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: .2em;
     color: var(--lantern);
 }
 
@@ -1190,7 +1177,6 @@
     padding: 2px 8px;
     border-radius: 999px;
     font-weight: 700;
-    letter-spacing: .06em;
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -1695,7 +1681,5 @@
 }
   .lb-room-stage {
     width: min(76vw, 280px);
-}
-  .lb-room-panel {
 }
 }

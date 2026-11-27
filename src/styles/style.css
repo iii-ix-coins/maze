@@ -169,7 +169,6 @@
     textarea {
         font: inherit;
         color: inherit;
-        letter-spacing: inherit;
     }
 
     button {
@@ -311,7 +310,6 @@
     h4 {
         font-family: var(--font-display);
         font-weight: 700;
-        letter-spacing: -0.025em;
         text-wrap: balance;
     }
 
@@ -731,7 +729,6 @@
     :is(.bar-box, .change-box, .spot)>span {
         display: block;
         font-size: var(--fs-xs);
-        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--text-mute);
     }
@@ -739,7 +736,6 @@
     :is(.bar-box, .change-box, .spot)>strong {
         display: block;
         font-family: var(--font-display);
-        letter-spacing: -0.015em;
         font-variant-numeric: tabular-nums;
         overflow-wrap: anywhere;
     }
@@ -880,7 +876,6 @@
     .change-period {
         font-weight: 600;
         font-size: 0.9rem;
-        letter-spacing: 0.03em;
         text-transform: uppercase;
         white-space: nowrap;
     }
@@ -897,7 +892,6 @@
         font-family: var(--font-mono);
         font-weight: 500;
         font-size: 0.9rem;
-        letter-spacing: -0.02em;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
         color: var(--text-soft);
@@ -945,7 +939,6 @@
         white-space: nowrap;
         font-family: var(--font-mono);
         font-size: 0.9rem;
-        letter-spacing: -0.01em;
         color: var(--text-soft);
     }
 
@@ -1180,7 +1173,6 @@
         gap: 10px;
         padding: 0.9rem 1.7rem;
         border-radius: var(--r-pill);
-        letter-spacing: -0.005em;
         white-space: nowrap;
         transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base), background var(--t-base), color var(--t-base);
     }
@@ -1281,7 +1273,6 @@
         align-items: center;
         gap: 10px;
         font-size: var(--fs-xs);
-        letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--mint);
     }
@@ -1301,7 +1292,6 @@
         padding: 5px 12px;
         border-radius: var(--r-pill);
         font-size: var(--fs-xs);
-        letter-spacing: 0.04em;
         background: var(--veil);
         border: 1px solid var(--stroke);
         color: var(--text-soft);
@@ -1620,7 +1610,6 @@ html[data-theme="grass"] .nav {
     font: inherit;
     font-size: clamp(15px, 3.2vw, 15px);
     font-weight: 650;
-    letter-spacing: -.035em;
     text-align: left;
     text-decoration: none;
     cursor: pointer;

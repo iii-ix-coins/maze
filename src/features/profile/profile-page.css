@@ -37,7 +37,6 @@
     margin: 0;
     color: var(--text, #f5f7f8);
     font-size: clamp(17px, 3vw, 22px);
-    letter-spacing: -.045em;
   }
 
   .profile-state-card p,
@@ -84,7 +83,6 @@
     color: var(--mint, #78edc0);
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: .12em;
     text-transform: uppercase;
   }
 
@@ -290,7 +288,6 @@
     margin: 0;
     color: var(--text, #f5f7f8);
     font-size: clamp(18px, 3vw, 22px);
-    letter-spacing: -.035em;
   }
 
   .profile-connect-copy p {
@@ -380,7 +377,6 @@
     color: var(--ar-on-accent);
     font-size: 16px;
     font-weight: 750;
-    letter-spacing: 0;
     text-transform: none;
     white-space: normal;
   }

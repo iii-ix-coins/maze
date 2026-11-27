@@ -54,7 +54,6 @@
     color: var(--ar-accent);
     font-size: 10px;
     font-weight: 850;
-    letter-spacing: .14em;
     text-transform: uppercase;
   }
 
@@ -64,7 +63,6 @@
     font-size: clamp(27px, 4vw, 42px);
     font-weight: 900;
     line-height: 1.04;
-    letter-spacing: -.045em;
   }
 
   .site-access-description {
@@ -152,7 +150,6 @@
     color: var(--ar-text);
     font-size: 18px;
     font-weight: 900;
-    letter-spacing: -.025em;
   }
 
   .site-access-action-copy p {
