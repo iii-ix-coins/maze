@@ -1,10 +1,12 @@
+> **به‌روزرسانی معماری — ۲۷ نوامبر ۲۰۲۶:** بخش‌های تاریخی این سند وضعیت فازهای قبلی را ثبت می‌کنند. معماری جاری در `UNIFIED-ROUTE-ARCHITECTURE-FA.md` تعریف شده است: یک `.route-page`، یک `main.feature-page-shell`، یک `.route-view` فعال و `#mazeApp` به‌عنوان همان Route؛ دیگر Portal مستقل، اسکرولر دوم یا کلاس `body.in-menu` وجود ندارد. این یادداشت‌های تاریخی را به‌عنوان توصیف وضعیت فعلی تفسیر نکنید.
+
 # برنامه و وضعیت مهاجرت به Vite + React
 
 ## اصلاح ساختار Navigation و حذف کامل Interaction Bar — 2026-11-23
 
 1. کامپوننت `InteractionBar` و تمام دکمه‌ها و رفتارهای آن (Tips، ثبت Views، Like، Share، کپی لینک و Share Modal) از React حذف شدند.
 2. endpointهای اختصاصی `/api/stats*`، کلاینت داخلی، snapshot آمار و `Interaction Engine` بازنشسته شدند؛ این سرویس هیچ مصرف‌کنندهٔ دیگری در پروژه نداشت.
-3. `SiteNavigation` در صفحات عادی به جایگاه dock پایین صفحه منتقل شد و پوسته و دکمه‌های Navigation ظاهر شیشه‌ای و دکمه‌ای dock قبلی را گرفتند. در صفحات Maze، Navigation در موقعیت بالایی قبلی باقی ماند.
+3. `SiteNavigation` در صفحات عادی به جایگاه dock پایین صفحه منتقل شد و پوسته و دکمه‌های Navigation ظاهر شیشه‌ای و دکمه‌ای dock قبلی را گرفتند. در صفحات Maze نیز همان Navigation مشترک حفظ شد.
 4. Wallet Connect، احراز هویت، Theme Switcher، Game View Switcher، APIهای Market و Holders، موتور بازی و ارتباط WebSocket در این تغییر حفظ شدند.
 
 
@@ -152,7 +154,7 @@ Adapterهای state/protocol حفظ شده‌اند؛ قراردادهای شب�
 - هیچ فایل مستقل JavaScript در `src/` یا `public/` باقی نمانده است. تنها ورودی فعال مرورگر در این درخت `src/main.tsx` است.
 - ۱۴۸ فایل محافظت‌شده شامل `server.js`، `start.js`، `package.json`، پوشه‌های `engines/` و `shared/`، قرارداد API، Maze Simulation، renderer، input و WebSocket client با SHA-256 نسخهٔ قبل مقایسه شدند؛ هر ۱۴۸ فایل دقیقاً بدون تغییرند.
 - دو صفحهٔ `legacy/home.html` و `legacy/maze.html` حذف نشدند، زیرا سرور Express بدون تغییر به آن‌ها fallback می‌کند؛ محتوای آن‌ها اکنون فقط HTML/CSS ایستا و فاقد script است. این fallback تنها زمانی دیده می‌شود که Build تولیدی React موجود نباشد.
-- اسکریپت‌های کوچک inline قبل از Paint عمداً باقی مانده‌اند: خواندن `hollld-theme` برای جلوگیری از چشمک تم و افزودن `body.in-menu` روی `/maze.html` برای حفظ CSS اولیه. هیچ‌کدام کنترلر، سازندهٔ DOM یا bootstrap اجرای اپلیکیشن نیستند.
+- در وضعیت تاریخی ثبت‌شده در این فاز، hook مسیرمحور `body.in-menu` نیز همراه bootstrap تم وجود داشت. hook مربوط به Maze در بازطراحی ریشه‌ای ۲۷ نوامبر ۲۰۲۶ حذف شد؛ اکنون تنها bootstrap inline فعال، تم ذخیره‌شده را پیش از Paint اعمال می‌کند.
 - Typecheck کامل، Vite Production Build و تست بصری مرورگر در این مرحله اجرا نشدند؛ وابستگی‌های پروژه در این محیط نصب نیستند و دسترسی قبلی به npm registry نیز با خطای DNS/شبکه متوقف شده بود. نتایج Syntax و ساختار را نباید معادل این آزمون‌ها دانست.
 
 ### اعداد نهایی کنترل نحوی پس از پاک‌سازی

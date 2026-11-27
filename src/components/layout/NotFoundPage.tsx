@@ -1,8 +1,8 @@
 export function NotFoundPage() {
   return (
-    <main role="main" style={{ padding: '24px', fontFamily: 'sans-serif' }}>
-      <h1>Page not found</h1>
+    <section className="route-view not-found-page" aria-labelledby="not-found-title">
+      <h1 id="not-found-title">Page not found</h1>
       <a href="/">Return to Hollld.fun</a>
-    </main>
+    </section>
   );
 }

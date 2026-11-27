@@ -4090,8 +4090,8 @@
     }
 
     /* During active gameplay, preserve the engine's wheel/camera behavior.
-       The pre-game Create / Rooms / Live menu scrolls only through #createGame
-       inside the shared Site Content Frame (owned by maze-unify.css). */
+       The pre-game Create / Rooms / Live menu remains in normal flow inside
+       the single shared route scroller (owned by site.css / maze-unify.css). */
     .maze-app {
         overscroll-behavior-y: auto;
     }

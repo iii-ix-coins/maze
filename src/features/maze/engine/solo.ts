@@ -163,7 +163,6 @@ export function resetUi() {
     createGame.hide();
     hideMazeConfirm();
     hideMazeBanner();
-    document.body.classList.remove('in-menu');
     syncRoleUi();
     fitLayout();
 }

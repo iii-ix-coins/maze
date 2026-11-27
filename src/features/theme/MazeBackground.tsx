@@ -40,9 +40,9 @@ const CAMERA_SMOOTHING_MS = 150;
 const ZOOM_MULTIPLIER = 1.6;
 
 const THEME_ASSETS: Record<SiteTheme, { image: string }> = {
-  grass: { image: '/css/images/3D-bg-grass.svg' },
-  dark: { image: '/css/images/3D-bg-dark.svg' },
-  light: { image: '/css/images/3D-bg-light.svg' },
+  grass: { image: '/css/images/wallet-bg-grass.svg' },
+  dark: { image: '/css/images/wallet-bg-dark.svg' },
+  light: { image: '/css/images/wallet-bg-light.svg' },
 };
 
 const CAMERA_ROUTE = [

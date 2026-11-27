@@ -19,13 +19,29 @@ export function applyMazeSize(size) {
 }
 export function fitLayout() {
     S.dpr = window.devicePixelRatio || 1;
-    const w = window.innerWidth, h = window.innerHeight;
+    // Site shell owns the viewport. Size the board against the shared route
+    // content rectangle so no Maze state can spill under the site header/dock.
+    const app = document.getElementById('mazeApp');
+    // Use the shared route viewport's content box for height. #mazeApp may be
+    // taller than the viewport while the Create / Rooms menu is in normal flow.
+    const surface = app?.parentElement;
+    const isSharedSurface = surface?.classList.contains('feature-page-shell') === true;
+    const surfaceStyle = isSharedSurface ? window.getComputedStyle(surface) : null;
+    const verticalPadding = surfaceStyle
+        ? (Number.parseFloat(surfaceStyle.paddingTop) || 0) + (Number.parseFloat(surfaceStyle.paddingBottom) || 0)
+        : 0;
+    const appBounds = app?.getBoundingClientRect();
+    const viewportHeight = isSharedSurface
+        ? surface.clientHeight - verticalPadding
+        : appBounds?.height;
+    const w = Math.max(1, Math.floor(appBounds?.width || window.innerWidth));
+    const h = Math.max(1, Math.floor(viewportHeight || window.innerHeight));
     const wide = w >= 640 && w / h > 1.1;
     const side = wide
         ? Math.min(w - PANEL_W - 14 - 28, h - 84)
         : Math.min(w - 20, h - 232);
-    S.V = clamp(Math.floor(side / 2) * 2, 240, 960);
-    document.body.classList.toggle('wide', wide);
+    S.V = clamp(Math.floor(side / 2) * 2, 180, 960);
+    app?.classList.toggle('wide', wide);
     const joystick = $('padWrap');
     if (wide) {
         if (joystick.parentElement !== padDock) padDock.appendChild(joystick);
@@ -34,7 +50,7 @@ export function fitLayout() {
         if (joystick.parentElement !== stageEl) stageEl.appendChild(joystick);
         joystick.classList.remove('docked');
     }
-    document.documentElement.style.setProperty('--v', S.V + 'px');
+    app?.style.setProperty('--v', S.V + 'px');
     S.base = Math.max(6, Math.floor((S.V - 2 * VIEW_MARGIN) / S.SIZE));
     mazeCanvas.style.width = mazeCanvas.style.height = S.V + 'px';
     mazeCanvas.width = mazeCanvas.height = Math.round(S.V * S.dpr);

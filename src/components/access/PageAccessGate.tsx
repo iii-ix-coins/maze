@@ -199,7 +199,7 @@ export function PageAccessGate({ page, status, error, onRetry }: PageAccessGateP
       : null;
 
   return (
-    <main className={`feature-page-shell access-gate access-gate--${page}`} aria-label={`${copy.title} sign-in preview`}>
+    <section className={`access-gate access-gate--${page}`} aria-label={`${copy.title} sign-in preview`}>
       <section className="access-gate-intro">
         <span className="access-gate-eyebrow">{copy.eyebrow}</span>
         <h1>{copy.title}</h1>
@@ -241,6 +241,6 @@ export function PageAccessGate({ page, status, error, onRetry }: PageAccessGateP
           <small className="access-gate-security-note">Wallet connection alone does not unlock the site. A verified sign-in is required; no blockchain transaction is requested.</small>
         </div>
       </section>
-    </main>
+    </section>
   );
 }

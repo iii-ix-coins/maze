@@ -1,3 +1,5 @@
+> **وضعیت فعلی (۲۷ نوامبر ۲۰۲۶):** این گزارش ثبت تاریخی پاک‌سازی Legacy است. ادعای قدیمی دربارهٔ افزودن `body.in-menu` در اسکریپت pre-paint دیگر معتبر نیست؛ اکنون فقط تم پیش از Paint خوانده می‌شود و حالت‌های `in-menu`، `wide` و `spectating` روی ریشهٔ محلی `#mazeApp` قرار دارند. برای معماری جاری به `UNIFIED-ROUTE-ARCHITECTURE-FA.md` مراجعه کنید.
+
 # گزارش پاک‌سازی کنترلرها و Bootstrapهای Legacy
 
 ## جمع‌بندی
@@ -9,7 +11,7 @@
 - ۳۷ فایل از `public/js/` و ۳۷ نسخهٔ تکراری از `src/features/home/legacy-scripts/` حذف شدند.
 - `src/features/theme/maze-background.js` و تابع imperative `initMazeBackground()` حذف شدند. SVG پس‌زمینه اکنون در `src/features/theme/MazeBackground.tsx` توسط JSX ساخته می‌شود؛ camera transform همچنان در همان RAF مستقل به‌روزرسانی می‌شود و هیچ React render در هر فریم انجام نمی‌شود.
 - فایل‌های خروجی قدیمی Maze شامل `app.js`، `app.js.map`، `app.css`، `app.css.map` و شش فونت hashed مخصوص همان bundle حذف شدند. پنج SVG که Wizard فعلی استفاده می‌کند حفظ شده‌اند.
-- فایل خارجی `theme-init.js` حذف شد. منطق حداقلی خواندن `hollld-theme` با همان مقادیر مجاز پیش از CSS در چهار HTML ورودی قرار گرفت تا جلوگیری از FOUC و رفتار ذخیره‌شده حفظ شود.
+- فایل خارجی `theme-init.js` حذف شد. منطق حداقلی خواندن `hollld-theme` با همان مقادیر مجاز پیش از CSS در HTML ورودی قرار گرفت تا جلوگیری از FOUC و رفتار ذخیره‌شده حفظ شود.
 - دو صفحهٔ `legacy/home.html` و `legacy/maze.html` به fallbackهای ثابت و فاقد JavaScript تبدیل شدند؛ این فایل‌ها باقی ماندند چون Express بدون تغییر در نبود Build تولیدی به آن‌ها ارجاع می‌دهد.
 - README، سند مهاجرت و `scripts/check-layout.mjs` به‌روزرسانی شدند.
 
@@ -18,9 +20,9 @@
 تنها کدهای inline پیش از Paint باقی‌مانده‌اند و هیچ‌کدام UI تولید نمی‌کنند:
 
 1. اسکریپت theme در چهار صفحه، مقدار ذخیره‌شدهٔ `hollld-theme` را پیش از بارگذاری CSS روی `html[data-theme]` اعمال می‌کند تا تم پیش‌فرض لحظه‌ای نمایش داده نشود.
-2. یک اسکریپت در `index.html` فقط هنگام مسیر `/maze.html` کلاس موجود `body.in-menu` و عنوان صفحه را پیش از mount شدن React تنظیم می‌کند تا همان selectorهای CSS بدون پرش حفظ شوند.
+2. (تاریخی و بازنشسته) در نسخهٔ قبلی یک hook مسیرمحور `body.in-menu` را پیش از mount تنظیم می‌کرد. این hook در بازطراحی ریشه‌ای Route حذف شد؛ اکنون وضعیت منوی Maze در React و روی `#mazeApp` مدیریت می‌شود.
 
-این دو قطعه، منطق UI یا کنترلر Legacy نیستند و حذفشان رفتار اولیهٔ بصری را تغییر می‌دهد.
+این قطعه، منطق UI یا کنترلر Legacy نیست و حذفش می‌تواند باعث چشمک تم در اولین Paint شود.
 
 ## محدوده‌های عمداً دست‌نخورده
 

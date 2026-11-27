@@ -1,18 +1,20 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { RouteScrollbar } from '../components/layout/RouteScrollbar';
 import { PageAccessGate, type AccessPreviewPage } from '../components/access/PageAccessGate';
 import { useIdentity } from '../platform/identity/IdentityProvider';
+import { MazeFrame } from '../features/maze/MazeFrame';
 
 import { usePathname } from './navigation';
-import { loadExplorePage, loadHomePage, loadMazeHubPage, loadProfilePage } from './route-loaders';
+import { loadExplorePage, loadHomePage, loadMazeHubPage, loadMazePage, loadProfilePage } from './route-loaders';
 import { resolveSiteRoute } from './routes';
 
 const HomePage = lazy(loadHomePage);
 const ExplorePage = lazy(loadExplorePage);
 const MazeHubPage = lazy(loadMazeHubPage);
 const ProfilePage = lazy(loadProfilePage);
+const MazePage = lazy(loadMazePage);
 
 const PAGE_COMPONENTS = {
   home: HomePage,
@@ -21,7 +23,7 @@ const PAGE_COMPONENTS = {
   profile: ProfilePage,
 };
 
-/** One React router dispatches all active site features without touching API routes. */
+/** Every route writes into the same content surface and the same scroll owner. */
 const ACCESS_PAGE_BY_ROUTE: Record<string, AccessPreviewPage> = {
   home: 'home',
   explore: 'explore',
@@ -33,49 +35,60 @@ export function AppRouter() {
   const pathname = usePathname();
   const { status, isAuthenticated, error, refreshSession } = useIdentity();
   const route = resolveSiteRoute(pathname);
+  const isMazePage = route?.id === 'maze';
+  const [hasMountedMaze, setHasMountedMaze] = useState(isMazePage && isAuthenticated);
 
-  // Maze has a persistent frame alongside the route dispatcher. The frame is
-  // still part of this React root and is activated by the same route snapshot.
-  if (route?.id === 'maze') return null;
+  // Keep the Engine's DOM contract mounted after first authenticated activation.
+  // It is parked inside the shared scroll surface on every other route.
+  useEffect(() => {
+    if (isMazePage && isAuthenticated) setHasMountedMaze(true);
+  }, [isMazePage, isAuthenticated]);
 
-  const Page = route
+  const Page = route && !isMazePage
     ? PAGE_COMPONENTS[route.page as keyof typeof PAGE_COMPONENTS]
     : undefined;
 
-  if (!route || !Page) {
-    return <NotFoundPage />;
-  }
-
-  const isHomePage = route.id === 'home';
-  const isMazeHubPage = route.id === 'maze-hub';
-
   return (
     <div
-      className={`route-page${isHomePage ? ' route-page--home' : ''}${isMazeHubPage ? ' route-page--maze-hub' : ''}`}
+      className="route-page"
       data-route-page={pathname}
+      data-route-kind={isMazePage ? 'maze' : 'site'}
       onAnimationEnd={(event) => {
-        // Clear the first-visit CSS fallback only when the new page surface
-        // finishes its entrance; nested component animations must not clear it.
         if (event.target === event.currentTarget.firstElementChild) {
           delete document.documentElement.dataset.siteRouteFallback;
         }
       }}
     >
-      {/* Keep this frame and its border mounted; only the keyed page content changes. */}
-      {isAuthenticated ? (
-        <Suspense fallback={null}>
-          <Page key={pathname} />
-        </Suspense>
-      ) : (
-        <PageAccessGate
-          page={ACCESS_PAGE_BY_ROUTE[route.id] ?? 'home'}
-          status={status}
-          error={error}
-          onRetry={refreshSession}
-        />
-      )}
-      {/* The scrollbar stays mounted and rebinds to the new direct child scroller. */}
-      <RouteScrollbar />
+      <main className="feature-page-shell" aria-label={route ? `${route.title} content` : 'Not found page'}>
+        {!route ? (
+          <NotFoundPage />
+        ) : !isMazePage ? (
+          isAuthenticated ? (
+            <Suspense fallback={null}>
+              {Page ? <Page key={pathname} /> : <NotFoundPage />}
+            </Suspense>
+          ) : (
+            <section className="route-view route-view--access">
+              <PageAccessGate
+                page={ACCESS_PAGE_BY_ROUTE[route.id] ?? 'home'}
+                status={status}
+                error={error}
+                onRetry={refreshSession}
+              />
+            </section>
+          )
+        ) : null}
+
+        <MazeFrame active={isMazePage}>
+          <Suspense fallback={null}>
+            {hasMountedMaze ? (
+              <MazePage active={isMazePage && isAuthenticated} authenticated={isAuthenticated} />
+            ) : null}
+          </Suspense>
+        </MazeFrame>
+      </main>
+
+      <RouteScrollbar contentSelector=":scope > .feature-page-shell" />
     </div>
   );
 }

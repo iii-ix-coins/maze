@@ -255,15 +255,10 @@ export function consumePendingDocumentEntry(): boolean {
 
 /** Returns only the active content; never returns the outer frame, header or dock. */
 export function getDocumentTransitionSurface(): HTMLElement | null {
-  // MazeFrame is intentionally parked in the DOM after its first visit so the
-  // Engine's cached node references remain valid. Always select the visible
-  // surface, rather than treating the existence of #mazeApp as the active route.
+  // Every route, including the parked/persistent Maze runtime, is rendered
+  // inside one shared content surface. Transition only its active route view.
   const candidates = [
-    '#mazeApp > .access-gate',
-    '#mazeApp > .maze-authenticated-boot',
-    '#mazeApp > #createGame.cg.show',
-    '#mazeApp > .game-container',
-    '.route-page > .feature-page-shell',
+    '.route-page > .feature-page-shell > .route-view:not([hidden])',
   ];
 
   for (const selector of candidates) {

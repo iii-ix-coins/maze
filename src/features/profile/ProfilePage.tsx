@@ -44,7 +44,7 @@ export function ProfilePage() {
   }
 
   return (
-    <main className="feature-page-shell profile-page" aria-label="Profile">
+    <section className="route-view profile-page" aria-label="Profile">
       <header className="feature-page-title">
         <span className="eyebrow">Account</span>
         <h1>Profile</h1>
@@ -166,6 +166,6 @@ export function ProfilePage() {
           </section>
         </>
       ) : null}
-    </main>
+    </section>
   );
 }

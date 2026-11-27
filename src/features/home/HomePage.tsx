@@ -177,7 +177,7 @@ export function HomePage() {
   const hasContent = liveRooms.length + openRooms.length + recentGames.length > 0;
 
   return (
-    <main className="feature-page-shell game-feed-page" aria-label="Maze game feed">
+    <section className="route-view game-feed-page" aria-label="Maze game feed">
       <header className="game-feed-heading">
         <div>
           <span className="eyebrow">THE MAZE NETWORK</span>
@@ -233,6 +233,6 @@ export function HomePage() {
 
       {!loading && !error && !hasContent ? <div className="game-feed-message">The Maze network is online, but there are no games to show yet. Create a room to start the feed.</div> : null}
       <p className="game-feed-footnote">Live room data refreshes every 10 seconds. Finished items are temporary result summaries; persistent replays will be added with the recording system.</p>
-    </main>
+    </section>
   );
 }

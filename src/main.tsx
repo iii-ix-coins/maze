@@ -6,6 +6,5 @@ if (!root) {
   throw new Error('Required React mount element #root was not found.');
 }
 
-// One React root. MazePage is rendered through a portal into #maze-root so the
-// original body-level DOM order and CSS selectors remain unchanged.
+// One React root owns the site shell, every route and the persistent Maze surface.
 createRoot(root).render(<App />);

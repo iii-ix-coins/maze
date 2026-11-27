@@ -36,7 +36,7 @@ export function syncRoleUi() {
     const label = S.spectating ? 'Back to lobby' : 'New Maze';
     setNewMazeButtonLabel(label);
     raceBoard.setHeading(S.spectating ? 'WATCHING' : 'LIVE RACE');
-    document.body.classList.toggle('spectating', S.spectating);
+    document.getElementById('mazeApp')?.classList.toggle('spectating', S.spectating);
 }
 export function showMenu() {
     leaveOnlineSession();

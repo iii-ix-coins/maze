@@ -49,6 +49,9 @@ export function mountMazeEngine(): () => void {
     }
     multiplayerClient.disconnect(false);
     createGame.setOnLaunch(() => undefined);
+    // The board-size token belongs to the Maze route only; never leak it into
+    // the global document or leave a stale inline value after Runtime disposal.
+    document.getElementById('mazeApp')?.style.removeProperty('--v');
     delete document.documentElement.dataset.mazeEngineReady;
     delete document.documentElement.dataset.mazeActiveRun;
     window.dispatchEvent(new Event('maze:engine-disposed'));

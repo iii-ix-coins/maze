@@ -40,7 +40,7 @@ const EXPLORE_DESTINATIONS = [
 
 export function ExplorePage() {
   return (
-    <main className="feature-page-shell explore-page" aria-label="Explore Maze">
+    <section className="route-view explore-page" aria-label="Explore Maze">
       <header className="feature-page-title explore-page-title">
         <span className="eyebrow">Discover</span>
         <h1>Explore</h1>
@@ -68,6 +68,6 @@ export function ExplorePage() {
           </a>
         ))}
       </section>
-    </main>
+    </section>
   );
 }

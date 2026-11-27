@@ -6,7 +6,7 @@ type RouteScrollbarProps = {
   label?: string;
 };
 
-/** Cross-browser scrollbar shared by site routes and the Maze content frame. */
+/** The single cross-browser scrollbar for the shared route content frame. */
 export function RouteScrollbar({
   contentSelector = ':scope > .feature-page-shell',
   label = 'Page content scrollbar',

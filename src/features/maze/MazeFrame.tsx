@@ -1,13 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { RouteScrollbar } from '../../components/layout/RouteScrollbar';
 import { usePageLoading } from '../../components/layout/PageLoadingProvider';
 import { PageAccessGate, type AccessPreviewPage } from '../../components/access/PageAccessGate';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
 import { startContentViewTransition, waitForDocumentEntryToFinish } from '../../platform/transition-coordinator';
 
 const SITE_THEMES = ['grass', 'dark', 'light'];
-const BODY_MODE_CLASSES = ['in-menu', 'wide', 'spectating'] as const;
 
 function getRequestedMazePreview(): AccessPreviewPage {
   const view = new URLSearchParams(window.location.search).get('view');
@@ -18,19 +16,18 @@ function getRequestedMazePreview(): AccessPreviewPage {
 }
 
 /**
- * Persistent Maze route surface.
- *
- * The frame is a permanent portal in the single App React tree. It is hidden
- * while another route is active. After the first authenticated Maze activation,
- * its markup stays mounted even while its Engine is disposed, so engine/dom.ts
- * can safely retain its DOM references across soft navigation.
+ * Persistent Maze route view inside the one shared site content surface.
+ * The parent .route-page supplies the frame, while its single .feature-page-shell
+ * owns scrolling, gutters and the custom scrollbar for every route. This node
+ * owns only Maze presentation state and the route-scoped Engine host.
+ * Its markup remains mounted after first authenticated activation because
+ * engine/dom.ts retains stable DOM references across soft navigation.
  */
 export function MazeFrame({ active, children }: { active: boolean; children: ReactNode }) {
   const { status, isAuthenticated, error, refreshSession } = useIdentity();
   const finishPageLoading = usePageLoading();
   const [engineReady, setEngineReady] = useState(() => document.documentElement.dataset.mazeEngineReady === 'true');
   const frameRef = useRef<HTMLElement | null>(null);
-  const parkedBodyModes = useRef<string[]>([]);
 
   useEffect(() => {
     if (!active || !isAuthenticated) {
@@ -92,8 +89,8 @@ export function MazeFrame({ active, children }: { active: boolean; children: Rea
     };
   }, [active, isAuthenticated]);
 
-  // Keep document-level Maze modes out of other route styling. Their exact
-  // values are parked and restored so a game/menu resumes in the same mode.
+  // Keep every Maze presentation mode on its own route root. The Engine
+  // never mutates document.body for game-specific layout or spectator state.
   useLayoutEffect(() => {
     const app = frameRef.current;
     if (!app) return undefined;
@@ -101,47 +98,43 @@ export function MazeFrame({ active, children }: { active: boolean; children: Rea
     const applyTheme = (theme: string | undefined) => {
       app.dataset.theme = SITE_THEMES.includes(theme ?? '') ? theme : 'grass';
     };
-    const syncAppMode = () => {
-      for (const name of BODY_MODE_CLASSES) {
-        app.classList.toggle(name, active && document.body.classList.contains(name));
-      }
-    };
     const onThemeChange = (event: Event) => {
       applyTheme((event as CustomEvent<{ theme?: string }>).detail?.theme);
     };
+    const routePage = app.closest<HTMLElement>('.route-page');
+    const syncRouteLayout = () => {
+      routePage?.classList.toggle(
+        'route-page--maze-gameplay',
+        active && !app.classList.contains('in-menu'),
+      );
+    };
 
     if (active) {
-      if (parkedBodyModes.current.length) {
-        document.body.classList.add(...parkedBodyModes.current);
-        parkedBodyModes.current = [];
+      // Begin in the local menu state until the Engine decides whether to
+      // restore a game or show the Create / Rooms / Live interface.
+      if (!isAuthenticated || document.documentElement.dataset.mazeEngineReady !== 'true') {
+        app.classList.add('in-menu');
       }
-      // Direct SPA entry has no HTML pre-paint pass; begin in the stable menu
-      // frame until the Engine publishes its initial menu/game decision.
-      if (document.documentElement.dataset.mazeEngineReady !== 'true') {
-        document.body.classList.add('in-menu');
-      }
-    } else {
-      parkedBodyModes.current = BODY_MODE_CLASSES.filter((name) => document.body.classList.contains(name));
-      document.body.classList.remove(...BODY_MODE_CLASSES);
     }
 
     applyTheme(document.documentElement.dataset.theme);
-    syncAppMode();
+    syncRouteLayout();
 
-    const bodyObserver = new MutationObserver(syncAppMode);
-    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    const appObserver = new MutationObserver(syncRouteLayout);
+    appObserver.observe(app, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('site:themechange', onThemeChange);
 
     return () => {
-      bodyObserver.disconnect();
+      appObserver.disconnect();
+      routePage?.classList.remove('route-page--maze-gameplay');
       window.removeEventListener('site:themechange', onThemeChange);
     };
-  }, [active]);
+  }, [active, isAuthenticated, engineReady]);
 
   return (
-    <main
+    <section
       ref={frameRef}
-      className="maze-app in-menu"
+      className="route-view maze-app in-menu"
       id="mazeApp"
       hidden={!active}
       aria-hidden={!active}
@@ -163,12 +156,6 @@ export function MazeFrame({ active, children }: { active: boolean; children: Rea
           <small>Identity verified · Starting game services</small>
         </div>
       ) : null}
-      {active ? (
-        <RouteScrollbar
-          contentSelector=":scope > #createGame.cg, :scope > .access-gate"
-          label={isAuthenticated ? 'Maze menu scrollbar' : 'Sign-in preview scrollbar'}
-        />
-      ) : null}
-    </main>
+    </section>
   );
 }

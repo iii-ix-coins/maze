@@ -1,29 +1,7 @@
-/* Shared page-shell and feature primitives. Loaded with the site shell so
-   direct entry and client-side navigation use the same page geometry. */
+/* Shared feature-content primitives. The route frame, viewport, gutters and scrolling
+   are owned centrally by site.css; this file must not define another page shell. */
 @layer pages {
-  .feature-page-shell {
-    width: min(1180px, calc(100% - 40px));
-    margin: clamp(24px, 4vw, 54px) auto 96px;
-    display: grid;
-    gap: clamp(20px, 3vw, 30px);
-  }
-
-  /* Non-home feature routes use a tighter top offset than the Home shell. */
-  .feature-page-shell:not(.site-home-content) {
-    width: min(1180px, calc(100% - 40px));
-    margin: clamp(8px, 1.5vw, 16px) auto 96px;
-    display: grid;
-    gap: clamp(20px, 3vw, 30px);
-  }
-
-  @media (max-width: 650px) {
-    .feature-page-shell:not(.site-home-content) {
-      width: min(100% - 24px, 1180px);
-      margin-top: 20px;
-    }
-  }
-
-  .feature-page-title {
+.feature-page-title {
     display: grid;
     gap: 8px;
     padding: 8px 2px 4px;
@@ -105,20 +83,6 @@
 
   .feature-status--error {
     color: var(--coral, #ff8c80);
-  }
-
-  /* Home page — unified compact spacing */
-  .route-page--home>.site-home-content.feature-page-shell {
-    width: min(calc(100% - 2 * var(--gutter)), var(--page-max));
-    max-width: var(--page-max);
-    margin: clamp(5px, .75vw, 5px) auto clamp(5px, .75vw, 5px);
-    padding-top: 0;
-    gap: 0;
-  }
-
-  /* Keep the Hero spacing owned by the Home page wrapper */
-  .route-page--home+#site-brand-header .home-hero-slider {
-    margin-top: 0;
   }
 
 }

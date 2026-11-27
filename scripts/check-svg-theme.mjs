@@ -148,11 +148,15 @@ const intentionallyExternal = [
   'third-party provider logos (official brand assets)',
 ];
 
-// These pre-existing image references are present in MazeBackground.tsx but their SVG
-// files are not included in the supplied archive. Keep this as a visible warning.
-for (const name of ['3D-bg-grass.svg', '3D-bg-dark.svg', '3D-bg-light.svg']) {
+// The original 3D backgrounds are retained under their current wallet-bg filenames.
+// Verify the actual public paths used by the shared MazeBackground component.
+const mazeBackgroundSource = read('src/features/theme/MazeBackground.tsx');
+for (const name of ['wallet-bg-grass.svg', 'wallet-bg-dark.svg', 'wallet-bg-light.svg']) {
+  if (!mazeBackgroundSource.includes(`/css/images/${name}`)) {
+    errors.push(`MazeBackground does not reference the retained theme asset ${name}.`);
+  }
   if (!fs.existsSync(path.join(root, 'public/css/images', name))) {
-    warnings.push(`MazeBackground references missing pre-existing asset public/css/images/${name}.`);
+    errors.push(`MazeBackground theme asset is missing: public/css/images/${name}.`);
   }
 }
 

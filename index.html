@@ -30,19 +30,8 @@
     <link rel="stylesheet" href="/src/styles/site.css" />
   </head>
   <body class="page-loading">
-    <script>
-      const mazeRoutePaths = /* @maze-route-paths */;
-      // Same normalization as normalizePath() in src/app/routes.ts, so the frame mode
-      // chosen before React mounts always agrees with the router (case, trailing slash).
-      const mazeRoutePath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
-      if (mazeRoutePaths.includes(mazeRoutePath)) {
-        document.body.classList.add('in-menu');
-      }
-    </script>
-    <!-- Both hosts stay direct body children; this preserves the legacy CSS selectors. -->
-    <div id="root" style="display: contents"></div>
-    <!-- React portal target: keeps the original body-level Maze placement without a second React root. -->
-    <div id="maze-root" style="display: contents"></div>
+    <!-- One React host owns the site chrome, every route and the persistent Maze DOM. -->
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

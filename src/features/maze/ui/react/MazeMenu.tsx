@@ -115,10 +115,8 @@ export function MazeMenu({ hidden = false }: { hidden?: boolean }) {
     () => document.documentElement.dataset.mazeEngineReady === 'true',
   );
 
-  // The document marks the game route as in-menu before React mounts. Keep that
-  // frame state untouched until the engine has selected its initial menu/game
-  // state; otherwise the first React effect removes and re-adds the class,
-  // making the shared content frame visibly collapse and re-enter.
+  // The menu/game state belongs to the Maze surface, not to the document.
+  // Toggling it on #mazeApp cannot alter the shared Site frame or navigation.
   useEffect(() => {
     const handleEngineReady = () => setEngineReady(true);
     const handleEngineDisposed = () => setEngineReady(false);
@@ -137,14 +135,13 @@ export function MazeMenu({ hidden = false }: { hidden?: boolean }) {
 
   useEffect(() => {
     if (!engineReady) return;
-    document.body.classList.toggle('in-menu', state.visible);
+    const app = rootRef.current?.closest<HTMLElement>('#mazeApp');
+    app?.classList.toggle('in-menu', state.visible);
   }, [engineReady, state.visible]);
 
-  // Remove the body mode only when the Maze menu is actually unmounted.
-  // Do not put this cleanup in the visibility effect: that effect re-runs
-  // whenever Create/Rooms/Live visibility changes.
+  // Remove only the local Maze mode if this component is actually unmounted.
   useEffect(() => () => {
-    document.body.classList.remove('in-menu');
+    rootRef.current?.closest<HTMLElement>('#mazeApp')?.classList.remove('in-menu');
   }, []);
 
   // Tab transitions belong to the React presentation layer, not the

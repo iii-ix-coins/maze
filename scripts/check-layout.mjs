@@ -164,8 +164,8 @@ const menuVisibilityIsBootGated =
   mazeMenuSource.includes("document.documentElement.dataset.mazeEngineReady === 'true'") &&
   mazeMenuSource.includes("window.addEventListener('maze:engine-ready', handleEngineReady)") &&
   mazeMenuSource.includes('if (!engineReady) return;') &&
-  mazeMenuSource.includes("document.body.classList.toggle('in-menu', state.visible)") &&
-  /useEffect\(\(\) => \(\) => \{\s*document\.body\.classList\.remove\('in-menu'\);\s*\}, \[\]\);/.test(mazeMenuSource) &&
+  mazeMenuSource.includes("app?.classList.toggle('in-menu', state.visible)") &&
+  /closest<HTMLElement>\('#mazeApp'\)\?\.classList\.remove\('in-menu'\)/.test(mazeMenuSource) &&
   menuBootDecisionIndex >= 0 &&
   menuEngineReadyIndex > menuBootDecisionIndex;
 if (!menuVisibilityIsBootGated) {
@@ -207,7 +207,7 @@ const hasSharedFrameGeometry = [
   '--site-frame-width:',
   '--site-header-height:',
   'width: var(--site-frame-width)',
-  '.route-page,',
+  '.route-page {',
   '.route-page::before',
   '#site-topbar::before',
 ].every((token) => siteChromeCss.includes(token));
@@ -221,15 +221,15 @@ if (
   process.exit(1);
 }
 const routeScrollRule = siteChromeCss.match(/\.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameRule = siteChromeCss.match(/\.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
-const routeFrameStrokeRule = siteChromeCss.match(/\.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameRule = siteChromeCss.match(/\.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeFrameStrokeRule = siteChromeCss.match(/\.route-page::before\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
   console.error('[layout] normal site frame geometry must not depend on Maze body-mode state.');
   process.exit(1);
 }
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
-const routeFrameOpening = routerSource.match(/<div\s+className=\{`route-page[^>]*>/s)?.[0] ?? '';
-const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<RouteScrollbar \/>/.test(routerSource);
+const routeFrameOpening = routerSource.match(/<div\s+className="route-page"[^>]*>/s)?.[0] ?? '';
+const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<main className="feature-page-shell"/.test(routerSource) && /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) && /<MazeFrame active=\{isMazePage\}>/.test(routerSource);
 if (!routeFrameIsPersistent) {
   console.error('[layout] the outer content frame must remain unkeyed while only the inner route component is keyed.');
   process.exit(1);
@@ -297,7 +297,7 @@ if (
   transitionCoordinatorSource.includes('allowMazeUnload') ||
   !transitionPageLoadingSource.includes('playPageEnter()') ||
   !siteCssEntry.includes('view-transition-name: site-route-content;') ||
-  !siteCssEntry.includes('#mazeApp > .maze-authenticated-boot')
+  !fs.readFileSync(path.join(root, 'src/components/access/page-access-gate.css'), 'utf8').includes('#mazeApp > .maze-authenticated-boot')
 ) {
   console.error('[layout] Site/Maze transitions must share a single coordinator, reveal the authenticated boot surface before engine-ready, and keep the real document-unload guard without a Maze-only bypass.');
   process.exit(1);
@@ -312,8 +312,8 @@ if (
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
 if (
   !htmlFoundationRules.some((rule) => rule.includes('height: 100%') && rule.includes('overflow: hidden')) ||
-  !/body:not\(\.in-menu\)\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
-  !/body:not\(\.in-menu\)\s*>\s*#root\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
+  !/body\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
+  !/#root\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
   !routeFrameRule.includes('position: fixed') ||
   !routeFrameRule.includes('overflow: hidden') ||
   !routeFrameStrokeRule.includes('z-index: 2') ||
@@ -340,7 +340,7 @@ if (
   !routeScrollbarSource.includes('setPointerCapture') ||
   !routeScrollbarSource.includes('onWheel') ||
   !routeScrollbarSource.includes('ResizeObserver') ||
-  !fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8').includes('<RouteScrollbar />') ||
+  !fs.readFileSync(path.join(root, 'src/app/router.tsx'), 'utf8').includes('<RouteScrollbar contentSelector=":scope > .feature-page-shell" />') ||
   !navigationSource.includes("'.route-page > .feature-page-shell'") ||
   navigationSource.includes('window.scrollTo') ||
   /html\s*\{[^}]*?(?:^|;)\s*scroll-behavior\s*:/ms.test(foundationStyles) ||
@@ -356,8 +356,19 @@ const mazeFrameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/m
 const mazeThemeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-theme.css'), 'utf8');
 const mazePageSource = fs.readFileSync(path.join(root, 'src/features/maze/MazePage.tsx'), 'utf8');
 const mazeFrameSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
-if (!mazeFrameSource.includes('document.body.classList.remove(...BODY_MODE_CLASSES)')) {
-  console.error('[layout] MazeFrame must clean document-level Maze modes on unmount, including the guest-gate path.');
+const mazeLayoutSource = fs.readFileSync(path.join(root, 'src/features/maze/engine/layout.ts'), 'utf8');
+const mazeSessionSource = fs.readFileSync(path.join(root, 'src/features/maze/engine/session.ts'), 'utf8');
+if (
+  mazeFrameSource.includes('document.body.classList') ||
+  mazeLayoutSource.includes('document.body.classList') ||
+  mazeSessionSource.includes('document.body.classList') ||
+  !mazeLayoutSource.includes("app?.classList.toggle('wide', wide)") ||
+  !mazeSessionSource.includes("document.getElementById('mazeApp')?.classList.toggle('spectating', S.spectating)") ||
+  !mazeLayoutSource.includes("surface?.classList.contains('feature-page-shell') === true") ||
+  !mazeLayoutSource.includes('surface.clientHeight - verticalPadding') ||
+  !mazeLayoutSource.includes('appBounds?.width')
+) {
+  console.error('[layout] Game-only layout state must stay on #mazeApp and Engine sizing must use the shared route viewport, never document.body or menu content height.');
   process.exit(1);
 }
 const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
@@ -391,56 +402,92 @@ const hasNestedMenuScroller = mazeMenuCssSources.some((css) => {
   });
 });
 const mazeFrameVerticalScrollCount = (mazeFrameCss.match(/overflow-y\s*:\s*auto/g) ?? []).length;
-if (
-  !siteChromeCss.includes('body.in-menu #mazeApp.maze-app.in-menu') ||
-  !siteChromeCss.includes('body.in-menu>#root>#site-topbar') ||
-  !/body\.in-menu\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) ||
-  !mazeFrameCss.includes('--site-frame-content-padding-start') ||
-  !mazeFrameCss.includes('--cg-gutter: var(--site-frame-content-padding-start)') ||
-  !mazeFrameCss.includes('--cg-pad-t: var(--site-frame-content-padding)') ||
-  !mazeFrameCss.includes('--cg-pad-b: var(--site-frame-content-padding)') ||
-  !mazeFrameCss.includes('--site-frame-content-padding-end') ||
-  !mazeFrameCss.includes('overflow-y: auto') ||
-  !mazeFrameCss.includes('background: transparent') ||
-  !mazeFrameCss.includes('--cg-max: 100%') ||
-  !mazeFrameCss.includes('--cg-gutter: var(--site-frame-content-padding-start)') ||
-  /body\.in-menu>\#root>\#site-brand-header:empty/.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8')) ||
-  mazeFrameCss.includes('.cg-layout::before') ||
-  mazeFrameCss.includes('.cg-layout::after') ||
-  /#mazeApp\.in-menu\s+\.lb\[data-view="(?:rooms|live)"\]\s*\{[^}]*border:\s*1px/s.test(mazeFrameCss) ||
-  !mazeFrameSource.includes('contentSelector=":scope > #createGame.cg, :scope > .access-gate"') ||
-  !mazeFrameSource.includes('<RouteScrollbar') ||
-  mazeFrameVerticalScrollCount !== 1 ||
-  hasNestedMenuScroller ||
-  !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*position:\s*absolute/s.test(mazeFrameCss) ||
-  !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*inset:\s*0/s.test(mazeFrameCss) ||
-  !mazeFrameCss.includes('overflow-y: auto') ||
-  !mazeFrameCss.includes('padding-inline-start: var(--site-frame-content-padding-start)') ||
-  !mazeFrameCss.includes('padding-inline-end: var(--site-frame-content-padding-end)') ||
-  /\.maze-app \.cg-layout\s*\{/.test(legacyMazeCss) ||
-  /--cg-max:\s*1180px/.test(legacyMazeCss) ||
-  /--cg-(?:top-pad|pad-t|pad-b|tabs-h):/.test(legacyMazeCss) ||
-  /(?:\.cg-steps|\.lb-members)[^{}]*\{[^}]*overflow-y\s*:\s*(?:auto|scroll)/s.test(legacyMazeCss) ||
-  /position:\s*fixed|inset:\s*0/.test(createGameCss.match(/\.cg\s*\{([^}]*)\}/s)?.[1] ?? '') ||
-  /\.maze-app \.lb\s*\{[^}]*padding:\s*16px/s.test(legacyMazeCss) ||
-  !mazeThemeCss.includes('.maze-app .cg, .maze-app .lb { background: transparent;') ||
-  /\.lb\s*\{[^}]*max-width:\s*1180px/s.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8')) ||
-  /\.lb-room-screen\s*\{[^}]*max-width:\s*1040px/s.test(fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8')) ||
-  /\.maze-app\s+\.cg-nav\s*\{[^}]*background:\s*var\(--surface-solid/s.test(createGameCss)
-) {
-  console.error('[layout] Create, Rooms, Live and Waiting Room must share one Site Content Frame and one vertical scroller.');
+const routeViewRoots = [
+  'src/features/home/HomePage.tsx',
+  'src/features/explore/ExplorePage.tsx',
+  'src/features/profile/ProfilePage.tsx',
+  'src/features/maze/MazeHubPage.tsx',
+  'src/components/layout/NotFoundPage.tsx',
+].map((file) => fs.readFileSync(path.join(root, file), 'utf8'));
+const routeViewRootsAreUniform =
+  routeViewRoots.every((source) => /<section\s+className=\"route-view\b/.test(source)) &&
+  (routerSource.match(/<main\b/g) ?? []).length === 1 &&
+  /<section className=\"route-view route-view--access\">/.test(routerSource) &&
+  /<section[\s\S]*className=\"route-view maze-app in-menu\"/.test(mazeFrameSource);
+if (!routeViewRootsAreUniform) {
+  console.error('[layout] Every registered destination must use the same direct section.route-view root under the one main content surface.');
   process.exit(1);
 }
-// The Maze content frame must be as persistent as the site frame: it exists from the first
-// React commit, independent of the lazy Maze chunk and of the engine boot.
+const sharedContentSurfaceIsUnified =
+  /<main className="feature-page-shell"/.test(routerSource) &&
+  /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) &&
+  /<MazeFrame active=\{isMazePage\}>[\s\S]*<\/MazeFrame>/.test(routerSource) &&
+  routerSource.indexOf('<MazeFrame active={isMazePage}>') > routerSource.indexOf('<main className="feature-page-shell"') &&
+  routeScrollRule.includes('height: 100%') &&
+  routeScrollRule.includes('overflow-y: auto') &&
+  routeScrollRule.includes('padding-inline-start: var(--site-frame-content-padding-start)') &&
+  routeScrollRule.includes('padding-inline-end: var(--site-frame-content-padding-end)') &&
+  siteChromeCss.includes('.route-page > .feature-page-shell > .route-view') &&
+  /\.route-page > \.feature-page-shell > \.route-view\s*\{[^}]*display:\s*grid/s.test(siteChromeCss) &&
+  /\.route-page > \.feature-page-shell > #mazeApp\s*\{[^}]*gap:\s*0/s.test(siteChromeCss) &&
+  !/<div className="route-view route-view--access">/.test(routerSource) &&
+  routerSource.includes('className="route-page"') &&
+  !routerSource.includes('route-page--home') &&
+  !routerSource.includes('route-page--maze-hub') &&
+  !routerSource.includes('route-page--maze`') &&
+  siteChromeCss.includes('.route-page--maze-gameplay > .feature-page-shell') &&
+  mazeFrameSource.includes('className="route-view maze-app in-menu"') &&
+  mazeFrameSource.includes('id="mazeApp"') &&
+  mazeFrameSource.includes('hidden={!active}') &&
+  !mazeFrameSource.includes('<RouteScrollbar') &&
+  !siteChromeCss.includes('.route-page > #mazeApp') &&
+  !/(^|\n)\s*\.feature-page-shell\b/m.test(fs.readFileSync(path.join(root, 'src/styles/home-shared.css'), 'utf8')) &&
+  !fs.readFileSync(path.join(root, 'src/styles/home-shared.css'), 'utf8').includes('route-page--home') &&
+  !siteChromeCss.includes('body.in-menu') &&
+  !mazeMenuPresentationSource.includes('document.body.classList.toggle') &&
+  !mazeFrameSource.includes('document.body.classList') &&
+  mazeLayoutSource.includes("app?.classList.toggle('wide', wide)") &&
+  mazeLayoutSource.includes("app?.style.setProperty('--v', S.V + 'px')") &&
+  fs.readFileSync(path.join(root, 'src/features/maze/engine-entry.ts'), 'utf8').includes("document.getElementById('mazeApp')?.style.removeProperty('--v')") &&
+  !mazeLayoutSource.includes("document.documentElement.style.setProperty('--v'") &&
+  mazeSessionSource.includes("document.getElementById('mazeApp')?.classList.toggle('spectating', S.spectating)") &&
+  mazeFrameVerticalScrollCount === 0 &&
+  !hasNestedMenuScroller &&
+  mazeFrameCss.includes('--cg-gutter: 0px') &&
+  mazeFrameCss.includes('--cg-pad-t: 0px') &&
+  mazeFrameCss.includes('--cg-pad-b: 0px') &&
+  mazeFrameCss.includes('--cg-available-height: calc(var(--site-frame-content-height) - var(--site-frame-content-padding) - var(--site-frame-content-padding))') &&
+  /#mazeApp\.maze-app\.in-menu > #createGame\.cg #cgViewCreate > \.cg-layout\s*\{[^}]*padding:\s*0/s.test(mazeFrameCss) &&
+  /#mazeApp\.maze-app\.in-menu \.lb\s*\{[^}]*padding:\s*0/s.test(mazeFrameCss) &&
+  !/padding-inline-(?:start|end):\s*var\(--site-frame-content-padding-(?:start|end)\)/.test(mazeFrameCss) &&
+  mazeFrameCss.includes('--cg-max: 100%') &&
+  /#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*position:\s*relative/s.test(mazeFrameCss) &&
+  !/#mazeApp\.maze-app\.in-menu > #createGame\.cg\s*\{[^}]*position:\s*absolute/s.test(mazeFrameCss) &&
+  mazeFrameCss.includes('overflow: visible') &&
+  /#mazeApp\.maze-app:not\(\.in-menu\) > \.game-container\s*\{[^}]*height:\s*100%/s.test(mazeFrameCss) &&
+  /\.maze-app \.cg-layout\s*\{/.test(legacyMazeCss) === false &&
+  !/--cg-max:\s*1180px/.test(legacyMazeCss) &&
+  !/--cg-(?:top-pad|pad-t|pad-b|tabs-h):/.test(legacyMazeCss) &&
+  !/(?:\.cg-steps|\.lb-members)[^{}]*\{[^}]*overflow-y\s*:\s*(?:auto|scroll)/s.test(legacyMazeCss) &&
+  !/position:\s*fixed|inset:\s*0/.test(createGameCss.match(/\.cg\s*\{([^}]*)\}/s)?.[1] ?? '') &&
+  !/\.maze-app \.lb\s*\{[^}]*padding:\s*16px/s.test(legacyMazeCss) &&
+  mazeThemeCss.includes('.maze-app .cg, .maze-app .lb { background: transparent;') &&
+  !/\.lb\s*\{[^}]*max-width:\s*1180px/s.test(lobbyCss) &&
+  !/\.lb-room-screen\s*\{[^}]*max-width:\s*1040px/s.test(lobbyCss) &&
+  !/\.maze-app\s+\.cg-nav\s*\{[^}]*background:\s*var\(--surface-solid/s.test(createGameCss);
+if (!sharedContentSurfaceIsUnified) {
+  console.error('[layout] Every route must render through one shared Content Surface, one route-view contract and one vertical scroll owner; Maze may not create a parallel frame.');
+  process.exit(1);
+}
+
+// The Engine host is mounted eagerly and persistently inside the universal content surface.
 const mazeStoreSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/maze-ui-store.ts'), 'utf8');
 const indexHtmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const mazeFrameIsEagerAndPersistent =
-  /import\s+\{\s*MazeFrame\s*\}\s+from\s+'\.\.\/features\/maze\/MazeFrame'/.test(appSource) &&
-  !/lazy\([^)]*MazeFrame/.test(appSource) &&
-  /<MazeFrame active=\{isMazePage\}>[\s\S]*<MazePage active=\{isMazePage && isAuthenticated\} authenticated=\{isAuthenticated\} \/>/.test(appSource) &&
-  appSource.includes('hasMountedMaze') &&
-  !appSource.includes('maze-loading') &&
+  /import\s+\{\s*MazeFrame\s*\}\s+from\s+'\.\.\/features\/maze\/MazeFrame'/.test(routerSource) &&
+  !/lazy\([^)]*MazeFrame/.test(routerSource) &&
+  /<MazeFrame active=\{isMazePage\}>[\s\S]*<MazePage active=\{isMazePage && isAuthenticated\} authenticated=\{isAuthenticated\} \/>/.test(routerSource) &&
+  routerSource.includes('hasMountedMaze') &&
   /id="mazeApp"/.test(mazeFrameSource) &&
   /hidden=\{!active\}/.test(mazeFrameSource) &&
   !/id=["']mazeApp["']/.test(mazePageSource) &&
@@ -452,11 +499,12 @@ const mazeFrameIsEagerAndPersistent =
   mazeStoreSource.includes('readInitialHomeView') &&
   /view:\s*initialHomeView/.test(mazeStoreSource) &&
   /html:not\(\[data-maze-engine-ready="true"\]\)[^{]*#mazeApp\.maze-app\s*>\s*#createGame\s*\{[^}]*visibility:\s*hidden/s.test(siteChromeCss) &&
-  /body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{[^}]*z-index:\s*1/s.test(siteChromeCss) &&
-  indexHtmlSource.includes('mazeRoutePath') &&
-  indexHtmlSource.includes("toLowerCase().replace(/\\/+$/, '')");
+  indexHtmlSource.includes('<div id="root"></div>') &&
+  !indexHtmlSource.includes('maze-root') &&
+  !indexHtmlSource.includes('mazeRoutePath') &&
+  !indexHtmlSource.includes('@maze-route-paths');
 if (!mazeFrameIsEagerAndPersistent) {
-  console.error('[layout] The Maze content frame must be mounted eagerly (MazeFrame) and stay constant; only its lazy content may load or appear.');
+  console.error('[layout] The Maze Engine host must remain persistent inside the same route-view tree and must not have a second document root.');
   process.exit(1);
 }
 
@@ -587,8 +635,8 @@ for (const page of activeHtmlPages) {
     console.error(`[layout] active page is missing pre-paint theme initialization: ${page}`);
     process.exit(1);
   }
-  if (!html.includes('/* @maze-route-paths */')) {
-    console.error(`[layout] Maze pre-paint route setup must be injected from the shared route manifest: ${page}`);
+  if (html.includes('/* @maze-route-paths */') || html.includes('maze-root')) {
+    console.error(`[layout] Route-specific Maze document roots or pre-paint bootstraps must not return: ${page}`);
     process.exit(1);
   }
   if (!html.includes('<!-- @site-default-title -->')) {
@@ -690,7 +738,7 @@ if (/document\.createElement|createElementNS|appendChild\(|initMazeBackground/.t
   console.error('[layout] site background must be React-owned and must not use a DOM bootstrap.');
   process.exit(1);
 }
-if (!appSource.includes('const MazePage = lazy(loadMazePage);') || !appSource.includes('loadMazePage')) {
+if (!routerSource.includes('const MazePage = lazy(loadMazePage);') || !routerSource.includes('loadMazePage')) {
   console.error('[layout] MazePage must be loaded through the centralized route-level lazy loader.')
   process.exit(1);
 }
@@ -748,12 +796,15 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
   process.exit(1);
 }
 if (
-  !featureRouter.includes("if (route?.id === 'maze') return null;") ||
+  featureRouter.includes("if (route?.id === 'maze') return null;") ||
+  featureRouter.includes('createPortal') ||
+  !featureRouter.includes('<main className="feature-page-shell"') ||
+  !featureRouter.includes('<MazeFrame active={isMazePage}>') ||
   featureRouter.includes('MazeRouteShell') ||
   !siteCssEntry.includes('.route-scrollbar[data-visible="false"]') ||
   !siteCssEntry.includes('visibility: hidden;')
 ) {
-  console.error('[layout] Maze must use only its portal-owned content frame, and scrollbars without a target must stay hidden.');
+  console.error('[layout] Maze and Site routes must use one shared content surface, and scrollbars without a target must stay hidden.');
   process.exit(1);
 }
 const siteRoutes = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8')).routes;
@@ -1097,8 +1148,8 @@ if (!packageConfig.scripts['test:maze:run'] || !packageConfig.scripts.check.incl
   process.exit(1);
 }
 const viteConfig = fs.readFileSync(path.join(root, 'vite.config.mts'), 'utf8');
-if (!viteConfig.includes("shared/site-routes.json") || !viteConfig.includes("@maze-route-paths") || !viteConfig.includes("@site-default-title")) {
-  console.error('[layout] Vite must inject pre-paint Maze route paths and the default title from the shared site route manifest.');
+if (!viteConfig.includes("shared/site-routes.json") || !viteConfig.includes("@site-default-title") || viteConfig.includes('@maze-route-paths')) {
+  console.error('[layout] Vite must use the shared route manifest for the default title without injecting a separate Maze document bootstrap.');
   process.exit(1);
 }
 if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {

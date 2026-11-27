@@ -1,11 +1,13 @@
 /*
- * Maze menu integration with the shared Site Content Frame.
- * The site owns the outer frame, viewport bounds, header and dock.
- * Create / Rooms / Live / Waiting Room only provide content inside it.
+ * Maze uses the exact same route-view and content surface as every Site page.
+ * The shared .feature-page-shell is the only scroll owner; #mazeApp is only
+ * the persistent Engine host and never creates a nested viewport.
  */
-#mazeApp.maze-app.in-menu {
-    min-width: 0;
-    min-height: 0;
+#mazeApp.maze-app {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-height: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -13,8 +15,22 @@
     background: transparent;
 }
 
-/* Park the persistent Maze DOM outside its active route without allowing
-   author-level menu/game display rules to override the native hidden attribute. */
+#mazeApp.maze-app.in-menu {
+    height: auto;
+    min-height: 100%;
+    max-height: none;
+    overflow: visible;
+    overscroll-behavior: auto;
+}
+
+#mazeApp.maze-app:not(.in-menu) {
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: contain;
+}
+
+/* Park persistent Maze DOM while another route or the guest gate is active. */
 #mazeApp[hidden],
 #mazeApp > [hidden],
 #mazeApp > .game-container[hidden],
@@ -22,42 +38,32 @@
     display: none !important;
 }
 
-/* The absolute inner content surface is the sole vertical scroller for all menu views. */
+/* The shared route surface scrolls; Maze menu views remain in normal flow. */
 #mazeApp.maze-app.in-menu > #createGame.cg {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    inset: auto;
     z-index: 1;
     display: flex;
     flex-direction: column;
-    width: auto;
+    width: 100%;
     height: auto;
     min-width: 0;
-    min-height: 0;
+    min-height: 100%;
     max-height: none;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    overflow: visible;
     background: transparent;
 
-    /* Create Wizard sizing inherits the shared Site Content Frame tokens. */
     --cg-max: 100%;
-    --cg-gutter: var(--site-frame-content-padding-start);
-    --cg-pad-t: var(--site-frame-content-padding);
-    --cg-pad-b: var(--site-frame-content-padding);
+    /* The parent route surface already owns all site gutters and padding. */
+    --cg-gutter: 0px;
+    --cg-pad-t: 0px;
+    --cg-pad-b: 0px;
+    --cg-available-height: calc(var(--site-frame-content-height) - var(--site-frame-content-padding) - var(--site-frame-content-padding));
     --cg-gap: clamp(14px, 2.5vw, 24px);
     --cg-top-pad: 0px;
     --cg-tabs-h: 0px;
-}
-
-#mazeApp.maze-app.in-menu > #createGame.cg::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
 }
 
 #mazeApp.maze-app.in-menu > #createGame.cg > .cg-top {
@@ -91,21 +97,17 @@
     min-width: 0;
     min-height: 100%;
     margin: 0;
-    padding-block: var(--cg-pad-t) var(--cg-pad-b);
-    padding-inline-start: var(--site-frame-content-padding-start);
-    padding-inline-end: var(--site-frame-content-padding-end);
+    padding: 0;
 }
 
-/* Rooms, Live and Waiting Room share the same frame and content gutters. */
+/* Rooms, Live and Waiting Room inherit the single parent-owned content gutter. */
 #mazeApp.maze-app.in-menu .lb {
     flex: 1 0 auto;
     width: 100%;
     max-width: none;
     min-width: 0;
     margin: 0;
-    padding-block: var(--site-frame-content-padding);
-    padding-inline-start: var(--site-frame-content-padding-start);
-    padding-inline-end: var(--site-frame-content-padding-end);
+    padding: 0;
     box-sizing: border-box;
     border: 0;
     border-radius: 0;
@@ -171,9 +173,9 @@
     #mazeApp.maze-app.in-menu > #createGame.cg {
         --cg-aside: clamp(300px, 34vw, 440px);
         --v-chrome: calc(var(--cg-top-pad) + var(--cg-tabs-h) + var(--cg-pad-t) + var(--node) + var(--cg-row) + var(--cg-pad-b) + 8px);
-        --maze-w: calc(100% - var(--site-frame-content-padding-start) - var(--site-frame-content-padding-end) - var(--cg-aside) - var(--cg-gap));
+        --maze-w: calc(100% - var(--cg-aside) - var(--cg-gap));
         --maze-side: min(
-            max(120px, calc(var(--site-frame-content-height) - var(--v-chrome))),
+            max(120px, calc(var(--cg-available-height) - var(--v-chrome))),
             var(--maze-cap),
             var(--maze-w)
         );
@@ -217,9 +219,7 @@
         height: auto;
         min-height: 100%;
         margin: 0;
-        padding-block: var(--cg-pad-t) var(--cg-pad-b);
-        padding-inline-start: var(--site-frame-content-padding-start);
-        padding-inline-end: var(--site-frame-content-padding-end);
+        padding: 0;
         grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
         grid-template-rows: auto minmax(min-content, auto) auto;
         grid-template-areas:
@@ -244,5 +244,28 @@
     position: absolute;
     z-index: 5;
     bottom: var(--site-frame-content-padding);
+}
+
+
+
+/* Gameplay occupies the shared content rectangle without adding a second scroller. */
+#mazeApp.maze-app:not(.in-menu) > .game-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#mazeApp.maze-app:not(.in-menu) .game-layout {
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
 }
 

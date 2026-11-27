@@ -588,11 +588,7 @@
     }
 
     /* Only browsers without the API use a CSS entrance for newly mounted routes. */
-    html:not([data-ui-view-transition-support="true"]) body.page-loaded .route-page > .feature-page-shell,
-    html:not([data-ui-view-transition-support="true"]) body.page-loaded #mazeApp > .access-gate,
-    html:not([data-ui-view-transition-support="true"]) body.page-loaded #mazeApp > .maze-authenticated-boot,
-    html:not([data-ui-view-transition-support="true"]) body.page-loaded #mazeApp > #createGame.cg.show,
-    html:not([data-ui-view-transition-support="true"]) body.page-loaded #mazeApp > .game-container {
+    html:not([data-ui-view-transition-support="true"]) body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
         width: 100%;
         min-width: 0;
         animation: site-route-content-enter var(--maze-enter-duration) var(--maze-enter-easing) both;
@@ -600,21 +596,13 @@
 
     /* View Transition-capable browsers use this CSS entrance only when the
        destination React.lazy chunk was not yet loaded on its first visit. */
-    html[data-site-route-fallback="true"] body.page-loaded .route-page > .feature-page-shell,
-    html[data-site-route-fallback="true"] body.page-loaded #mazeApp > .access-gate,
-    html[data-site-route-fallback="true"] body.page-loaded #mazeApp > .maze-authenticated-boot,
-    html[data-site-route-fallback="true"] body.page-loaded #mazeApp > #createGame.cg.show,
-    html[data-site-route-fallback="true"] body.page-loaded #mazeApp > .game-container {
+    html[data-site-route-fallback="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
         width: 100%;
         min-width: 0;
         animation: site-route-content-enter var(--maze-enter-duration) var(--maze-enter-easing) both;
     }
 
-    html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell,
-    html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .access-gate,
-    html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .maze-authenticated-boot,
-    html[data-site-route-exiting="true"] body.page-loaded #mazeApp > #createGame.cg.show,
-    html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .game-container {
+    html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
         animation: site-route-content-exit 130ms cubic-bezier(.4, 0, 1, 1) both;
         pointer-events: none;
     }
@@ -658,16 +646,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        body.page-loaded .route-page > .feature-page-shell,
-        body.page-loaded #mazeApp > .access-gate,
-        body.page-loaded #mazeApp > .maze-authenticated-boot,
-        body.page-loaded #mazeApp > #createGame.cg.show,
-        body.page-loaded #mazeApp > .game-container,
-        html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell,
-        html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .access-gate,
-        html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .maze-authenticated-boot,
-        html[data-site-route-exiting="true"] body.page-loaded #mazeApp > #createGame.cg.show,
-        html[data-site-route-exiting="true"] body.page-loaded #mazeApp > .game-container,
+        body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]),
+        html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]),
         html[data-maze-tab-exiting="true"] .maze-app .cg-views > .cg-view:not([hidden]),
         html[data-maze-tab-entering="true"] .maze-app .cg-views > .cg-view:not([hidden]),
         ::view-transition-group(site-route-content),

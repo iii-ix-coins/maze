@@ -5,11 +5,7 @@
 @import "./page-transition.css";
 @import "./home-shared.css";
 
-/* Keep Maze's persistent chrome clear of the game surface. */
-body.in-menu #site-header {
-    z-index: 1000;
-}
-
+/* The fixed header and dock are shared by every route and every Maze state. */
 /* One shared horizontal frame for the topbar, route content and bottom dock. */
 :root {
     --site-frame-max-width: 900px;
@@ -45,8 +41,7 @@ body.in-menu #site-header {
 }
 
 /* The topbar is a real frame; the brand link only occupies its own content. */
-body:not(.in-menu)>#root>#site-topbar,
-body.in-menu>#root>#site-topbar {
+#root > #site-topbar {
     position: fixed;
     top: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top));
     left: 50%;
@@ -323,7 +318,7 @@ body.in-menu>#root>#site-topbar {
 
 /* Theme selection is a compact vertical stack of three square, chamfer-cut controls. */
 
-/* Bottom navigation dock. Maze keeps its established in-flow/top placement. */
+/* One fixed bottom navigation dock for every route. */
 #site-header {
     position: fixed;
     top: auto;
@@ -339,29 +334,9 @@ body.in-menu>#root>#site-topbar {
     pointer-events: none;
 }
 
-/* Both site routes and the Maze menu use the same viewport and content-frame geometry. */
-body.in-menu {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 100vh;
-    min-height: 0;
-    max-height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    overscroll-behavior: none;
-}
-
-@supports (height: 100dvh) {
-    body.in-menu {
-        height: 100dvh;
-        max-height: 100dvh;
-    }
-}
-
-/* Normal site routes are viewport-locked; the page frame owns vertical scrolling. */
-body:not(.in-menu) {
+/* One document geometry for all routes. Maze menu/game state is local to
+   #mazeApp and must never change body or #root layout. */
+body {
     position: relative;
     display: block;
     width: 100%;
@@ -375,10 +350,9 @@ body:not(.in-menu) {
     overscroll-behavior: none;
 }
 
-/* index.html keeps display:contents for the gameplay shell; site routes need a bounded root. */
-body:not(.in-menu)>#root {
+#root {
     position: relative;
-    display: block !important;
+    display: block;
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -387,16 +361,16 @@ body:not(.in-menu)>#root {
 }
 
 @supports (height: 100dvh) {
-    body:not(.in-menu) {
+    body {
         height: 100dvh;
         max-height: 100dvh;
     }
 }
 
-.route-page,
-body.in-menu #mazeApp.maze-app.in-menu {
+.route-page {
     position: fixed;
     isolation: isolate;
+    z-index: 1;
     display: block;
     top: var(--site-frame-top-space);
     right: auto;
@@ -413,12 +387,11 @@ body.in-menu #mazeApp.maze-app.in-menu {
     transform: translateX(-50%);
 }
 
-/* Content frame uses the same chamfer and border language, with no filled surface. */
-.route-page::before,
-body.in-menu #mazeApp.maze-app.in-menu::before {
+/* Every destination uses this exact single outer border. All route content,
+   including the Maze Engine host, lives inside one shared content surface. */
+.route-page::before {
     content: "";
     position: absolute;
-    /* Keep the frame stroke above the inner scroller and its scrollbar. */
     z-index: 2;
     inset: 0;
     border: 2px solid var(--ar-line);
@@ -438,36 +411,18 @@ body.in-menu #mazeApp.maze-app.in-menu::before {
     pointer-events: none;
 }
 
-/* The Maze frame is mounted eagerly and never changes between first paint and
-   gameplay hand-off. Its stacking order is owned here (not by the lazy Maze CSS
-   chunk), so loading that chunk cannot change the frame. */
-body.in-menu #mazeApp.maze-app.in-menu {
-    z-index: 1;
-}
-
-/* Only the CONTENT waits for the engine's first menu/game decision, and it is
-   revealed instantly (no animation) in its final state. The frame, its border and
-   its scrollbar rail stay fully visible and untouched the whole time. If the
-   engine fails to boot, the content is released so the page is never left blank. */
-html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app>#createGame {
+/* During the first Engine mount only the local menu contents wait for the
+   restore/showMenu decision. The shared route frame remains fully stable. */
+html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app > #createGame {
     visibility: hidden;
 }
 
-/* The inner page is the only vertical scroll container; the outer frame stays fixed. */
-/* Both Site and Maze expose the same transition identity for their inner
-   content. The three outer chrome/frame surfaces intentionally have no name. */
-#mazeApp > .access-gate,
-#mazeApp > .maze-authenticated-boot,
-#mazeApp > #createGame.cg.show,
-#mazeApp > .game-container {
-    view-transition-name: site-route-content;
-}
-
-.route-page>.feature-page-shell {
+/* One content surface owns route layout, scrolling, gutters and transitions.
+   Ordinary features and the persistent Maze host are children of this same node. */
+.route-page > .feature-page-shell {
     position: relative;
     z-index: 1;
-    view-transition-name: site-route-content;
-    display: grid;
+    display: block;
     width: 100%;
     height: 100%;
     max-width: none;
@@ -487,16 +442,78 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     scrollbar-gutter: auto;
 }
 
-.route-page>.feature-page-shell::-webkit-scrollbar {
+.route-page > .feature-page-shell::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;
 }
 
+/* Every page root uses the same route-view contract. Page-specific classes
+   may compose content, but cannot introduce another width, frame or scroller. */
+.route-page > .feature-page-shell > .route-view {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-content: start;
+    gap: clamp(18px, 3vw, 28px);
+    width: 100%;
+    height: auto;
+    max-width: none;
+    min-width: 0;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.route-page > .feature-page-shell > .route-view[hidden] {
+    display: none !important;
+}
+
+/* Maze is an Engine host inside the shared route-view, never a second frame.
+   In menu mode the shared parent scrolls; in gameplay the parent locks to the
+   visible board area while the Engine receives that exact rectangle. */
+.route-page > .feature-page-shell > #mazeApp {
+    /* Keep the same root display contract as every other .route-view. */
+    gap: 0;
+    align-content: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+.route-page > .feature-page-shell > #mazeApp.in-menu {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+}
+
+.route-page--maze-gameplay > .feature-page-shell {
+    overflow-y: hidden;
+}
+
+.route-page--maze-gameplay > .feature-page-shell > #mazeApp:not(.in-menu) {
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+/* One named transition surface across all site pages, Maze menus and gameplay. */
+.route-page > .feature-page-shell > .route-view:not([hidden]) {
+    view-transition-name: site-route-content;
+}
+
 /* A single custom rail keeps its track, thumb and position consistent across browsers. */
-/* A scrollbar without an overflowing content target must not paint an
-   orphaned rail. This also prevents a second, viewport-edge rail on Maze
-   routes where AppRouter does not own the content frame. */
+/* The single route scroller is measured by the custom rail on every route.
+   If it has no overflow, keep the rail hidden instead of painting an orphan. */
 .route-scrollbar[data-visible="false"] {
     visibility: hidden;
     pointer-events: none;
@@ -914,25 +931,13 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 }
 
 /* During cross-document exit, only the outgoing content loses pointer access. */
-html[data-ui-document-exiting="true"] .route-page > .feature-page-shell,
-html[data-ui-document-exiting="true"] #mazeApp > .access-gate,
-html[data-ui-document-exiting="true"] #mazeApp > .maze-authenticated-boot,
-html[data-ui-document-exiting="true"] #mazeApp > #createGame.cg.show,
-html[data-ui-document-exiting="true"] #mazeApp > .game-container {
+html[data-ui-document-exiting="true"] .route-page > .feature-page-shell > .route-view:not([hidden]) {
     pointer-events: none;
 }
 
 
 /* Same-document WAAPI fallback locks only the moving content surface. */
-html[data-ui-content-transition-fallback="true"] .route-page > .feature-page-shell,
-html[data-ui-content-transition-fallback="true"] #mazeApp > .access-gate,
-html[data-ui-content-transition-fallback="true"] #mazeApp > .maze-authenticated-boot,
-html[data-ui-content-transition-fallback="true"] #mazeApp > #createGame.cg.show,
-html[data-ui-content-transition-fallback="true"] #mazeApp > .game-container,
-html[data-ui-document-entering="true"] .route-page > .feature-page-shell,
-html[data-ui-document-entering="true"] #mazeApp > .access-gate,
-html[data-ui-document-entering="true"] #mazeApp > .maze-authenticated-boot,
-html[data-ui-document-entering="true"] #mazeApp > #createGame.cg.show,
-html[data-ui-document-entering="true"] #mazeApp > .game-container {
+html[data-ui-content-transition-fallback="true"] .route-page > .feature-page-shell > .route-view:not([hidden]),
+html[data-ui-document-entering="true"] .route-page > .feature-page-shell > .route-view:not([hidden]) {
     pointer-events: none;
 }
