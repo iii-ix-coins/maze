@@ -76,16 +76,16 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       sourcemap: false,
       target: [
-        'safari13.1',
-        'ios13.4',
+        'safari14',
+        'ios14',
         'chrome80',
         'firefox74',
         'edge80'
       ],
 
       cssTarget: [
-        'safari13.1',
-        'ios13.4',
+        'safari14',
+        'ios14',
         'chrome80',
         'firefox74',
         'edge80'

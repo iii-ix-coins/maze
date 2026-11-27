@@ -61,7 +61,7 @@
     display: grid;
     gap: 0;
     margin-top: 12px;
-    border-top: 1px solid color-mix(in srgb, var(--ar-line) 55%, transparent);
+    border-top: 1px solid rgba(var(--ar-line) 55%);
   }
 
   .site-access-pillar {
@@ -70,7 +70,7 @@
     align-items: start;
     gap: 10px;
     padding: 11px 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--ar-line) 35%, transparent);
+    border-bottom: 1px solid rgba(var(--ar-line) 35%);
   }
 
   .site-access-pillar-number {
@@ -88,7 +88,7 @@
     justify-items: center;
     gap: 12px;
     padding: clamp(16px, 2.5vw, 24px);
-    border: 1px solid color-mix(in srgb, var(--ar-line) 55%, transparent);
+    border: 1px solid rgba(var(--ar-line) 55%);
     background: var(--surface-solid);
     text-align: center;
   }

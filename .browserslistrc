@@ -1,6 +1,6 @@
 [production]
-safari >= 13.1
-ios_saf >= 13.4
+safari >= 14
+ios_saf >= 14
 chrome >= 80
 firefox >= 74
 edge >= 80
