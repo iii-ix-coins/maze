@@ -41,7 +41,7 @@
 }
 
 /* The topbar is a real frame; the brand link only occupies its own content. */
-#root > #site-topbar {
+#root>#site-topbar {
     position: fixed;
     top: calc(var(--site-frame-edge-gap) + env(safe-area-inset-top));
     left: 50%;
@@ -413,13 +413,13 @@ body {
 
 /* During the first Engine mount only the local menu contents wait for the
    restore/showMenu decision. The shared route frame remains fully stable. */
-html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app > #createGame {
+html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) #mazeApp.maze-app>#createGame {
     visibility: hidden;
 }
 
 /* One content surface owns route layout, scrolling, gutters and transitions.
    Ordinary features and the persistent Maze host are children of this same node. */
-.route-page > .feature-page-shell {
+.route-page>.feature-page-shell {
     position: relative;
     z-index: 1;
     display: block;
@@ -442,7 +442,7 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     scrollbar-gutter: auto;
 }
 
-.route-page > .feature-page-shell::-webkit-scrollbar {
+.route-page>.feature-page-shell::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;
@@ -450,11 +450,11 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 
 /* Every page root uses the same route-view contract. Page-specific classes
    may compose content, but cannot introduce another width, frame or scroller. */
-.route-page > .feature-page-shell > .route-view {
+.route-page>.feature-page-shell>.route-view {
     position: relative;
     z-index: 1;
     display: grid;
-    align-content: start;
+    align-content: center;
     gap: clamp(18px, 3vw, 28px);
     width: 100%;
     height: auto;
@@ -466,14 +466,14 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     box-sizing: border-box;
 }
 
-.route-page > .feature-page-shell > .route-view[hidden] {
+.route-page>.feature-page-shell>.route-view[hidden] {
     display: none !important;
 }
 
 /* Maze is a regular .route-view. The only Site-owned scrolling surface is
    .feature-page-shell; no Maze-specific root geometry or overflow exception. */
 /* One named transition surface across all site pages, Maze menus and gameplay. */
-.route-page > .feature-page-shell > .route-view:not([hidden]) {
+.route-page>.feature-page-shell>.route-view:not([hidden]) {
     view-transition-name: site-route-content;
 }
 
@@ -590,18 +590,19 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     box-shadow: var(--ar-glow);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
+
     clip-path: polygon(var(--dock-cut) 0,
             100% 0,
-            100% calc(100% - var(--dock-cut)),
-            calc(100% - var(--dock-cut)) 100%,
+            100% 100%,
             0 100%,
             0 var(--dock-cut));
+
     -webkit-clip-path: polygon(var(--dock-cut) 0,
             100% 0,
-            100% calc(100% - var(--dock-cut)),
-            calc(100% - var(--dock-cut)) 100%,
+            100% 100%,
             0 100%,
             0 var(--dock-cut));
+
     pointer-events: none;
 }
 
@@ -897,13 +898,13 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 }
 
 /* During cross-document exit, only the outgoing content loses pointer access. */
-html[data-ui-document-exiting="true"] .route-page > .feature-page-shell > .route-view:not([hidden]) {
+html[data-ui-document-exiting="true"] .route-page>.feature-page-shell>.route-view:not([hidden]) {
     pointer-events: none;
 }
 
 
 /* Same-document WAAPI fallback locks only the moving content surface. */
-html[data-ui-content-transition-fallback="true"] .route-page > .feature-page-shell > .route-view:not([hidden]),
-html[data-ui-document-entering="true"] .route-page > .feature-page-shell > .route-view:not([hidden]) {
+html[data-ui-content-transition-fallback="true"] .route-page>.feature-page-shell>.route-view:not([hidden]),
+html[data-ui-document-entering="true"] .route-page>.feature-page-shell>.route-view:not([hidden]) {
     pointer-events: none;
 }
