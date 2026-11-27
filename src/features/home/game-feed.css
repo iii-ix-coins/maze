@@ -156,7 +156,6 @@
     border: 1px solid var(--nav-accent, var(--mint));
     color: var(--nav-accent, var(--mint));
     font-size: .9rem;
-    font-weight: 800;
   }
 
   .game-feed-author-copy {
@@ -185,7 +184,6 @@
     border: 1px solid var(--stroke, #666);
     color: var(--text-soft, #ccc);
     font-size: .62rem;
-    font-weight: 800;
   }
 
   .game-feed-status--live {
@@ -229,7 +227,6 @@
   .game-feed-finish-caption {
     color: var(--text-mute, #999);
     font-size: .62rem;
-    font-weight: 750;
   }
 
   .game-feed-art-center strong {
@@ -283,7 +280,6 @@
     margin: 0;
     color: var(--text, #eee);
     font-size: .98rem;
-    font-weight: 780;
   }
 
   .game-feed-post-code {
@@ -310,7 +306,6 @@
 
   .game-feed-stat-row strong {
     color: var(--text, #eee);
-    font-weight: 750;
   }
 
   .game-feed-action {
@@ -324,7 +319,6 @@
     border: 1px solid var(--nav-accent, var(--mint));
     color: var(--nav-accent, var(--mint));
     font-size: .78rem;
-    font-weight: 750;
     text-decoration: none;
   }
 

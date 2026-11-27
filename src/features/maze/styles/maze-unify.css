@@ -264,7 +264,7 @@
     animation: maze-host-spin .8s linear infinite;
 }
 
-.maze-authenticated-boot strong { font-size: 14px; font-weight: 850; }
+.maze-authenticated-boot strong { font-size: 14px; }
 .maze-authenticated-boot small { color: var(--ar-soft); font-size: 10px; }
 
 @keyframes maze-host-spin { to { transform: rotate(360deg); } }

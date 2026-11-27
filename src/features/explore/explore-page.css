@@ -65,7 +65,6 @@
   .explore-destination-copy strong {
     color: var(--text, #f5f7f8);
     font-size: clamp(1.05rem, 2vw, 1.3rem);
-    font-weight: 750;
   }
 
   .explore-destination-copy > span {
@@ -84,7 +83,6 @@
     border-top: 1px solid var(--stroke, #334047);
     color: var(--mint, #78edc0);
     font-size: .78rem;
-    font-weight: 750;
   }
 
   .explore-destination-action > span {

@@ -53,7 +53,6 @@
   .site-access-eyebrow {
     color: var(--ar-accent);
     font-size: 10px;
-    font-weight: 850;
     text-transform: uppercase;
   }
 
@@ -61,7 +60,6 @@
     margin: 0;
     color: var(--ar-text);
     font-size: clamp(27px, 4vw, 42px);
-    font-weight: 900;
     line-height: 1.04;
   }
 
@@ -92,7 +90,6 @@
   .site-access-pillar-number {
     color: var(--ar-accent);
     font-size: 10px;
-    font-weight: 900;
     font-variant-numeric: tabular-nums;
   }
 
@@ -104,7 +101,6 @@
   .site-access-pillar strong {
     color: var(--ar-text);
     font-size: 12px;
-    font-weight: 850;
   }
 
   .site-access-pillar small {
@@ -149,7 +145,6 @@
     margin: 0;
     color: var(--ar-text);
     font-size: 18px;
-    font-weight: 900;
   }
 
   .site-access-action-copy p {

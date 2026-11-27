@@ -163,7 +163,6 @@
     color: var(--ar-text);
     box-shadow: none;
     font-size: 10px;
-    font-weight: 800;
     line-height: 1;
     opacity: 1;
     transition: border-color 150ms ease, color 150ms ease;
@@ -310,7 +309,6 @@
     white-space: nowrap;
 
     font-size: 15px;
-    font-weight: lighter;
 
     text-overflow: ellipsis;
 }
@@ -765,7 +763,6 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     padding-bottom: 11px;
     border-bottom: 1px solid var(--ar-line, rgba(255, 255, 255, .12));
     font-size: 13px;
-    font-weight: 750;
 }
 
 .site-bottom-nav .nav-notifications-empty {
@@ -794,7 +791,6 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 
 .site-bottom-nav .nav-notifications-empty strong {
     font-size: 12px;
-    font-weight: 700;
 }
 
 .site-bottom-nav .nav-notifications-empty p {

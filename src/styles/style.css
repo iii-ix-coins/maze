@@ -309,7 +309,7 @@
     h3,
     h4 {
         font-family: var(--font-display);
-        font-weight: 700;
+        font-weight: 600;
         text-wrap: balance;
     }
 
@@ -1609,7 +1609,6 @@ html[data-theme="grass"] .nav {
     color: var(--nav-text);
     font: inherit;
     font-size: clamp(15px, 3.2vw, 15px);
-    font-weight: 650;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
@@ -1655,7 +1654,6 @@ html[data-theme="grass"] .nav {
     color: var(--nav-muted);
     font-family: inherit;
     font-size: var(--nav-fs);
-    font-weight: 600;
     white-space: nowrap;
 
     cursor: pointer;
