@@ -17,21 +17,15 @@
 
 
 
-    .maze-app {
-        min-height: 100vh;
-        margin: 0;
-        overflow-x: hidden;
-        font-size: 15px;
-        font-style: normal;
-        font-weight: 400;
-    }
+    /* The Maze host is a route view, not a second page shell. The Site owns
+       typography, frame geometry, gutters and overflow for every route. */
 
     .maze-app .game-container {
         text-align: center;
         box-sizing: border-box;
     }
 
-    .maze-app h1 {
+    .maze-app .game-container h1 {
         margin: 0 0 10px;
         font-size: 0.9rem;
     }
@@ -420,8 +414,9 @@
         gap: 10px;
     }
 
-    /* The HUD button look. Buttons inside the Create-Game flow (.cg) bring their own styling. */
-    .maze-app button:where(:not(.cg button)) {
+    /* Engine HUD controls only. Site-level wallet/access buttons are deliberately
+       outside this legacy feature styling and inherit the shared Site system. */
+    .maze-app .game-container button:where(:not(.cg button)) {
         background-color: #e63946;
         border: none;
         color: white;
@@ -436,7 +431,7 @@
         font-weight: 400;
     }
 
-    .maze-app button:where(:not(.cg button)):hover {
+    .maze-app .game-container button:where(:not(.cg button)):hover {
         background-color: #cb2d3a;
         transform: translateY(-2px);
         box-shadow: 0 6px 18px rgba(230, 57, 70, 0.4);
@@ -488,7 +483,7 @@
         gap: 6px;
     }
 
-    .maze-app:not(.wide) h1 {
+    .maze-app:not(.wide) .game-container h1 {
         margin-bottom: 6px;
     }
 
@@ -547,7 +542,7 @@
         margin-inline: auto;
     }
 
-    .maze-app h1 {
+    .maze-app .game-container h1 {
         color: #80d986;
         text-shadow: 0 0 24px rgba(38, 222, 64, .12);
     }
@@ -3911,19 +3906,7 @@
 
     /* Hollld shell integration: scoped tokens and theme bridge. */
     .maze-app {
-        width: min(100%, 1440px);
-        margin-inline: auto;
-        padding: clamp(12px, 2vw, 24px) clamp(10px, 2vw, 24px) 36px;
-        color: var(--text, #eaf2ff);
-        font-family: var(--font-body, "Nunito", sans-serif);
-        text-align: initial;
-        position: relative;
-        z-index: 1;
-        isolation: isolate;
-        display: block;
-        background: transparent;
-        align-items: initial;
-        justify-content: initial;
+        /* Feature tokens only. All shell-level layout and typography belong to Site. */
         --ground: rgba(16, 24, 39, .90);
         --ground-2: var(--ink-900, #172235);
         --moss: var(--mint, #72e8c2);
@@ -3940,7 +3923,7 @@
     /* MAZE TEXT THEME BRIDGE */
 
     /* Grass — semantic values come from the global palette in theme-tokens.css. */
-    .maze-app[data-theme="grass"] {
+    html[data-theme="grass"] .maze-app {
         --ground: var(--green);
         --ground-2: var(--green);
         --haze: var(--ar-text);
@@ -3966,7 +3949,7 @@
     }
 
     /* Light */
-    .maze-app[data-theme="light"] {
+    html[data-theme="light"] .maze-app {
         --haze: #111827;
         --fog: #374151;
         --moss: #166534;
@@ -3979,7 +3962,7 @@
         --lantern-depth: #4D3200;
     }
 
-    .maze-app[data-theme="grass"] .cg {
+    html[data-theme="grass"] .maze-app .cg {
         --ground: var(--green);
         --ground-2: var(--green);
         --moss: var(--bright-fern);
@@ -3992,7 +3975,7 @@
         --glass: var(--surface-solid);
     }
 
-    .maze-app[data-theme="dark"] .cg {
+    html[data-theme="dark"] .maze-app .cg {
         --ground: rgba(8, 12, 22, .9);
         --ground-2: rgba(15, 22, 38, .94);
         --moss: var(--azure, #8fb0ff);
@@ -4009,7 +3992,7 @@
         --glass: rgba(190, 205, 235, .055);
     }
 
-    .maze-app[data-theme="light"] .cg {
+    html[data-theme="light"] .maze-app .cg {
         --ground: rgba(247, 250, 248, .92);
         --ground-2: rgba(255, 255, 255, .96);
         --sky: #315fba;
@@ -4061,24 +4044,24 @@
         color: var(--haze);
     }
 
-    .maze-app[data-theme="light"] .cg,
-    .maze-app[data-theme="light"] .lb,
-    .maze-app[data-theme="light"] .cg-panel,
-    .maze-app[data-theme="light"] .cg-card,
-    .maze-app[data-theme="light"] .lb-card {
+    html[data-theme="light"] .maze-app .cg,
+    html[data-theme="light"] .maze-app .lb,
+    html[data-theme="light"] .maze-app .cg-panel,
+    html[data-theme="light"] .maze-app .cg-card,
+    html[data-theme="light"] .maze-app .lb-card {
         color: var(--haze);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-panel,
-    .maze-app[data-theme="light"] .cg .cg-step,
-    .maze-app[data-theme="light"] .lb .lb-card {
+    html[data-theme="light"] .maze-app .cg .cg-panel,
+    html[data-theme="light"] .maze-app .cg .cg-step,
+    html[data-theme="light"] .maze-app .lb .lb-card {
         background: rgba(255, 255, 255, .82);
         border-color: var(--line);
         box-shadow: 0 12px 32px rgba(30, 60, 44, .09);
     }
 
-    .maze-app[data-theme="light"] .cg input,
-    .maze-app[data-theme="light"] .lb input {
+    html[data-theme="light"] .maze-app .cg input,
+    html[data-theme="light"] .maze-app .lb input {
         color: #172b22;
     }
 
@@ -4089,13 +4072,7 @@
         display: none !important;
     }
 
-    /* During active gameplay, preserve the engine's wheel/camera behavior.
-       The pre-game Create / Rooms / Live menu remains in normal flow inside
-       the single shared route scroller (owned by site.css / maze-unify.css). */
-    .maze-app {
-        overscroll-behavior-y: auto;
-    }
-
+    /* The Site content surface remains the sole scroll and overscroll owner. */
     .maze-app .game-container {
         width: 100%;
         max-width: none;
@@ -4106,41 +4083,35 @@
         justify-content: center;
     }
 
-    @media (max-width: 760px) {
-        .maze-app {
-            padding-inline: 8px;
-        }
-    }
 
-
-    .maze-app[data-theme="grass"] .cg,
-    .maze-app[data-theme="dark"] .cg,
-    .maze-app[data-theme="light"] .cg {
+    html[data-theme="grass"] .maze-app .cg,
+    html[data-theme="dark"] .maze-app .cg,
+    html[data-theme="light"] .maze-app .cg {
         background: transparent !important;
     }
 
-    .maze-app[data-theme="light"] .cg {
+    html[data-theme="light"] .maze-app .cg {
         color: #172b22;
     }
 
-    .maze-app[data-theme="light"] .cg [class*="panel"],
-    .maze-app[data-theme="light"] .cg [class*="card"],
-    .maze-app[data-theme="light"] .cg [class*="tile"],
-    .maze-app[data-theme="light"] .lb-card {
+    html[data-theme="light"] .maze-app .cg [class*="panel"],
+    html[data-theme="light"] .maze-app .cg [class*="card"],
+    html[data-theme="light"] .maze-app .cg [class*="tile"],
+    html[data-theme="light"] .maze-app .lb-card {
         background-color: rgba(255, 255, 255, .86);
         border-color: rgba(26, 62, 43, .18);
         color: #172b22;
     }
 
-    .maze-app[data-theme="light"] .cg p,
-    .maze-app[data-theme="light"] .cg small,
-    .maze-app[data-theme="light"] .lb .lb-sub,
-    .maze-app[data-theme="light"] .lb .lb-facts {
+    html[data-theme="light"] .maze-app .cg p,
+    html[data-theme="light"] .maze-app .cg small,
+    html[data-theme="light"] .maze-app .lb .lb-sub,
+    html[data-theme="light"] .maze-app .lb .lb-facts {
         color: #52675c;
     }
 
-    .maze-app[data-theme="light"] .cg button:not(.cg-launch),
-    .maze-app[data-theme="light"] .lb button {
+    html[data-theme="light"] .maze-app .cg button:not(.cg-launch),
+    html[data-theme="light"] .maze-app .lb button {
         color: #172b22;
     }
 
@@ -4152,40 +4123,40 @@
         display: none !important;
     }
 
-    .maze-app[data-theme="light"] .cg .cg-nav {
+    html[data-theme="light"] .maze-app .cg .cg-nav {
         background: transparent;
     }
 
-    .maze-app[data-theme="light"] .cg .cg-node {
+    html[data-theme="light"] .maze-app .cg .cg-node {
         background: var(--surface-solid, #000000);
         color: #52675c;
         border-color: rgba(26, 62, 43, .24);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-rail-btn.is-visited .cg-node,
-    .maze-app[data-theme="light"] .cg .cg-rail-btn.is-done .cg-node {
+    html[data-theme="light"] .maze-app .cg .cg-rail-btn.is-visited .cg-node,
+    html[data-theme="light"] .maze-app .cg .cg-rail-btn.is-done .cg-node {
         background: var(--surface-solid, #000000);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-lens-dot,
-    .maze-app[data-theme="light"] .cg .cg-dial-knob {
+    html[data-theme="light"] .maze-app .cg .cg-lens-dot,
+    html[data-theme="light"] .maze-app .cg .cg-dial-knob {
         background-color: #f7faf8;
     }
 
-    .maze-app[data-theme="light"] .cg .cg-lens-dot {
+    html[data-theme="light"] .maze-app .cg .cg-lens-dot {
         border-color: rgba(26, 62, 43, .32);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-dial-knob {
+    html[data-theme="light"] .maze-app .cg .cg-dial-knob {
         border-color: rgba(26, 62, 43, .24);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-name input::placeholder,
-    .maze-app[data-theme="light"] .cg .cg-rail-text b {
+    html[data-theme="light"] .maze-app .cg .cg-name input::placeholder,
+    html[data-theme="light"] .maze-app .cg .cg-rail-text b {
         color: rgba(23, 43, 34, .56);
     }
 
-    .maze-app[data-theme="light"] .cg .cg-launch {
+    html[data-theme="light"] .maze-app .cg .cg-launch {
         background: rgba(22, 122, 85, .08);
         border-color: rgba(22, 122, 85, .38);
     }
@@ -4201,32 +4172,5 @@
 
     }
 
-}
-
-/* Menu view motion is scoped to the active panel. The #mazeApp frame,
-   tabs rail, scrollbar, CreateWizard canvas and shared stores remain mounted. */
-.maze-app .cg-views > .cg-view:not([hidden]) {
-    view-transition-name: maze-menu-content;
-}
-
-html[data-maze-tab-exiting="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
-    animation: maze-menu-view-exit 120ms cubic-bezier(.4, 0, 1, 1) both;
-    pointer-events: none;
-}
-
-html[data-maze-tab-entering="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
-    animation: maze-menu-view-enter 190ms cubic-bezier(.2, .75, .25, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .maze-app .cg-tabs,
-    .maze-app .cg-tabs-glider,
-    .maze-app .cg-tab,
-    .maze-app .cg-tab-count,
-    .maze-app .cg-views > .cg-view:not([hidden]) {
-        transition-duration: .01ms !important;
-        animation: none !important;
-        translate: none !important;
-    }
 }
 

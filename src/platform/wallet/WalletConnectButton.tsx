@@ -68,7 +68,9 @@ function scheduleIdle(task: () => void): () => void {
   return () => window.clearTimeout(id);
 }
 
-export function WalletConnectButton({ compactAuthenticated = false }: { compactAuthenticated?: boolean } = {}) {
+type WalletConnectButtonProps = { compactAuthenticated?: boolean; variant?: 'navigation' | 'primary' };
+
+export function WalletConnectButton({ compactAuthenticated = false, variant = 'navigation' }: WalletConnectButtonProps = {}) {
   const { status: identityStatus, isAuthenticated, user, error: identityError, login, logout } = useIdentity();
   const [Runtime, setRuntime] = useState<{ Component: RuntimeComponent } | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('idle');
@@ -169,7 +171,7 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
     (event: ReactAnimationEvent<HTMLDivElement>) => {
       // Ignore animation events bubbling from menu children or entrance animations.
       if (event.target !== event.currentTarget) return;
-      if (event.animationName !== 'maze-dropdown-out') return;
+      if (event.animationName !== 'site-wallet-menu-out') return;
       if (!walletMenuClosingRef.current) return;
 
       finishWalletMenuClose();
@@ -684,7 +686,7 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
   if (!isConfigured && !isAuthenticated && !snapshot.isConnected) {
     return (
       <button
-        className="nav-wallet-button"
+        className={`nav-wallet-button${variant === 'primary' ? ' is-primary' : ''}`}
         type="button"
         data-nav-action="connect-wallet"
         disabled
@@ -710,7 +712,7 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
       <div className="nav-wallet-wrap" ref={walletRootRef}>
         <button
           ref={walletButtonRef}
-          className={`nav-wallet-button${isConnected || isAuthenticated ? ' is-connected' : ''}${showAuthenticatedAccount ? ' is-authenticated' : ''}${showAuthenticatedAccount && compactAuthenticated ? ' is-compact-account' : ''}`}
+          className={`nav-wallet-button${variant === 'primary' ? ' is-primary' : ''}${isConnected || isAuthenticated ? ' is-connected' : ''}${showAuthenticatedAccount ? ' is-authenticated' : ''}${showAuthenticatedAccount && compactAuthenticated ? ' is-compact-account' : ''}`}
           type="button"
           data-nav-action="connect-wallet"
           data-wallet-status={status ?? 'disconnected'}

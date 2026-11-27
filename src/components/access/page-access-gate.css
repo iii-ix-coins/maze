@@ -1,332 +1,191 @@
+/* One identity/access surface shared by every protected route. */
 @layer pages {
-  .access-gate {
+  .site-access-gate {
     display: grid;
     width: 100%;
+    min-height: 100%;
     align-content: center;
     justify-items: center;
-    gap: clamp(18px, 3vh, 28px);
-    min-height: 100%;
-    padding-block: clamp(18px, 3vh, 30px);
-  }
-
-  .access-gate-intro {
-    width: min(100%, 760px);
-    display: grid;
-    gap: 7px;
-    text-align: center;
-  }
-
-  .access-gate-eyebrow {
-    color: var(--ar-accent);
-    font-size: 10px;
-    font-weight: 850;
-    letter-spacing: .16em;
-  }
-
-  .access-gate-intro h1 {
-    margin: 0;
-    color: var(--ar-text);
-    font-size: clamp(25px, 4vw, 36px);
-    line-height: 1.05;
-    font-weight: 900;
-    letter-spacing: -.045em;
-  }
-
-  .access-gate-intro p {
-    max-width: 580px;
     margin: 0 auto;
-    color: var(--ar-soft);
-    font-size: 13px;
-    line-height: 1.6;
+    padding: clamp(22px, 5vh, 54px) clamp(10px, 2vw, 22px);
+    box-sizing: border-box;
   }
 
-  .access-gate-content {
+  .site-access-panel {
     display: grid;
-    grid-template-columns: minmax(0, 360px) minmax(220px, 320px);
+    grid-template-columns: minmax(0, 1.15fr) minmax(230px, .85fr);
     align-items: center;
-    justify-content: center;
-    gap: clamp(22px, 4vw, 48px);
+    gap: clamp(22px, 4vw, 46px);
     width: min(100%, 760px);
+    padding: clamp(20px, 4vw, 38px);
+    border: 1px solid var(--ar-line);
+    background: var(--panel-bg);
+    color: var(--ar-text);
+    box-sizing: border-box;
   }
 
-  .access-gate-preview-column {
+  .site-access-overview,
+  .site-access-action {
     display: grid;
-    justify-items: center;
-    gap: 9px;
+    align-content: center;
     min-width: 0;
   }
 
-  .access-gate-preview-frame {
-    position: relative;
-    width: min(100%, 360px);
-    max-width: 360px;
-    aspect-ratio: 1 / 1;
-    max-height: 360px;
-    overflow: hidden;
-    isolation: isolate;
-    pointer-events: none;
-    user-select: none;
-    border: 1px solid rgba(var(--ar-line-rgb), .78);
-    background: var(--surface-solid);
-    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
-    box-shadow: 0 0 0 1px rgba(var(--ar-rgb), .10), 0 14px 42px rgba(0, 0, 0, .16);
-  }
-
-  .access-gate-preview-track {
-    position: absolute;
-    inset: 0 0 auto;
-    min-height: 440px;
-    padding: 15px;
-    color: var(--ar-text);
-    background:
-      radial-gradient(ellipse at 85% 10%, rgba(var(--ar-rgb), .10), transparent 47%),
-      var(--surface-solid);
-    animation: access-preview-auto-pan 17s ease-in-out 1.5s infinite alternate;
-    transform: translateY(0);
-    will-change: transform;
-  }
-
-  .access-preview-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(var(--ar-line-rgb), .40);
-  }
-
-  .access-preview-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--ar-text);
-    font-size: 12px;
-    font-weight: 950;
-    letter-spacing: .14em;
-  }
-
-  .access-preview-brand-mark {
-    width: 13px;
-    height: 13px;
-    border: 2px solid var(--ar-accent);
-    transform: rotate(45deg);
-  }
-
-  .access-preview-label {
-    margin-left: auto;
-    color: var(--ar-soft);
+  .site-access-overview { gap: 10px; }
+  .site-access-eyebrow {
+    color: var(--ar-accent);
     font-size: 10px;
-    font-weight: 750;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
   }
 
-  .access-preview-dots { display: flex; gap: 3px; }
-  .access-preview-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ar-accent); opacity: .65; }
-
-  .access-preview-scene { display: grid; gap: 10px; padding-top: 13px; }
-  .access-preview-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-  .access-preview-stat { display: grid; gap: 3px; padding: 9px 8px; border: 1px solid rgba(var(--ar-line-rgb), .35); background: rgba(var(--ar-fill-rgb), .38); }
-  .access-preview-stat strong { color: var(--ar-text); font-size: 20px; line-height: 1; font-weight: 900; }
-  .access-preview-stat span { color: var(--ar-soft); font-size: 9px; }
-  .access-preview-section-title { margin-top: 4px; color: var(--ar-accent); font-size: 9px; font-weight: 900; letter-spacing: .13em; }
-
-  .access-preview-room { display: flex; align-items: center; gap: 9px; min-height: 53px; padding: 8px 10px; border: 1px solid rgba(var(--ar-line-rgb), .33); background: rgba(var(--ar-fill-rgb), .30); }
-  .access-preview-status { display: inline-flex; align-items: center; gap: 5px; color: var(--ar-soft); font-size: 8px; font-weight: 900; }
-  .access-preview-status i, .access-preview-live-heading i { width: 6px; height: 6px; border-radius: 50%; background: var(--ar-accent); }
-  .access-preview-status.is-live { color: var(--ar-hot); }
-  .access-preview-status.is-live i { background: var(--ar-hot); }
-  .access-preview-room-copy { display: grid; gap: 3px; min-width: 0; }
-  .access-preview-room-copy strong { overflow: hidden; color: var(--ar-text); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-  .access-preview-room-copy span { color: var(--ar-soft); font-size: 9px; }
-  .access-preview-room-arrow { margin-left: auto; color: var(--ar-accent); font-size: 17px; }
-  .access-preview-room-skeleton { display: flex; gap: 8px; padding: 10px; }
-  .access-preview-room-skeleton i { height: 7px; flex: 1; background: rgba(var(--ar-line-rgb), .22); }
-
-  .access-preview-profile-card { display: flex; align-items: center; gap: 10px; padding: 11px; border: 1px solid rgba(var(--ar-line-rgb), .35); }
-  .access-preview-avatar { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid var(--ar-accent); border-radius: 50%; color: var(--ar-accent); font-size: 17px; font-weight: 900; }
-  .access-preview-profile-card div { display: grid; gap: 3px; }
-  .access-preview-profile-card strong { font-size: 12px; }
-  .access-preview-profile-card span:not(.access-preview-avatar) { color: var(--ar-soft); font-size: 9px; }
-  .access-preview-verified { width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--ar-accent); }
-  .access-preview-activity { display: flex; align-items: center; gap: 9px; padding: 8px; border-bottom: 1px solid rgba(var(--ar-line-rgb), .25); }
-  .access-preview-activity-icon { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--ar-line); color: var(--ar-accent); }
-  .access-preview-activity div { display: grid; gap: 2px; }
-  .access-preview-activity strong { font-size: 10px; }
-  .access-preview-activity small { color: var(--ar-soft); font-size: 8px; }
-  .access-preview-activity b { margin-left: auto; color: var(--ar-accent); font-size: 9px; }
-
-  .access-preview-filter-row { display: flex; flex-wrap: wrap; gap: 5px; }
-  .access-preview-filter-row i { padding: 5px 8px; border: 1px solid rgba(var(--ar-line-rgb), .35); color: var(--ar-soft); font-size: 8px; font-style: normal; }
-  .access-preview-filter-row i.is-active { border-color: var(--ar-accent); color: var(--ar-accent); }
-
-  .access-preview-hero { display: grid; gap: 8px; padding: 17px; border: 1px solid rgba(var(--ar-rgb), .50); background: linear-gradient(135deg, rgba(var(--ar-rgb), .13), transparent 72%); }
-  .access-preview-hero span { color: var(--ar-accent); font-size: 8px; font-weight: 900; letter-spacing: .12em; }
-  .access-preview-hero strong { font-size: 21px; line-height: 1.05; font-weight: 950; }
-  .access-preview-hero i { color: var(--ar-soft); font-size: 9px; font-style: normal; }
-  .access-preview-hub-card { display: grid; grid-template-columns: 84px 1fr; align-items: center; gap: 10px; padding: 9px; border: 1px solid rgba(var(--ar-line-rgb), .30); }
-  .access-preview-hub-card div:last-child { display: grid; gap: 4px; }
-  .access-preview-hub-card strong { font-size: 10px; }
-  .access-preview-hub-card small { color: var(--ar-soft); font-size: 8px; }
-
-  .access-preview-stepper { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-  .access-preview-stepper b, .access-preview-stepper span { color: var(--ar-soft); font-size: 7px; font-weight: 800; }
-  .access-preview-stepper b { color: var(--ar-accent); }
-  .access-preview-stepper i { width: 12px; height: 1px; background: var(--ar-line); opacity: .55; }
-  .access-preview-create-layout { display: grid; grid-template-columns: 1fr 122px; gap: 10px; align-items: center; }
-  .access-preview-create-layout > div:first-child { display: grid; gap: 6px; }
-  .access-preview-create-layout small { color: var(--ar-soft); font-size: 8px; }
-  .access-preview-create-layout strong { font-size: 24px; font-weight: 950; }
-  .access-preview-create-layout span { color: var(--ar-accent); font-size: 9px; }
-  .access-preview-range { height: 5px; margin: 7px 0; background: rgba(var(--ar-line-rgb), .35); }
-  .access-preview-range i { display: block; width: 56%; height: 100%; background: var(--ar-accent); }
-
-  .access-preview-maze { position: relative; display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; aspect-ratio: 1; padding: 5px; border: 1px solid rgba(var(--ar-rgb), .55); background: rgba(var(--ar-fill-rgb), .28); }
-  .access-preview-maze i { background: rgba(var(--ar-line-rgb), .08); }
-  .access-preview-maze i.is-wall { background: var(--ar-accent); opacity: .65; }
-  .access-preview-maze .access-preview-player, .access-preview-maze .access-preview-goal { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--ar-hot); left: 10%; top: 12%; box-shadow: 0 0 9px rgba(var(--ar-hot-rgb), .70); }
-  .access-preview-maze .access-preview-goal { left: auto; top: auto; right: 9%; bottom: 10%; background: var(--ar-accent-2); }
-  .access-preview-maze.is-compact { grid-template-columns: repeat(6, 1fr); }
-  .access-preview-create .access-preview-maze { max-width: 122px; }
-  .access-preview-bottom-line { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 10px; border-top: 1px solid rgba(var(--ar-line-rgb), .35); }
-  .access-preview-bottom-line span { color: var(--ar-soft); font-size: 8px; }
-  .access-preview-bottom-line b { color: var(--ar-accent); font-size: 8px; }
-
-  .access-preview-live-heading { display: flex; justify-content: space-between; align-items: center; }
-  .access-preview-live-heading span { display: inline-flex; align-items: center; gap: 6px; color: var(--ar-hot); font-size: 9px; font-weight: 900; }
-  .access-preview-live-heading b { font-size: 12px; }
-  .access-preview-live-layout { display: grid; grid-template-columns: 1fr 115px; gap: 10px; align-items: center; }
-  .access-preview-rankings { display: grid; gap: 8px; }
-  .access-preview-rankings small { color: var(--ar-soft); font-size: 8px; }
-  .access-preview-rankings b { display: flex; gap: 6px; font-size: 8px; }
-  .access-preview-rankings b i { width: 6px; height: 6px; border-radius: 50%; background: var(--ar-accent); }
-
-  .access-preview-waiting-title { display: grid; gap: 4px; }
-  .access-preview-waiting-title span { color: var(--ar-soft); font-size: 8px; }
-  .access-preview-waiting-title b { color: var(--ar-accent); font-size: 11px; }
-  .access-preview-racer { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 7px; border: 1px solid rgba(var(--ar-line-rgb), .25); }
-  .access-preview-racer i { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--ar-line); border-radius: 50%; color: var(--ar-accent); font-size: 10px; font-style: normal; }
-  .access-preview-racer strong { font-size: 9px; }
-  .access-preview-racer span { margin-left: auto; color: var(--ar-soft); font-size: 8px; }
-
-  .access-preview-preview-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; color: var(--ar-soft); font-size: 8px; letter-spacing: .1em; }
-  .access-preview-preview-footer i { width: 6px; height: 6px; border-radius: 50%; background: var(--ar-accent); }
-
-  .access-gate-preview-shade { position: absolute; z-index: 1; inset: auto 0 0; height: 54px; background: linear-gradient(transparent, var(--surface-solid)); pointer-events: none; }
-  .access-gate-preview-lock { position: absolute; z-index: 2; right: 12px; bottom: 12px; display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--ar-accent); background: var(--surface-solid); color: var(--ar-accent); font-size: 16px; }
-  .access-gate-preview-caption { color: var(--ar-soft); font-size: 10px; text-align: center; }
-
-  .access-gate-action-column { display: grid; justify-items: center; gap: 11px; min-width: 0; text-align: center; }
-  .access-gate-lock-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--ar-line); color: var(--ar-accent); }
-  .access-gate-lock-icon svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .access-gate-action-column h2 { margin: 0; color: var(--ar-text); font-size: 20px; font-weight: 900; letter-spacing: -.03em; }
-  .access-gate-action-column > p { max-width: 300px; margin: 0; color: var(--ar-soft); font-size: 12px; line-height: 1.65; }
-  .access-gate-wallet { width: 100%; display: flex; justify-content: center; }
-  .access-gate-wallet .nav-wallet-wrap { width: 100%; }
-  .access-gate-wallet .nav-wallet-button { width: 100%; min-height: 48px; height: auto; padding: 12px 18px; border: 1px solid var(--ar-accent); background: var(--ar-accent); color: var(--ar-on-accent); font: inherit; font-size: 14px; font-weight: 900; }
-  .access-gate-wallet .nav-wallet-button:hover:not(:disabled) { filter: brightness(1.08); }
-  .access-gate-wallet .nav-wallet-button:focus-visible { outline: 2px solid var(--ar-accent-2); outline-offset: 3px; }
-  .access-gate-wallet .nav-wallet-feedback { margin-top: 8px; text-align: left; }
-  .access-gate-progress { display: inline-flex; align-items: center; gap: 8px; color: var(--ar-accent); font-size: 11px; }
-  .access-gate-progress i { width: 7px; height: 7px; border: 1px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: access-gate-spin .8s linear infinite; }
-  .access-gate-error, .access-gate-inline-error { display: grid; gap: 8px; width: 100%; color: var(--ar-hot); font-size: 11px; line-height: 1.5; }
-  .access-gate-error button { justify-self: center; min-height: 32px; padding: 5px 11px; border: 1px solid var(--ar-line); background: transparent; color: var(--ar-text); font: inherit; cursor: pointer; }
-  .access-gate-inline-error { margin: 0; }
-  .access-gate-security-note { max-width: 280px; color: var(--ar-soft); font-size: 9px; line-height: 1.55; }
-
-  @keyframes access-preview-auto-pan {
-    0%, 12% { transform: translateY(0); }
-    88%, 100% { transform: translateY(-62px); }
-  }
-  @keyframes access-gate-spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 760px) {
-    .access-gate-content { grid-template-columns: minmax(0, 360px); gap: 17px; }
-    .access-gate-action-column { width: min(100%, 360px); }
-    .access-gate-intro p { font-size: 12px; }
-  }
-
-  @media (max-width: 420px) {
-    .access-gate-preview-frame { width: min(100%, 330px); }
-    .access-gate-preview-track { padding: 12px; }
-    .access-gate { gap: 16px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .access-gate-preview-track { animation: none; }
-    .access-gate-progress i { animation: none; }
-  }
-}
-
-/* Maze access gates are content within the same #mazeApp route surface.
-   The parent owns scrolling; the gate itself never creates another viewport. */
-@layer pages {
-  #mazeApp > .access-gate {
-    position: relative;
-    z-index: 1;
-    min-height: 100%;
+  .site-access-overview h1 {
     margin: 0;
-    overflow: visible;
+    color: var(--ar-text);
+    font-size: clamp(27px, 4vw, 42px);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -.045em;
   }
 
-  #mazeApp > .maze-authenticated-boot {
-    position: absolute;
-    z-index: 4;
-    inset: 0;
+  .site-access-description {
+    max-width: 440px;
+    margin: 0;
+    color: var(--ar-soft);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .site-access-pillars {
     display: grid;
-    align-content: center;
-    justify-items: center;
+    gap: 0;
+    margin-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--ar-line) 55%, transparent);
+  }
+
+  .site-access-pillar {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: start;
     gap: 10px;
-    background: var(--page-background);
-    color: var(--ar-text);
+    padding: 11px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ar-line) 35%, transparent);
+  }
+
+  .site-access-pillar-number {
+    color: var(--ar-accent);
+    font-size: 10px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-access-pillar div { display: grid; gap: 2px; }
+  .site-access-pillar strong { color: var(--ar-text); font-size: 12px; font-weight: 850; }
+  .site-access-pillar small { color: var(--ar-soft); font-size: 10px; line-height: 1.5; }
+
+  .site-access-action {
+    justify-items: center;
+    gap: 12px;
+    padding: clamp(16px, 2.5vw, 24px);
+    border: 1px solid color-mix(in srgb, var(--ar-line) 55%, transparent);
+    background: var(--surface-solid);
     text-align: center;
   }
 
-  .maze-authenticated-boot-mark {
-    width: 30px;
-    height: 30px;
-    border: 2px solid var(--ar-line);
-    border-top-color: var(--ar-accent);
-    border-radius: 50%;
-    animation: access-gate-spin .8s linear infinite;
+  .site-access-lock {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--ar-line);
+    color: var(--ar-accent);
+  }
+  .site-access-lock svg {
+    width: 21px;
+    height: 21px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .maze-authenticated-boot strong { font-size: 14px; font-weight: 850; }
-  .maze-authenticated-boot small { color: var(--ar-soft); font-size: 10px; }
+  .site-access-action-copy { display: grid; gap: 6px; }
+  .site-access-action-copy h2 {
+    margin: 0;
+    color: var(--ar-text);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -.025em;
+  }
+  .site-access-action-copy p {
+    max-width: 280px;
+    margin: 0;
+    color: var(--ar-soft);
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .site-access-wallet { display: flex; justify-content: center; width: 100%; }
+  .site-access-wallet .nav-wallet-wrap { width: 100%; }
+  .site-access-wallet .nav-wallet-button { width: 100%; }
+
+  .site-access-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ar-accent);
+    font-size: 10px;
+  }
+  .site-access-progress i {
+    width: 8px;
+    height: 8px;
+    border: 1px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: site-access-spin .8s linear infinite;
+  }
+
+  .site-access-error,
+  .site-access-inline-error {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    color: var(--ar-hot);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .site-access-retry {
+    justify-self: center;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid var(--ar-line);
+    background: transparent;
+    color: var(--ar-text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .site-access-retry:hover { border-color: var(--ar-accent); }
+  .site-access-security-note {
+    max-width: 280px;
+    color: var(--ar-mute);
+    font-size: 9px;
+    line-height: 1.55;
+  }
+
+  @keyframes site-access-spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 700px) {
+    .site-access-panel {
+      grid-template-columns: minmax(0, 1fr);
+      width: min(100%, 470px);
+      gap: 20px;
+    }
+    .site-access-action { width: 100%; box-sizing: border-box; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .maze-authenticated-boot-mark { animation: none; }
+    .site-access-progress i { animation: none; }
   }
-}
-
-/* WalletConnectButton owns its base control in the unlayered site foundation.
-   Keep the guest CTA at the same cascade level so it can adapt to the gate. */
-.access-gate-wallet .nav-wallet-button {
-  display: inline-flex;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  height: auto;
-  padding: 12px 18px;
-  border: 1px solid var(--ar-accent);
-  background: var(--ar-accent);
-  color: var(--ar-on-accent);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.access-gate-wallet .nav-wallet-button:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-
-.access-gate-wallet .nav-wallet-button:focus-visible {
-  outline: 2px solid var(--ar-accent-2);
-  outline-offset: 3px;
-}
-
-.access-gate-preview-lock svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }

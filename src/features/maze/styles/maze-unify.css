@@ -1,37 +1,7 @@
 /*
- * Maze uses the exact same route-view and content surface as every Site page.
- * The shared .feature-page-shell is the only scroll owner; #mazeApp is only
- * the persistent Engine host and never creates a nested viewport.
+ * Maze content composes inside the ordinary .route-view contract.
+ * No shell, height, overflow, gutter, theme or scroll settings are owned here.
  */
-#mazeApp.maze-app {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    max-height: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    isolation: isolate;
-    background: transparent;
-}
-
-#mazeApp.maze-app.in-menu {
-    height: auto;
-    min-height: 100%;
-    max-height: none;
-    overflow: visible;
-    overscroll-behavior: auto;
-}
-
-#mazeApp.maze-app:not(.in-menu) {
-    height: 100%;
-    min-height: 100%;
-    overflow: hidden;
-    overscroll-behavior: contain;
-}
-
-/* Park persistent Maze DOM while another route or the guest gate is active. */
-#mazeApp[hidden],
 #mazeApp > [hidden],
 #mazeApp > .game-container[hidden],
 #mazeApp > #createGame[hidden] {
@@ -269,3 +239,36 @@
     margin: auto;
 }
 
+
+/* Engine-ready placeholder is owned by the persistent Maze host, not by the
+   generic identity/access surface used across the whole social platform. */
+#mazeApp > .maze-authenticated-boot {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 10px;
+    background: var(--page-background);
+    color: var(--ar-text);
+    text-align: center;
+}
+
+.maze-authenticated-boot-mark {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--ar-line);
+    border-top-color: var(--ar-accent);
+    border-radius: 50%;
+    animation: maze-host-spin .8s linear infinite;
+}
+
+.maze-authenticated-boot strong { font-size: 14px; font-weight: 850; }
+.maze-authenticated-boot small { color: var(--ar-soft); font-size: 10px; }
+
+@keyframes maze-host-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .maze-authenticated-boot-mark { animation: none; }
+}

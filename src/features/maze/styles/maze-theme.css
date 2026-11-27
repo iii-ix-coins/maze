@@ -1,11 +1,12 @@
-/* Maze feature inherits the same three global monochrome palettes. */
-.maze-app[data-theme="light"], .maze-app[data-theme="dark"], .maze-app[data-theme="grass"] { color: var(--ar-text); background: var(--ar-bg); }
-.maze-app[data-theme="light"] .cg,
-.maze-app[data-theme="dark"] .cg,
-.maze-app[data-theme="grass"] .cg,
-.maze-app[data-theme="light"] .lb,
-.maze-app[data-theme="dark"] .lb,
-.maze-app[data-theme="grass"] .lb {
+/* Maze feature maps the three global Site palettes into its existing visual tokens. */
+/* Theme tokens may flow into the feature controls, but the host itself is
+   transparent and inherits the Site route typography and surface. */
+html[data-theme="light"] .maze-app .cg,
+html[data-theme="dark"] .maze-app .cg,
+html[data-theme="grass"] .maze-app .cg,
+html[data-theme="light"] .maze-app .lb,
+html[data-theme="dark"] .maze-app .lb,
+html[data-theme="grass"] .maze-app .lb {
   --ground: var(--ar-bg);
   --ground-2: var(--ar-bg);
   --haze: var(--ar-text);
@@ -30,12 +31,9 @@
   --coral-depth: var(--ar-mute);
 }
 .maze-app .cg, .maze-app .lb { background: transparent; color: var(--ar-text); }
-.maze-app .cg-panel, .maze-app .cg-card, .maze-app .cg-step, .maze-app .lb-card,
-.maze-app .lb-room, .maze-app .cg-readout,
-.maze-app .cg-summary, .maze-app .cg-control { background: var(--surface-solid); border-color: var(--ar-line); box-shadow: none; }
 
 /* Grass palette bridge: keep the whole Maze UI on the same exact site palette. */
-.maze-app[data-theme="grass"] {
+html[data-theme="grass"] .maze-app {
   --ground: var(--green);
   --ground-2: var(--green);
   --board-surround: var(--green);
@@ -61,8 +59,8 @@
   --coral-depth: var(--green-2);
 }
 
-.maze-app[data-theme="grass"] .cg,
-.maze-app[data-theme="grass"] .lb {
+html[data-theme="grass"] .maze-app .cg,
+html[data-theme="grass"] .maze-app .lb {
   --ground: var(--green);
   --ground-2: var(--green);
   --haze: var(--slime-lime);
@@ -92,12 +90,12 @@
 
 /* Legacy game HUD controls inherit the same Grass palette rather than the old
    white-glass/dusk colours. These rules are scoped to Grass only. */
-.maze-app[data-theme="grass"] .maze-wrapper {
+html[data-theme="grass"] .maze-app .maze-wrapper {
   box-shadow: none;
   outline: 1px solid var(--radioactive-grass);
 }
 
-.maze-app[data-theme="grass"] :where(.tile, .btn, .mini-tile, .pad, .knob, .win-card, .race-board, .banner) {
+html[data-theme="grass"] .maze-app :where(.tile, .btn, .mini-tile, .pad, .knob, .win-card, .race-board, .banner) {
   background: var(--dark-spruce);
   border-color: var(--radioactive-grass);
   color: var(--slime-lime);
@@ -106,66 +104,66 @@
   -webkit-backdrop-filter: none;
 }
 
-.maze-app[data-theme="grass"] :where(.lbl, .text-button, .zoom-label, .race-row, .win-stats) {
+html[data-theme="grass"] .maze-app :where(.lbl, .text-button, .zoom-label, .race-row, .win-stats) {
   color: var(--radioactive-grass);
 }
 
-.maze-app[data-theme="grass"] .btn:hover,
-.maze-app[data-theme="grass"] .race-row:hover,
-.maze-app[data-theme="grass"] .race-row.is-focus {
+html[data-theme="grass"] .maze-app .btn:hover,
+html[data-theme="grass"] .maze-app .race-row:hover,
+html[data-theme="grass"] .maze-app .race-row.is-focus {
   background: var(--green-2);
   color: var(--chartreuse);
 }
 
-.maze-app[data-theme="grass"] .btn[aria-pressed="true"],
-.maze-app[data-theme="grass"] .cg-tab-count {
+html[data-theme="grass"] .maze-app .btn[aria-pressed="true"],
+html[data-theme="grass"] .maze-app .cg-tab-count {
   background: var(--radioactive-grass);
   color: var(--dark-spruce);
 }
 
-.maze-app[data-theme="grass"] .cg-tab.is-active {
+html[data-theme="grass"] .maze-app .cg-tab.is-active {
   color: var(--chartreuse);
 }
 
-.maze-app[data-theme="grass"] .cg-tab-count {
+html[data-theme="grass"] .maze-app .cg-tab-count {
   background: var(--green-2);
   color: var(--slime-lime);
 }
 
-.maze-app[data-theme="grass"] .cg-tab.is-active .cg-tab-count {
+html[data-theme="grass"] .maze-app .cg-tab.is-active .cg-tab-count {
   background: var(--radioactive-grass);
   color: var(--dark-spruce);
 }
 
-.maze-app[data-theme="grass"] .pad-grip {
+html[data-theme="grass"] .maze-app .pad-grip {
   background: var(--radioactive-grass);
   border-color: var(--radioactive-grass);
 }
 
-.maze-app[data-theme="grass"] .pad-grip::after {
+html[data-theme="grass"] .maze-app .pad-grip::after {
   background: var(--dark-spruce);
   box-shadow: 0 -3px 0 var(--dark-spruce);
 }
 
-.maze-app[data-theme="grass"] .message {
+html[data-theme="grass"] .maze-app .message {
   color: var(--chartreuse);
 }
 
-.maze-app[data-theme="grass"] .cg-tabs-glider {
+html[data-theme="grass"] .maze-app .cg-tabs-glider {
   background: var(--dark-spruce);
   box-shadow: none;
 }
 
-.maze-app[data-theme="grass"] .text-button:hover {
+html[data-theme="grass"] .maze-app .text-button:hover {
   background: var(--green-2);
   color: var(--chartreuse);
 }
 
-.maze-app[data-theme="grass"] .cg [data-level="0"] { --tint: 56 176 0; }
-.maze-app[data-theme="grass"] .cg [data-level="1"] { --tint: 112 224 0; }
-.maze-app[data-theme="grass"] .cg [data-level="2"] { --tint: 204 255 51; }
+html[data-theme="grass"] .maze-app .cg [data-level="0"] { --tint: 56 176 0; }
+html[data-theme="grass"] .maze-app .cg [data-level="1"] { --tint: 112 224 0; }
+html[data-theme="grass"] .maze-app .cg [data-level="2"] { --tint: 204 255 51; }
 
-.maze-app[data-theme="grass"] :where(input, textarea, select, button, [role="button"]) {
+html[data-theme="grass"] .maze-app :is(.game-container, .cg, .lb) :where(input, textarea, select, button, [role="button"]) {
   border-color: var(--radioactive-grass);
 }
 

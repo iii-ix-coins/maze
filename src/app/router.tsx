@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { NotFoundPage } from '../components/layout/NotFoundPage';
 import { RouteScrollbar } from '../components/layout/RouteScrollbar';
-import { PageAccessGate, type AccessPreviewPage } from '../components/access/PageAccessGate';
+import { PageAccessGate, type AccessPage } from '../components/access/PageAccessGate';
 import { useIdentity } from '../platform/identity/IdentityProvider';
 import { MazeFrame } from '../features/maze/MazeFrame';
 
@@ -24,12 +24,20 @@ const PAGE_COMPONENTS = {
 };
 
 /** Every route writes into the same content surface and the same scroll owner. */
-const ACCESS_PAGE_BY_ROUTE: Record<string, AccessPreviewPage> = {
+const ACCESS_PAGE_BY_ROUTE: Record<string, AccessPage> = {
   home: 'home',
   explore: 'explore',
   'maze-hub': 'maze-hub',
   profile: 'profile',
 };
+
+function getRequestedMazeAccessPage(): AccessPage {
+  const view = new URLSearchParams(window.location.search).get('view');
+  if (view === 'rooms') return 'rooms';
+  if (view === 'live') return 'live';
+  if (view === 'waiting') return 'waiting-room';
+  return 'create';
+}
 
 export function AppRouter() {
   const pathname = usePathname();
@@ -54,7 +62,12 @@ export function AppRouter() {
       data-route-page={pathname}
       data-route-kind={isMazePage ? 'maze' : 'site'}
       onAnimationEnd={(event) => {
-        if (event.target === event.currentTarget.firstElementChild) {
+        const animatedSurface = event.target;
+        if (
+          event.animationName === 'site-route-content-enter' &&
+          animatedSurface instanceof HTMLElement &&
+          animatedSurface.matches('.route-page > .feature-page-shell > .route-view:not([hidden])')
+        ) {
           delete document.documentElement.dataset.siteRouteFallback;
         }
       }}
@@ -62,24 +75,22 @@ export function AppRouter() {
       <main className="feature-page-shell" aria-label={route ? `${route.title} content` : 'Not found page'}>
         {!route ? (
           <NotFoundPage />
+        ) : !isAuthenticated ? (
+          <section className="route-view route-view--access">
+            <PageAccessGate
+              page={isMazePage ? getRequestedMazeAccessPage() : ACCESS_PAGE_BY_ROUTE[route.id] ?? 'home'}
+              status={status}
+              error={error}
+              onRetry={refreshSession}
+            />
+          </section>
         ) : !isMazePage ? (
-          isAuthenticated ? (
-            <Suspense fallback={null}>
-              {Page ? <Page key={pathname} /> : <NotFoundPage />}
-            </Suspense>
-          ) : (
-            <section className="route-view route-view--access">
-              <PageAccessGate
-                page={ACCESS_PAGE_BY_ROUTE[route.id] ?? 'home'}
-                status={status}
-                error={error}
-                onRetry={refreshSession}
-              />
-            </section>
-          )
+          <Suspense fallback={null}>
+            {Page ? <Page key={pathname} /> : <NotFoundPage />}
+          </Suspense>
         ) : null}
 
-        <MazeFrame active={isMazePage}>
+        <MazeFrame active={isMazePage && isAuthenticated}>
           <Suspense fallback={null}>
             {hasMountedMaze ? (
               <MazePage active={isMazePage && isAuthenticated} authenticated={isAuthenticated} />

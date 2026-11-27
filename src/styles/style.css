@@ -537,22 +537,21 @@
     }
 
     /* =========================================================
-       MAZE — SCOPED CONTENT MOTION
+       SITE — SINGLE CONTENT MOTION SYSTEM
        Persistent chrome and the outer content frame never animate.
-       View Transitions animate only the named inner content surface;
-       older browsers use a short CSS exit/enter fallback.
+       Every route and same-route view uses this one transition owner.
        ========================================================= */
 
     :root {
-        --maze-enter-duration: 220ms;
-        --maze-enter-easing: cubic-bezier(.2, .75, .25, 1);
-        --maze-enter-distance: 7px;
+        --site-route-enter-duration: 220ms;
+        --site-route-enter-easing: cubic-bezier(.2, .75, .25, 1);
+        --site-route-enter-distance: 7px;
     }
 
     @keyframes site-route-content-enter {
         from {
             opacity: 0;
-            translate: 0 var(--maze-enter-distance);
+            translate: 0 var(--site-route-enter-distance);
         }
 
         to {
@@ -568,30 +567,12 @@
         }
     }
 
-    @keyframes maze-menu-view-enter {
-        from {
-            opacity: 0;
-            translate: 0 5px;
-        }
-
-        to {
-            opacity: 1;
-            translate: 0 0;
-        }
-    }
-
-    @keyframes maze-menu-view-exit {
-        to {
-            opacity: 0;
-            translate: 0 -4px;
-        }
-    }
 
     /* Only browsers without the API use a CSS entrance for newly mounted routes. */
     html:not([data-ui-view-transition-support="true"]) body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
         width: 100%;
         min-width: 0;
-        animation: site-route-content-enter var(--maze-enter-duration) var(--maze-enter-easing) both;
+        animation: site-route-content-enter var(--site-route-enter-duration) var(--site-route-enter-easing) both;
     }
 
     /* View Transition-capable browsers use this CSS entrance only when the
@@ -599,7 +580,7 @@
     html[data-site-route-fallback="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
         width: 100%;
         min-width: 0;
-        animation: site-route-content-enter var(--maze-enter-duration) var(--maze-enter-easing) both;
+        animation: site-route-content-enter var(--site-route-enter-duration) var(--site-route-enter-easing) both;
     }
 
     html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]) {
@@ -613,20 +594,8 @@
         animation: none !important;
     }
 
-    ::view-transition-group(site-route-content),
-    ::view-transition-group(maze-menu-content) {
+    ::view-transition-group(site-route-content) {
         animation: none;
-    }
-
-    /* A page-level transition owns the entire Maze inner surface; its nested
-       tab snapshot is disabled so Boot -> Create produces one clean animation. */
-    html[data-ui-content-transition="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
-        view-transition-name: none;
-    }
-
-    /* A tab change owns only the active menu panel, never the complete Create frame. */
-    html[data-ui-maze-menu-transition="true"] #mazeApp > #createGame.cg.show {
-        view-transition-name: none;
     }
 
     ::view-transition-old(site-route-content) {
@@ -634,28 +603,16 @@
     }
 
     ::view-transition-new(site-route-content) {
-        animation: site-route-content-enter 220ms var(--maze-enter-easing) both;
+        animation: site-route-content-enter 220ms var(--site-route-enter-easing) both;
     }
 
-    ::view-transition-old(maze-menu-content) {
-        animation: maze-menu-view-exit 120ms cubic-bezier(.4, 0, 1, 1) both;
-    }
-
-    ::view-transition-new(maze-menu-content) {
-        animation: maze-menu-view-enter 190ms var(--maze-enter-easing) both;
-    }
 
     @media (prefers-reduced-motion: reduce) {
         body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]),
         html[data-site-route-exiting="true"] body.page-loaded .route-page > .feature-page-shell > .route-view:not([hidden]),
-        html[data-maze-tab-exiting="true"] .maze-app .cg-views > .cg-view:not([hidden]),
-        html[data-maze-tab-entering="true"] .maze-app .cg-views > .cg-view:not([hidden]),
         ::view-transition-group(site-route-content),
         ::view-transition-old(site-route-content),
-        ::view-transition-new(site-route-content),
-        ::view-transition-group(maze-menu-content),
-        ::view-transition-old(maze-menu-content),
-        ::view-transition-new(maze-menu-content) {
+        ::view-transition-new(site-route-content) {
             animation: none !important;
             translate: none !important;
             filter: none !important;
@@ -1628,13 +1585,13 @@ html[data-theme="grass"] .nav {
     min-width: 148px;
     padding: 3px;
     background: var(--nav-panel);
-    animation: maze-dropdown-in 150ms ease both;
+    animation: site-wallet-menu-in 150ms ease both;
 }
 
 
 .nav-wallet-menu.is-closing {
     pointer-events: none;
-    animation: maze-dropdown-out 150ms ease both;
+    animation: site-wallet-menu-out 150ms ease both;
 }
 
 .nav-wallet-feedback {
@@ -1777,6 +1734,44 @@ html[data-theme="grass"] .nav {
     fill: currentColor;
 }
 
+/* Primary CTA variant is shared by every route, including the access gate. */
+.nav-wallet-button.is-primary {
+    width: 100%;
+    min-height: 48px;
+    height: auto;
+    padding: 12px 18px;
+    border: 1px solid var(--ar-accent);
+    border-radius: var(--r-pill, 999px);
+    background: var(--ar-accent);
+    color: var(--ar-on-accent);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 850;
+    box-shadow: none;
+    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, filter 180ms ease;
+}
+
+.nav-wallet-button.is-primary > span,
+.nav-wallet-button.is-primary .nav-wallet-address {
+    color: inherit;
+}
+
+.nav-wallet-button.is-primary:hover:not(:disabled) {
+    border-color: var(--ar-accent-2);
+    background: var(--ar-accent-2);
+    filter: none;
+    transform: translateY(-1px);
+}
+
+.nav-wallet-button.is-primary:focus-visible {
+    outline: 2px solid var(--ar-accent-2);
+    outline-offset: 3px;
+}
+
+.nav-wallet-button.is-primary:disabled {
+    opacity: .7;
+}
+
 .nav-wallet-button.is-authenticated {
     gap: 8px;
 }
@@ -1849,7 +1844,7 @@ html[data-theme="grass"] .nav {
     outline-offset: 4px;
 }
 
-@keyframes maze-dropdown-in {
+@keyframes site-wallet-menu-in {
     from {
         opacity: 0.6;
         transform: translateX(12px);
@@ -1861,7 +1856,7 @@ html[data-theme="grass"] .nav {
     }
 }
 
-@keyframes maze-dropdown-out {
+@keyframes site-wallet-menu-out {
     from {
         opacity: 1;
         transform: translateX(0);

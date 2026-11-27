@@ -260,14 +260,4 @@
     background-color: var(--surface-solid);
     background-image: none;
   }
-  html[data-theme] .maze-app :where(h1,h2,h3,h4,h5,h6,p,small,label,span,strong,em,button,a) {
-    color: var(--ar-text);
-  }
-  html[data-theme] .maze-app :where(.cg-panel,.cg-card,.cg-step,.lb-card,.lb-room,
-    .lb-empty,.cg-readout,.cg-summary,.cg-control) {
-    color: var(--ar-text);
-    background: var(--surface-solid);
-    border-color: var(--ar-line);
-    box-shadow: none;
-  }
 }

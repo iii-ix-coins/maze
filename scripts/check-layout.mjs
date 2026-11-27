@@ -229,7 +229,7 @@ if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
 }
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
 const routeFrameOpening = routerSource.match(/<div\s+className="route-page"[^>]*>/s)?.[0] ?? '';
-const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<main className="feature-page-shell"/.test(routerSource) && /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) && /<MazeFrame active=\{isMazePage\}>/.test(routerSource);
+const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<main className="feature-page-shell"/.test(routerSource) && /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) && /<MazeFrame active=\{isMazePage && isAuthenticated\}>/.test(routerSource);
 if (!routeFrameIsPersistent) {
   console.error('[layout] the outer content frame must remain unkeyed while only the inner route component is keyed.');
   process.exit(1);
@@ -267,10 +267,12 @@ if (
   !routeLoadersSource.includes('loadedRoutePages.add(\'home\')') ||
   !routerSource.includes('onAnimationEnd=') ||
   !routerSource.includes('dataset.siteRouteFallback') ||
+  !routerSource.includes("event.animationName === 'site-route-content-enter'") ||
+  !routerSource.includes("animatedSurface.matches('.route-page > .feature-page-shell > .route-view:not([hidden])')") ||
   !foundationStyles.includes('html[data-site-route-fallback=\"true\"]') ||
   !transitionCoordinatorSource.includes('prefersReducedMotion') ||
   !transitionCoordinatorSource.includes("root.dataset.uiViewTransition = 'scoped'") ||
-  !transitionCoordinatorSource.includes('startMazeMenuViewTransition') ||
+  transitionCoordinatorSource.includes('startMazeMenuViewTransition') ||
   !transitionCoordinatorSource.includes('startThemeViewTransition') ||
   !transitionCoordinatorSource.includes('NAVIGATION_RECOVERY_DELAY_MS') ||
   !transitionCoordinatorSource.includes('animatePendingDocumentEntry') ||
@@ -297,7 +299,7 @@ if (
   transitionCoordinatorSource.includes('allowMazeUnload') ||
   !transitionPageLoadingSource.includes('playPageEnter()') ||
   !siteCssEntry.includes('view-transition-name: site-route-content;') ||
-  !fs.readFileSync(path.join(root, 'src/components/access/page-access-gate.css'), 'utf8').includes('#mazeApp > .maze-authenticated-boot')
+  !fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-unify.css'), 'utf8').includes('.maze-authenticated-boot')
 ) {
   console.error('[layout] Site/Maze transitions must share a single coordinator, reveal the authenticated boot surface before engine-ready, and keep the real document-unload guard without a Maze-only bypass.');
   process.exit(1);
@@ -374,18 +376,38 @@ if (
 const createGameCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/create-game.css'), 'utf8');
 const lobbyCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/lobby.css'), 'utf8');
 const legacyMazeCss = fs.readFileSync(path.join(root, 'src/features/maze/styles/maze-site.css'), 'utf8');
+const mazeHostPresentationIsIsolated =
+  legacyMazeCss.includes('.maze-app .game-container button:where') &&
+  legacyMazeCss.includes('.maze-app .game-container h1') &&
+  !legacyMazeCss.includes('.maze-app button:where') &&
+  !legacyMazeCss.includes('.maze-app h1 {') &&
+  !legacyMazeCss.includes('.maze-app:not(.wide) h1') &&
+  !legacyMazeCss.includes('min-height: 100vh') &&
+  !legacyMazeCss.includes('padding-inline: 8px') &&
+  mazeThemeCss.includes(':is(.game-container, .cg, .lb) :where(input, textarea, select, button, [role="button"])') &&
+  !mazeThemeCss.includes('.maze-app :where(input, textarea, select, button, [role="button"])') &&
+  !/html\[data-theme="(?:light|dark|grass)"\] \.maze-app\s*\{[^}]*background\s*:/s.test(mazeThemeCss) &&
+  !mazeFrameCss.includes('overscroll-behavior') &&
+  !mazeFrameSource.includes('route-page--maze-gameplay') &&
+  !mazeFrameCss.includes('#mazeApp.maze-app {') &&
+  !siteChromeCss.includes('.route-page > .feature-page-shell > #mazeApp {');
+if (!mazeHostPresentationIsIsolated) {
+  console.error('[layout] Maze styles must not leak legacy shell, heading, theme or button rules onto shared Site components; only game-owned controls may use Engine presentation.');
+  process.exit(1);
+}
 const mazeMenuCssSources = [mazeFrameCss, createGameCss, lobbyCss, legacyMazeCss];
 const createGameControllerSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/create-game/create-game.ts'), 'utf8');
 const mazeMenuPresentationSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
 if (
   !createGameControllerSource.includes('onViewTransition') ||
   /(document|window|HTMLElement|Element|querySelector|addEventListener)/.test(createGameControllerSource) ||
-  !mazeMenuPresentationSource.includes('startMazeMenuViewTransition(update)') ||
-  !mazeMenuPresentationSource.includes('dataset.mazeTabExiting') ||
-  !mazeMenuPresentationSource.includes('dataset.mazeTabEntering') ||
-  !legacyMazeCss.includes('view-transition-name: maze-menu-content;') ||
-  !legacyMazeCss.includes('maze-menu-view-exit 120ms') ||
-  !legacyMazeCss.includes('maze-menu-view-enter 190ms') ||
+  !mazeMenuPresentationSource.includes('startContentViewTransition(update)') ||
+  mazeMenuPresentationSource.includes('dataset.mazeTabExiting') ||
+  mazeMenuPresentationSource.includes('dataset.mazeTabEntering') ||
+  legacyMazeCss.includes('view-transition-name: maze-menu-content;') ||
+  legacyMazeCss.includes('maze-menu-view-exit 120ms') ||
+  legacyMazeCss.includes('maze-menu-view-enter 190ms') ||
+  transitionCoordinatorSource.includes('startMazeMenuViewTransition') ||
   !legacyMazeCss.includes('transform 260ms cubic-bezier(.22, .78, .24, 1)')
 ) {
   console.error('[layout] Create/Rooms/Live tab motion must be scoped to the active panel and preserve the mounted Maze UI.');
@@ -421,21 +443,21 @@ if (!routeViewRootsAreUniform) {
 const sharedContentSurfaceIsUnified =
   /<main className="feature-page-shell"/.test(routerSource) &&
   /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) &&
-  /<MazeFrame active=\{isMazePage\}>[\s\S]*<\/MazeFrame>/.test(routerSource) &&
-  routerSource.indexOf('<MazeFrame active={isMazePage}>') > routerSource.indexOf('<main className="feature-page-shell"') &&
+  /<MazeFrame active=\{isMazePage && isAuthenticated\}>[\s\S]*<\/MazeFrame>/.test(routerSource) &&
+  routerSource.indexOf('<MazeFrame active={isMazePage && isAuthenticated}>') > routerSource.indexOf('<main className="feature-page-shell"') &&
   routeScrollRule.includes('height: 100%') &&
   routeScrollRule.includes('overflow-y: auto') &&
   routeScrollRule.includes('padding-inline-start: var(--site-frame-content-padding-start)') &&
   routeScrollRule.includes('padding-inline-end: var(--site-frame-content-padding-end)') &&
   siteChromeCss.includes('.route-page > .feature-page-shell > .route-view') &&
   /\.route-page > \.feature-page-shell > \.route-view\s*\{[^}]*display:\s*grid/s.test(siteChromeCss) &&
-  /\.route-page > \.feature-page-shell > #mazeApp\s*\{[^}]*gap:\s*0/s.test(siteChromeCss) &&
+  !siteChromeCss.includes('.route-page > .feature-page-shell > #mazeApp {') &&
   !/<div className="route-view route-view--access">/.test(routerSource) &&
   routerSource.includes('className="route-page"') &&
   !routerSource.includes('route-page--home') &&
   !routerSource.includes('route-page--maze-hub') &&
   !routerSource.includes('route-page--maze`') &&
-  siteChromeCss.includes('.route-page--maze-gameplay > .feature-page-shell') &&
+  !siteChromeCss.includes('.route-page--maze-gameplay') &&
   mazeFrameSource.includes('className="route-view maze-app in-menu"') &&
   mazeFrameSource.includes('id="mazeApp"') &&
   mazeFrameSource.includes('hidden={!active}') &&
@@ -486,7 +508,7 @@ const indexHtmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const mazeFrameIsEagerAndPersistent =
   /import\s+\{\s*MazeFrame\s*\}\s+from\s+'\.\.\/features\/maze\/MazeFrame'/.test(routerSource) &&
   !/lazy\([^)]*MazeFrame/.test(routerSource) &&
-  /<MazeFrame active=\{isMazePage\}>[\s\S]*<MazePage active=\{isMazePage && isAuthenticated\} authenticated=\{isAuthenticated\} \/>/.test(routerSource) &&
+  /<MazeFrame active=\{isMazePage && isAuthenticated\}>[\s\S]*<MazePage active=\{isMazePage && isAuthenticated\} authenticated=\{isAuthenticated\} \/>/.test(routerSource) &&
   routerSource.includes('hasMountedMaze') &&
   /id="mazeApp"/.test(mazeFrameSource) &&
   /hidden=\{!active\}/.test(mazeFrameSource) &&
@@ -508,7 +530,7 @@ if (!mazeFrameIsEagerAndPersistent) {
   process.exit(1);
 }
 
-// Logged-out pages must render an inert preview and must not mount protected feature trees.
+// Logged-out pages use the shared Access Surface and never mount protected feature trees.
 const accessGateSource = fs.readFileSync(path.join(root, 'src/components/access/PageAccessGate.tsx'), 'utf8');
 const accessGateCss = fs.readFileSync(path.join(root, 'src/components/access/page-access-gate.css'), 'utf8');
 const accessGateIdentitySource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
@@ -516,19 +538,18 @@ const pageLoadingSource = fs.readFileSync(path.join(root, 'src/components/layout
 const mazeFrameTransitionSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
 const siteChromeHostsSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
 const authGateIsFailClosed =
-  routerSource.includes('isAuthenticated ? (') &&
+  routerSource.includes('!isAuthenticated ? (') &&
   routerSource.includes('<Page key={pathname} />') &&
   routerSource.includes('<PageAccessGate') &&
-  mazeFrameSource.includes('{active && !isAuthenticated ? (') &&
-  mazeFrameSource.includes('<PageAccessGate') &&
-  accessGateSource.includes('<WalletConnectButton />') &&
-  accessGateSource.includes('inert') &&
+  !mazeFrameSource.includes('PageAccessGate') &&
+  routerSource.includes('isMazePage ? getRequestedMazeAccessPage() : ACCESS_PAGE_BY_ROUTE[route.id]') &&
   accessGateSource.includes("status === 'authenticating'") &&
-  accessGateSource.includes('role="img"') &&
+  accessGateSource.includes('site-access-panel') &&
+  accessGateSource.includes('PLATFORM_PILLARS') &&
+  accessGateSource.includes('<WalletConnectButton variant="primary" />') &&
+  !/access-preview-|PreviewHeader|PreviewRoom|PreviewMaze/.test(accessGateSource + accessGateCss) &&
   !/fetch\s*\(|API_PATHS|axios\./.test(accessGateSource) &&
-  accessGateCss.includes('width: min(100%, 360px)') &&
-  accessGateCss.includes('aspect-ratio: 1 / 1') &&
-  accessGateCss.includes('access-preview-auto-pan') &&
+  accessGateCss.includes('.site-access-panel') &&
   accessGateCss.includes('prefers-reduced-motion: reduce') &&
   accessGateIdentitySource.includes("if (!result.authenticated || !result.user)") &&
   accessGateIdentitySource.includes('navigateTo(returnTo)') &&
@@ -537,7 +558,7 @@ const authGateIsFailClosed =
   siteChromeHostsSource.includes('const { isAuthenticated } = useIdentity()') &&
   siteChromeHostsSource.includes('{isAuthenticated ? <HeaderCoinBalance /> : null}');
 if (!authGateIsFailClosed) {
-  console.error('[layout] Guests must stay outside Home, Explore, Profile and the Maze engine until the server confirms the wallet identity; previews must remain inert and bounded.');
+  console.error('[layout] Guests must stay outside protected feature trees until the server confirms wallet identity; every route must use the shared Access Surface.');
   process.exit(1);
 }
 // Identity bootstrap: the server embeds the session snapshot in the HTML, so a
@@ -555,6 +576,26 @@ if (!identityBootstrapIsWired) {
   console.error('[layout] Every site document response must embed the server-verified identity snapshot (no-store, Vary: Cookie) and IdentityProvider must start from it.');
   process.exit(1);
 }
+const rootThemeStyles = fs.readFileSync(path.join(root, 'src/styles/theme-tokens.css'), 'utf8');
+const siteButtonStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+if (
+  rootThemeStyles.includes('html[data-theme] .maze-app :where') ||
+  rootThemeStyles.includes('.cg-panel,.cg-card,.cg-step,.lb-card') ||
+  siteButtonStyles.includes('maze-menu-content') ||
+  siteButtonStyles.includes('data-maze-tab-exiting') ||
+  siteButtonStyles.includes('--maze-enter-') ||
+  siteButtonStyles.includes('maze-dropdown-') ||
+  !siteButtonStyles.includes('--site-route-enter-duration') ||
+  !siteButtonStyles.includes('site-wallet-menu-out') ||
+  !siteButtonStyles.includes('.nav-wallet-button.is-primary') ||
+  !siteButtonStyles.includes('.nav-wallet-button.is-primary > span') ||
+  mazeFrameSource.includes('app.dataset.theme') ||
+  mazeFrameSource.includes('site:themechange')
+) {
+  console.error('[layout] The document theme and shared site button styles must be the only platform-level presentation source; Maze may not override shared descendants or own a second tab transition system.');
+  process.exit(1);
+}
+
 const walletButtonSource = fs.readFileSync(path.join(root, 'src/platform/wallet/WalletConnectButton.tsx'), 'utf8');
 const walletTeardownSource = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.ts'), 'utf8');
 const walletTeardownTests = fs.readFileSync(path.join(root, 'src/platform/wallet/wallet-session-teardown.test.ts'), 'utf8');
@@ -799,7 +840,7 @@ if (
   featureRouter.includes("if (route?.id === 'maze') return null;") ||
   featureRouter.includes('createPortal') ||
   !featureRouter.includes('<main className="feature-page-shell"') ||
-  !featureRouter.includes('<MazeFrame active={isMazePage}>') ||
+  !featureRouter.includes('<MazeFrame active={isMazePage && isAuthenticated}>') ||
   featureRouter.includes('MazeRouteShell') ||
   !siteCssEntry.includes('.route-scrollbar[data-visible="false"]') ||
   !siteCssEntry.includes('visibility: hidden;')

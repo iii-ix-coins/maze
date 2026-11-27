@@ -5,6 +5,7 @@ const PENDING_ENTRY_MAX_AGE_MS = 15_000;
 const DOCUMENT_EXIT_DURATION_MS = 130;
 const DOCUMENT_ENTER_DURATION_MS = 220;
 const NAVIGATION_RECOVERY_DELAY_MS = 1_800;
+const NATIVE_TRANSITION_FAILSAFE_MS = 1_600;
 
 /** Minimal surface of the native API, kept structural for browser/TS compatibility. */
 type NativeViewTransition = { finished?: Promise<unknown> };
@@ -23,6 +24,8 @@ export type DocumentNavigationOptions = {
 };
 
 let nativeTransitionInFlight = false;
+let nativeTransitionGeneration = 0;
+let nativeTransitionFailsafe: number | null = null;
 let waapiContentTransitionInFlight = false;
 let documentNavigationInFlight = false;
 let pendingRecoveryTimer: number | null = null;
@@ -52,19 +55,19 @@ if (supportsSameDocumentViewTransitions()) {
  * If another transition is already running, callers apply their state update
  * immediately rather than starting competing browser snapshots.
  */
-function startNativeViewTransition(update: () => void, mode: 'content' | 'maze-menu' | 'theme'): boolean {
+function startNativeViewTransition(update: () => void, mode: 'content' | 'theme'): boolean {
   const transitionDocument = document as TransitionDocument;
   const startTransition = transitionDocument.startViewTransition;
   if (!startTransition || prefersReducedMotion() || nativeTransitionInFlight || waapiContentTransitionInFlight) return false;
 
   const root = document.documentElement;
+  const generation = ++nativeTransitionGeneration;
   nativeTransitionInFlight = true;
   if (mode === 'theme') {
     root.dataset.uiThemeTransition = 'true';
   } else {
     root.dataset.uiViewTransition = 'scoped';
-    if (mode === 'content') root.dataset.uiContentTransition = 'true';
-    else root.dataset.uiMazeMenuTransition = 'true';
+    root.dataset.uiContentTransition = 'true';
   }
 
   let updateRan = false;
@@ -75,39 +78,46 @@ function startNativeViewTransition(update: () => void, mode: 'content' | 'maze-m
       update();
     });
   } catch {
-    finishNativeViewTransition(root, mode);
+    finishNativeViewTransition(root, mode, generation);
     return updateRan;
   }
 
-  const finish = () => finishNativeViewTransition(root, mode);
+  const finish = () => finishNativeViewTransition(root, mode, generation);
   if (transition.finished) void transition.finished.then(finish, finish);
   else window.requestAnimationFrame(finish);
+
+  // The browser normally resolves `finished`; keep a bounded recovery so a
+  // cancelled/interrupted native transition can never lock future page motion.
+  nativeTransitionFailsafe = window.setTimeout(finish, NATIVE_TRANSITION_FAILSAFE_MS);
   return true;
 }
 
-function finishNativeViewTransition(root: HTMLElement, mode: 'content' | 'maze-menu' | 'theme'): void {
+function finishNativeViewTransition(
+  root: HTMLElement,
+  mode: 'content' | 'theme',
+  generation: number,
+): void {
+  if (generation !== nativeTransitionGeneration) return;
+  if (nativeTransitionFailsafe !== null) {
+    window.clearTimeout(nativeTransitionFailsafe);
+    nativeTransitionFailsafe = null;
+  }
   if (mode === 'theme') {
     delete root.dataset.uiThemeTransition;
   } else {
     delete root.dataset.uiViewTransition;
-    if (mode === 'content') delete root.dataset.uiContentTransition;
-    else delete root.dataset.uiMazeMenuTransition;
+    delete root.dataset.uiContentTransition;
   }
   nativeTransitionInFlight = false;
 }
 
-/** Animate one named content surface while keeping all three persistent frames still. */
+/** Animate a same-route content change using the exact site-wide motion system. */
 export function startContentViewTransition(update: () => void): boolean {
   if (supportsSameDocumentViewTransitions()) {
     const started = startNativeViewTransition(update, 'content');
     if (started || nativeTransitionInFlight || waapiContentTransitionInFlight || prefersReducedMotion()) return started;
   }
   return startSameDocumentWaapiTransition(update);
-}
-
-/** Only the active Maze menu panel moves for Create/Rooms/Live tab changes. */
-export function startMazeMenuViewTransition(update: () => void): boolean {
-  return startNativeViewTransition(update, 'maze-menu');
 }
 
 function waitForAnimationFrames(count = 2): Promise<void> {
