@@ -11,7 +11,7 @@ const siteRouteManifest = JSON.parse(
 const mazeRoutePaths = siteRouteManifest.routes.find((route: { id: string }) => route.id === 'maze')?.paths;
 const siteDefaultTitle = siteRouteManifest.routes.find((route: { id: string }) => route.id === 'home')?.title;
 if (!Array.isArray(mazeRoutePaths) || mazeRoutePaths.length === 0) {
-  throw new Error('The shared site route manifest must define at least one Maze document path.');
+  throw new Error('The shared site route manifest must define at least one Maze route path.');
 }
 if (typeof siteDefaultTitle !== 'string' || !siteDefaultTitle.trim()) {
   throw new Error('The shared site route manifest must define the home page title.');

@@ -11,7 +11,7 @@ The Create/Rooms/Live menu, in-race HUD, Race Board, result cards and site-facin
 
 ## Maze Hub vs. Maze runtime
 
-`/maze` is the lightweight Maze Hub route. It owns the former Home market summary and hero slider. `/maze.html` (and `/play`) remain the non-soft-navigation Maze runtime document that mounts the existing game engine into `#maze-root`. The bottom-dock Maze action opens the Hub; Create still opens `/maze.html?view=create`.
+`/maze` is the lightweight Maze Hub route. It owns the former Home market summary and hero slider. `/maze.html` and `/play` are aliases for the Maze runtime route inside the same SPA document; they no longer create a document-navigation boundary. The bottom-dock Maze action opens the Hub; Create opens `/maze.html?view=create` through the shared router and transition coordinator.
 
 
 ## Game Feed integration boundary
@@ -20,11 +20,11 @@ The site Home route reads the existing read-only `GET /rooms` snapshot through `
 
 ## Stable game-content frame initialization
 
-The `/maze.html` document sets `body.in-menu` synchronously from the route before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. `MazeFrame` owns the route lifetime and clears all Maze body-mode classes on unmount, including the guest-gate path where `MazeMenu` is never mounted. `MazeMenu` also keeps its unmount-only cleanup as a local safeguard; never put that cleanup in the `state.visible` effect.
+The shared SPA document sets `body.in-menu` synchronously for the Maze route paths (`/maze.html` and `/play`) before React mounts. `MazeMenu` must not toggle that class until the engine has completed its first `restoreGame()` / `showMenu()` decision. `engine/boot.ts` publishes `maze:engine-ready` after that decision; the React menu then synchronizes the body mode. `MazeFrame` owns route activation and removes all Maze body-mode classes whenever another route becomes active, including the guest-gate path where `MazeMenu` is not mounted yet. `MazeMenu` also keeps its unmount-only cleanup as a local safeguard; never put that cleanup in the `state.visible` effect.
 
 ## Persistent content frame
 
-`MazeFrame.tsx` is eager and owns `#mazeApp` (frame, scrollbar, theme and body-mode classes). It mounts in the first React commit together with the header and dock. `MazePage.tsx` is lazy and renders only the content inside that frame and boots the engine. The initial Create / Rooms / Live tab is read from `?view=` by `maze-ui-store.ts` before the first render. The content stays hidden (`visibility`, no animation) until `data-maze-engine-ready` is set.
+`MazeFrame.tsx` is eager and owns `#mazeApp` (frame, scrollbar, theme and body-mode classes) in the single React root. `MazePage.tsx` is loaded on the first Maze visit and keeps the exact game DOM mounted for the lifetime of that root; `engine-entry.ts` mounts and disposes the runtime as the authenticated Maze route becomes active or inactive. This persistence is required because `engine/dom.ts` caches DOM nodes. The initial Create / Rooms / Live tab is read from `?view=` by `maze-ui-store.ts` before the first render. The content stays hidden (`visibility`, no animation) until `data-maze-engine-ready` is set.
 
 ## Menu tab motion ownership
 
@@ -33,6 +33,6 @@ The Create / Rooms / Live panel transition is coordinated by the React `MazeMenu
 
 ## Shared motion system
 
-Site route transitions are scoped to the inner `.feature-page-shell`; the persistent route frame, custom scrollbar, header and navigation dock remain mounted and do not animate. Native View Transitions are used only when the target lazy page chunk has already resolved. First visits to an unloaded route use a brief CSS exit/entry fallback so Suspense does not produce an empty transition snapshot.
+All registered site routes, including Maze, use the same same-document transition coordinator. Native View Transitions animate the active content surface when the destination lazy chunk is already resolved; first visits to an unloaded route use a brief CSS exit/entry fallback so Suspense does not produce an empty transition snapshot. Persistent site chrome stays mounted. Maze's persistent frame is kept in the DOM but hidden while another route is active; its engine resources are disposed during that route transition.
 
 Create / Rooms / Live panel transitions are owned by the React `MazeMenu` presentation layer. `CreateGameComponent` remains a DOM-free state adapter and the panel switch does not unmount the persistent wizard preview or canvas. Reduced-motion preferences disable these transitions.

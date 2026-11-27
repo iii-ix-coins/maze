@@ -11,6 +11,7 @@ import { updateHud, fmtTime } from './hud';
 import { showMazeResult, showMazeBanner } from '../ui/maze-view-store';
 import { rankPlayers } from '../ui/race-board';
 import { ensurePlayerVisible } from './camera';
+import { scheduleEngineTimeout } from './runtime-timers';
 export function getMultiplayerUrl() {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="maze-multiplayer-url"]');
     const configured = meta ? meta.content.trim() : '';
@@ -257,7 +258,7 @@ export function finishMultiplayerGame(message) {
     if (!reduceMotion) {
         const mine = !S.spectating && S.multiplayerWinnerId === S.localPlayerId;
         burst(S.player, mine ? 100 : 32);
-        if (mine) setTimeout(() => burst(S.player, 70), 320);
+        if (mine) scheduleEngineTimeout(() => burst(S.player, 70), 320);
     }
     cam.follow = true;
     cam.anchor = null;

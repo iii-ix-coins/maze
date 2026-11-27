@@ -156,7 +156,7 @@ if (
 const mazeMenuSource = fs.readFileSync(path.join(root, 'src/features/maze/ui/react/MazeMenu.tsx'), 'utf8');
 const mazeBootSource = fs.readFileSync(path.join(root, 'src/features/maze/engine/boot.ts'), 'utf8');
 const menuBootDecisionIndex = Math.max(
-  mazeBootSource.indexOf('if (saved) restoreGame(saved); else showMenu();'),
+  mazeBootSource.indexOf('if (saved) restoreGame(saved);'),
   -1,
 );
 const menuEngineReadyIndex = mazeBootSource.indexOf("window.dispatchEvent(new Event('maze:engine-ready'));");
@@ -224,7 +224,7 @@ const routeScrollRule = siteChromeCss.match(/\.route-page\s*>\s*\.feature-page-s
 const routeFrameRule = siteChromeCss.match(/\.route-page,\s*body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameStrokeRule = siteChromeCss.match(/\.route-page::before,\s*body\.in-menu #mazeApp\.maze-app\.in-menu::before\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
-  console.error('[layout] normal site frame geometry must not depend on Maze document body modes.');
+  console.error('[layout] normal site frame geometry must not depend on Maze body-mode state.');
   process.exit(1);
 }
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
@@ -239,15 +239,20 @@ if (
   !routeDefinitionsSource.includes('export function canSoftNavigateBetween') ||
   !navigationSourceHasBidirectionalBoundary()
 ) {
-  console.error('[layout] navigation must not cross the standalone Maze document boundary with SPA transitions.');
+  console.error('[layout] every registered route, including Maze, must use the shared same-document SPA transition path.');
   process.exit(1);
 }
 
 function navigationSourceHasBidirectionalBoundary() {
   const navigation = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
+  const routes = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8')).routes;
+  const maze = routes.find((route) => route.id === 'maze');
   return navigation.includes('canSoftNavigateBetween(window.location.pathname, url.pathname)') &&
     navigation.includes('canSoftNavigateBetween(currentPath, nextPath)') &&
-    navigation.includes('window.location.reload()');
+    navigation.includes('window.location.reload()') &&
+    navigation.includes('confirmMazeRouteExit') &&
+    navigation.includes('getDocumentTransitionSurface') &&
+    maze?.soft === true && maze?.server === 'spa';
 }
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const routeLoadersSource = fs.readFileSync(path.join(root, 'src/app/route-loaders.ts'), 'utf8');
@@ -288,12 +293,13 @@ if (
   !transitionMazeFrameSource.includes('startContentViewTransition') ||
   !transitionMazeFrameSource.includes('waitForDocumentEntryToFinish') ||
   !identitySource.includes('waitForDocumentEntryToFinish') ||
-  !mazeBootSourceForTransitions.includes("dataset.mazeAllowUnload === 'true'") ||
+  !/if \(!S\.isGameOver\)\s*\{ event\.preventDefault\(\); event\.returnValue = ''; \}/.test(mazeBootSourceForTransitions) ||
+  transitionCoordinatorSource.includes('allowMazeUnload') ||
   !transitionPageLoadingSource.includes('playPageEnter()') ||
   !siteCssEntry.includes('view-transition-name: site-route-content;') ||
   !siteCssEntry.includes('#mazeApp > .maze-authenticated-boot')
 ) {
-  console.error('[layout] Site/Maze transitions must share a single coordinator, reveal the authenticated boot surface before engine-ready, and preserve the unload guard.');
+  console.error('[layout] Site/Maze transitions must share a single coordinator, reveal the authenticated boot surface before engine-ready, and keep the real document-unload guard without a Maze-only bypass.');
   process.exit(1);
 }
 if (
@@ -432,19 +438,22 @@ const indexHtmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const mazeFrameIsEagerAndPersistent =
   /import\s+\{\s*MazeFrame\s*\}\s+from\s+'\.\.\/features\/maze\/MazeFrame'/.test(appSource) &&
   !/lazy\([^)]*MazeFrame/.test(appSource) &&
-  /<MazeFrame>\s*<Suspense fallback=\{null\}>\s*<MazePage \/>\s*<\/Suspense>\s*<\/MazeFrame>/.test(appSource) &&
+  /<MazeFrame active=\{isMazePage\}>[\s\S]*<MazePage active=\{isMazePage && isAuthenticated\} authenticated=\{isAuthenticated\} \/>/.test(appSource) &&
+  appSource.includes('hasMountedMaze') &&
   !appSource.includes('maze-loading') &&
   /id="mazeApp"/.test(mazeFrameSource) &&
+  /hidden=\{!active\}/.test(mazeFrameSource) &&
   !/id=["']mazeApp["']/.test(mazePageSource) &&
   !/<main\b/.test(mazePageSource) &&
   !/import\s+['"]\.\/styles\/index\.css['"]/.test(mazeFrameSource) &&
   !/setInterval|\.click\(\)/.test(mazePageSource) &&
-  /useLayoutEffect/.test(mazeFrameSource) &&
+  /useLayoutEffect/.test(mazePageSource) &&
+  mazePageSource.includes('mountMazeEngine') &&
   mazeStoreSource.includes('readInitialHomeView') &&
   /view:\s*initialHomeView/.test(mazeStoreSource) &&
   /html:not\(\[data-maze-engine-ready="true"\]\)[^{]*#mazeApp\.maze-app\s*>\s*#createGame\s*\{[^}]*visibility:\s*hidden/s.test(siteChromeCss) &&
   /body\.in-menu #mazeApp\.maze-app\.in-menu\s*\{[^}]*z-index:\s*1/s.test(siteChromeCss) &&
-  indexHtmlSource.includes('mazeDocumentPath') &&
+  indexHtmlSource.includes('mazeRoutePath') &&
   indexHtmlSource.includes("toLowerCase().replace(/\\/+$/, '')");
 if (!mazeFrameIsEagerAndPersistent) {
   console.error('[layout] The Maze content frame must be mounted eagerly (MazeFrame) and stay constant; only its lazy content may load or appear.');
@@ -462,7 +471,7 @@ const authGateIsFailClosed =
   routerSource.includes('isAuthenticated ? (') &&
   routerSource.includes('<Page key={pathname} />') &&
   routerSource.includes('<PageAccessGate') &&
-  mazeFrameSource.includes('{isAuthenticated ? children : (') &&
+  mazeFrameSource.includes('{active && !isAuthenticated ? (') &&
   mazeFrameSource.includes('<PageAccessGate') &&
   accessGateSource.includes('<WalletConnectButton />') &&
   accessGateSource.includes('inert') &&
@@ -506,7 +515,8 @@ if (
   !walletButtonSource.includes('logoutAfterWalletChange') ||
   !walletButtonSource.includes('runWalletSessionTeardown') ||
   !walletButtonSource.includes('endError.sessionRevoked') ||
-  !walletButtonSource.includes('allowMazeUnload: true') ||
+  walletButtonSource.includes('navigateDocument') ||
+  walletButtonSource.includes('isMazeDocumentPath') ||
   /const handleDisconnect\s*=|const handleLogout\s*=|disconnectPending|logoutPending/.test(walletButtonSource) ||
   !walletTeardownSource.includes('sessionRevoked') ||
   !walletTeardownTests.includes('does not disconnect the wallet if server logout fails') ||
@@ -680,8 +690,38 @@ if (/document\.createElement|createElementNS|appendChild\(|initMazeBackground/.t
   console.error('[layout] site background must be React-owned and must not use a DOM bootstrap.');
   process.exit(1);
 }
-if (!/lazy\(\(\) => import\('..\/features\/maze\/MazePage'/.test(appSource)) {
-  console.error('[layout] MazePage must be loaded as a route-level lazy chunk.');
+if (!appSource.includes('const MazePage = lazy(loadMazePage);') || !appSource.includes('loadMazePage')) {
+  console.error('[layout] MazePage must be loaded through the centralized route-level lazy loader.')
+  process.exit(1);
+}
+const mazeEngineEntry = fs.readFileSync(path.join(root, 'src/features/maze/engine-entry.ts'), 'utf8');
+const mazeEngineBoot = fs.readFileSync(path.join(root, 'src/features/maze/engine/boot.ts'), 'utf8');
+const mazeEngineFrame = fs.readFileSync(path.join(root, 'src/features/maze/engine/frame.ts'), 'utf8');
+const mazeSocketClient = fs.readFileSync(path.join(root, 'src/features/maze/net/multiplayer-client.ts'), 'utf8');
+const mazeLobbyHub = fs.readFileSync(path.join(root, 'src/features/maze/ui/lobby/lobby-hub.ts'), 'utf8');
+const mazeRuntimeTimers = fs.readFileSync(path.join(root, 'src/features/maze/engine/runtime-timers.ts'), 'utf8');
+if (
+  !mazePageSource.includes('mountMazeEngine') ||
+  !mazeEngineEntry.includes('new AbortController()') ||
+  !mazeEngineEntry.includes('controller.abort()') ||
+  !mazeEngineEntry.includes('multiplayerClient.disconnect(false)') ||
+  !mazeEngineEntry.includes('clearEngineTimeouts()') ||
+  !mazeRuntimeTimers.includes('pendingTimers') ||
+  !mazeRuntimeTimers.includes('window.clearTimeout(timer)') ||
+  !mazeEngineBoot.includes('cancelAnimationFrame(activeFrameId)') ||
+  !mazeEngineBoot.includes("dataset.mazeActiveRun = (!S.isGameOver && !S.spectating) ? 'true' : 'false'") ||
+  !mazeSocketClient.includes('socketController.abort()') ||
+  !mazeSocketClient.includes('clearTimeout(this.reconnectTimer)') ||
+  !mazeLobbyHub.includes('this.unsubscribeStore?.()') ||
+  !mazeLobbyHub.includes('this.busyTimers.clear()') ||
+  !mazeLobbyHub.includes("this.phase = 'idle'") ||
+  !mazeLobbyHub.includes('this.watching = false') ||
+  !mazeLobbyHub.includes('mazeUiStore.patch({ busyRoomIds: [], copied: false })') ||
+  !mazeLobbyHub.includes('mazeUiStore.unregisterActions(this.registeredActions)') ||
+  !mazeEngineBoot.includes('S.multiplayerSession || S.spectating') ||
+  !mazeEngineBoot.includes("if (lobbyHub.phase !== 'idle') lobbyHub.leaveRoom()")
+) {
+  console.error('[layout] Maze Engine must expose an idempotent mount/dispose lifecycle and release its listeners, RAF loop, WebSocket, reconnect/timer and store subscriptions.');
   process.exit(1);
 }
 for (const component of ['function CreateWizard', 'export function RoomsPanel', 'export function LivePanel', 'export function RoomPanel']) {
@@ -719,7 +759,7 @@ if (
 const siteRoutes = JSON.parse(fs.readFileSync(path.join(root, 'shared/site-routes.json'), 'utf8')).routes;
 const mazeHubRoute = siteRoutes.find((route) => route.id === 'maze-hub');
 if (!mazeHubRoute || !mazeHubRoute.paths.includes('/maze') || mazeHubRoute.server !== 'spa' || mazeHubRoute.navKey !== 'maze-hub') {
-  console.error('[layout] Maze Hub must be a distinct soft-navigation SPA route at /maze; /maze.html remains the game document.');
+  console.error('[layout] Maze Hub must remain a distinct soft-navigation SPA route at /maze.');
   process.exit(1);
 }
 
@@ -859,7 +899,7 @@ if (/localStorage\.(?:getItem|setItem).*?(?:session|token|identity)/i.test(ident
 }
 
 const packageManifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageManifest.scripts?.['test:identity'] !== 'node --test tests/identity/identity-routes.test.cjs') {
+if (!packageManifest.scripts?.['test:identity']?.includes('tests/identity/identity-routes.test.cjs') || !packageManifest.scripts?.['test:identity']?.includes('tests/identity/identity-bootstrap.test.cjs')) {
   console.error('[layout] The SIWS/session integration tests must remain available through npm run test:identity.');
   process.exit(1);
 }
@@ -894,8 +934,8 @@ if (new Set(allRoutePaths).size !== allRoutePaths.length) {
   process.exit(1);
 }
 const mazeRoute = routeManifest.routes.find((route) => route.id === 'maze');
-if (!mazeRoute?.paths.includes('/maze.html') || !mazeRoute.paths.includes('/play') || mazeRoute.server !== 'maze' || mazeRoute.soft) {
-  console.error('[layout] Maze document aliases must be declared once in the shared route manifest and remain hard navigations.');
+if (!mazeRoute?.paths.includes('/maze.html') || !mazeRoute.paths.includes('/play') || mazeRoute.server !== 'spa' || !mazeRoute.soft) {
+  console.error('[layout] Maze aliases must be declared once as soft routes served by the shared SPA document.');
   process.exit(1);
 }
 for (const routeId of ['home', 'maze', 'explore', 'profile']) {
@@ -1066,7 +1106,7 @@ if (!viteConfig.includes("main: path.resolve(root, 'index.html')")) {
   process.exit(1);
 }
 
-console.log('[layout] React routes, header theme and coin balance, notification dock, Holders retirement, unified wallet teardown, and shared Maze content frame verified.');
+console.log('[layout] React routes, shared Maze SPA frame, explicit Engine lifecycle, unified identity transitions, header theme, wallet teardown and navigation verified.');
 
 // Retired transaction/verification engines and buyer feed must stay removed.
 for (const retiredPath of [

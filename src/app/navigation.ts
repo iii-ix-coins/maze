@@ -12,6 +12,7 @@ import {
     prefersReducedMotion,
     startContentViewTransition,
     supportsSameDocumentViewTransitions,
+    getDocumentTransitionSurface,
 } from '../platform/transition-coordinator';
 import { isRoutePageLoaded, preloadSiteRoutePage } from './route-loaders';
 
@@ -21,9 +22,11 @@ export const LOADER_HIDE_EVENT = 'site:loader-hide';
 /* ---------- pathname store (lets the router react to pushState) ---------- */
 const listeners = new Set<() => void>();
 let currentPath = normalizePath(window.location.pathname);
+let currentLocationKey = `${currentPath}${window.location.search}${window.location.hash}`;
 
 function emitPath() {
     currentPath = normalizePath(window.location.pathname);
+    currentLocationKey = `${currentPath}${window.location.search}${window.location.hash}`;
     listeners.forEach((listener) => listener());
 }
 
@@ -35,6 +38,18 @@ export function usePathname() {
         },
         () => currentPath,
         () => currentPath,
+    );
+}
+
+/** Full same-document location snapshot for route-local query/hash state. */
+export function useLocationKey() {
+    return useSyncExternalStore(
+        (listener) => {
+            listeners.add(listener);
+            return () => listeners.delete(listener);
+        },
+        () => currentLocationKey,
+        () => currentLocationKey,
     );
 }
 
@@ -85,7 +100,7 @@ function swapTo(url: URL, push: boolean): void {
     // The CSS fallback gives the current surface a short exit before React
     // replaces it. For browsers with View Transitions, mark the destination
     // so its entrance still runs after a first-visit lazy chunk resolves.
-    const hasRouteSurface = Boolean(document.querySelector('.route-page > .feature-page-shell'));
+    const hasRouteSurface = Boolean(getDocumentTransitionSurface());
     if (!prefersReducedMotion() && hasRouteSurface) {
         if (supportsSameDocumentViewTransitions()) {
             document.documentElement.dataset.siteRouteFallback = 'true';
@@ -102,6 +117,15 @@ function swapTo(url: URL, push: boolean): void {
     applyRouteSwap(url, push);
 }
 
+function confirmMazeRouteExit(nextPath: string): boolean {
+    const currentIsMaze = resolveSiteRoute(currentPath)?.id === 'maze';
+    const nextIsMaze = resolveSiteRoute(nextPath)?.id === 'maze';
+    if (!currentIsMaze || nextIsMaze) return true;
+    if (document.documentElement.dataset.mazeEngineReady !== 'true'
+        || document.documentElement.dataset.mazeActiveRun !== 'true') return true;
+    return window.confirm('You have an unfinished Maze run. Leaving now will stop this run. Continue?');
+}
+
 export function navigateTo(href: string) {
     const url = new URL(href, window.location.href);
     if (url.origin !== window.location.origin) {
@@ -109,18 +133,16 @@ export function navigateTo(href: string) {
         return;
     }
     if (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.search === window.location.search) return;
-    // Maze is a standalone runtime document. Crossing the SPA boundary in
-    // either direction must be a document navigation so its engine lifecycle
-    // and body-level frame mode cannot leak into ordinary site routes.
+    if (!confirmMazeRouteExit(url.pathname)) return;
     if (!canSoftNavigateBetween(window.location.pathname, url.pathname)) {
-        // Warm a Site route chunk while the Maze content exits. This is code-only
-        // preloading: the destination React page is not mounted in the Maze runtime.
-        if (resolveSiteRoute(url.pathname)?.id !== 'maze') {
-            void preloadSiteRoutePage(url.pathname).catch(() => undefined);
-        }
         void navigateDocument(url);
         return;
     }
+
+    // Entering/leaving the Maze runtime is now a route transition. A route
+    // chunk may load in parallel with the outgoing surface's CSS fallback;
+    // the persistent Maze DOM remains mounted after its first visit.
+    void preloadSiteRoutePage(url.pathname).catch(() => undefined);
     swapTo(url, true);
 }
 
@@ -152,11 +174,23 @@ function onClick(event: MouseEvent) {
 
 function onPopState() {
     const nextPath = normalizePath(window.location.pathname);
+    const nextLocationKey = `${nextPath}${window.location.search}${window.location.hash}`;
     if (pendingRouteSwap !== null) cancelPendingRouteSwap();
-    if (nextPath === currentPath) return;
+    if (nextLocationKey === currentLocationKey) return;
+    if (nextPath === currentPath) {
+        emitPath();
+        return;
+    }
 
-    // Back/Forward must respect the same document boundary as ordinary links.
-    // The browser has already changed the URL for popstate, so reload that URL.
+    if (!confirmMazeRouteExit(nextPath)) {
+        // popstate has already changed the URL; restore the last committed SPA URL.
+        const previous = new URL(currentLocationKey, window.location.origin);
+        window.history.pushState(null, '', previous.href);
+        return;
+    }
+
+    // All registered site routes, including Maze, share one document and one
+    // transition coordinator. Only paths outside the client route set reload.
     if (!canSoftNavigateBetween(currentPath, nextPath)) {
         window.location.reload();
         return;

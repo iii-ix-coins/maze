@@ -31,11 +31,11 @@
   </head>
   <body class="page-loading">
     <script>
-      const mazeDocumentPaths = /* @maze-route-paths */;
+      const mazeRoutePaths = /* @maze-route-paths */;
       // Same normalization as normalizePath() in src/app/routes.ts, so the frame mode
       // chosen before React mounts always agrees with the router (case, trailing slash).
-      const mazeDocumentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
-      if (mazeDocumentPaths.includes(mazeDocumentPath)) {
+      const mazeRoutePath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+      if (mazeRoutePaths.includes(mazeRoutePath)) {
         document.body.classList.add('in-menu');
       }
     </script>

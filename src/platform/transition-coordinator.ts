@@ -19,8 +19,6 @@ type PendingDocumentEntry = {
 };
 
 export type DocumentNavigationOptions = {
-  /** Only a completed, explicit logout may bypass the unfinished-game unload guard. */
-  allowMazeUnload?: boolean;
   replace?: boolean;
 };
 
@@ -257,19 +255,20 @@ export function consumePendingDocumentEntry(): boolean {
 
 /** Returns only the active content; never returns the outer frame, header or dock. */
 export function getDocumentTransitionSurface(): HTMLElement | null {
-  const mazeFrame = document.getElementById('mazeApp');
-  const candidates = mazeFrame
-    ? [
-        '#mazeApp > .access-gate',
-        '#mazeApp > .maze-authenticated-boot',
-        '#mazeApp > #createGame.cg.show',
-        '#mazeApp > .game-container',
-      ]
-    : ['.route-page > .feature-page-shell'];
+  // MazeFrame is intentionally parked in the DOM after its first visit so the
+  // Engine's cached node references remain valid. Always select the visible
+  // surface, rather than treating the existence of #mazeApp as the active route.
+  const candidates = [
+    '#mazeApp > .access-gate',
+    '#mazeApp > .maze-authenticated-boot',
+    '#mazeApp > #createGame.cg.show',
+    '#mazeApp > .game-container',
+    '.route-page > .feature-page-shell',
+  ];
 
   for (const selector of candidates) {
     const element = document.querySelector<HTMLElement>(selector);
-    if (!element || element.getClientRects().length === 0) continue;
+    if (!element || element.closest('[hidden]') || element.getClientRects().length === 0) continue;
     const style = getComputedStyle(element);
     if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
     return element;
@@ -359,7 +358,6 @@ function restoreAfterCancelledNavigation(animation?: Animation | null): void {
   animation?.cancel();
   activeDocumentExitAnimation = null;
   delete document.documentElement.dataset.uiDocumentExiting;
-  delete document.documentElement.dataset.mazeAllowUnload;
   documentNavigationInFlight = false;
 }
 
@@ -373,10 +371,9 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Cross-document navigation stays a document navigation because Maze owns an
- * independent engine lifecycle. WAAPI is used consistently across browsers:
- * native MPA View Transitions can snapshot the initial loader before the CSR
- * route or the asynchronously booted Maze surface exists.
+ * Full-document navigation is reserved for destinations outside the shared SPA.
+ * It remains a WAAPI fallback because a browser-level transition can snapshot
+ * the initial loader before the destination document has mounted its content.
  */
 export async function navigateDocument(
   url: URL,
@@ -391,7 +388,6 @@ export async function navigateDocument(
   documentNavigationInFlight = true;
   const sourceHref = window.location.href;
   const root = document.documentElement;
-  if (options.allowMazeUnload) root.dataset.mazeAllowUnload = 'true';
 
   const surface = prefersReducedMotion() ? null : getDocumentTransitionSurface();
   let animation: Animation | null = null;

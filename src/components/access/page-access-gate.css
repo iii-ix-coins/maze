@@ -253,7 +253,7 @@
   }
 }
 
-/* The Maze document uses the same preview as site routes, but its frame is
+/* The Maze route uses the same preview as site routes, but its frame is
    viewport-locked. Keep the gate as the only scroll target inside that frame. */
 @layer pages {
   body.in-menu #mazeApp.maze-app.in-menu > .access-gate {

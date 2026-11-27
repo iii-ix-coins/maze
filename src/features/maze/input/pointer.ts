@@ -6,9 +6,9 @@ import { movePlayer } from '../engine/solo';
 import { zoomAt } from '../engine/camera';
 export const swipeStep = () => clamp(S.base * cam.z * 0.8, 14, 34);
 
-export function initPointer() {
+export function initPointer(signal: AbortSignal) {
 for (const ev of ['touchstart', 'touchmove']) {
-    stageEl.addEventListener(ev, (e: any) => { if (!e.target.closest('button')) e.preventDefault(); }, { passive: false });
+    stageEl.addEventListener(ev, (e: any) => { if (!e.target.closest('button')) e.preventDefault(); }, { passive: false, signal });
 }
 mazeCanvas.addEventListener('pointerdown', (e) => {
     mazeCanvas.setPointerCapture(e.pointerId);
@@ -17,7 +17,7 @@ mazeCanvas.addEventListener('pointerdown', (e) => {
         const [a, b] = [...ptrs.values()];
         S.pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
     }
-});
+}, { signal });
 mazeCanvas.addEventListener('pointermove', (e) => {
     const p = ptrs.get(e.pointerId);
     if (!p) return;
@@ -48,13 +48,13 @@ mazeCanvas.addEventListener('pointermove', (e) => {
         }
         S.pinchDist = d;
     }
-});
+}, { signal });
 for (const ev of ['pointerup', 'pointercancel']) {
     mazeCanvas.addEventListener(ev, (e: any) => {
         ptrs.delete(e.pointerId);
         if (ptrs.size < 2) S.pinchDist = 0;
         for (const q of ptrs.values()) { q.ax = q.x; q.ay = q.y; }
-    });
+    }, { signal });
 }
 // Native page scrolling remains the default over the board. Zoom is an explicit
 // precision gesture (Ctrl/Cmd + wheel), matching modern map/canvas interaction
@@ -69,5 +69,5 @@ mazeCanvas.addEventListener('wheel', (e) => {
     const delta = e.deltaY * unit;
     const scale = Math.exp(-delta * 0.0018);
     zoomAt(cam.tz * scale, e.clientX - rect.left, e.clientY - rect.top);
-}, { passive: false });
+}, { passive: false, signal });
 }

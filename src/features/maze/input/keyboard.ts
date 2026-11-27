@@ -6,7 +6,7 @@ import { ARROWS, ZOOM_STEP } from '../engine/constants';
 import { movePlayer, toggleFog, useHint } from '../engine/solo';
 import { zoomBy, resetView } from '../engine/camera';
 
-export function initKeyboard() {
+export function initKeyboard(signal: AbortSignal) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && mazeHudStore.getSnapshot().confirmVisible) { cancelEnd(); return; }
     const t: any = e.target;
@@ -26,5 +26,5 @@ document.addEventListener('keydown', (e) => {
         case 'KeyF': toggleFog(); break;
         case 'KeyH': useHint(); break;
     }
-});
+}, { signal });
 }

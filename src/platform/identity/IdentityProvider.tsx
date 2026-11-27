@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { flushSync } from 'react-dom';
-import { getSiteRoutePath, isMazeDocumentPath } from '../../app/routes';
+import { getSiteRoutePath } from '../../app/routes';
 import { preloadSiteRoutePage } from '../../app/route-loaders';
 import { startContentViewTransition, waitForDocumentEntryToFinish } from '../transition-coordinator';
 import { navigateTo } from '../../app/navigation';
@@ -112,28 +112,24 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         // update, no transition, no re-render.
         if (bootstrap && isSameSession(bootstrap, response)) return;
 
-        // For Site documents, let the one-shot cross-document entry settle before
-        // replacing the guest Gate with an authenticated page. Maze is different:
-        // it must publish authenticated state first so MazeFrame can reveal Boot,
-        // then it waits before the engine-ready hand-off.
-        const isMazeDocument = isMazeDocumentPath(window.location.pathname);
+        // Every route, including Maze, is one same-document React surface.
+        // Preload authenticated page code without mounting it, then settle any
+        // cross-document entry marker before applying one shared content transition.
         const nextStatus = response.authenticated && response.user ? 'authenticated' : 'anonymous';
 
-        if (!isMazeDocument && nextStatus === 'authenticated') {
-          // The route chunk is code-only preloaded after the server has restored
-          // the session. It is not mounted and cannot run page effects pre-auth.
+        if (nextStatus === 'authenticated') {
           try {
             await preloadSiteRoutePage(window.location.pathname);
           } catch (preloadError) {
-            console.warn('[Identity] Could not prefetch the restored Site route:', preloadError);
+            console.warn('[Identity] Could not prefetch the restored route:', preloadError);
           }
         }
-        if (!isMazeDocument && !document.body.classList.contains('page-loading')) {
+        if (!document.body.classList.contains('page-loading')) {
           await waitForDocumentEntryToFinish();
         }
         if (requestVersion !== requestVersionRef.current || controller.signal.aborted) return;
 
-        if (document.body.classList.contains('page-loading') || isMazeDocument || nextStatus === 'anonymous') {
+        if (document.body.classList.contains('page-loading')) {
           commit(nextStatus, response.user);
         } else {
           commitWithContentTransition(nextStatus, response.user);
@@ -283,12 +279,10 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     try {
       await revokeIdentitySession();
       if (requestVersion === requestVersionRef.current) {
-        // The Maze engine has no complete in-place dispose contract yet. Keep its
-        // authenticated UI mounted until WalletConnectButton performs a controlled
-        // document navigation after the wallet teardown has also completed.
-        if (!isMazeDocumentPath(window.location.pathname)) {
-          commitWithContentTransition('anonymous', null);
-        }
+        // Identity and the Maze Engine share the same route lifecycle. The
+        // identity transition hides the authenticated Maze surface; MazePage's
+        // cleanup then disposes its listeners, RAF loop and WebSocket in place.
+        commitWithContentTransition('anonymous', null);
       }
     } catch (logoutError) {
       if (requestVersion !== requestVersionRef.current) return;

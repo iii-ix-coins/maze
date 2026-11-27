@@ -3,8 +3,7 @@ import type {
   AnimationEvent as ReactAnimationEvent,
   ComponentType,
 } from 'react';
-import { getSiteRoutePath, isMazeDocumentPath } from '../../app/routes';
-import { navigateDocument } from '../transition-coordinator';
+import { getSiteRoutePath } from '../../app/routes';
 import { useIdentity } from '../identity/IdentityProvider';
 import { UserAvatar } from '../../components/account/UserAvatar';
 import { runWalletSessionTeardown, WalletSessionTeardownError } from './wallet-session-teardown';
@@ -379,12 +378,6 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
           : undefined,
       });
       if (shouldLogout) loginAttemptRef.current = false;
-      if (shouldLogout && isMazeDocumentPath(window.location.pathname)) {
-        // Server logout and wallet teardown have both completed. Reloading the
-        // independent Maze document is the engine's safe, complete disposal path.
-        await navigateDocument(new URL(window.location.href), { allowMazeUnload: true, replace: true });
-        return;
-      }
       setDisconnectRecoveryRequired(false);
       closeWalletMenu();
       setActionError(null);
@@ -393,19 +386,6 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
 
       if (endError instanceof WalletSessionTeardownError && endError.sessionRevoked) {
         loginAttemptRef.current = false;
-
-        if (isMazeDocumentPath(window.location.pathname)) {
-          // A revoked server session must never leave the authenticated Maze
-          // runtime visible, even when the wallet provider refuses to disconnect.
-          // Reloading this independent document is also the complete engine
-          // disposal boundary; the next document will render the guest gate.
-          setDisconnectRecoveryRequired(snapshotRef.current.isConnected);
-          await navigateDocument(new URL(window.location.href), {
-            allowMazeUnload: true,
-            replace: true,
-          });
-          return;
-        }
 
         if (snapshotRef.current.isConnected) {
           setDisconnectRecoveryRequired(true);
@@ -448,12 +428,6 @@ export function WalletConnectButton({ compactAuthenticated = false }: { compactA
       await logout();
       loginAttemptRef.current = false;
       closeWalletMenu();
-      if (isMazeDocumentPath(window.location.pathname)) {
-        // An external wallet disconnect/account switch has already happened;
-        // leave the old engine document only after the server session is revoked.
-        await navigateDocument(new URL(window.location.href), { allowMazeUnload: true, replace: true });
-        return;
-      }
     } catch (syncError) {
       const detail = getErrorMessage(syncError, 'Please try signing out again.');
       setActionError(reason === 'disconnected'

@@ -34,11 +34,6 @@ export function canSoftNavigateBetween(fromPath: string, toPath: string): boolea
   return isSoftNavigationPath(fromPath) && isSoftNavigationPath(toPath);
 }
 
-export function isMazeDocumentPath(pathname: string): boolean {
-  const normalized = normalizePath(pathname);
-  return resolveSiteRoute(normalized)?.id === 'maze';
-}
-
 export function getSiteRoutePath(routeId: string): string {
   const path = SITE_ROUTES.find((route) => route.id === routeId)?.paths[0];
   if (!path) throw new Error(`Unknown site route: ${routeId}`);

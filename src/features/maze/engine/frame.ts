@@ -7,7 +7,7 @@ export function frame(t) {
     const dt = Math.min(0.05, Math.max(0.001, (t - S.lastT) / 1000));
     S.lastT = t;
     update(dt);
+    document.documentElement.dataset.mazeActiveRun = (!S.isGameOver && !S.spectating) ? 'true' : 'false';
     draw(t);
     drawMini();
-    requestAnimationFrame(frame);
 }

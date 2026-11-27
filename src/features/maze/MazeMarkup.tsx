@@ -9,10 +9,10 @@ import {
  * classes, canvas nodes and controls) is preserved for the independent game
  * engine while React owns creation and teardown of the page structure.
  */
-export function MazeMarkup() {
+export function MazeMarkup({ hidden = false }: { hidden?: boolean }) {
   return (
     <>
-    <div className={"game-container"}>
+    <div className={"game-container"} hidden={hidden}>
       <div className={"game-layout"}>
         <div className={"maze-wrapper"} id={"stage"}>
           <canvas id={"maze"} className={"maze"} aria-label={"Maze game board"} />
@@ -49,7 +49,7 @@ export function MazeMarkup() {
         </aside>
       </div>
     </div>
-    <MazeMenu />
+    <MazeMenu hidden={hidden} />
     </>
   );
 }

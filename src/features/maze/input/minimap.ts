@@ -11,10 +11,10 @@ export function miniTo(e) {
     clampCam(false, true);
 }
 
-export function initMiniMap() {
-miniCanvas.addEventListener('pointerdown', (e) => { S.miniId = e.pointerId; miniCanvas.setPointerCapture(e.pointerId); miniTo(e); });
-miniCanvas.addEventListener('pointermove', (e) => { if (e.pointerId === S.miniId) miniTo(e); });
+export function initMiniMap(signal: AbortSignal) {
+miniCanvas.addEventListener('pointerdown', (e) => { S.miniId = e.pointerId; miniCanvas.setPointerCapture(e.pointerId); miniTo(e); }, { signal });
+miniCanvas.addEventListener('pointermove', (e) => { if (e.pointerId === S.miniId) miniTo(e); }, { signal });
 for (const ev of ['pointerup', 'pointercancel']) {
-    miniCanvas.addEventListener(ev, (e: any) => { if (e.pointerId === S.miniId) S.miniId = null; });
+    miniCanvas.addEventListener(ev, (e: any) => { if (e.pointerId === S.miniId) S.miniId = null; }, { signal });
 }
 }

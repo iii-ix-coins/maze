@@ -105,7 +105,7 @@ function RepeatButton({
   );
 }
 
-export function MazeMenu() {
+export function MazeMenu({ hidden = false }: { hidden?: boolean }) {
   const state = useMazeUi();
   const rootRef = useRef<HTMLElement | null>(null);
   const cancelTabTransitionRef = useRef<(() => void) | null>(null);
@@ -121,7 +121,9 @@ export function MazeMenu() {
   // making the shared content frame visibly collapse and re-enter.
   useEffect(() => {
     const handleEngineReady = () => setEngineReady(true);
+    const handleEngineDisposed = () => setEngineReady(false);
     window.addEventListener('maze:engine-ready', handleEngineReady);
+    window.addEventListener('maze:engine-disposed', handleEngineDisposed);
 
     if (document.documentElement.dataset.mazeEngineReady === 'true') {
       setEngineReady(true);
@@ -129,6 +131,7 @@ export function MazeMenu() {
 
     return () => {
       window.removeEventListener('maze:engine-ready', handleEngineReady);
+      window.removeEventListener('maze:engine-disposed', handleEngineDisposed);
     };
   }, []);
 
@@ -228,6 +231,7 @@ export function MazeMenu() {
       aria-modal="true"
       aria-labelledby="cgTitle"
       aria-hidden={!state.visible}
+      hidden={hidden}
       data-view={state.view}
       data-step={state.step}
       data-level={state.levelIndex}

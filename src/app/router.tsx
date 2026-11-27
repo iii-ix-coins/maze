@@ -34,9 +34,8 @@ export function AppRouter() {
   const { status, isAuthenticated, error, refreshSession } = useIdentity();
   const route = resolveSiteRoute(pathname);
 
-  // The Maze document owns its own persistent frame and scrollbar through the
-  // #maze-root portal. Do not create an empty site route frame (or a second
-  // orphaned RouteScrollbar) for this route.
+  // Maze has a persistent frame alongside the route dispatcher. The frame is
+  // still part of this React root and is activated by the same route snapshot.
   if (route?.id === 'maze') return null;
 
   const Page = route

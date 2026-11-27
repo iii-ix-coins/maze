@@ -113,6 +113,12 @@ class MazeUiStore {
     this.actions = { ...this.actions, ...actions };
   }
 
+  unregisterActions(actions: Record<string, (...args: any[]) => any>) {
+    for (const [name, action] of Object.entries(actions)) {
+      if (this.actions[name] === action) delete this.actions[name];
+    }
+  }
+
   action(name: string, ...args: any[]) {
     return this.actions[name]?.(...args);
   }

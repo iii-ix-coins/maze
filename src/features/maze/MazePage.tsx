@@ -1,66 +1,77 @@
 import './styles/index.css';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { usePageLoading } from '../../components/layout/PageLoadingProvider';
+import { useLocationKey } from '../../app/navigation';
 import { MazeMarkup } from './MazeMarkup';
 
-/** Upper bound for holding the page loader if the engine never reports readiness. */
 const ENGINE_READY_TIMEOUT_MS = 10_000;
 
+type MazePageProps = {
+  active: boolean;
+  authenticated: boolean;
+};
+
 /**
- * Lazy Maze page CONTENT.
- *
- * The persistent content frame (`#mazeApp`, its border, scrollbar, theme and
- * body-mode classes) is owned by the eager `MazeFrame` and is never created or
- * destroyed by this component. This component only renders the static Maze DOM
- * contract (IDs, classes, canvas elements and control nodes) inside that frame
- * and boots the independent game engine after those nodes have committed.
- * Keeping that DOM contract stable is deliberate: the renderer, input handlers,
- * save format and multiplayer protocol are not rewritten.
- *
- * The initial Create / Rooms / Live view comes from `?view=` and is applied by
- * the UI store before the first render, so no tab is clicked programmatically
- * and the content never visibly switches views while booting.
+ * Maze's stable DOM contract plus the route-scoped Engine lifecycle.
+ * The markup is retained after first authenticated activation; only mountMazeEngine/dispose run
+ * as the authenticated Maze route becomes active or inactive.
  */
-export function MazePage() {
+export function MazePage({ active, authenticated }: MazePageProps) {
   const finishPageLoading = usePageLoading();
+  const locationKey = useLocationKey();
+  const wasActive = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!active) return undefined;
+
     let disposed = false;
+    let disposeEngine: (() => void) | null = null;
     let readyTimer: number | undefined;
-    let onEngineReady: (() => void) | undefined;
+    const onEngineReady = () => {
+      if (readyTimer !== undefined) window.clearTimeout(readyTimer);
+      readyTimer = undefined;
+      finishPageLoading();
+    };
 
-    void (async () => {
-      try {
-        // Site chrome, the persistent frame and the complete static Maze UI tree
-        // are mounted by React. The engine starts only after those nodes commit.
-        await import('./engine-entry');
-        if (disposed) return;
+    delete document.body.dataset.mazeBootstrapError;
+    window.addEventListener('maze:engine-ready', onEngineReady);
+    readyTimer = window.setTimeout(() => {
+      readyTimer = undefined;
+      finishPageLoading();
+    }, ENGINE_READY_TIMEOUT_MS);
 
-        // Hold the page loader until the engine has chosen its first menu/game
-        // state, so the content is revealed once, already in its final state.
-        if (document.documentElement.dataset.mazeEngineReady !== 'true') {
-          await new Promise<void>((resolve) => {
-            onEngineReady = () => resolve();
-            window.addEventListener('maze:engine-ready', onEngineReady, { once: true });
-            readyTimer = window.setTimeout(resolve, ENGINE_READY_TIMEOUT_MS);
-          });
-          if (disposed) return;
-        }
-
-        finishPageLoading();
-      } catch (error) {
-        console.error('[Maze] React/Vite bootstrap failed:', error);
-        document.body.dataset.mazeBootstrapError = 'true';
-        finishPageLoading();
-      }
-    })();
+    void import('./engine-entry').then(({ mountMazeEngine }) => {
+      if (disposed) return;
+      disposeEngine = mountMazeEngine();
+      if (document.documentElement.dataset.mazeEngineReady === 'true') onEngineReady();
+    }).catch((bootstrapError) => {
+      if (disposed) return;
+      console.error('[Maze] Engine mount failed:', bootstrapError);
+      document.body.dataset.mazeBootstrapError = 'true';
+      finishPageLoading();
+    });
 
     return () => {
       disposed = true;
       if (readyTimer !== undefined) window.clearTimeout(readyTimer);
-      if (onEngineReady) window.removeEventListener('maze:engine-ready', onEngineReady);
+      window.removeEventListener('maze:engine-ready', onEngineReady);
+      disposeEngine?.();
     };
-  }, [finishPageLoading]);
+  }, [active, finishPageLoading]);
 
-  return <MazeMarkup />;
+  // Query-only navigation does not change the route component identity. Apply
+  // updated view/invite parameters to the already-mounted runtime without
+  // remounting the Engine or replacing its DOM contract.
+  useEffect(() => {
+    const justActivated = active && !wasActive.current;
+    wasActive.current = active;
+    if (!active || justActivated) return;
+    void import('./engine-entry').then(({ syncMazeRouteLocation }) => {
+      syncMazeRouteLocation();
+    }).catch((error) => {
+      console.warn('[Maze] Could not apply route query state:', error);
+    });
+  }, [active, locationKey]);
+
+  return <MazeMarkup hidden={!authenticated} />;
 }

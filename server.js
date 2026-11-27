@@ -180,13 +180,10 @@ function getConfiguredDocumentPaths(serverRole) {
     }
     return route.paths;
 }
-const MAZE_DOCUMENT_PATHS = getConfiguredDocumentPaths('maze');
 const HOME_DOCUMENT_PATH = getConfiguredDocumentPaths('root')[0];
 
-// Both `/` and `/maze.html` are routes in the same root React/Vite application.
-// The old standalone documents remain available only as explicit rollback URLs.
-app.get(MAZE_DOCUMENT_PATHS, (req, res) => sendSiteDocument(req, res, LEGACY_MAZE_INDEX));
-
+// Maze paths are part of SPA_ROUTE_PATHS and resolve to the exact same React
+// document as the rest of the site. The old standalone HTML remains an explicit rollback URL.
 app.get('/maze-legacy.html', (req, res) => res.sendFile(LEGACY_MAZE_INDEX));
 
 // Public assets retain their old stable URLs (/css, /js and /maze-assets).
@@ -506,6 +503,8 @@ app.get(
 // Client routes must resolve to the shared Vite document on direct visits and refreshes.
 app.get(SPA_ROUTE_PATHS, (req, res, next) => {
     if (fs.existsSync(SITE_DIST_INDEX)) return sendSiteDocument(req, res, SITE_DIST_INDEX);
+    const route = SITE_ROUTE_CONFIG.find((entry) => entry.server === 'spa' && entry.paths.includes(req.path));
+    if (route?.id === 'maze') return res.sendFile(LEGACY_MAZE_INDEX);
     return next();
 });
 

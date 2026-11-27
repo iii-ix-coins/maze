@@ -12,12 +12,22 @@ import { mazeUiStore } from '../react/maze-ui-store';
 const LOBBY_VIEWS = new Set(['create', 'rooms', 'live']);
 const MAX_PEEK_CACHE = 24;
 
-function frameThrottle<T extends (...args: any[]) => void>(fn: T): T {
+function frameThrottle<T extends (...args: any[]) => void>(fn: T, signal: AbortSignal): T {
   let queued = false;
+  let frameId = 0;
+  signal.addEventListener('abort', () => {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = 0;
+    queued = false;
+  }, { once: true });
   return ((...args: any[]) => {
-    if (queued) return;
+    if (queued || signal.aborted) return;
     queued = true;
-    requestAnimationFrame(() => { queued = false; fn(...args); });
+    frameId = requestAnimationFrame(() => {
+      frameId = 0;
+      queued = false;
+      if (!signal.aborted) fn(...args);
+    });
   }) as T;
 }
 
@@ -40,6 +50,10 @@ export class LobbyHub {
   frameCache = new Map<string, any>();
   busyTimers = new Map<string, ReturnType<typeof setTimeout>>();
   noticeTimer: ReturnType<typeof setTimeout> | 0 = 0;
+  copyTimer: ReturnType<typeof setTimeout> | 0 = 0;
+  private unsubscribeStore: (() => void) | null = null;
+  private registeredActions: Record<string, (...args: any[]) => any> = {};
+  private mounted = false;
 
   constructor({ client, shell, getServerUrl, retryConnection }: any) {
     this.client = client;
@@ -48,12 +62,17 @@ export class LobbyHub {
     this.retryConnection = retryConnection;
     this.store = new LobbyStore();
 
-    const publish = frameThrottle(() => this.refreshAll());
-    this.store.subscribe(() => publish());
-    shell.onViewChange = (view: string, previous: string) => this.viewChanged(view, previous);
-    shell.onVisibility = (visible: boolean) => this.visibilityChanged(visible);
+  }
 
-    mazeUiStore.registerActions({
+  mount(signal: AbortSignal) {
+    if (this.mounted || signal.aborted) return;
+    this.mounted = true;
+    const publish = frameThrottle(() => this.refreshAll(), signal);
+    this.unsubscribeStore = this.store.subscribe(() => publish());
+    this.shell.onViewChange = (view: string, previous: string) => this.viewChanged(view, previous);
+    this.shell.onVisibility = (visible: boolean) => this.visibilityChanged(visible);
+
+    this.registeredActions = {
       joinRoom: (room: any) => this.joinRoom(room),
       joinCode: (code: string) => this.joinCode(code),
       watchRoom: (room: any) => this.watchRoom(room),
@@ -66,7 +85,36 @@ export class LobbyHub {
       requestPeeks: (ids: string[]) => this.requestPeeks(ids),
       roomNoticeAction: (key: string) => this.roomNoticeAction(key),
       toastAction: (key: string) => this.toastAction(key),
-    });
+    };
+    mazeUiStore.registerActions(this.registeredActions);
+    signal.addEventListener('abort', () => this.dispose(), { once: true });
+  }
+
+  dispose() {
+    if (!this.mounted) return;
+    this.mounted = false;
+    this.unsubscribeStore?.();
+    this.unsubscribeStore = null;
+    this.shell.onViewChange = () => undefined;
+    this.shell.onVisibility = () => undefined;
+    mazeUiStore.unregisterActions(this.registeredActions);
+    this.registeredActions = {};
+
+    if (this.tickTimer) clearInterval(this.tickTimer);
+    this.tickTimer = 0;
+    if (this.noticeTimer) clearTimeout(this.noticeTimer);
+    this.noticeTimer = 0;
+    if (this.copyTimer) clearTimeout(this.copyTimer);
+    this.copyTimer = 0;
+    for (const timer of this.busyTimers.values()) clearTimeout(timer);
+    this.busyTimers.clear();
+    this.phase = 'idle';
+    this.pending = '';
+    this.watching = false;
+    this.peekedIds = [];
+    // Busy/copy indicators are mount-scoped UI state, unlike room data and
+    // peek caches. Clear their transient flags without resetting the store.
+    mazeUiStore.patch({ busyRoomIds: [], copied: false });
   }
 
   get online() { return this.network === 'online'; }
@@ -339,7 +387,11 @@ export class LobbyHub {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
       await navigator.clipboard.writeText(link);
       mazeUiStore.patch({ copied: true });
-      window.setTimeout(() => mazeUiStore.patch({ copied: false }), 1800);
+      if (this.copyTimer) window.clearTimeout(this.copyTimer);
+      this.copyTimer = window.setTimeout(() => {
+        this.copyTimer = 0;
+        mazeUiStore.patch({ copied: false });
+      }, 1800);
     } catch {
       mazeUiStore.showToast('Copy is not available here. Select the room code to copy it.', { tone: 'warn' });
     }

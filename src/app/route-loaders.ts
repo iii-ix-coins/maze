@@ -31,6 +31,13 @@ export function loadMazeHubPage() {
   });
 }
 
+export function loadMazePage() {
+  return import('../features/maze/MazePage').then((module) => {
+    loadedRoutePages.add('maze');
+    return { default: module.MazePage };
+  });
+}
+
 export function loadProfilePage() {
   return import('../features/profile/ProfilePage').then((module) => {
     loadedRoutePages.add('profile');
@@ -50,6 +57,7 @@ export async function preloadSiteRoutePage(pathname: string): Promise<void> {
     case 'home': await loadHomePage(); break;
     case 'explore': await loadExplorePage(); break;
     case 'maze-hub': await loadMazeHubPage(); break;
+    case 'maze': await loadMazePage(); break;
     case 'profile': await loadProfilePage(); break;
     default: break;
   }

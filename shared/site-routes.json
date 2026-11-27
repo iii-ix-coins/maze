@@ -41,8 +41,8 @@
       ],
       "title": "Maze · Hollld",
       "page": "maze",
-      "soft": false,
-      "server": "maze",
+      "soft": true,
+      "server": "spa",
       "navKey": "maze"
     },
     {

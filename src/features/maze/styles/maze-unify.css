@@ -13,6 +13,15 @@
     background: transparent;
 }
 
+/* Park the persistent Maze DOM outside its active route without allowing
+   author-level menu/game display rules to override the native hidden attribute. */
+#mazeApp[hidden],
+#mazeApp > [hidden],
+#mazeApp > .game-container[hidden],
+#mazeApp > #createGame[hidden] {
+    display: none !important;
+}
+
 /* The absolute inner content surface is the sole vertical scroller for all menu views. */
 #mazeApp.maze-app.in-menu > #createGame.cg {
     position: absolute;

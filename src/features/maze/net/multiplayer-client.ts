@@ -14,6 +14,7 @@ export class MazeMultiplayerClient {
     declare onStatus: (...args: any[]) => any;
     declare url: string;
     declare socket: any;
+    declare socketController: AbortController | null;
     declare pendingAction: any;
     declare lobbyWanted: boolean;
     declare protocol: number;
@@ -27,6 +28,7 @@ export class MazeMultiplayerClient {
         this.onStatus = onStatus;
         this.url = '';
         this.socket = null;
+        this.socketController = null;
         /** Built lazily once the server has said which protocol it speaks: (protocol) => payload. */
         this.pendingAction = null;
         this.lobbyWanted = true;
@@ -67,11 +69,14 @@ export class MazeMultiplayerClient {
             return false;
         }
         this.socket = socket;
+        const socketController = new AbortController();
+        this.socketController = socketController;
+        const { signal } = socketController;
         socket.addEventListener('open', () => {
             if (this.socket !== socket) return;
             this.attempts = 0;
             this.onStatus('online', 'Online lobby');
-        });
+        }, { signal });
         socket.addEventListener('message', event => {
             if (this.socket !== socket) return;
             let data;
@@ -81,17 +86,19 @@ export class MazeMultiplayerClient {
             // A bug in a handler must stay visible instead of silently dropping the message.
             try { this.onMessage(data); }
             catch (error) { console.error('Multiplayer message handler failed:', error); }
-        });
+        }, { signal });
         socket.addEventListener('error', () => {
             if (this.socket === socket) this.onStatus('offline', 'Server unavailable');
-        });
+        }, { signal });
         socket.addEventListener('close', () => {
             if (this.socket !== socket) return;
             this.socket = null;
+            if (this.socketController === socketController) this.socketController = null;
+            socketController.abort();
             this.protocol = 0;
             this.onStatus('offline', this.keepAlive ? 'Offline · retrying…' : 'Offline · check server');
             this.scheduleReconnect();
-        });
+        }, { signal });
         return true;
     }
     /** The server's greeting tells us which protocol to speak; only then is queued work sent. */
@@ -191,6 +198,8 @@ export class MazeMultiplayerClient {
         this.protocol = 0;
         const current = this.socket;
         this.socket = null;
+        this.socketController?.abort();
+        this.socketController = null;
         if (current) {
             current.onclose = null;
             try { current.close(); } catch (_) { }

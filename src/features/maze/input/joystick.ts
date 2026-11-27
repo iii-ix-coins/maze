@@ -32,17 +32,17 @@ export function placePad() {
     padWrap.style.top = PAD_M + S.padPos.y * f.h + 'px';
 }
 
-export function initJoystick() {
+export function initJoystick(signal: AbortSignal) {
 padEl.addEventListener('pointerdown', (e) => {
     S.padId = e.pointerId;
     padEl.setPointerCapture(e.pointerId);
     padEl.classList.add('dragging');
     padWrap.classList.add('active');
     padPoint(e);
-});
-padEl.addEventListener('pointermove', (e) => { if (e.pointerId === S.padId) padPoint(e); });
+}, { signal });
+padEl.addEventListener('pointermove', (e) => { if (e.pointerId === S.padId) padPoint(e); }, { signal });
 for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-    padEl.addEventListener(ev, (e: any) => { if (e.pointerId === S.padId) padReset(); });
+    padEl.addEventListener(ev, (e: any) => { if (e.pointerId === S.padId) padReset(); }, { signal });
 }
 try {
     const s = JSON.parse(localStorage.getItem('mazePadPos'));
@@ -55,14 +55,14 @@ padGrip.addEventListener('pointerdown', (e) => {
     S.gripOffX = e.clientX - r.left; S.gripOffY = e.clientY - r.top;
     padWrap.classList.add('active');
     e.preventDefault();
-});
+}, { signal });
 padGrip.addEventListener('pointermove', (e) => {
     if (e.pointerId !== S.gripId) return;
     const s = stage.getBoundingClientRect(), f = padFree();
     S.padPos.x = clamp((e.clientX - s.left - S.gripOffX - PAD_M) / f.w, 0, 1);
     S.padPos.y = clamp((e.clientY - s.top - S.gripOffY - PAD_M) / f.h, 0, 1);
     placePad();
-});
+}, { signal });
 for (const ev of ['pointerup', 'pointercancel']) {
     padGrip.addEventListener(ev, (e: any) => {
         if (e.pointerId !== S.gripId) return;
@@ -75,6 +75,6 @@ for (const ev of ['pointerup', 'pointercancel']) {
         else if (m === 2) S.padPos.y = 0; else S.padPos.y = 1;
         placePad();
         try { localStorage.setItem('mazePadPos', JSON.stringify(S.padPos)); } catch (_) { }
-    });
+    }, { signal });
 }
 }

@@ -11,6 +11,7 @@ import { bfs, fitLayout, applyMazeSize } from './layout';
 import { syncRoleUi, setConfirm } from './session';
 import { buildWalls, buildMini } from './render';
 import { padReset } from '../input/joystick';
+import { scheduleEngineTimeout } from './runtime-timers';
 export function movePlayer(d) {
     if (S.isGameOver || S.pausedAt !== null || S.spectating) return;
     if (S.multiplayerSession) {
@@ -58,7 +59,7 @@ export function checkGoal() {
     showMazeResult('🏆 You Win', stats);
     if (!reduceMotion) {
         burst(S.player, 90);
-        setTimeout(() => burst(S.player, 90), 320);
+        scheduleEngineTimeout(() => burst(S.player, 90), 320);
     }
     cam.follow = true;
     cam.anchor = null;

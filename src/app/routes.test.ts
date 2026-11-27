@@ -4,7 +4,6 @@ import {
   SITE_ROUTES,
   SOFT_NAVIGATION_PATHS,
   canSoftNavigateBetween,
-  isMazeDocumentPath,
   normalizePath,
   resolveSiteRoute,
   getSiteRoutePathByNavKey,
@@ -37,22 +36,19 @@ describe('shared site route manifest', () => {
     expect(getSiteRoutePathByNavKey('profile')).toBe('/profile');
   });
 
-  it('keeps maze navigation as a document navigation, not a soft navigation', () => {
+  it('registers Maze as a soft route in the shared SPA document', () => {
     expect(CLIENT_ROUTE_PATHS.has('/maze.html')).toBe(true);
     expect(CLIENT_ROUTE_PATHS.has('/play')).toBe(true);
     expect(resolveSiteRoute('/play')?.id).toBe('maze');
-    expect(isMazeDocumentPath('/play')).toBe(true);
-    expect(isMazeDocumentPath('/market')).toBe(false);
-    expect(isMazeDocumentPath('/maze')).toBe(false);
-    expect(SOFT_NAVIGATION_PATHS.has('/maze.html')).toBe(false);
+    expect(SOFT_NAVIGATION_PATHS.has('/maze.html')).toBe(true);
     expect(SOFT_NAVIGATION_PATHS.has('/profile')).toBe(true);
   });
 
-  it('keeps the standalone Maze document outside SPA transitions in both directions', () => {
+  it('allows all registered site routes to share same-document transitions', () => {
     expect(canSoftNavigateBetween('/', '/profile')).toBe(true);
-    expect(canSoftNavigateBetween('/maze.html', '/')).toBe(false);
-    expect(canSoftNavigateBetween('/play', '/explore')).toBe(false);
-    expect(canSoftNavigateBetween('/profile', '/maze.html')).toBe(false);
+    expect(canSoftNavigateBetween('/maze.html', '/')).toBe(true);
+    expect(canSoftNavigateBetween('/play', '/explore')).toBe(true);
+    expect(canSoftNavigateBetween('/profile', '/maze.html')).toBe(true);
     expect(canSoftNavigateBetween('/maze', '/profile')).toBe(true);
   });
 
