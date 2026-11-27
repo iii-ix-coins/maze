@@ -1732,18 +1732,18 @@ html[data-theme="grass"] .nav {
     box-shadow: none;
     transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, filter 180ms ease;
 
-    clip-path: polygon(0 0,
-            calc(100% - var(--site-frame-cut)) 0,
-            100% var(--site-frame-cut),
-            100% 100%,
-            var(--site-frame-cut) 100%,
-            0 calc(100% - var(--site-frame-cut)));
-    -webkit-clip-path: polygon(0 0,
-            calc(100% - var(--site-frame-cut)) 0,
-            100% var(--site-frame-cut),
-            100% 100%,
-            var(--site-frame-cut) 100%,
-            0 calc(100% - var(--site-frame-cut)));
+    clip-path: polygon(var(--site-frame-cut) 0,
+            100% 0,
+            100% calc(100% - var(--site-frame-cut)),
+            calc(100% - var(--site-frame-cut)) 100%,
+            0 100%,
+            0 var(--site-frame-cut));
+    -webkit-clip-path: polygon(var(--site-frame-cut) 0,
+            100% 0,
+            100% calc(100% - var(--site-frame-cut)),
+            calc(100% - var(--site-frame-cut)) 100%,
+            0 100%,
+            0 var(--site-frame-cut));
 }
 
 .nav-wallet-button.is-primary>span,
