@@ -1720,30 +1720,30 @@ html[data-theme="grass"] .nav {
 /* Primary CTA variant is shared by every route, including the access gate. */
 .nav-wallet-button.is-primary {
     width: 100%;
-    min-height: 39px;
+    min-height: 33px;
     height: auto;
-    padding: 12px 18px;
+    padding: 6px 9px;
     border: 0;
     background: var(--ar-accent-2);
     color: var(--ar-on-accent);
     font: inherit;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     box-shadow: none;
     transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, filter 180ms ease;
 
     clip-path: polygon(0 0,
-            calc(100% - var(--site-scrollbar-cut)) 0,
-            100% var(--site-scrollbar-cut),
+            calc(100% - var(--site-frame-cut)) 0,
+            100% var(--site-frame-cut),
             100% 100%,
-            var(--site-scrollbar-cut) 100%,
-            0 calc(100% - var(--site-scrollbar-cut)));
+            var(--site-frame-cut) 100%,
+            0 calc(100% - var(--site-frame-cut)));
     -webkit-clip-path: polygon(0 0,
-            calc(100% - var(--site-scrollbar-cut)) 0,
-            100% var(--site-scrollbar-cut),
+            calc(100% - var(--site-frame-cut)) 0,
+            100% var(--site-frame-cut),
             100% 100%,
-            var(--site-scrollbar-cut) 100%,
-            0 calc(100% - var(--site-scrollbar-cut)));
+            var(--site-frame-cut) 100%,
+            0 calc(100% - var(--site-frame-cut)));
 }
 
 .nav-wallet-button.is-primary>span,
@@ -1752,15 +1752,12 @@ html[data-theme="grass"] .nav {
 }
 
 .nav-wallet-button.is-primary:hover:not(:disabled) {
-    border-color: var(--ar-accent-2);
-    background: var(--ar-accent-2);
+    background: var(--ar-accent);
     filter: none;
-    transform: translateY(-1px);
 }
 
 .nav-wallet-button.is-primary:focus-visible {
-    outline: 2px solid var(--ar-accent-2);
-    outline-offset: 3px;
+    outline: 2px solid var(--ar-accent);
 }
 
 .nav-wallet-button.is-primary:disabled {
