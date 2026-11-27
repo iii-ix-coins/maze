@@ -5,8 +5,15 @@ import {
     resolveSiteRoute,
     canSoftNavigateBetween,
 } from './routes';
-import { prefersReducedMotion, startScopedViewTransition, supportsScopedViewTransitions } from '../platform/scoped-view-transition';
-import { isRoutePageLoaded } from './route-loaders';
+import {
+    animatePendingDocumentEntry,
+    consumePendingDocumentEntry,
+    navigateDocument,
+    prefersReducedMotion,
+    startContentViewTransition,
+    supportsSameDocumentViewTransitions,
+} from '../platform/transition-coordinator';
+import { isRoutePageLoaded, preloadSiteRoutePage } from './route-loaders';
 
 export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
@@ -39,8 +46,10 @@ function resetRouteScroll() {
     if (pageScroller) pageScroller.scrollTop = 0;
 }
 
-export function playPageEnter(): Promise<void> {
-    return Promise.resolve();
+export async function playPageEnter(): Promise<void> {
+    // Only cross-document fallbacks need a JS entrance; native View Transitions
+    // already animate the named content surface. The marker is consumed once.
+    if (consumePendingDocumentEntry()) await animatePendingDocumentEntry();
 }
 
 const ROUTE_EXIT_DURATION_MS = 130;
@@ -66,19 +75,19 @@ function swapTo(url: URL, push: boolean): void {
 
     const destinationPage = resolveSiteRoute(url.pathname)?.page ?? '';
     const destinationIsReady = isRoutePageLoaded(destinationPage);
-    const canCaptureDestination = supportsScopedViewTransitions() && destinationIsReady;
+    const canCaptureDestination = destinationIsReady;
 
-    // A native transition is used only when the destination lazy chunk has
-    // already resolved. On a first visit, React Suspense would otherwise
-    // capture an empty frame; use the CSS fallback for that one navigation.
-    if (canCaptureDestination && startScopedViewTransition(() => applyRouteSwap(url, push))) return;
+    // The coordinator uses native View Transitions where available and WAAPI
+    // otherwise, but only after the destination lazy chunk has resolved. On a
+    // first visit, React Suspense could otherwise capture an empty frame.
+    if (canCaptureDestination && startContentViewTransition(() => applyRouteSwap(url, push))) return;
 
     // The CSS fallback gives the current surface a short exit before React
     // replaces it. For browsers with View Transitions, mark the destination
     // so its entrance still runs after a first-visit lazy chunk resolves.
     const hasRouteSurface = Boolean(document.querySelector('.route-page > .feature-page-shell'));
     if (!prefersReducedMotion() && hasRouteSurface) {
-        if (supportsScopedViewTransitions()) {
+        if (supportsSameDocumentViewTransitions()) {
             document.documentElement.dataset.siteRouteFallback = 'true';
         }
         document.documentElement.dataset.siteRouteExiting = 'true';
@@ -104,7 +113,12 @@ export function navigateTo(href: string) {
     // either direction must be a document navigation so its engine lifecycle
     // and body-level frame mode cannot leak into ordinary site routes.
     if (!canSoftNavigateBetween(window.location.pathname, url.pathname)) {
-        window.location.assign(url.href);
+        // Warm a Site route chunk while the Maze content exits. This is code-only
+        // preloading: the destination React page is not mounted in the Maze runtime.
+        if (resolveSiteRoute(url.pathname)?.id !== 'maze') {
+            void preloadSiteRoutePage(url.pathname).catch(() => undefined);
+        }
+        void navigateDocument(url);
         return;
     }
     swapTo(url, true);

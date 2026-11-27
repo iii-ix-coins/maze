@@ -8,7 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { getSiteRoutePath } from '../../app/routes';
+import { flushSync } from 'react-dom';
+import { getSiteRoutePath, isMazeDocumentPath } from '../../app/routes';
+import { preloadSiteRoutePage } from '../../app/route-loaders';
+import { startContentViewTransition, waitForDocumentEntryToFinish } from '../transition-coordinator';
 import { navigateTo } from '../../app/navigation';
 import { ApiError } from '../../services/api/http';
 import {
@@ -65,12 +68,19 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     setUser(nextUser);
   }, []);
 
+  const commitWithContentTransition = useCallback((nextStatus: IdentityStatus, nextUser: IdentityUser | null) => {
+    const transitioned = startContentViewTransition(() => {
+      flushSync(() => commit(nextStatus, nextUser));
+    });
+    if (!transitioned) commit(nextStatus, nextUser);
+  }, [commit]);
+
   const refreshSession = useCallback(async () => {
     const requestVersion = ++requestVersionRef.current;
     try {
       const response = await getIdentitySession();
       if (requestVersion !== requestVersionRef.current) return;
-      commit(response.authenticated && response.user ? 'authenticated' : 'anonymous', response.user);
+      commitWithContentTransition(response.authenticated && response.user ? 'authenticated' : 'anonymous', response.user);
       setError(null);
     } catch (refreshError) {
       if (requestVersion !== requestVersionRef.current) return;
@@ -79,17 +89,43 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       setError(message);
       throw new Error(message, { cause: refreshError });
     }
-  }, [commit]);
+  }, [commitWithContentTransition]);
 
   useEffect(() => {
     mountedRef.current = true;
     const controller = new AbortController();
     const requestVersion = requestVersionRef.current;
     getIdentitySession(controller.signal)
-      .then((response) => {
+      .then(async (response) => {
         // A user action (login/logout/manual refresh) supersedes the initial session read.
         if (requestVersion !== requestVersionRef.current) return;
-        commit(response.authenticated && response.user ? 'authenticated' : 'anonymous', response.user);
+
+        // For Site documents, let the one-shot cross-document entry settle before
+        // replacing the guest Gate with an authenticated page. Maze is different:
+        // it must publish authenticated state first so MazeFrame can reveal Boot,
+        // then it waits before the engine-ready hand-off.
+        const isMazeDocument = isMazeDocumentPath(window.location.pathname);
+        const nextStatus = response.authenticated && response.user ? 'authenticated' : 'anonymous';
+
+        if (!isMazeDocument && nextStatus === 'authenticated') {
+          // The route chunk is code-only preloaded after the server has restored
+          // the session. It is not mounted and cannot run page effects pre-auth.
+          try {
+            await preloadSiteRoutePage(window.location.pathname);
+          } catch (preloadError) {
+            console.warn('[Identity] Could not prefetch the restored Site route:', preloadError);
+          }
+        }
+        if (!isMazeDocument && !document.body.classList.contains('page-loading')) {
+          await waitForDocumentEntryToFinish();
+        }
+        if (requestVersion !== requestVersionRef.current || controller.signal.aborted) return;
+
+        if (document.body.classList.contains('page-loading') || isMazeDocument || nextStatus === 'anonymous') {
+          commit(nextStatus, response.user);
+        } else {
+          commitWithContentTransition(nextStatus, response.user);
+        }
       })
       .catch((loadError: unknown) => {
         if (isAbortError(loadError) || requestVersion !== requestVersionRef.current) return;
@@ -101,7 +137,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       mountedRef.current = false;
       controller.abort();
     };
-  }, [commit]);
+  }, [commit, commitWithContentTransition]);
 
   const login = useCallback(async ({ walletAddress, signIn, signMessage, isWalletConnected }: LoginInput) => {
     if (loginInFlightRef.current) throw new Error('A sign-in request is already in progress.');
@@ -120,6 +156,11 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`
       || getSiteRoutePath('profile');
     const requestVersion = ++requestVersionRef.current;
+    // Download only the destination UI chunk after the visitor explicitly starts
+    // sign-in. It is not mounted and cannot run page effects while the user is a guest.
+    const destinationReady = preloadSiteRoutePage(returnTo).catch((preloadError) => {
+      console.warn('[Identity] Could not prefetch the destination page:', preloadError);
+    });
     commit('authenticating', null);
     setError(null);
 
@@ -202,7 +243,10 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
           : 'The wallet disconnected before sign-in completed. Please connect again.');
       }
 
-      commit('authenticated', result.user);
+      // Finish the optional route prefetch before swapping the gated surface.
+      // A failed prefetch must not invalidate a server-verified identity session.
+      await destinationReady;
+      commitWithContentTransition('authenticated', result.user);
       navigateTo(returnTo);
       return result.user;
     } catch (loginError) {
@@ -216,21 +260,28 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     } finally {
       loginInFlightRef.current = false;
     }
-  }, [commit]);
+  }, [commit, commitWithContentTransition]);
 
   const logout = useCallback(async () => {
     const requestVersion = ++requestVersionRef.current;
     setError(null);
     try {
       await revokeIdentitySession();
-      if (requestVersion === requestVersionRef.current) commit('anonymous', null);
+      if (requestVersion === requestVersionRef.current) {
+        // The Maze engine has no complete in-place dispose contract yet. Keep its
+        // authenticated UI mounted until WalletConnectButton performs a controlled
+        // document navigation after the wallet teardown has also completed.
+        if (!isMazeDocumentPath(window.location.pathname)) {
+          commitWithContentTransition('anonymous', null);
+        }
+      }
     } catch (logoutError) {
       if (requestVersion !== requestVersionRef.current) return;
       const message = getErrorMessage(logoutError, 'Could not sign out. Please try again.');
       setError(message);
       throw new Error(message, { cause: logoutError });
     }
-  }, [commit]);
+  }, [commitWithContentTransition]);
 
   const updateProfile = useCallback(async (input: UpdateProfileInput) => {
     if (stateRef.current.status !== 'authenticated' || !stateRef.current.user) {
@@ -245,11 +296,11 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       return response.user;
     } catch (profileError) {
       if (requestVersion === requestVersionRef.current && profileError instanceof ApiError && profileError.status === 401) {
-        commit('anonymous', null);
+        commitWithContentTransition('anonymous', null);
       }
       throw profileError;
     }
-  }, [commit]);
+  }, [commit, commitWithContentTransition]);
 
   const clearError = useCallback(() => setError(null), []);
 

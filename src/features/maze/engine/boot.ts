@@ -18,6 +18,9 @@ export function initButtons() {
 
 export function initWindowEvents() {
     window.addEventListener('beforeunload', (e) => {
+        // Only a completed, explicit logout may bypass the unfinished-run guard.
+        // Ordinary navigation away from an active game keeps the original warning.
+        if (document.documentElement.dataset.mazeAllowUnload === 'true') return;
         if (!S.isGameOver) { e.preventDefault(); e.returnValue = ''; }
     });
     window.addEventListener('resize', () => {

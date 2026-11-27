@@ -1,3 +1,5 @@
+import { startThemeViewTransition } from '../../platform/transition-coordinator';
+
 export const SITE_THEMES = ['grass', 'dark', 'light'] as const;
 
 export type SiteTheme = (typeof SITE_THEMES)[number];
@@ -19,12 +21,8 @@ export function applySiteTheme(theme: string, persist = true): SiteTheme {
     document.documentElement.dataset.theme = selectedTheme;
     window.dispatchEvent(new CustomEvent('site:themechange', { detail: { theme: selectedTheme } }));
   };
-  const startTransition = (document as Document & { startViewTransition?: (callback: () => void) => unknown }).startViewTransition;
-  if (typeof startTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    startTransition.call(document, updateDocument);
-  } else {
-    updateDocument();
-  }
+  const transitioned = startThemeViewTransition(updateDocument);
+  if (!transitioned) updateDocument();
 
   if (persist) {
     try {

@@ -40,7 +40,7 @@
 
 ## فایل‌های تغییرکرده
 
-- `src/platform/scoped-view-transition.ts` (جدید)
+- `src/platform/transition-coordinator.ts` (جدید)
 - `src/app/navigation.ts`
 - `src/app/router.tsx`
 - `src/app/route-loaders.ts` (جدید)

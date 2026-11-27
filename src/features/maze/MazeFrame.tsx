@@ -1,7 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { RouteScrollbar } from '../../components/layout/RouteScrollbar';
+import { usePageLoading } from '../../components/layout/PageLoadingProvider';
 import { PageAccessGate, type AccessPreviewPage } from '../../components/access/PageAccessGate';
 import { useIdentity } from '../../platform/identity/IdentityProvider';
+import { startContentViewTransition, waitForDocumentEntryToFinish } from '../../platform/transition-coordinator';
 
 const SITE_THEMES = ['grass', 'dark', 'light'];
 const BODY_MODE_CLASSES = ['in-menu', 'wide', 'spectating'] as const;
@@ -30,14 +33,43 @@ function getRequestedMazePreview(): AccessPreviewPage {
 
 export function MazeFrame({ children }: { children: ReactNode }) {
   const { status, isAuthenticated, error, refreshSession } = useIdentity();
+  const finishPageLoading = usePageLoading();
   const [engineReady, setEngineReady] = useState(() => document.documentElement.dataset.mazeEngineReady === 'true');
   const frameRef = useRef<HTMLElement | null>(null);
 
+  // Reveal the verified boot surface as soon as the authenticated frame is
+  // committed. The engine continues loading behind this stable surface; the
+  // engine-ready event then performs the second, scoped content transition.
   useEffect(() => {
-    const handleEngineReady = () => setEngineReady(true);
-    window.addEventListener('maze:engine-ready', handleEngineReady);
+    if (!isAuthenticated || engineReady) return undefined;
+    let firstFrame = 0;
+    let secondFrame = 0;
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(finishPageLoading);
+    });
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+    };
+  }, [isAuthenticated, engineReady, finishPageLoading]);
+
+  useEffect(() => {
+    const revealEngineContent = () => {
+      void (async () => {
+        // Do not start a second animation while the cross-document entry is
+        // revealing the Boot surface. Once it settles, Boot -> Maze gets one
+        // named, same-document transition.
+        await waitForDocumentEntryToFinish();
+        if (!frameRef.current?.isConnected) return;
+        const transitioned = startContentViewTransition(() => {
+          flushSync(() => setEngineReady(true));
+        });
+        if (!transitioned) setEngineReady(true);
+      })();
+    };
+    window.addEventListener('maze:engine-ready', revealEngineContent);
     if (document.documentElement.dataset.mazeEngineReady === 'true') setEngineReady(true);
-    return () => window.removeEventListener('maze:engine-ready', handleEngineReady);
+    return () => window.removeEventListener('maze:engine-ready', revealEngineContent);
   }, []);
 
   // Layout effect: theme and mode classes are applied before the browser paints,

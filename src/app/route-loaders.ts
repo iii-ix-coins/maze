@@ -37,3 +37,20 @@ export function loadProfilePage() {
     return { default: module.ProfilePage };
   });
 }
+
+/**
+ * Preload the requested Site route after the visitor explicitly begins sign-in.
+ * This does not mount the page or run its effects; it prevents a verified login
+ * from switching to an empty Suspense frame while the destination chunk downloads.
+ */
+export async function preloadSiteRoutePage(pathname: string): Promise<void> {
+  const { resolveSiteRoute } = await import('./routes');
+  const route = resolveSiteRoute(pathname);
+  switch (route?.page) {
+    case 'home': await loadHomePage(); break;
+    case 'explore': await loadExplorePage(); break;
+    case 'maze-hub': await loadMazeHubPage(); break;
+    case 'profile': await loadProfilePage(); break;
+    default: break;
+  }
+}

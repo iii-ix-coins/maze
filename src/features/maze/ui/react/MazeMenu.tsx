@@ -9,7 +9,7 @@ import {
 import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { DIFFICULTIES } from '@maze/shared';
 import { createGame } from '../create-game/create-game';
-import { prefersReducedMotion, startScopedViewTransition } from '../../../../platform/scoped-view-transition';
+import { prefersReducedMotion, startMazeMenuViewTransition } from '../../../../platform/transition-coordinator';
 import { MazeStage } from '../create-game/maze-stage';
 import { iconUrl, STEP_ICONS } from '../create-game/icons';
 import { LiveThumb } from '../lobby/live-thumb';
@@ -172,7 +172,7 @@ export function MazeMenu() {
         update();
         return;
       }
-      if (startScopedViewTransition(update)) return;
+      if (startMazeMenuViewTransition(update)) return;
       if (prefersReducedMotion()) {
         update();
         return;

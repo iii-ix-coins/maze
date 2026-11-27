@@ -454,6 +454,15 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 }
 
 /* The inner page is the only vertical scroll container; the outer frame stays fixed. */
+/* Both Site and Maze expose the same transition identity for their inner
+   content. The three outer chrome/frame surfaces intentionally have no name. */
+#mazeApp > .access-gate,
+#mazeApp > .maze-authenticated-boot,
+#mazeApp > #createGame.cg.show,
+#mazeApp > .game-container {
+    view-transition-name: site-route-content;
+}
+
 .route-page>.feature-page-shell {
     position: relative;
     z-index: 1;
@@ -902,4 +911,28 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     .site-bottom-nav .nav-notifications-trigger {
         transition-duration: .03ms !important;
     }
+}
+
+/* During cross-document exit, only the outgoing content loses pointer access. */
+html[data-ui-document-exiting="true"] .route-page > .feature-page-shell,
+html[data-ui-document-exiting="true"] #mazeApp > .access-gate,
+html[data-ui-document-exiting="true"] #mazeApp > .maze-authenticated-boot,
+html[data-ui-document-exiting="true"] #mazeApp > #createGame.cg.show,
+html[data-ui-document-exiting="true"] #mazeApp > .game-container {
+    pointer-events: none;
+}
+
+
+/* Same-document WAAPI fallback locks only the moving content surface. */
+html[data-ui-content-transition-fallback="true"] .route-page > .feature-page-shell,
+html[data-ui-content-transition-fallback="true"] #mazeApp > .access-gate,
+html[data-ui-content-transition-fallback="true"] #mazeApp > .maze-authenticated-boot,
+html[data-ui-content-transition-fallback="true"] #mazeApp > #createGame.cg.show,
+html[data-ui-content-transition-fallback="true"] #mazeApp > .game-container,
+html[data-ui-document-entering="true"] .route-page > .feature-page-shell,
+html[data-ui-document-entering="true"] #mazeApp > .access-gate,
+html[data-ui-document-entering="true"] #mazeApp > .maze-authenticated-boot,
+html[data-ui-document-entering="true"] #mazeApp > #createGame.cg.show,
+html[data-ui-document-entering="true"] #mazeApp > .game-container {
+    pointer-events: none;
 }

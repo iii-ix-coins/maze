@@ -89,7 +89,11 @@
     font-display: swap;
 }
 
-/* Cross-document page transitions (Chrome / Safari — ignored elsewhere) */
+/* Keep cross-document transitions under the coordinator's WAAPI lifecycle.
+   This is deliberate: the app is client-rendered and Maze content is gated on
+   server identity + asynchronous engine readiness, so auto MPA snapshots could
+   capture the loader instead of the final destination surface. Same-document
+   View Transitions remain enabled through startViewTransition(). */
 @view-transition {
     navigation: none;
 }
@@ -614,6 +618,17 @@
         animation: none;
     }
 
+    /* A page-level transition owns the entire Maze inner surface; its nested
+       tab snapshot is disabled so Boot -> Create produces one clean animation. */
+    html[data-ui-content-transition="true"] .maze-app .cg-views > .cg-view:not([hidden]) {
+        view-transition-name: none;
+    }
+
+    /* A tab change owns only the active menu panel, never the complete Create frame. */
+    html[data-ui-maze-menu-transition="true"] #mazeApp > #createGame.cg.show {
+        view-transition-name: none;
+    }
+
     ::view-transition-old(site-route-content) {
         animation: site-route-content-exit 130ms cubic-bezier(.4, 0, 1, 1) both;
     }
@@ -647,13 +662,19 @@
         }
     }
 
-    /* —— 4.5 View-transition timing —— */
-    ::view-transition-old(root) {
-        animation: 0.28s var(--ease-out) both vt-out;
+    /* Root snapshots are deliberately static: only the named inner content
+       surface moves. Theme changes opt into a short root fade explicitly below. */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
     }
 
-    ::view-transition-new(root) {
-        animation: 0.42s var(--ease-out) both vt-in;
+    html[data-ui-theme-transition="true"]::view-transition-old(root) {
+        animation: 160ms var(--ease-out) both vt-out;
+    }
+
+    html[data-ui-theme-transition="true"]::view-transition-new(root) {
+        animation: 160ms var(--ease-out) both vt-in;
     }
 
     @keyframes vt-out {

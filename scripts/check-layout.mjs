@@ -251,23 +251,56 @@ function navigationSourceHasBidirectionalBoundary() {
 }
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const routeLoadersSource = fs.readFileSync(path.join(root, 'src/app/route-loaders.ts'), 'utf8');
-const scopedTransitionSource = fs.readFileSync(path.join(root, 'src/platform/scoped-view-transition.ts'), 'utf8');
+const transitionCoordinatorSource = fs.readFileSync(path.join(root, 'src/platform/transition-coordinator.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
 if (
-  !navigationSource.includes('startScopedViewTransition') ||
+  !navigationSource.includes('startContentViewTransition') ||
   !navigationSource.includes('ROUTE_EXIT_DURATION_MS = 130') ||
   !navigationSource.includes('cancelPendingRouteSwap') ||
   !navigationSource.includes('isRoutePageLoaded(destinationPage)') ||
-  !navigationSource.includes('supportsScopedViewTransitions()') ||
+  !navigationSource.includes('supportsSameDocumentViewTransitions()') ||
   !routeLoadersSource.includes('loadedRoutePages.add(\'home\')') ||
   !routerSource.includes('onAnimationEnd=') ||
   !routerSource.includes('dataset.siteRouteFallback') ||
   !foundationStyles.includes('html[data-site-route-fallback=\"true\"]') ||
-  !scopedTransitionSource.includes('prefersReducedMotion') ||
-  !scopedTransitionSource.includes('uiViewTransitionSupport') ||
-  !scopedTransitionSource.includes("VIEW_TRANSITION_DATASET_KEY = 'uiViewTransition'")
+  !transitionCoordinatorSource.includes('prefersReducedMotion') ||
+  !transitionCoordinatorSource.includes("root.dataset.uiViewTransition = 'scoped'") ||
+  !transitionCoordinatorSource.includes('startMazeMenuViewTransition') ||
+  !transitionCoordinatorSource.includes('startThemeViewTransition') ||
+  !transitionCoordinatorSource.includes('NAVIGATION_RECOVERY_DELAY_MS') ||
+  !transitionCoordinatorSource.includes('animatePendingDocumentEntry') ||
+  !foundationStyles.includes('navigation: none;')
 ) {
   console.error('[layout] route motion must use the shared scoped transition helper and a reduced-motion-aware CSS fallback.');
+  process.exit(1);
+}
+const identitySource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
+const mazeBootSourceForTransitions = fs.readFileSync(path.join(root, 'src/features/maze/engine/boot.ts'), 'utf8');
+const transitionPageLoadingSource = fs.readFileSync(path.join(root, 'src/components/layout/PageLoadingProvider.tsx'), 'utf8');
+const transitionMazeFrameSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
+if (
+  !transitionCoordinatorSource.includes('documentNavigationInFlight') ||
+  !transitionCoordinatorSource.includes('restoreAfterCancelledNavigation') ||
+  !transitionCoordinatorSource.includes('sessionStorage') ||
+  !transitionCoordinatorSource.includes('prefersReducedMotion()') ||
+  !identitySource.includes('commitWithContentTransition') ||
+  !transitionMazeFrameSource.includes('finishPageLoading') ||
+  !transitionMazeFrameSource.includes('startContentViewTransition') ||
+  !transitionMazeFrameSource.includes('waitForDocumentEntryToFinish') ||
+  !identitySource.includes('waitForDocumentEntryToFinish') ||
+  !mazeBootSourceForTransitions.includes("dataset.mazeAllowUnload === 'true'") ||
+  !transitionPageLoadingSource.includes('playPageEnter()') ||
+  !siteCssEntry.includes('view-transition-name: site-route-content;') ||
+  !siteCssEntry.includes('#mazeApp > .maze-authenticated-boot')
+) {
+  console.error('[layout] Site/Maze transitions must share a single coordinator, reveal the authenticated boot surface before engine-ready, and preserve the unload guard.');
+  process.exit(1);
+}
+if (
+  fs.existsSync(path.join(root, 'src/platform/scoped-view-transition.ts')) ||
+  fs.existsSync(path.join(root, 'src/platform/document-transition.ts'))
+) {
+  console.error('[layout] Legacy split transition helpers must not coexist with the single transition coordinator.');
   process.exit(1);
 }
 const htmlFoundationRules = [...foundationStyles.matchAll(/html\s*\{([^}]*)\}/g)].map((match) => match[1]);
@@ -330,7 +363,7 @@ const mazeMenuPresentationSource = fs.readFileSync(path.join(root, 'src/features
 if (
   !createGameControllerSource.includes('onViewTransition') ||
   /(document|window|HTMLElement|Element|querySelector|addEventListener)/.test(createGameControllerSource) ||
-  !mazeMenuPresentationSource.includes('startScopedViewTransition(update)') ||
+  !mazeMenuPresentationSource.includes('startMazeMenuViewTransition(update)') ||
   !mazeMenuPresentationSource.includes('dataset.mazeTabExiting') ||
   !mazeMenuPresentationSource.includes('dataset.mazeTabEntering') ||
   !legacyMazeCss.includes('view-transition-name: maze-menu-content;') ||
@@ -423,6 +456,7 @@ const accessGateSource = fs.readFileSync(path.join(root, 'src/components/access/
 const accessGateCss = fs.readFileSync(path.join(root, 'src/components/access/page-access-gate.css'), 'utf8');
 const accessGateIdentitySource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
 const pageLoadingSource = fs.readFileSync(path.join(root, 'src/components/layout/PageLoadingProvider.tsx'), 'utf8');
+const mazeFrameTransitionSource = fs.readFileSync(path.join(root, 'src/features/maze/MazeFrame.tsx'), 'utf8');
 const siteChromeHostsSource = fs.readFileSync(path.join(root, 'src/components/layout/SiteChromeHosts.tsx'), 'utf8');
 const authGateIsFailClosed =
   routerSource.includes('isAuthenticated ? (') &&
@@ -456,6 +490,8 @@ if (
   !walletButtonSource.includes('Disconnect & log out') ||
   !walletButtonSource.includes('logoutAfterWalletChange') ||
   !walletButtonSource.includes('runWalletSessionTeardown') ||
+  !walletButtonSource.includes('endError.sessionRevoked') ||
+  !walletButtonSource.includes('allowMazeUnload: true') ||
   /const handleDisconnect\s*=|const handleLogout\s*=|disconnectPending|logoutPending/.test(walletButtonSource) ||
   !walletTeardownSource.includes('sessionRevoked') ||
   !walletTeardownTests.includes('does not disconnect the wallet if server logout fails') ||

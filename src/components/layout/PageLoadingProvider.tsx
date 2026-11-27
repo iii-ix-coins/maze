@@ -39,10 +39,14 @@ export function PageLoadingProvider({
         finishingRef.current = true;
         // Reveal the React page as soon as its critical bootstrap has completed.
         // Fonts, images and non-critical API data settle progressively in the background.
-        void playPageEnter();
         setLoading(false);
         document.body.classList.remove('page-loading');
         document.body.classList.add('page-loaded');
+        // Start any one-shot cross-document fallback only after the destination
+        // content and the persistent frame have been released from the loader.
+        void playPageEnter().catch((error) => {
+            console.warn('[PageLoading] optional entrance transition failed:', error);
+        });
     }, []);
 
     // Loader shown by soft page transitions, on top of the persistent background.
