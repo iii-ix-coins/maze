@@ -294,7 +294,7 @@
         min-height: 100vh;
         font-family: var(--font-body);
         font-size: var(--fs-base);
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text);
         background: transparent;
         text-rendering: optimizeLegibility;
@@ -309,7 +309,7 @@
     h3,
     h4 {
         font-family: var(--font-display);
-        font-weight: 600;
+        font-weight: 700;
         text-wrap: balance;
     }
 
@@ -874,7 +874,7 @@
 
     .bar-box>span,
     .change-period {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.9rem;
         text-transform: uppercase;
         white-space: nowrap;
@@ -890,7 +890,7 @@
 
     .change-box>div:not(.change-period) {
         font-family: var(--font-mono);
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.9rem;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
@@ -1728,7 +1728,7 @@ html[data-theme="grass"] .nav {
     color: var(--ar-on-accent);
     font: inherit;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     box-shadow: none;
     transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, filter 180ms ease;
 
