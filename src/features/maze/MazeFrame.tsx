@@ -62,7 +62,7 @@ export function MazeFrame({ active, children }: { active: boolean; children: Rea
           if (!isCurrentEngineSurface()) return;
           flushSync(() => setEngineReady(true));
         };
-        const transitioned = startContentViewTransition(reveal);
+        const transitioned = startContentViewTransition(reveal, { key: 'maze-engine-ready' });
         if (!transitioned) reveal();
       })();
     };

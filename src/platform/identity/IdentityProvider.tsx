@@ -11,7 +11,7 @@ import {
 import { flushSync } from 'react-dom';
 import { getSiteRoutePath } from '../../app/routes';
 import { preloadSiteRoutePage } from '../../app/route-loaders';
-import { startContentViewTransition, waitForDocumentEntryToFinish } from '../transition-coordinator';
+import { cancelPendingContentViewTransition, startContentViewTransition, waitForDocumentEntryToFinish } from '../transition-coordinator';
 import { navigateTo } from '../../app/navigation';
 import { ApiError } from '../../services/api/http';
 import { isSameSession, readIdentityBootstrap } from './identity-bootstrap';
@@ -75,9 +75,22 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     setUser(nextUser);
   }, []);
 
-  const commitWithContentTransition = useCallback((nextStatus: IdentityStatus, nextUser: IdentityUser | null) => {
+  const commitWithContentTransition = useCallback((
+    nextStatus: IdentityStatus,
+    nextUser: IdentityUser | null,
+    priority: 'normal' | 'urgent' = 'normal',
+    expectedRequestVersion?: number,
+  ) => {
+    if (priority === 'urgent') {
+      cancelPendingContentViewTransition('maze-menu');
+      cancelPendingContentViewTransition('maze-engine-ready');
+    }
     const transitioned = startContentViewTransition(() => {
+      if (expectedRequestVersion !== undefined && expectedRequestVersion !== requestVersionRef.current) return;
       flushSync(() => commit(nextStatus, nextUser));
+    }, {
+      key: 'identity',
+      priority,
     });
     if (!transitioned) commit(nextStatus, nextUser);
   }, [commit]);
@@ -87,7 +100,8 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     try {
       const response = await getIdentitySession();
       if (requestVersion !== requestVersionRef.current) return;
-      commitWithContentTransition(response.authenticated && response.user ? 'authenticated' : 'anonymous', response.user);
+      const nextStatus = response.authenticated && response.user ? 'authenticated' : 'anonymous';
+      commitWithContentTransition(nextStatus, response.user, nextStatus === 'anonymous' ? 'urgent' : 'normal', requestVersion);
       setError(null);
     } catch (refreshError) {
       if (requestVersion !== requestVersionRef.current) return;
@@ -132,7 +146,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         if (document.body.classList.contains('page-loading')) {
           commit(nextStatus, response.user);
         } else {
-          commitWithContentTransition(nextStatus, response.user);
+          commitWithContentTransition(nextStatus, response.user, nextStatus === 'anonymous' ? 'urgent' : 'normal', requestVersion);
         }
       })
       .catch((loadError: unknown) => {
@@ -257,7 +271,13 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       // Finish the optional route prefetch before swapping the gated surface.
       // A failed prefetch must not invalidate a server-verified identity session.
       await destinationReady;
-      commitWithContentTransition('authenticated', result.user);
+      if (requestVersion !== requestVersionRef.current || (isWalletConnected && !isWalletConnected())) {
+        try { await revokeIdentitySession(); } catch (revokeError) {
+          console.error('[Identity] Could not revoke a superseded sign-in session:', revokeError);
+        }
+        throw new Error('This sign-in attempt was superseded before the authenticated view could be shown.');
+      }
+      commitWithContentTransition('authenticated', result.user, 'normal', requestVersion);
       navigateTo(returnTo);
       return result.user;
     } catch (loginError) {
@@ -282,7 +302,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
         // Identity and the Maze Engine share the same route lifecycle. The
         // identity transition hides the authenticated Maze surface; MazePage's
         // cleanup then disposes its listeners, RAF loop and WebSocket in place.
-        commitWithContentTransition('anonymous', null);
+        commitWithContentTransition('anonymous', null, 'urgent', requestVersion);
       }
     } catch (logoutError) {
       if (requestVersion !== requestVersionRef.current) return;
@@ -305,7 +325,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
       return response.user;
     } catch (profileError) {
       if (requestVersion === requestVersionRef.current && profileError instanceof ApiError && profileError.status === 401) {
-        commitWithContentTransition('anonymous', null);
+        commitWithContentTransition('anonymous', null, 'urgent', requestVersion);
       }
       throw profileError;
     }

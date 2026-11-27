@@ -157,7 +157,7 @@ export function MazeMenu({ hidden = false }: { hidden?: boolean }) {
         update();
         return;
       }
-      if (!startContentViewTransition(update)) update();
+      if (!startContentViewTransition(update, { key: 'maze-menu' })) update();
     };
 
     createGame.onViewTransition = transitionView;

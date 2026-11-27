@@ -61,16 +61,6 @@ export function AppRouter() {
       className="route-page"
       data-route-page={pathname}
       data-route-kind={isMazePage ? 'maze' : 'site'}
-      onAnimationEnd={(event) => {
-        const animatedSurface = event.target;
-        if (
-          event.animationName === 'site-route-content-enter' &&
-          animatedSurface instanceof HTMLElement &&
-          animatedSurface.matches('.route-page > .feature-page-shell > .route-view:not([hidden])')
-        ) {
-          delete document.documentElement.dataset.siteRouteFallback;
-        }
-      }}
     >
       <main className="feature-page-shell" aria-label={route ? `${route.title} content` : 'Not found page'}>
         {!route ? (

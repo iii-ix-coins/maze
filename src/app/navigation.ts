@@ -9,12 +9,10 @@ import {
     animatePendingDocumentEntry,
     consumePendingDocumentEntry,
     navigateDocument,
-    prefersReducedMotion,
     startContentViewTransition,
-    supportsSameDocumentViewTransitions,
-    getDocumentTransitionSurface,
+    cancelPendingContentViewTransition,
 } from '../platform/transition-coordinator';
-import { isRoutePageLoaded, preloadSiteRoutePage } from './route-loaders';
+import { preloadSiteRoutePage } from './route-loaders';
 
 export const LOADER_SHOW_EVENT = 'site:loader-show';
 export const LOADER_HIDE_EVENT = 'site:loader-hide';
@@ -67,16 +65,11 @@ export async function playPageEnter(): Promise<void> {
     if (consumePendingDocumentEntry()) await animatePendingDocumentEntry();
 }
 
-const ROUTE_EXIT_DURATION_MS = 130;
-let pendingRouteSwap: number | null = null;
+let navigationIntentVersion = 0;
 
-function cancelPendingRouteSwap(): void {
-    if (pendingRouteSwap !== null) {
-        window.clearTimeout(pendingRouteSwap);
-        pendingRouteSwap = null;
-    }
-    delete document.documentElement.dataset.siteRouteExiting;
-    delete document.documentElement.dataset.siteRouteFallback;
+function cancelPendingNavigation(): void {
+    navigationIntentVersion += 1;
+    cancelPendingContentViewTransition('navigation');
 }
 
 function applyRouteSwap(url: URL, push: boolean): void {
@@ -86,35 +79,26 @@ function applyRouteSwap(url: URL, push: boolean): void {
 }
 
 function swapTo(url: URL, push: boolean): void {
-    cancelPendingRouteSwap();
+    const intentVersion = ++navigationIntentVersion;
+    cancelPendingContentViewTransition('navigation');
 
-    const destinationPage = resolveSiteRoute(url.pathname)?.page ?? '';
-    const destinationIsReady = isRoutePageLoaded(destinationPage);
-    const canCaptureDestination = destinationIsReady;
-
-    // The coordinator uses native View Transitions where available and WAAPI
-    // otherwise, but only after the destination lazy chunk has resolved. On a
-    // first visit, React Suspense could otherwise capture an empty frame.
-    if (canCaptureDestination && startContentViewTransition(() => applyRouteSwap(url, push))) return;
-
-    // The CSS fallback gives the current surface a short exit before React
-    // replaces it. For browsers with View Transitions, mark the destination
-    // so its entrance still runs after a first-visit lazy chunk resolves.
-    const hasRouteSurface = Boolean(getDocumentTransitionSurface());
-    if (!prefersReducedMotion() && hasRouteSurface) {
-        if (supportsSameDocumentViewTransitions()) {
-            document.documentElement.dataset.siteRouteFallback = 'true';
+    // Prepare the lazy destination before taking the outgoing snapshot. This
+    // keeps first-visit routes on the exact same transition path as cached routes.
+    void (async () => {
+        try {
+            await preloadSiteRoutePage(url.pathname);
+        } catch (error) {
+            // A route import error must not strand navigation; React's route
+            // error boundary remains responsible for presenting the failure.
+            console.warn('[navigation] Route preload failed; committing the route anyway.', error);
         }
-        document.documentElement.dataset.siteRouteExiting = 'true';
-        pendingRouteSwap = window.setTimeout(() => {
-            pendingRouteSwap = null;
-            delete document.documentElement.dataset.siteRouteExiting;
-            applyRouteSwap(url, push);
-        }, ROUTE_EXIT_DURATION_MS);
-        return;
-    }
 
-    applyRouteSwap(url, push);
+        if (intentVersion !== navigationIntentVersion) return;
+        startContentViewTransition(() => {
+            if (intentVersion !== navigationIntentVersion) return;
+            applyRouteSwap(url, push);
+        }, { key: 'navigation' });
+    })();
 }
 
 function confirmMazeRouteExit(nextPath: string): boolean {
@@ -129,20 +113,23 @@ function confirmMazeRouteExit(nextPath: string): boolean {
 export function navigateTo(href: string) {
     const url = new URL(href, window.location.href);
     if (url.origin !== window.location.origin) {
+        cancelPendingNavigation();
         window.location.assign(url.href);
         return;
     }
-    if (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.search === window.location.search) return;
+    if (normalizePath(url.pathname) === normalizePath(window.location.pathname) && url.search === window.location.search) {
+        cancelPendingNavigation();
+        return;
+    }
     if (!confirmMazeRouteExit(url.pathname)) return;
     if (!canSoftNavigateBetween(window.location.pathname, url.pathname)) {
+        cancelPendingNavigation();
         void navigateDocument(url);
         return;
     }
 
-    // Entering/leaving the Maze runtime is now a route transition. A route
-    // chunk may load in parallel with the outgoing surface's CSS fallback;
-    // the persistent Maze DOM remains mounted after its first visit.
-    void preloadSiteRoutePage(url.pathname).catch(() => undefined);
+    // Every same-document route, including the first lazy visit, goes through
+    // the same serialized content transition after its code is ready.
     swapTo(url, true);
 }
 
@@ -161,8 +148,8 @@ function onClick(event: MouseEvent) {
         normalizePath(url.pathname) === normalizePath(window.location.pathname) &&
         url.search === window.location.search;
     if (samePage) {
-        // A click back to the still-current page cancels a pending CSS fallback.
-        if (pendingRouteSwap !== null) cancelPendingRouteSwap();
+        // A click back to the currently committed route cancels a queued destination.
+        cancelPendingNavigation();
         if (!url.hash) event.preventDefault();
         return;
     }
@@ -175,14 +162,18 @@ function onClick(event: MouseEvent) {
 function onPopState() {
     const nextPath = normalizePath(window.location.pathname);
     const nextLocationKey = `${nextPath}${window.location.search}${window.location.hash}`;
-    if (pendingRouteSwap !== null) cancelPendingRouteSwap();
-    if (nextLocationKey === currentLocationKey) return;
+    if (nextLocationKey === currentLocationKey) {
+        cancelPendingNavigation();
+        return;
+    }
     if (nextPath === currentPath) {
+        cancelPendingNavigation();
         emitPath();
         return;
     }
 
     if (!confirmMazeRouteExit(nextPath)) {
+        cancelPendingNavigation();
         // popstate has already changed the URL; restore the last committed SPA URL.
         const previous = new URL(currentLocationKey, window.location.origin);
         window.history.pushState(null, '', previous.href);

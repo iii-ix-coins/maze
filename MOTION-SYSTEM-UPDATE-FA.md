@@ -1,66 +1,61 @@
-# پیاده‌سازی Motion System برای MAZE
+# سیستم Motion یکپارچهٔ پلتفرم
 
 ## هدف
 
-افزودن حرکت‌های ظریف به داک ناوبری، تغییر صفحات عادی و تب‌های Create / Rooms / Live، بدون متحرک‌کردن Header، داک، قاب ثابت محتوا یا قاب اصلی بازی.
+تمام جابه‌جایی‌های محتوایی Social و Game باید از یک قرارداد زمان‌بندی و یک هماهنگ‌کننده عبور کنند. Header، Dock، قاب اصلی و Scrollbar خارج از محدودهٔ انیمیشن محتوای Route باقی می‌مانند.
 
-## تغییرات
+## قرارداد مرکزی زمان و حرکت
 
-### داک ناوبری
+توکن‌های مرجع در `src/styles/style.css` تعریف شده‌اند:
 
-- وضعیت Active با یک نشانگر باریک زیر آیکون مشخص می‌شود.
-- آیکون فعال فقط ۱٫۰۳۵ برابر بزرگ‌تر نمایش داده می‌شود.
-- هنگام فشردن کنترل، آیکون تا ۰٫۹۴ برابر کوچک می‌شود.
-- رنگ، شفافیت، نشانگر و مقیاس با زمان حدود ۱۸۰ms تغییر می‌کنند.
-- ابعاد خانه‌های داک، Grid و جایگاه خود داک تغییر نمی‌کنند؛ Transform کلی دکمه در حالت فشردن خنثی شده و فقط آیکون بازخورد می‌دهد.
+```css
+:root {
+    --motion-route-duration: 220ms;
+    --motion-route-easing: cubic-bezier(.22, 1, .36, 1);
+    --motion-route-distance: 7px;
+    --motion-route-exit-distance: 5px;
+    --motion-theme-duration: 160ms;
+}
+```
 
-### صفحات عادی
+`--motion-route-duration` مدت کل یک جابه‌جایی Route است، نه مدت جداگانهٔ هر نیمه:
 
-- فقط `.feature-page-shell` نام View Transition اختصاصی `site-route-content` می‌گیرد.
-- خروج محتوا حدود ۱۳۰ms و ورود آن حدود ۲۲۰ms با جابه‌جایی عمودی ۵ تا ۷ پیکسل است.
-- در مرورگرهای فاقد View Transition API، خروج CSS پیش از تغییر Route اجرا می‌شود و ورود CSS پس از Mount صفحه جدید انجام می‌شود.
-- وضعیت بارگذاری صفحات lazy ردیابی می‌شود؛ نخستین بازدید از صفحه‌ای که chunk آن هنوز آماده نیست از fallback CSS استفاده می‌کند و پس از آماده‌شدن محتوا وارد می‌شود، بازدیدهای بعدی از View Transition بومی بهره می‌برند.
-- انیمیشن root هنگام انتقال scoped غیرفعال می‌شود تا Header و Dock محو/ظاهر نشوند.
-- قاب `.route-page`، Border و RouteScrollbar بدون انیمیشن باقی می‌مانند.
+- Native View Transition، Snapshot قدیمی و جدید را هم‌زمان در ۲۲۰ms اجرا می‌کند.
+- WAAPI به‌دلیل اجرای ترتیبی خروج، Commit و ورود، بودجهٔ ۲۲۰ms را به دو فاز ۱۱۰ms تقسیم می‌کند؛ تنها یک فریم برای اعمال DOM بین دو فاز در نظر گرفته می‌شود.
+- هر دو مسیر مقدار Duration و Easing را از همان توکن‌های CSS می‌خوانند. اعداد TypeScript صرفاً fallback دفاعی برای محیط فاقد CSS/DOM هستند.
+- تغییر Theme توکن مستقل `--motion-theme-duration` دارد، اما قفل و صف اجرای آن با Transition محتوایی مشترک است.
 
-### تب‌های Maze
+## مالکیت اجرا
 
-- Glider تب‌ها از ۶۰۰ms به ۲۶۰ms کاهش پیدا می‌کند؛ تغییر رنگ و شمارندهٔ تب‌ها نیز حدود ۱۸۰ms است.
-- پنل فعال با نام `maze-menu-content` انتقال می‌گیرد.
-- مدت خروج پنل ۱۲۰ms و مدت ورود ۱۹۰ms است.
-- مرورگرهای فاقد API از خروج CSS کوتاه و سپس ورود پنل جدید استفاده می‌کنند.
-- مسئولیت زمان‌بندی در `MazeMenu` و React باقی می‌ماند؛ `CreateGameComponent` همچنان DOM-free است.
-- CreateWizard و Canvas پیش‌نمایش آن از درخت React حذف یا دوباره Mount نمی‌شوند.
+`src/platform/transition-coordinator.ts` تنها مالک Transitionهای محتوایی و Theme است:
 
-### دسترس‌پذیری و سازگاری
+- درخواست‌ها سریالی اجرا می‌شوند؛ درخواست جدید هنگام فعال‌بودن Transition قبلی رد یا بی‌انیمیشن Commit نمی‌شود.
+- درخواست‌های منتظر با کلید یکسان و قابل جایگزینی (مانند مقصدهای Navigation یا Theme) به آخرین مقصد ادغام می‌شوند.
+- درخواست هویت با اولویت `urgent` قبل از درخواست‌های نمایشی منتظر اجرا می‌شود. در صورت امکان، فاز بصری عملیات عادی فعال کوتاه/لغو می‌شود، اما Update فعال گم نمی‌شود.
+- Callback درخواست فعال حداکثر و عملاً دقیقاً یک‌بار اعمال می‌شود؛ خطا یا لغو Animation نباید صف را قفل کند.
+- `waitForTransitionQueueIdle()` پایان همهٔ کارهای پذیرفته‌شدهٔ درون‌سندی را اعلام می‌کند؛ ناوبری سندی قبل از شروع انیمیشن خروج منتظر این نقطه می‌ماند.
+- `prefers-reduced-motion` محترم است؛ در این حالت تغییر وضعیت بدون حرکت انجام می‌شود.
 
-- `prefers-reduced-motion: reduce` مسیرهای متحرک را غیرفعال می‌کند.
-- View Transition API فقط Progressive Enhancement است؛ در مرورگرهای قدیمی مسیر CSS/بدون انیمیشن استفاده می‌شود.
-- جابه‌جایی سندی به `/maze.html` یا `/play` به منطق Soft Navigation تعمیم داده نشده است.
+## مسیریابی
 
-## فایل‌های تغییرکرده
+- Routeهای Home، Explore، Profile، Maze Hub، Create، Rooms، Live و Gameplay در یک SPA و یک React root قرار دارند.
+- پیش از Transition، Lazy Chunk مقصد با `preloadSiteRoutePage()` آماده می‌شود؛ سپس Commit Route از همان Coordinator عبور می‌کند.
+- مسیر موازی CSS/Timer برای Lazy Route وجود ندارد. Navigationهای سریع با نسخهٔ intent محافظت می‌شوند تا مقصد قدیمی پس از مقصد جدید اعمال نشود.
+- `route-view` سطح محتوایی متحرک است. Header، Dock، قاب‌ها و Scrollbar ثابت می‌مانند.
+- مسیرهای واقعاً خارج از SPA تنها پس از خالی‌شدن صف محتوایی از سند خارج می‌شوند و برای WAAPI سندی نیز توکن‌های مرکزی را مصرف می‌کنند.
 
-- `src/platform/transition-coordinator.ts` (جدید)
-- `src/app/navigation.ts`
-- `src/app/router.tsx`
-- `src/app/route-loaders.ts` (جدید)
-- `src/styles/site.css`
-- `src/styles/style.css`
-- `src/features/maze/styles/lobby.css`
-- `src/features/maze/styles/maze-site.css`
-- `src/features/maze/ui/create-game/create-game.ts`
-- `src/features/maze/ui/react/MazeMenu.tsx`
-- `src/features/maze/README.md`
-- `scripts/check-layout.mjs`
+## هویت و بازی
 
-## بخش‌های دست‌نخورده
+- Login و Logout در همان سند و از همان Coordinator عبور می‌کنند.
+- Logout، Session نامعتبر و پاسخ 401 اولویت فوری دارند.
+- `MazeMenu` و آماده‌شدن محتوای Engine برای Transition محتوایی از همان API استفاده می‌کنند؛ منطق Engine و انیمیشن‌های ذاتی Simulation بخشی از سیستم Motion صفحات نیستند.
+- ریزتعامل‌های محلی مانند فشردن دکمه، Glider یا تغییر رنگ کنترل‌ها می‌توانند مدت کوتاه مختص خود را داشته باشند؛ اما نباید Route Surface، Theme یا زمان‌بندی Logout را مالک شوند.
+- Game Loop، Simulation، الگوریتم‌ها، Canvas، WebSocket، Room Store و Backend در این اصلاح تغییر نکرده‌اند.
 
-Game Loop، Simulation، الگوریتم‌های Maze، Canvas بازی اصلی، WebSocket، Room Store، پروتکل Multiplayer، APIها، Theme Switcher، Header Coin Balance و هندسه/Scroll قاب‌های اصلی تغییر داده نشده‌اند.
+## دسترس‌پذیری
+
+`prefers-reduced-motion: reduce` مسیرهای متحرک را غیرفعال می‌کند، ولی Update و ناوبری را حفظ می‌کند. هیچ کاربر دارای این تنظیمی برای دیدن انیمیشن مجبور نمی‌شود.
 
 ## اعتبارسنجی
 
-- `node scripts/check-layout.mjs`: موفق.
-- `node scripts/check-css-duplicates.mjs`: موفق؛ ۱۹ فایل CSS بدون selector/property تکراری.
-- TypeScript transpile syntax برای فایل‌های تغییرکرده: موفق.
-- PostCSS parse برای چهار فایل CSS تغییرکرده: موفق.
-- Typecheck کامل، Build و تست بصری مرورگر در این محیط اجرا نشدند؛ وابستگی‌های محلی (`node_modules`, Vite, PostCSS package resolution و ابزار تست) در ZIP موجود نیستند.
+تست‌های Coordinator در `src/platform/transition-coordinator.test.ts` رفتار صف، coalescing، اولویت Logout، اشتراک قفل Theme/Content، WAAPI و Reduced Motion را پوشش می‌دهند. اجرای کامل Vitest، Build و Browser E2E باید در CI با Node تعریف‌شده در `.nvmrc` انجام شود؛ Parse نحوی یا تست دستی جایگزین آن‌ها نیست.

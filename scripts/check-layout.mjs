@@ -148,7 +148,7 @@ if (
   !motionStyles.includes('::view-transition-old(site-route-content)') ||
   !motionStyles.includes('::view-transition-new(site-route-content)') ||
   !motionStyles.includes('data-ui-view-transition=\"scoped\"') ||
-  !motionStyles.includes('data-site-route-exiting=\"true\"')
+  !motionStyles.includes('--motion-route-duration')
 ) {
   console.error('[layout] Header, dock and outer content frame must persist; route motion must be scoped to the inner page surface.');
   process.exit(1);
@@ -251,25 +251,49 @@ function navigationSourceHasBidirectionalBoundary() {
     navigation.includes('canSoftNavigateBetween(currentPath, nextPath)') &&
     navigation.includes('window.location.reload()') &&
     navigation.includes('confirmMazeRouteExit') &&
-    navigation.includes('getDocumentTransitionSurface') &&
+    navigation.includes('preloadSiteRoutePage(url.pathname)') &&
+    navigation.includes("key: 'navigation'") &&
     maze?.soft === true && maze?.server === 'spa';
 }
 const navigationSource = fs.readFileSync(path.join(root, 'src/app/navigation.ts'), 'utf8');
 const routeLoadersSource = fs.readFileSync(path.join(root, 'src/app/route-loaders.ts'), 'utf8');
 const transitionCoordinatorSource = fs.readFileSync(path.join(root, 'src/platform/transition-coordinator.ts'), 'utf8');
 const foundationStyles = fs.readFileSync(path.join(root, 'src/styles/style.css'), 'utf8');
+const transitionCoordinatorTests = fs.readFileSync(path.join(root, 'src/platform/transition-coordinator.test.ts'), 'utf8');
+if (
+  !transitionCoordinatorSource.includes('--motion-route-duration') ||
+  !transitionCoordinatorSource.includes('pendingTransitions') ||
+  !transitionCoordinatorSource.includes("priority === 'urgent'") ||
+  !transitionCoordinatorSource.includes('updateApplied') ||
+  !transitionCoordinatorTests.includes('coalesces queued navigation') ||
+  !transitionCoordinatorTests.includes('queue-idle waiters') ||
+  !transitionCoordinatorTests.includes('urgent identity changes') ||
+  !transitionCoordinatorTests.includes('serializes theme and content transitions through the same browser lock') ||
+  !transitionCoordinatorTests.includes('keeps the queue moving when a consumer update throws') ||
+  !transitionCoordinatorTests.includes('splits the canonical route duration across sequential WAAPI phases') ||
+  !transitionCoordinatorSource.includes('duration / 2') ||
+  !transitionCoordinatorSource.includes('await waitForTransitionQueueIdle()') ||
+  !foundationStyles.includes('--motion-theme-duration') ||
+  !foundationStyles.includes('animation: site-route-content-exit var(--motion-route-duration)') ||
+  !foundationStyles.includes('animation: site-route-content-enter var(--motion-route-duration)')
+) {
+  console.error('[layout] route transitions must have one CSS timing source, serialized/coalesced scheduling, urgent identity handling and regression tests.');
+  process.exit(1);
+}
 if (
   !navigationSource.includes('startContentViewTransition') ||
-  !navigationSource.includes('ROUTE_EXIT_DURATION_MS = 130') ||
-  !navigationSource.includes('cancelPendingRouteSwap') ||
-  !navigationSource.includes('isRoutePageLoaded(destinationPage)') ||
-  !navigationSource.includes('supportsSameDocumentViewTransitions()') ||
+  !navigationSource.includes('preloadSiteRoutePage(url.pathname)') ||
+  !navigationSource.includes("key: 'navigation'") ||
+  navigationSource.includes('ROUTE_EXIT_DURATION_MS') ||
+  navigationSource.includes('cancelPendingRouteSwap') ||
   !routeLoadersSource.includes('loadedRoutePages.add(\'home\')') ||
-  !routerSource.includes('onAnimationEnd=') ||
-  !routerSource.includes('dataset.siteRouteFallback') ||
-  !routerSource.includes("event.animationName === 'site-route-content-enter'") ||
-  !routerSource.includes("animatedSurface.matches('.route-page > .feature-page-shell > .route-view:not([hidden])')") ||
-  !foundationStyles.includes('html[data-site-route-fallback=\"true\"]') ||
+  routerSource.includes('onAnimationEnd=') ||
+  routerSource.includes('dataset.siteRouteFallback') ||
+  foundationStyles.includes('data-site-route-fallback') ||
+  foundationStyles.includes('data-site-route-exiting') ||
+  !transitionCoordinatorSource.includes('pendingTransitions') ||
+  !transitionCoordinatorSource.includes('requestActivePreemption') ||
+  !transitionCoordinatorSource.includes('cancelPendingContentViewTransition') ||
   !transitionCoordinatorSource.includes('prefersReducedMotion') ||
   !transitionCoordinatorSource.includes("root.dataset.uiViewTransition = 'scoped'") ||
   transitionCoordinatorSource.includes('startMazeMenuViewTransition') ||
@@ -278,7 +302,7 @@ if (
   !transitionCoordinatorSource.includes('animatePendingDocumentEntry') ||
   !foundationStyles.includes('navigation: none;')
 ) {
-  console.error('[layout] route motion must use the shared scoped transition helper and a reduced-motion-aware CSS fallback.');
+  console.error('[layout] route motion must use the serialized shared coordinator, common timing tokens and reduced-motion handling.');
   process.exit(1);
 }
 const identitySource = fs.readFileSync(path.join(root, 'src/platform/identity/IdentityProvider.tsx'), 'utf8');
@@ -401,7 +425,7 @@ const mazeMenuPresentationSource = fs.readFileSync(path.join(root, 'src/features
 if (
   !createGameControllerSource.includes('onViewTransition') ||
   /(document|window|HTMLElement|Element|querySelector|addEventListener)/.test(createGameControllerSource) ||
-  !mazeMenuPresentationSource.includes('startContentViewTransition(update)') ||
+  !mazeMenuPresentationSource.includes("startContentViewTransition(update, { key: 'maze-menu' })") ||
   mazeMenuPresentationSource.includes('dataset.mazeTabExiting') ||
   mazeMenuPresentationSource.includes('dataset.mazeTabEntering') ||
   legacyMazeCss.includes('view-transition-name: maze-menu-content;') ||

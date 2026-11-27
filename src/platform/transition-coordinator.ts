@@ -2,15 +2,53 @@ import { normalizePath } from '../app/routes';
 
 const PENDING_ENTRY_KEY = 'maze:document-transition:v1';
 const PENDING_ENTRY_MAX_AGE_MS = 15_000;
-const DOCUMENT_EXIT_DURATION_MS = 130;
-const DOCUMENT_ENTER_DURATION_MS = 220;
 const NAVIGATION_RECOVERY_DELAY_MS = 1_800;
-const NATIVE_TRANSITION_FAILSAFE_MS = 1_600;
+const NATIVE_TRANSITION_FAILSAFE_EXTRA_MS = 1_200;
+const NATIVE_TRANSITION_FINAL_FAILSAFE_MS = 500;
+const DEFAULT_ROUTE_DURATION_MS = 220;
+const DEFAULT_ROUTE_EASING = 'cubic-bezier(.22, 1, .36, 1)';
+const DEFAULT_ROUTE_DISTANCE = 7;
 
-/** Minimal surface of the native API, kept structural for browser/TS compatibility. */
-type NativeViewTransition = { finished?: Promise<unknown> };
+type NativeViewTransition = {
+  finished?: Promise<unknown>;
+  updateCallbackDone?: Promise<unknown>;
+  skipTransition?: () => void;
+};
 type TransitionDocument = Document & {
   startViewTransition?: (update: () => void) => NativeViewTransition;
+};
+type TransitionMode = 'content' | 'theme';
+type TransitionPriority = 'normal' | 'urgent';
+
+export type ViewTransitionOptions = {
+  /** Replace an older request with the same key while it is still queued. */
+  key?: string;
+  /** Urgent identity changes are placed before queued presentation changes. */
+  priority?: TransitionPriority;
+};
+
+export type DocumentNavigationOptions = {
+  replace?: boolean;
+};
+
+type TransitionRequest = {
+  id: number;
+  mode: TransitionMode;
+  update: () => void;
+  key?: string;
+  priority: TransitionPriority;
+};
+
+type ActiveTransition = {
+  request: TransitionRequest;
+  settled: boolean;
+  updateApplied: boolean;
+  preemptRequested: boolean;
+  phase: 'native' | 'exit' | 'enter' | 'update' | null;
+  nativeTransition: NativeViewTransition | null;
+  animation: Animation | null;
+  failsafe: number | null;
+  finalFailsafe: number | null;
 };
 
 type PendingDocumentEntry = {
@@ -19,14 +57,10 @@ type PendingDocumentEntry = {
   createdAt: number;
 };
 
-export type DocumentNavigationOptions = {
-  replace?: boolean;
-};
-
-let nativeTransitionInFlight = false;
-let nativeTransitionGeneration = 0;
-let nativeTransitionFailsafe: number | null = null;
-let waapiContentTransitionInFlight = false;
+const pendingTransitions: TransitionRequest[] = [];
+const transitionIdleWaiters = new Set<() => void>();
+let activeTransition: ActiveTransition | null = null;
+let nextTransitionId = 0;
 let documentNavigationInFlight = false;
 let pendingRecoveryTimer: number | null = null;
 let activeDocumentExitAnimation: Animation | null = null;
@@ -50,74 +84,155 @@ if (supportsSameDocumentViewTransitions()) {
   document.documentElement.dataset.uiViewTransitionSupport = 'true';
 }
 
-/**
- * Single owner for every same-document View Transition in the application.
- * If another transition is already running, callers apply their state update
- * immediately rather than starting competing browser snapshots.
- */
-function startNativeViewTransition(update: () => void, mode: 'content' | 'theme'): boolean {
+function parseCssTime(value: string, fallback: number): number {
+  const match = value.trim().match(/^(-?\d+(?:\.\d+)?)\s*(ms|s)$/i);
+  if (!match) return fallback;
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount < 0) return fallback;
+  return match[2].toLowerCase() === 's' ? amount * 1_000 : amount;
+}
+
+/** CSS is the single source of truth for route transition timing and geometry. */
+function getRouteMotionTokens(): { duration: number; easing: string; distance: string; exitDistance: string } {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || typeof window.getComputedStyle !== 'function') {
+    return {
+      duration: DEFAULT_ROUTE_DURATION_MS,
+      easing: DEFAULT_ROUTE_EASING,
+      distance: `${DEFAULT_ROUTE_DISTANCE}px`,
+      exitDistance: '5px',
+    };
+  }
+
+  const styles = window.getComputedStyle(document.documentElement);
+  const duration = parseCssTime(styles.getPropertyValue('--motion-route-duration'), DEFAULT_ROUTE_DURATION_MS);
+  const easing = styles.getPropertyValue('--motion-route-easing').trim() || DEFAULT_ROUTE_EASING;
+  const distance = styles.getPropertyValue('--motion-route-distance').trim() || `${DEFAULT_ROUTE_DISTANCE}px`;
+  const exitDistance = styles.getPropertyValue('--motion-route-exit-distance').trim() || '5px';
+  return { duration, easing, distance, exitDistance };
+}
+
+function invokeUpdate(request: TransitionRequest): void {
+  try {
+    request.update();
+  } catch (error) {
+    // Never let a consumer exception strand the global transition queue.
+    console.error(`[transition] ${request.mode} update failed:`, error);
+  }
+}
+
+function clearActiveMarkers(active: ActiveTransition): void {
+  const root = document.documentElement;
+  if (active.request.mode === 'theme') {
+    delete root.dataset.uiThemeTransition;
+  } else {
+    delete root.dataset.uiViewTransition;
+    delete root.dataset.uiContentTransition;
+    delete root.dataset.uiContentTransitionFallback;
+  }
+}
+
+function applyActiveUpdate(active: ActiveTransition): void {
+  if (active.updateApplied) return;
+  active.updateApplied = true;
+  active.phase = 'update';
+  invokeUpdate(active.request);
+}
+
+function resolveTransitionIdleWaiters(): void {
+  if (activeTransition || pendingTransitions.length > 0) return;
+  for (const resolve of transitionIdleWaiters) resolve();
+  transitionIdleWaiters.clear();
+}
+
+function finishActiveTransition(active: ActiveTransition): void {
+  if (active.settled || activeTransition !== active) return;
+  // State correctness outranks motion: even a failed animation must commit its update.
+  applyActiveUpdate(active);
+  active.settled = true;
+  if (active.failsafe !== null) window.clearTimeout(active.failsafe);
+  if (active.finalFailsafe !== null) window.clearTimeout(active.finalFailsafe);
+  active.failsafe = null;
+  active.finalFailsafe = null;
+  active.animation = null;
+  clearActiveMarkers(active);
+  activeTransition = null;
+  // Let the browser finish the current style/React commit before starting the next snapshot.
+  void Promise.resolve().then(() => {
+    runNextTransition();
+    resolveTransitionIdleWaiters();
+  });
+}
+
+function runNativeTransition(active: ActiveTransition): void {
   const transitionDocument = document as TransitionDocument;
   const startTransition = transitionDocument.startViewTransition;
-  if (!startTransition || prefersReducedMotion() || nativeTransitionInFlight || waapiContentTransitionInFlight) return false;
+  if (!startTransition) {
+    if (active.request.mode === 'content') runWaapiTransition(active);
+    else finishActiveTransition(active);
+    return;
+  }
 
   const root = document.documentElement;
-  const generation = ++nativeTransitionGeneration;
-  nativeTransitionInFlight = true;
-  if (mode === 'theme') {
+  active.phase = 'native';
+  if (active.request.mode === 'theme') {
     root.dataset.uiThemeTransition = 'true';
   } else {
     root.dataset.uiViewTransition = 'scoped';
     root.dataset.uiContentTransition = 'true';
   }
 
-  let updateRan = false;
-  let transition: NativeViewTransition;
+  const updateOnce = () => {
+    if (active.settled) return;
+    applyActiveUpdate(active);
+  };
+
   try {
-    transition = startTransition.call(transitionDocument, () => {
-      updateRan = true;
-      update();
-    });
-  } catch {
-    finishNativeViewTransition(root, mode, generation);
-    return updateRan;
-  }
+    const transition = startTransition.call(transitionDocument, updateOnce);
+    active.nativeTransition = transition;
 
-  const finish = () => finishNativeViewTransition(root, mode, generation);
-  if (transition.finished) void transition.finished.then(finish, finish);
-  else window.requestAnimationFrame(finish);
+    const finishNative = () => {
+      // A broken/partial implementation must never discard the state update.
+      updateOnce();
+      finishActiveTransition(active);
+    };
+    if (transition.finished) {
+      void transition.finished.then(finishNative, finishNative);
+    } else if (transition.updateCallbackDone) {
+      void transition.updateCallbackDone.then(
+        () => window.requestAnimationFrame(finishNative),
+        finishNative,
+      );
+    } else {
+      window.requestAnimationFrame(finishNative);
+    }
 
-  // The browser normally resolves `finished`; keep a bounded recovery so a
-  // cancelled/interrupted native transition can never lock future page motion.
-  nativeTransitionFailsafe = window.setTimeout(finish, NATIVE_TRANSITION_FAILSAFE_MS);
-  return true;
-}
-
-function finishNativeViewTransition(
-  root: HTMLElement,
-  mode: 'content' | 'theme',
-  generation: number,
-): void {
-  if (generation !== nativeTransitionGeneration) return;
-  if (nativeTransitionFailsafe !== null) {
-    window.clearTimeout(nativeTransitionFailsafe);
-    nativeTransitionFailsafe = null;
+    // If a browser extension or interrupted snapshot leaves `finished` pending,
+    // ask the native API to skip its visual phase; the React update still runs.
+    const { duration } = getRouteMotionTokens();
+    active.failsafe = window.setTimeout(() => {
+      if (active.settled) return;
+      try {
+        transition.skipTransition?.();
+      } catch {
+        // The final failsafe below still releases the queue.
+      }
+      active.finalFailsafe = window.setTimeout(() => {
+        updateOnce();
+        finishActiveTransition(active);
+      }, NATIVE_TRANSITION_FINAL_FAILSAFE_MS);
+    }, duration + NATIVE_TRANSITION_FAILSAFE_EXTRA_MS);
+  } catch (error) {
+    console.warn('[transition] Native View Transition could not start; using the supported fallback.', error);
+    clearActiveMarkers(active);
+    active.nativeTransition = null;
+    if (active.updateApplied) {
+      finishActiveTransition(active);
+    } else if (active.request.mode === 'content') {
+      runWaapiTransition(active);
+    } else {
+      finishActiveTransition(active);
+    }
   }
-  if (mode === 'theme') {
-    delete root.dataset.uiThemeTransition;
-  } else {
-    delete root.dataset.uiViewTransition;
-    delete root.dataset.uiContentTransition;
-  }
-  nativeTransitionInFlight = false;
-}
-
-/** Animate a same-route content change using the exact site-wide motion system. */
-export function startContentViewTransition(update: () => void): boolean {
-  if (supportsSameDocumentViewTransitions()) {
-    const started = startNativeViewTransition(update, 'content');
-    if (started || nativeTransitionInFlight || waapiContentTransitionInFlight || prefersReducedMotion()) return started;
-  }
-  return startSameDocumentWaapiTransition(update);
 }
 
 function waitForAnimationFrames(count = 2): Promise<void> {
@@ -130,55 +245,189 @@ function waitForAnimationFrames(count = 2): Promise<void> {
   });
 }
 
-/** WAAPI fallback for same-document page/auth/engine swaps on older browsers. */
-function startSameDocumentWaapiTransition(update: () => void): boolean {
-  if (prefersReducedMotion() || nativeTransitionInFlight || waapiContentTransitionInFlight) return false;
-  const outgoing = getDocumentTransitionSurface();
-  if (!outgoing || typeof outgoing.animate !== 'function') return false;
+function playSurfaceAnimation(
+  active: ActiveTransition,
+  surface: HTMLElement,
+  frames: Keyframe[],
+): Promise<void> {
+  if (prefersReducedMotion() || typeof surface.animate !== 'function') return Promise.resolve();
+  const { duration, easing } = getRouteMotionTokens();
+  // Native View Transition old/new snapshots run concurrently for the full
+  // route duration. WAAPI must split that same total budget across its
+  // sequential outgoing and incoming phases.
+  const phaseDuration = Math.max(1, duration / 2);
+  const animation = surface.animate(frames, { duration: phaseDuration, easing, fill: 'both' });
+  active.animation = animation;
+  return animation.finished.then(
+    () => undefined,
+    () => undefined,
+  ).finally(() => {
+    if (active.animation === animation) active.animation = null;
+    try { animation.cancel(); } catch { /* an already-finished animation is harmless */ }
+  });
+}
 
-  waapiContentTransitionInFlight = true;
+/** WAAPI fallback used only when the browser has no usable native View Transition API. */
+function runWaapiTransition(active: ActiveTransition): void {
+  const outgoing = getDocumentTransitionSurface();
+  if (!outgoing || typeof outgoing.animate !== 'function' || active.request.mode === 'theme') {
+    finishActiveTransition(active);
+    return;
+  }
+
   document.documentElement.dataset.uiContentTransitionFallback = 'true';
   void (async () => {
     try {
-      // Animation failure must never block the state/navigation update.
-      try {
-        await animateSurface(outgoing, [
-          { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-          { opacity: 0, transform: 'translate3d(0, -5px, 0)' },
-        ], DOCUMENT_EXIT_DURATION_MS);
-      } catch (animationError) {
-        console.warn('[transition] outgoing WAAPI animation was skipped:', animationError);
-      }
+      const { distance, exitDistance } = getRouteMotionTokens();
+      active.phase = 'exit';
+      await playSurfaceAnimation(active, outgoing, [
+        { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+        { opacity: 0, transform: `translate3d(0, -${exitDistance}, 0)` },
+      ]);
 
-      try {
-        update();
-      } catch (error) {
-        console.error('[transition] same-document update failed after the outgoing animation', error);
-        return;
-      }
+      // Once a request becomes active, its update is committed exactly once.
+      // An urgent request may preempt visuals, never the active state update.
+      // Replaceable pending intents may be coalesced before activation.
+      applyActiveUpdate(active);
+      if (active.preemptRequested || active.settled) return;
 
-      await waitForAnimationFrames();
+      await waitForAnimationFrames(1);
+      if (active.preemptRequested || active.settled) return;
+
       const incoming = getDocumentTransitionSurface();
       if (!incoming || !incoming.isConnected || typeof incoming.animate !== 'function') return;
-      try {
-        await animateSurface(incoming, [
-          { opacity: 0, transform: 'translate3d(0, 7px, 0)' },
-          { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-        ], DOCUMENT_ENTER_DURATION_MS);
-      } catch (animationError) {
-        console.warn('[transition] incoming WAAPI animation was skipped:', animationError);
-      }
+      active.phase = 'enter';
+      await playSurfaceAnimation(active, incoming, [
+        { opacity: 0, transform: `translate3d(0, ${distance}, 0)` },
+        { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+      ]);
+    } catch (animationError) {
+      console.warn('[transition] WAAPI content transition was skipped:', animationError);
+      applyActiveUpdate(active);
     } finally {
-      delete document.documentElement.dataset.uiContentTransitionFallback;
-      waapiContentTransitionInFlight = false;
+      finishActiveTransition(active);
     }
   })();
+}
+
+function requestActivePreemption(priority: TransitionPriority): void {
+  const active = activeTransition;
+  if (!active || priority !== 'urgent' || active.request.priority === 'urgent') return;
+  active.preemptRequested = true;
+
+  if (active.nativeTransition?.skipTransition) {
+    try { active.nativeTransition.skipTransition(); } catch { /* finish/failsafe handles recovery */ }
+    return;
+  }
+
+  // Cancelling WAAPI settles Animation.finished; the active request still commits
+  // its update, but skips its incoming visual phase before urgent work begins.
+  try { active.animation?.cancel(); } catch { /* the animation may have just settled */ }
+}
+
+function insertPendingTransition(request: TransitionRequest): void {
+  if (request.key) {
+    const existingIndex = pendingTransitions.findIndex((pending) => pending.key === request.key);
+    if (existingIndex >= 0) pendingTransitions.splice(existingIndex, 1);
+  }
+  pendingTransitions.push(request);
+  pendingTransitions.sort((left, right) => {
+    const priority = (right.priority === 'urgent' ? 1 : 0) - (left.priority === 'urgent' ? 1 : 0);
+    return priority || left.id - right.id;
+  });
+}
+
+function runNextTransition(): void {
+  if (activeTransition || pendingTransitions.length === 0 || typeof window === 'undefined' || typeof document === 'undefined') return;
+  const request = pendingTransitions.shift()!;
+  const active: ActiveTransition = {
+    request,
+    settled: false,
+    updateApplied: false,
+    preemptRequested: false,
+    phase: null,
+    nativeTransition: null,
+    animation: null,
+    failsafe: null,
+    finalFailsafe: null,
+  };
+  activeTransition = active;
+
+  if (prefersReducedMotion()) {
+    finishActiveTransition(active);
+    return;
+  }
+
+  if (supportsSameDocumentViewTransitions()) {
+    runNativeTransition(active);
+    return;
+  }
+
+  if (request.mode === 'theme') {
+    // Theme changes remain correct in older browsers; they simply do not animate.
+    finishActiveTransition(active);
+    return;
+  }
+
+  runWaapiTransition(active);
+}
+
+function enqueueTransition(
+  mode: TransitionMode,
+  update: () => void,
+  options: ViewTransitionOptions = {},
+): boolean {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+
+  const request: TransitionRequest = {
+    id: ++nextTransitionId,
+    mode,
+    update,
+    key: options.key,
+    priority: options.priority ?? 'normal',
+  };
+
+  // Avoid starting an animation for reduced-motion users when the scheduler is idle.
+  if (!activeTransition && pendingTransitions.length === 0 && prefersReducedMotion()) {
+    invokeUpdate(request);
+    return true;
+  }
+
+  insertPendingTransition(request);
+  requestActivePreemption(request.priority);
+  runNextTransition();
   return true;
 }
 
-/** Theme changes alone may animate the document root; all page transitions stay scoped. */
+/**
+ * All same-document content changes use this serialized scheduler. A request is
+ * never silently rejected because another transition is active; keyed pending
+ * requests coalesce to the latest destination while urgent identity changes win.
+ */
+export function startContentViewTransition(
+  update: () => void,
+  options: ViewTransitionOptions = {},
+): boolean {
+  return enqueueTransition('content', update, options);
+}
+
+/** Theme updates share the same native transition lock and are coalesced by key. */
 export function startThemeViewTransition(update: () => void): boolean {
-  return startNativeViewTransition(update, 'theme');
+  return enqueueTransition('theme', update, { key: 'theme' });
+}
+
+/** Cancel a not-yet-started keyed request (used when a pending route is superseded). */
+export function cancelPendingContentViewTransition(key: string): void {
+  for (let index = pendingTransitions.length - 1; index >= 0; index -= 1) {
+    if (pendingTransitions[index]?.key === key) pendingTransitions.splice(index, 1);
+  }
+  resolveTransitionIdleWaiters();
+}
+
+/** Resolve only after all content and theme work already accepted by the coordinator has settled. */
+export function waitForTransitionQueueIdle(): Promise<void> {
+  if (!activeTransition && pendingTransitions.length === 0) return Promise.resolve();
+  return new Promise((resolve) => transitionIdleWaiters.add(resolve));
 }
 
 function destinationKey(url: URL): string {
@@ -234,7 +483,7 @@ function finishDocumentEntrySession(): void {
   delete document.documentElement.dataset.uiDocumentEntering;
 }
 
-/** Wait for the WAAPI entry phase, including the case where PageLoading has not consumed its marker yet. */
+/** Wait for the WAAPI entry phase, including when PageLoading has not consumed its marker yet. */
 export function waitForDocumentEntryToFinish(): Promise<void> {
   if (!documentEntryPromise && isPendingEntryForCurrentDocument()) beginDocumentEntrySession();
   return documentEntryPromise ?? Promise.resolve();
@@ -263,31 +512,21 @@ export function consumePendingDocumentEntry(): boolean {
   }
 }
 
-/** Returns only the active content; never returns the outer frame, header or dock. */
+/** Returns only the active content; never the outer frame, header or dock. */
 export function getDocumentTransitionSurface(): HTMLElement | null {
-  // Every route, including the parked/persistent Maze runtime, is rendered
-  // inside one shared content surface. Transition only its active route view.
-  const candidates = [
+  const element = document.querySelector<HTMLElement>(
     '.route-page > .feature-page-shell > .route-view:not([hidden])',
-  ];
-
-  for (const selector of candidates) {
-    const element = document.querySelector<HTMLElement>(selector);
-    if (!element || element.closest('[hidden]') || element.getClientRects().length === 0) continue;
-    const style = getComputedStyle(element);
-    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
-    return element;
-  }
-  return null;
+  );
+  if (!element || element.closest('[hidden]') || element.getClientRects().length === 0) return null;
+  const style = window.getComputedStyle(element);
+  if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return null;
+  return element;
 }
 
-function animateSurface(surface: HTMLElement, frames: Keyframe[], duration: number): Promise<void> {
+function animateSurface(surface: HTMLElement, frames: Keyframe[]): Promise<void> {
   if (prefersReducedMotion() || typeof surface.animate !== 'function') return Promise.resolve();
-  const animation = surface.animate(frames, {
-    duration,
-    easing: 'cubic-bezier(.2, .75, .25, 1)',
-    fill: 'both',
-  });
+  const { duration, easing } = getRouteMotionTokens();
+  const animation = surface.animate(frames, { duration, easing, fill: 'both' });
   return animation.finished.then(
     () => { animation.cancel(); },
     () => { animation.cancel(); },
@@ -323,28 +562,23 @@ function waitForDocumentTransitionSurface(timeoutMs = 2_500): Promise<HTMLElemen
   });
 }
 
-/**
- * Entry half of the WAAPI document-boundary fallback. It runs only after the
- * destination Gate, authenticated boot surface or real page is ready.
- */
+/** Entry half of the WAAPI document-boundary fallback. */
 export async function animatePendingDocumentEntry(): Promise<void> {
   try {
     if (prefersReducedMotion()) return;
     const surface = await waitForDocumentTransitionSurface();
     if (!surface || typeof surface.animate !== 'function') return;
 
-    await new Promise<void>((resolve) => {
-      window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
-    });
+    await waitForAnimationFrames();
     if (!surface.isConnected) return;
 
     document.documentElement.dataset.uiDocumentEntering = 'true';
+    const { distance } = getRouteMotionTokens();
     await animateSurface(surface, [
-      { opacity: 0, transform: 'translate3d(0, 7px, 0)' },
+      { opacity: 0, transform: `translate3d(0, ${distance}, 0)` },
       { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-    ], DOCUMENT_ENTER_DURATION_MS);
+    ]);
   } catch (animationError) {
-    // A presentation failure must not leave the entry-session barrier unresolved.
     console.warn('[transition] document entrance animation was skipped:', animationError);
   } finally {
     finishDocumentEntrySession();
@@ -375,11 +609,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-/**
- * Full-document navigation is reserved for destinations outside the shared SPA.
- * It remains a WAAPI fallback because a browser-level transition can snapshot
- * the initial loader before the destination document has mounted its content.
- */
+/** Full-document navigation is reserved for destinations outside the shared SPA. */
 export async function navigateDocument(
   url: URL,
   options: DocumentNavigationOptions = {},
@@ -391,6 +621,7 @@ export async function navigateDocument(
   }
 
   documentNavigationInFlight = true;
+  await waitForTransitionQueueIdle();
   const sourceHref = window.location.href;
   const root = document.documentElement;
 
@@ -399,14 +630,11 @@ export async function navigateDocument(
   if (surface && typeof surface.animate === 'function') {
     root.dataset.uiDocumentExiting = 'true';
     try {
+      const { exitDistance, duration, easing } = getRouteMotionTokens();
       animation = surface.animate([
         { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-        { opacity: 0, transform: 'translate3d(0, -5px, 0)' },
-      ], {
-        duration: DOCUMENT_EXIT_DURATION_MS,
-        easing: 'cubic-bezier(.4, 0, 1, 1)',
-        fill: 'both',
-      });
+        { opacity: 0, transform: `translate3d(0, -${exitDistance}, 0)` },
+      ], { duration, easing, fill: 'both' });
       activeDocumentExitAnimation = animation;
       // A cancelled animation must not cancel navigation; it only removes the visual enhancement.
       try { await animation.finished; } catch { /* continue with the document navigation */ }
