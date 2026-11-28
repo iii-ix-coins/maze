@@ -435,6 +435,11 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     scrollbar-gutter: auto;
 }
 
+/* Add 6px only while the custom scrollbar is actually visible. */
+.route-page > .feature-page-shell[data-scrollbar-visible="true"] {
+    padding-right: calc(var(--site-frame-content-padding) + 6px);
+}
+
 .route-page>.feature-page-shell::-webkit-scrollbar {
     display: none;
     width: 0;

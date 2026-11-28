@@ -34,6 +34,15 @@ export function RouteScrollbar({
 
     const setVisible = (visible: boolean) => {
       scrollbar.dataset.visible = String(visible);
+
+      if (scroller) {
+        if (visible) {
+          scroller.dataset.scrollbarVisible = 'true';
+        } else {
+          scroller.removeAttribute('data-scrollbar-visible');
+        }
+      }
+
       scrollbar.setAttribute('aria-hidden', String(!visible));
       scrollbar.tabIndex = visible ? 0 : -1;
     };
@@ -99,8 +108,11 @@ export function RouteScrollbar({
       if (nextScroller === scroller) return;
 
       if (scroller) {
+        scroller.removeAttribute('data-scrollbar-visible');
+
         scroller.removeEventListener('scroll', scheduleUpdate);
         scroller.removeEventListener('load', scheduleUpdate, true);
+
         contentObserver.disconnect();
       }
       resizeObserver?.disconnect();
@@ -228,6 +240,8 @@ export function RouteScrollbar({
     return () => {
       if (animationFrame) cancelAnimationFrame(animationFrame);
       if (scroller) {
+        scroller.removeAttribute('data-scrollbar-visible');
+
         scroller.removeEventListener('scroll', scheduleUpdate);
         scroller.removeEventListener('load', scheduleUpdate, true);
       }
