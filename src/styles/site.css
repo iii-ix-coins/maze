@@ -416,6 +416,12 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 
 /* One content surface owns route layout, scrolling, gutters and transitions.
    Ordinary features and the persistent Maze host are children of this same node. */
+.route-page>.feature-page-shell--access {
+    overflow: hidden;
+    scrollbar-gutter: auto;
+    padding-inline-end: var(--site-frame-content-padding-start);
+}
+
 .route-page>.feature-page-shell {
     position: relative;
     z-index: 1;

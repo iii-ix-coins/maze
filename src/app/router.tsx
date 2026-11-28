@@ -43,6 +43,7 @@ export function AppRouter() {
   const pathname = usePathname();
   const { status, isAuthenticated, error, refreshSession } = useIdentity();
   const route = resolveSiteRoute(pathname);
+  const isAccessView = Boolean(route && !isAuthenticated);
   const isMazePage = route?.id === 'maze';
   const [hasMountedMaze, setHasMountedMaze] = useState(isMazePage && isAuthenticated);
 
@@ -62,7 +63,10 @@ export function AppRouter() {
       data-route-page={pathname}
       data-route-kind={isMazePage ? 'maze' : 'site'}
     >
-      <main className="feature-page-shell" aria-label={route ? `${route.title} content` : 'Not found page'}>
+      <main
+        className={`feature-page-shell${isAccessView ? ' feature-page-shell--access' : ''}`}
+        aria-label={route ? `${route.title} content` : 'Not found page'}
+      >
         {!route ? (
           <NotFoundPage />
         ) : !isAuthenticated ? (
@@ -89,7 +93,9 @@ export function AppRouter() {
         </MazeFrame>
       </main>
 
-      <RouteScrollbar contentSelector=":scope > .feature-page-shell" />
+      {!isAccessView && (
+        <RouteScrollbar contentSelector=":scope > .feature-page-shell" />
+      )}
     </div>
   );
 }
