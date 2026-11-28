@@ -5,6 +5,7 @@
     width: 100%;
     min-height: 100%;
     align-content: center;
+    border: 3px red;
     justify-items: center;
     margin: 0 auto;
     padding: clamp(22px, 5vh, 54px) clamp(10px, 2vw, 22px);
