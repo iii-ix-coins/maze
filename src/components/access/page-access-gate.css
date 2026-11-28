@@ -5,7 +5,6 @@
     width: 100%;
     min-height: 100%;
     align-content: center;
-    border: 3px red;
     justify-items: center;
     margin: 0 auto;
     padding: clamp(22px, 5vh, 54px) clamp(10px, 2vw, 22px);
@@ -22,8 +21,8 @@
     height: var(--access-panel-cut);
 
     box-sizing: border-box;
-    border: 1px solid var(--ar-line);
-    background: var(--panel-bg);
+    border: 3px solid red;
+    background: transparent;
 
     pointer-events: none;
     z-index: 0;
