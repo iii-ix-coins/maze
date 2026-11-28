@@ -12,7 +12,7 @@
   }
 
   .site-access-panel {
-    --dock-cut: 18px;
+    --access-panel-cut: 21px;
 
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(230px, .85fr);
@@ -25,18 +25,45 @@
     color: var(--ar-text);
     box-sizing: border-box;
 
-    clip-path: polygon(var(--dock-cut) 0,
+  }
+
+  .site-access-panel::before,
+  .site-access-panel::after {
+    content: "";
+    position: absolute;
+
+    width: var(--access-panel-cut);
+    height: var(--access-panel-cut);
+
+    box-sizing: border-box;
+    border: 1px solid var(--ar-line);
+    background: var(--panel-bg);
+
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .site-access-panel::before {
+    top: 0;
+    left: 0;
+
+    clip-path: polygon(0 0,
         100% 0,
-        100% calc(100% - var(--dock-cut)),
-        calc(100% - var(--dock-cut)) 100%,
-        0 100%,
-        0 var(--dock-cut));
-    -webkit-clip-path: polygon(var(--dock-cut) 0,
-        100% 0,
-        100% calc(100% - var(--dock-cut)),
-        calc(100% - var(--dock-cut)) 100%,
-        0 100%,
-        0 var(--dock-cut));
+        0 100%);
+  }
+
+  .site-access-panel::after {
+    right: 0;
+    bottom: 0;
+
+    clip-path: polygon(100% 0,
+        100% 100%,
+        0 100%);
+  }
+
+  .site-access-panel>* {
+    position: relative;
+    z-index: 1;
   }
 
   .site-access-overview,
