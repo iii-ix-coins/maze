@@ -221,6 +221,9 @@ if (
   process.exit(1);
 }
 const routeScrollRule = siteChromeCss.match(/\.route-page\s*>\s*\.feature-page-shell\s*\{([^}]*)\}/s)?.[1] ?? '';
+const routeScrollRuleIndex = siteChromeCss.indexOf('.route-page>.feature-page-shell {');
+const accessScrollRuleIndex = siteChromeCss.indexOf('.route-page > .feature-page-shell.feature-page-shell--access {');
+const accessScrollRuleFollowsBase = routeScrollRuleIndex >= 0 && accessScrollRuleIndex > routeScrollRuleIndex;
 const routeFrameRule = siteChromeCss.match(/\.route-page\s*\{([^}]*)\}/s)?.[1] ?? '';
 const routeFrameStrokeRule = siteChromeCss.match(/\.route-page::before\s*\{([^}]*)\}/s)?.[1] ?? '';
 if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
@@ -229,7 +232,9 @@ if (/body:not\(\.in-menu\)\s+\.route-page/.test(siteChromeCss)) {
 }
 const mobileHeaderRule = siteChromeCss.match(/@media \(max-width: 720px\)\s*\{[\s\S]*?#site-header\s*\{([^}]*)\}/)?.[1] ?? '';
 const routeFrameOpening = routerSource.match(/<div\s+className="route-page"[^>]*>/s)?.[0] ?? '';
-const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && /<main className="feature-page-shell"/.test(routerSource) && /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) && /<MazeFrame active=\{isMazePage && isAuthenticated\}>/.test(routerSource);
+const routeMainUsesSharedClass = routerSource.includes("className={`feature-page-shell${isAccessView ? ' feature-page-shell--access' : ''}`}");
+const routeScrollbarIsDisabledForAccess = routerSource.includes('{!isAccessView && (') && /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource);
+const routeFrameIsPersistent = routeFrameOpening.includes('data-route-page={pathname}') && !routeFrameOpening.includes('key=') && /<Page key=\{pathname\} \/>/.test(routerSource) && routeMainUsesSharedClass && routeScrollbarIsDisabledForAccess && /<MazeFrame active=\{isMazePage && isAuthenticated\}>/.test(routerSource);
 if (!routeFrameIsPersistent) {
   console.error('[layout] the outer content frame must remain unkeyed while only the inner route component is keyed.');
   process.exit(1);
@@ -349,17 +354,22 @@ if (
   !routeScrollRule.includes('overflow-y: auto') ||
   !routeScrollRule.includes('overscroll-behavior: contain') ||
   !routeScrollRule.includes('scrollbar-width: none') ||
-  !routeScrollRule.includes('padding-inline-start: var(--site-frame-content-padding-start)') ||
-  !routeScrollRule.includes('padding-inline-end: var(--site-frame-content-padding-end)') ||
+  !routeScrollRule.includes('padding: var(--site-frame-content-padding)') ||
+  !accessScrollRuleFollowsBase ||
+  routeScrollRule.includes('padding-inline-start:') ||
+  routeScrollRule.includes('padding-inline-end:') ||
   !routeScrollRule.includes('-ms-overflow-style: none') ||
   !siteChromeCss.includes('::-webkit-scrollbar {\n    display: none;') ||
   !siteChromeCss.includes('height: 60%') ||
   !siteChromeCss.includes('top: 50%') ||
   !siteChromeCss.includes('--site-frame-side-gutter:') ||
-  !siteChromeCss.includes('--site-frame-content-inline-padding:') ||
+  !siteChromeCss.includes('--site-frame-content-padding: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-hit-width))') ||
+  siteChromeCss.includes('--site-frame-content-padding-start:') ||
+  siteChromeCss.includes('--site-frame-content-padding-end:') ||
+  siteChromeCss.includes('--site-frame-content-inline-padding:') ||
   !siteChromeCss.includes('.route-scrollbar-track') ||
   !siteChromeCss.includes('.route-scrollbar-thumb') ||
-  !siteChromeCss.includes('--site-scrollbar-content-gap: clamp(9px, 0.55vw, 18px)') ||
+  siteChromeCss.includes('--site-scrollbar-content-gap:') ||
   !siteChromeCss.includes('--site-scrollbar-inset: clamp(9px, 0.55vw, 18px)') ||
   !routeScrollbarSource.includes('role="scrollbar"') ||
   !routeScrollbarSource.includes("case 'PageDown':") ||
@@ -414,8 +424,9 @@ const mazeHostPresentationIsIsolated =
   !mazeFrameCss.includes('overscroll-behavior') &&
   !mazeFrameSource.includes('route-page--maze-gameplay') &&
   !mazeFrameCss.includes('#mazeApp.maze-app {') &&
-  !siteChromeCss.includes('.route-page > .feature-page-shell > #mazeApp {');
+  !/\.route-page\s*>\s*\.feature-page-shell\s*>\s*#mazeApp\s*\{/.test(siteChromeCss);
 if (!mazeHostPresentationIsIsolated) {
+  console.log('[layout:maze-host-debug]', { mazeHostPresentationIsIsolated, legacyButton: legacyMazeCss.includes('.maze-app .game-container button:where'), legacyH1: legacyMazeCss.includes('.maze-app .game-container h1'), noAppButton: !legacyMazeCss.includes('.maze-app button:where'), noAppH1: !legacyMazeCss.includes('.maze-app h1 {'), noWideH1: !legacyMazeCss.includes('.maze-app:not(.wide) h1'), noMinHeight: !legacyMazeCss.includes('min-height: 100vh'), noPadding: !legacyMazeCss.includes('padding-inline: 8px'), themeControls: mazeThemeCss.includes(':is(.game-container, .cg, .lb) :where(input, textarea, select, button, [role="button"])'), noThemeControls: !mazeThemeCss.includes('.maze-app :where(input, textarea, select, button, [role="button"])'), noBg: !/html\[data-theme="(?:light|dark|grass)"] \.maze-app\s*\{[^}]*background\s*:/s.test(mazeThemeCss), frameNoOverscroll: !mazeFrameCss.includes('overscroll-behavior'), noGameplay: !mazeFrameSource.includes('route-page--maze-gameplay'), noMazeAppRoot: !mazeFrameCss.includes('#mazeApp.maze-app {'), noRouteFrameMaze: !/\.route-page\s*>\s*\.feature-page-shell\s*>\s*#mazeApp\s*\{/.test(siteChromeCss) });
   console.error('[layout] Maze styles must not leak legacy shell, heading, theme or button rules onto shared Site components; only game-owned controls may use Engine presentation.');
   process.exit(1);
 }
@@ -465,17 +476,21 @@ if (!routeViewRootsAreUniform) {
   process.exit(1);
 }
 const sharedContentSurfaceIsUnified =
-  /<main className="feature-page-shell"/.test(routerSource) &&
+  routeMainUsesSharedClass &&
+  routeScrollbarIsDisabledForAccess &&
   /<RouteScrollbar contentSelector=":scope > \.feature-page-shell" \/>/.test(routerSource) &&
   /<MazeFrame active=\{isMazePage && isAuthenticated\}>[\s\S]*<\/MazeFrame>/.test(routerSource) &&
-  routerSource.indexOf('<MazeFrame active={isMazePage && isAuthenticated}>') > routerSource.indexOf('<main className="feature-page-shell"') &&
+  routerSource.indexOf('<MazeFrame active={isMazePage && isAuthenticated}>') > routerSource.indexOf('<main') &&
   routeScrollRule.includes('height: 100%') &&
   routeScrollRule.includes('overflow-y: auto') &&
-  routeScrollRule.includes('padding-inline-start: var(--site-frame-content-padding-start)') &&
-  routeScrollRule.includes('padding-inline-end: var(--site-frame-content-padding-end)') &&
-  siteChromeCss.includes('.route-page > .feature-page-shell > .route-view') &&
-  /\.route-page > \.feature-page-shell > \.route-view\s*\{[^}]*display:\s*grid/s.test(siteChromeCss) &&
-  !siteChromeCss.includes('.route-page > .feature-page-shell > #mazeApp {') &&
+  routeScrollRule.includes('padding: var(--site-frame-content-padding)') &&
+  !routeScrollRule.includes('padding-inline-start:') &&
+  !routeScrollRule.includes('padding-inline-end:') &&
+  accessScrollRuleFollowsBase &&
+  /\.route-page > \.feature-page-shell\.feature-page-shell--access\s*\{[^}]*overflow:\s*hidden/s.test(siteChromeCss) &&
+  /\.route-page\s*>\s*\.feature-page-shell\s*>\s*\.route-view/.test(siteChromeCss) &&
+  /\.route-page\s*>\s*\.feature-page-shell\s*>\s*\.route-view\s*\{[^}]*display:\s*grid/s.test(siteChromeCss) &&
+  !/\.route-page\s*>\s*\.feature-page-shell\s*>\s*#mazeApp\s*\{/.test(siteChromeCss) &&
   !/<div className="route-view route-view--access">/.test(routerSource) &&
   routerSource.includes('className="route-page"') &&
   !routerSource.includes('route-page--home') &&
@@ -486,7 +501,7 @@ const sharedContentSurfaceIsUnified =
   mazeFrameSource.includes('id="mazeApp"') &&
   mazeFrameSource.includes('hidden={!active}') &&
   !mazeFrameSource.includes('<RouteScrollbar') &&
-  !siteChromeCss.includes('.route-page > #mazeApp') &&
+  !/\.route-page\s*>\s*#mazeApp/.test(siteChromeCss) &&
   !/(^|\n)\s*\.feature-page-shell\b/m.test(fs.readFileSync(path.join(root, 'src/styles/home-shared.css'), 'utf8')) &&
   !fs.readFileSync(path.join(root, 'src/styles/home-shared.css'), 'utf8').includes('route-page--home') &&
   !siteChromeCss.includes('body.in-menu') &&
@@ -612,7 +627,7 @@ if (
   !siteButtonStyles.includes('--site-route-enter-duration') ||
   !siteButtonStyles.includes('site-wallet-menu-out') ||
   !siteButtonStyles.includes('.nav-wallet-button.is-primary') ||
-  !siteButtonStyles.includes('.nav-wallet-button.is-primary > span') ||
+  !/\.nav-wallet-button\.is-primary\s*>\s*span/.test(siteButtonStyles) ||
   mazeFrameSource.includes('app.dataset.theme') ||
   mazeFrameSource.includes('site:themechange')
 ) {
@@ -863,7 +878,7 @@ if (!featureRouter.includes('resolveSiteRoute') || !featureRouter.includes('PAGE
 if (
   featureRouter.includes("if (route?.id === 'maze') return null;") ||
   featureRouter.includes('createPortal') ||
-  !featureRouter.includes('<main className="feature-page-shell"') ||
+  !/className=\{`feature-page-shell\$\{isAccessView \? ' feature-page-shell--access' : ''\}`\}/.test(featureRouter) ||
   !featureRouter.includes('<MazeFrame active={isMazePage && isAuthenticated}>') ||
   featureRouter.includes('MazeRouteShell') ||
   !siteCssEntry.includes('.route-scrollbar[data-visible="false"]') ||

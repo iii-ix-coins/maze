@@ -20,3 +20,10 @@ src/styles/site.css
 scripts/check-layout.mjs
 src/components/navigation/README.md
 NOTIFICATIONS-THEME-DOCK-UPDATE-FA.md
+
+UNIFIED CONTENT SURFACE PADDING (2026-11-28)
+CHANGED
+src/styles/site.css
+scripts/check-layout.mjs
+ADDED
+CONTENT-SURFACE-PADDING-FIX-FA.md

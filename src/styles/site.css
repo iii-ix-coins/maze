@@ -13,15 +13,12 @@
     --site-frame-width: min(var(--site-frame-max-width), calc(100vw - 2 * var(--site-frame-side-gutter)));
     --site-frame-edge-gap: 7px;
     --site-frame-content-gap: clamp(6px, 2.5vh, 9px);
-    --site-frame-content-padding: clamp(6px, 2vw, 9px);
     --site-scrollbar-track-width: 12px;
     --site-scrollbar-hit-width: 15px;
     --site-scrollbar-inset: clamp(9px, 0.55vw, 18px);
-    --site-scrollbar-content-gap: clamp(9px, 0.55vw, 18px);
-    --site-scrollbar-content-gutter: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-track-width) + var(--site-scrollbar-content-gap));
-    --site-frame-content-inline-padding: max(var(--site-frame-content-padding), var(--site-scrollbar-content-gutter));
-    --site-frame-content-padding-start: clamp(15px, 0.52vw, 24px);
-    --site-frame-content-padding-end: calc(var(--site-frame-content-inline-padding) + clamp(3px, 0.52vw, 6px));
+    /* One symmetric content inset. Its size also keeps the custom scrollbar's
+       hit target outside the content on every route and at every viewport size. */
+    --site-frame-content-padding: calc(var(--site-scrollbar-inset) + var(--site-scrollbar-hit-width));
     --site-scrollbar-cut: 6px;
     --site-frame-cut: 18px;
     --site-header-cut: 18px;
@@ -416,12 +413,6 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
 
 /* One content surface owns route layout, scrolling, gutters and transitions.
    Ordinary features and the persistent Maze host are children of this same node. */
-.route-page>.feature-page-shell--access {
-    overflow: hidden;
-    scrollbar-gutter: auto;
-    padding-inline-end: var(--site-frame-content-padding-start);
-}
-
 .route-page>.feature-page-shell {
     position: relative;
     z-index: 1;
@@ -432,9 +423,8 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     max-height: 100%;
     min-height: 0;
     margin: 0;
-    padding-block: var(--site-frame-content-padding);
-    padding-inline-start: var(--site-frame-content-padding-start);
-    padding-inline-end: var(--site-frame-content-padding-end);
+    /* A single token defines top, right, bottom and left in every identity state. */
+    padding: var(--site-frame-content-padding);
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
@@ -449,6 +439,13 @@ html:not([data-maze-engine-ready="true"]) body:not([data-maze-bootstrap-error]) 
     display: none;
     width: 0;
     height: 0;
+}
+
+/* Access surfaces do not scroll and do not mount the custom RouteScrollbar.
+   Keep this modifier after the base rule so its overflow contract wins. */
+.route-page > .feature-page-shell.feature-page-shell--access {
+    overflow: hidden;
+    scrollbar-gutter: auto;
 }
 
 /* Every page root uses the same route-view contract. Page-specific classes
